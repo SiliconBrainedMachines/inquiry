@@ -13,7 +13,7 @@ Supersedes: v0.1.0-spec (March 28, 2026)
 
 `ape` is the command-line tool for the Finite APE Machine framework. It configures development repositories to work with the APE methodology (Analyze → Plan → Execute + DARWIN) by installing agents, skills, prompts, hooks, and configuration files tailored to the user's AI coding tool of choice.
 
-`ape` is also the **programmatic API** for apes. Skills do not write files directly — they execute `ape memory create`, `ape task create`, `ape git commit`, etc. The CLI enforces validation (SCRIBE), maintains indices, and guarantees consistency. This is a key architectural decision: the CLI is the single gateway through which all structured writes pass.
+`ape` is also the **programmatic API** for apes. Skills do not write files directly — they execute `ape memory create`, `ape task create`, `ape git commit`, etc. The CLI enforces validation via BORGES (schema enforcement, documentation compiler), maintains indices, and guarantees consistency. This is a key architectural decision: the CLI is the single gateway through which all structured writes pass.
 
 `ape` is a single native binary that operates in two modes:
 
@@ -53,7 +53,7 @@ These are **hard requirements**, not optional integrations. `ape init` verifies 
 | HTTP | `package:http` | For downloading releases, checking updates, and GitHub API calls. |
 | Archive | `package:archive` | For extracting release assets (tar.gz, zip). |
 | File System | `package:path` + `dart:io` | Cross-platform path handling. |
-| Markdown Parsing | `package:markdown` | For frontmatter extraction and index parsing (SCRIBE validation). |
+| Markdown Parsing | `package:markdown` | For frontmatter extraction and index parsing (BORGES validation). |
 | Versioning | Semantic Versioning (semver) | CLI version and repo config version tracked independently. |
 
 ---
@@ -168,11 +168,11 @@ ape status                           # Show repo status
 ape upgrade                          # Upgrade CLI binary
 ape repo upgrade                     # Migrate repo config
 ape repo doctor                      # Verify repo integrity
-ape repo doctor --memory             # + SCRIBE validation
+ape repo doctor --memory             # + BORGES validation
 ape repo retarget <target>           # Change agent target
 ape memory status                    # Memory health overview
 ape memory search <query>            # Search memory files
-ape memory validate                  # Run SCRIBE validation
+ape memory validate                  # Run BORGES validation
 ape memory create <type>             # Create a memory file
 ape memory rebuild-index             # Rebuild all indices
 ape task create <title>              # Create task (→ GitHub Issue)
@@ -198,7 +198,7 @@ Launches the interactive terminal user interface. The TUI provides:
 - **Status dashboard:** current repo configuration, agent health, task overview, memory statistics.
 - **Reconfigure:** change target, add/remove skills, modify risk defaults.
 - **Upgrade manager:** visual diff of what `ape repo upgrade` will change before applying.
-- **Memory browser:** navigate memory files, view indices, check SCRIBE status.
+- **Memory browser:** navigate memory files, view indices, check BORGES status.
 - **Task board:** visual task management backed by GitHub Issues.
 
 ---
@@ -237,7 +237,7 @@ Checking prerequisites...
 
 ✓ Created .ape/ape.yaml
 ✓ Created .ape/agents/ (8 agents)
-✓ Created .ape/skills/ (12 skills + SCRIBE protocol)
+✓ Created .ape/skills/ (12 skills + BORGES protocol)
 ✓ Created .ape/templates/ (6 templates)
 ✓ Created .ape/hooks/tracker.sh
 ✓ Created .ape/memory/ (structure + taxonomy + empty indices)
@@ -287,7 +287,7 @@ Memory:
   Runbooks: 4 (1 in_progress, 3 completed)
   Deviations: 7 (6 resolved, 1 escalated)
   Lessons: 2 (2 active)
-  SCRIBE: ✓ all files valid
+  BORGES: ✓ all files valid
 
 Tasks:
   Open: 4 (2 in_progress, 2 pending)
@@ -339,8 +339,8 @@ Repo config version: 0.1.0
 CLI version:         0.2.0
 
 Migrations to apply:
-  0.1.0 → 0.1.1: Add @contract template, update REVIEWER prompt
-  0.1.1 → 0.2.0: Add memory structure, task configuration, SCRIBE protocol
+  0.1.0 → 0.1.1: Add @contract template, update DIJKSTRA (quality gate pre-PR) prompt
+  0.1.1 → 0.2.0: Add memory structure, task configuration, BORGES protocol
 
 ? Apply migrations? (y/N) y
 
@@ -380,7 +380,7 @@ Checking .ape/ integrity...
   ✓ Prerequisites: git 2.43.0, gh 2.45.0
   ✓ ape.yaml valid
   ✓ All 8 agent prompts present
-  ✓ All shared skills present (including SCRIBE)
+  ✓ All shared skills present (including BORGES)
   ✓ Templates intact
   ✓ Target files in sync with .ape/
   ⚠ hooks/tracker.sh not executable (fixing...)
@@ -397,7 +397,7 @@ $ ape repo doctor --memory
 
 Checking .ape/ integrity... ✓ (all checks passed)
 
-SCRIBE Validation:
+BORGES Validation:
   Scanning .ape/memory/...
   ✓ taxonomy.md present and valid
   ✓ All index.md files present (5/5 directories)
@@ -417,7 +417,7 @@ SCRIBE Validation:
 - Prerequisites verification (`git`, `gh` in PATH, `gh auth status`).
 - `ape.yaml` schema validation.
 - All required agent prompt files exist.
-- All required skill files exist (including SCRIBE protocol).
+- All required skill files exist (including BORGES protocol).
 - Templates exist and match expected structure.
 - Target-specific files are in sync with `.ape/` source of truth.
 - Hooks have correct permissions.
@@ -425,7 +425,7 @@ SCRIBE Validation:
 - Task backend reachable.
 
 **Additional checks with `--memory`:**
-- SCRIBE validation: parse all frontmatter YAML in `.ape/memory/`.
+- BORGES validation: parse all frontmatter YAML in `.ape/memory/`.
 - Validate against schemas (per memory type).
 - Check all cross-references (no dangling pointers).
 - Verify index consistency (indices match files).
@@ -479,7 +479,7 @@ Memory as Code — .ape/memory/
   Reports:     2 files (cycle-summary, risk-patterns)
 
   Indices: 5/5 present ✓
-  SCRIBE: last validated 2026-03-29 ✓
+  BORGES: last validated 2026-03-29 ✓
   Total: 23 memory files
 ```
 
@@ -521,18 +521,18 @@ Results:
 
 **Mode:** CLI
 
-Runs full SCRIBE validation on all memory files. Equivalent to `ape repo doctor --memory` but memory-only.
+Runs full BORGES validation on all memory files. Equivalent to `ape repo doctor --memory` but memory-only.
 
 ```
 $ ape memory validate
 
-SCRIBE Validation:
+BORGES Validation:
   ✓ 17/17 files — schema valid
   ✓ 17/17 files — tags in taxonomy
   ✓ 17/17 files — cross-references valid
   ✓ 5/5 indices — consistent
 
-All memory files pass SCRIBE validation.
+All memory files pass BORGES validation.
 ```
 
 **Exit codes:**
@@ -553,7 +553,7 @@ Creates a new memory file with correct schema, unique ID, and updates the index.
 $ ape memory create adr --title "Authentication Strategy" --tags "auth,security,jwt" --cycle cycle-003
 
 Generating ID: adr-004 (next in sequence)
-SCRIBE validation:
+BORGES validation:
   ✓ ID unique
   ✓ Tags in taxonomy
   ✓ Schema complete
@@ -578,7 +578,7 @@ SCRIBE validation:
 **Behavior:**
 1. Reads the relevant index to determine next sequential ID.
 2. Generates frontmatter from flags + defaults.
-3. Validates all fields via SCRIBE rules (tags in taxonomy, related IDs exist, etc.).
+3. Validates all fields via BORGES rules (tags in taxonomy, related IDs exist, etc.).
 4. Creates the .md file with frontmatter + section template for the type.
 5. Updates the corresponding `index.md`.
 6. Returns the file path (or JSON with full metadata).
@@ -588,7 +588,7 @@ SCRIBE validation:
 ape memory create deviation --title "JWT lib replacement" --tags "jwt,dependency" --cycle cycle-003 --json
 ```
 
-The CLI guarantees SCRIBE compliance, index consistency, and unique IDs.
+The CLI guarantees BORGES compliance, index consistency, and unique IDs.
 
 ---
 
@@ -752,7 +752,7 @@ Creating branch: task-005/login-endpoint
 
 **Mode:** CLI (skill)
 
-Creates a commit at the end of a green phase. This is a **skill** — it is invoked by apes (typically CODER) after tests pass, not by humans directly (though humans can use it).
+Creates a commit at the end of a green phase. This is a **skill** — it is invoked by apes (typically ADA — TDD implementation) after tests pass, not by humans directly (though humans can use it).
 
 ```
 $ ape git commit --phase 3 --task task-005
@@ -852,18 +852,18 @@ This is the recovery mechanism described in the Memory as Code spec — normally
 ├── ape.yaml                        # Main configuration file
 │
 ├── agents/                         # Agent prompts (transition functions)
-│   ├── scout.md                    # SCOUT: document ingestion
-│   ├── analyst.md                  # ANALYST: requirements understanding
-│   ├── architect.md                # ARCHITECT: decomposition, WBS
-│   ├── strategist.md               # STRATEGIST: runbook generation
-│   ├── tester.md                   # TESTER: @contract test writing
-│   ├── coder.md                    # CODER: TDD implementation
-│   ├── reviewer.md                 # REVIEWER: quality gate
+│   ├── scout.md                    # MARCOPOLO: document ingestion
+│   ├── analyst.md                  # SOCRATES: requirements understanding
+│   ├── architect.md                # VITRUVIUS: decomposition, WBS
+│   ├── strategist.md               # SUNZI: runbook generation
+│   ├── tester.md                   # GATSBY: @contract test writing
+│   ├── coder.md                    # ADA: TDD implementation
+│   ├── reviewer.md                 # DIJKSTRA: quality gate
 │   └── darwin.md                   # DARWIN: evolutionary analysis
 │
 ├── skills/                         # Skills (tools available to apes)
 │   ├── _shared/                    # Universal skills (all apes inherit)
-│   │   ├── scribe.md              # SCRIBE protocol (documentation compiler)
+│   │   ├── scribe.md              # BORGES protocol (documentation compiler)
 │   │   ├── memory.md              # Memory consultation protocol
 │   │   ├── contracts.md           # @contract reading/writing
 │   │   └── tracker.md             # State reporting protocol
@@ -887,12 +887,12 @@ This is the recovery mechanism described in the Memory as Code spec — normally
 │   └── status.md                  # Project status template
 │
 ├── hooks/                          # Automation hooks
-│   └── tracker.sh                 # TRACKER: auto-update status
+│   └── tracker.sh                 # HERMES: auto-update status
 │
 ├── memory/                         # Project memory (Memory as Code)
 │   ├── taxonomy.md                # Controlled vocabulary for tags
 │   ├── adrs/                      # Architecture Decision Records
-│   │   └── index.md              # Primary index (TRACKER maintains)
+│   │   └── index.md              # Primary index (HERMES maintains)
 │   ├── specs/                     # Specifications (from Analyze)
 │   │   └── index.md
 │   ├── runbooks/                  # Runbooks (from Plan)
@@ -906,7 +906,7 @@ This is the recovery mechanism described in the Memory as Code spec — normally
 │   │   └── risk-patterns.md      # Cross-cycle risk analysis
 │   └── changelog.md              # Chronological project evolution
 │
-└── status.md                       # Current project state (TRACKER output)
+└── status.md                       # Current project state (HERMES output)
 ```
 
 **Versioning rules:**
@@ -990,10 +990,10 @@ test_command: "dart test"           # or "npm test", "pytest", etc.
 Each file in `.ape/agents/` is the complete prompt for that ape — its transition function. Structure:
 
 ```markdown
-# SCOUT — Document Ingestion and Normalization
+# MARCOPOLO — Document Ingestion and Normalization
 
 ## Identity
-You are SCOUT, a specialized agent in the Finite APE Machine framework.
+You are MARCOPOLO, a specialized agent in the Finite APE Machine framework.
 Your role is to ingest heterogeneous documents and produce structured markdown.
 
 ## FSM States
@@ -1013,7 +1013,7 @@ Your role is to ingest heterogeneous documents and produce structured markdown.
 - codebase: read and analyze repository structure
 - memory: consult project and framework memory via `ape memory search`
 
-## SCRIBE Protocol (Mandatory)
+## BORGES Protocol (Mandatory)
 [Embedded from .ape/skills/_shared/scribe.md]
 
 ## CLI API
@@ -1021,7 +1021,7 @@ When you need to create or modify structured data, use the `ape` CLI:
 - Create memory: `ape memory create <type> --title "..." --tags "..." --json`
 - Search memory: `ape memory search "<query>" --json`
 - Validate: `ape memory validate`
-Do NOT write to .ape/memory/ directly. The CLI enforces SCRIBE validation.
+Do NOT write to .ape/memory/ directly. The CLI enforces BORGES validation.
 
 ## Output Contract
 Produce one .md file per input document in the following structure:
@@ -1100,7 +1100,7 @@ List<Migration> resolveMigrationChain(String from, String to) {
 
 **v0.1.0 → v0.1.1:**
 ```
-Description: Add @contract template, update REVIEWER prompt
+Description: Add @contract template, update DIJKSTRA prompt
 Changes:
   + .ape/templates/contract.md (new file)
   ~ .ape/agents/reviewer.md (add @contract verification section)
@@ -1109,13 +1109,13 @@ Changes:
 
 **v0.1.1 → v0.2.0:**
 ```
-Description: Add memory structure, task config, SCRIBE protocol, CLI API instructions
+Description: Add memory structure, task config, BORGES protocol, CLI API instructions
 Changes:
   + .ape/memory/ (full directory structure with indices and taxonomy)
-  + .ape/skills/_shared/scribe.md (SCRIBE protocol)
+  + .ape/skills/_shared/scribe.md (BORGES protocol)
   + .ape/skills/git/skill.md (git operations skill)
   ~ .ape/ape.yaml (remove memory.provider, add tasks section, add test_command)
-  ~ .ape/agents/*.md (add SCRIBE protocol section, CLI API section to all agents)
+  ~ .ape/agents/*.md (add BORGES protocol section, CLI API section to all agents)
   ~ .ape/templates/deviation.md (new format with frontmatter)
   + .ape/templates/status.md (updated with task/memory sections)
 ```
@@ -1199,7 +1199,7 @@ finite-ape-machine/
 │   │   ├── schema.dart             # Frontmatter schema definitions
 │   │   ├── index.dart              # Index file parser/writer
 │   │   ├── taxonomy.dart           # Taxonomy reader/validator
-│   │   ├── scribe_validator.dart   # SCRIBE validation engine
+│   │   ├── scribe_validator.dart   # BORGES validation engine
 │   │   ├── query_planner.dart      # Index scan → filter → read strategy
 │   │   └── id_generator.dart       # Sequential ID generation
 │   │
@@ -1237,7 +1237,7 @@ finite-ape-machine/
 │       ├── agents/                 # Default agent prompts
 │       ├── skills/                 # Default skill definitions
 │       │   └── _shared/
-│       │       └── scribe.dart     # SCRIBE protocol prompt
+│       │       └── scribe.dart     # BORGES protocol prompt
 │       ├── templates/              # Default templates
 │       ├── hooks/                  # Default hooks
 │       └── memory/                 # Memory initialization assets
@@ -1249,7 +1249,7 @@ finite-ape-machine/
 │   ├── cli/
 │   ├── tui/
 │   ├── core/
-│   ├── memory/                     # SCRIBE validation tests
+│   ├── memory/                     # BORGES validation tests
 │   ├── tasks/                      # Task backend tests
 │   ├── git/                        # Git operations tests
 │   ├── targets/
@@ -1279,7 +1279,7 @@ Dart supports embedding assets at compile time. Default agent prompts and skills
 ```dart
 // lib/assets/agents/scout.dart
 const scoutPrompt = r'''
-# SCOUT — Document Ingestion and Normalization
+# MARCOPOLO — Document Ingestion and Normalization
 ...
 ''';
 ```
@@ -1289,14 +1289,14 @@ const scoutPrompt = r'''
 | Category | Contents | Extracted To |
 |----------|----------|-------------|
 | Agents | 8 agent prompts (transition functions) | `.ape/agents/` |
-| Skills | Shared skills (SCRIBE, memory, contracts, tracker) + specialized (markitdown, mermaid, tdd, git, security) | `.ape/skills/` |
+| Skills | Shared skills (BORGES, memory, contracts, hermes) + specialized (markitdown, mermaid, tdd, git, security) | `.ape/skills/` |
 | Templates | Runbook, WBS, @contract, deviation, darwin-report, status | `.ape/templates/` |
 | Hooks | tracker.sh | `.ape/hooks/` |
 | Memory | taxonomy.md (default vocabulary), empty index.md templates (one per type), frontmatter schema templates | `.ape/memory/` |
 
-### 8.2 SCRIBE Protocol Asset
+### 8.2 BORGES Protocol Asset
 
-The SCRIBE skill is the most critical shared asset. It contains:
+The BORGES skill is the most critical shared asset. It contains:
 
 1. The validation checklist (11 checks).
 2. The query planner protocol (index → filter → partial → full).
@@ -1328,20 +1328,20 @@ The canonical workflow through APE commands:
 2. ape git branch task-NNN
    → Creates feature branch from task
 
-3. [ANALYZE: SCOUT → ANALYST → ARCHITECT]
+3. [ANALYZE: MARCOPOLO → SOCRATES → VITRUVIUS]
    → Apes use: ape memory create spec, ape memory create adr
    → Human gates between apes
 
-4. [PLAN: STRATEGIST → TESTER]
+4. [PLAN: SUNZI → GATSBY]
    → Apes use: ape memory create runbook
-   → TESTER writes test files directly (source code, not memory)
+   → GATSBY writes test files directly (source code, not memory)
    → Human gate: confirm tests
 
-5. [EXECUTE: CODER → REVIEWER]
-   → CODER implements TDD phase by phase
+5. [EXECUTE: ADA → DIJKSTRA]
+   → ADA implements TDD phase by phase
    → After each green phase: ape git commit --phase N --task task-NNN
    → Tactical deviations: ape memory create deviation
-   → REVIEWER runs: ape memory validate (pre-check)
+   → DIJKSTRA runs: ape memory validate (pre-check)
    → Human gate: review PR
 
 6. ape git pr --task task-NNN
@@ -1370,13 +1370,13 @@ This is a fundamental architectural decision. Apes do NOT:
 Instead, they execute `ape` CLI commands. This creates a single validation boundary:
 
 ```
-[Ape prompt] → executes → [ape memory create ...] → [SCRIBE validates] → [file written + index updated]
+[Ape prompt] → executes → [ape memory create ...] → [BORGES validates] → [file written + index updated]
 [Ape prompt] → executes → [ape task create ...]   → [gh issue create] → [status.md updated]
 [Ape prompt] → executes → [ape git commit ...]    → [green verified] → [structured commit]
 ```
 
 Benefits:
-- SCRIBE validation is enforced programmatically, not just by prompt compliance.
+- BORGES validation is enforced programmatically, not just by prompt compliance.
 - Index consistency is guaranteed.
 - ID uniqueness is guaranteed.
 - The CLI can be tested independently of the agent prompts.
@@ -1392,7 +1392,7 @@ The orchestrator that coordinates apes within a cycle is not part of the CLI —
 
 ### 10.2 Memory as Code Evolution (See: Memory as Code Specification)
 
-The full Memory as Code architecture, including schemas, query planner, SCRIBE protocol, DARWIN operations, concurrency rules, and upgrade path (v0=md, v1=optional SQLite cache, v2=hybrid search), is specified in the companion document *Memory as Code v0.1.0-spec*.
+The full Memory as Code architecture, including schemas, query planner, BORGES protocol, DARWIN operations, concurrency rules, and upgrade path (v0=md, v1=optional SQLite cache, v2=hybrid search), is specified in the companion document *Memory as Code v0.1.0-spec*.
 
 ### 10.3 Task Backend Abstraction
 
@@ -1436,8 +1436,8 @@ For teams, a shared `.ape/` configuration committed to the repo ensures all deve
 |------|-----------|
 | **CLI as API** | Architectural decision: apes interact with memory, tasks, and git through `ape` commands, not direct file manipulation |
 | **Memory as Code** | Architecture where project memory lives as structured .md files, versioned with git, no external database |
-| **SCRIBE** | Shared skill (documentation compiler) enforcing schema, structure, and cross-reference integrity on all memory files |
-| **SCRIBE validation** | Automated checks run by `ape repo doctor --memory` and `ape memory validate` |
+| **BORGES** | Shared skill (documentation compiler) enforcing schema, structure, and cross-reference integrity on all memory files |
+| **BORGES validation** | Automated checks run by `ape repo doctor --memory` and `ape memory validate` |
 | **Task backend** | Abstract interface for task management; GitHub Issues in v0.x.x |
 | **Green phase** | A completed TDD cycle where all tests pass — triggers `ape git commit` |
 | **Prerequisite** | External tool required by `ape` (git, gh) — verified during `ape init` |

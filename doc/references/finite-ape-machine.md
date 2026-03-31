@@ -177,9 +177,9 @@ Skills can be shared across apes (e.g., memory consultation, @contract reading, 
 
 #### ANALYZE Stage
 
-##### SCOUT — Document Ingestion and Normalization
+##### MARCOPOLO — Document Ingestion and Normalization
 
-**Role:** Receives heterogeneous documents (PDF, Word, Excel, PowerPoint, emails, images, repos) and produces structured markdown. Does not make decisions — makes the illegible legible.
+**Role:** MARCOPOLO (document ingestion and normalization) receives heterogeneous documents (PDF, Word, Excel, PowerPoint, emails, images, repos) and produces structured markdown. Does not make decisions — makes the illegible legible.
 
 **Skills:** markitdown (microsoft/markitdown), codebase reading, DB schema extraction, email parsing, image OCR.
 
@@ -189,11 +189,11 @@ idle → ingesting → normalizing → delivering → idle
 ```
 
 **Input:** Raw documents, files, URLs, repository references.
-**Output:** Structured .md files ready for ANALYST consumption.
+**Output:** Structured .md files ready for SOCRATES consumption.
 
-##### ANALYST — Conversational Requirements Understanding
+##### SOCRATES — Conversational Requirements Understanding
 
-**Role:** The primary conversational ape of Analyze. Takes SCOUT's output and processes it: asks questions, identifies ambiguities, maps the domain, challenges assumptions. Produces the scope document and constraints. Conducts the Socratic conversation with the human to refine intention.
+**Role:** SOCRATES (conversational requirements understanding) is the primary conversational ape of Analyze. Takes MARCOPOLO's output and processes it: asks questions, identifies ambiguities, maps the domain, challenges assumptions. Produces the scope document and constraints. Conducts the Socratic conversation with the human to refine intention.
 
 **Skills:** Memory consultation (project + framework), mermaid generation (domain diagrams, context diagrams), spec writing.
 
@@ -202,14 +202,14 @@ idle → ingesting → normalizing → delivering → idle
 idle → understanding → questioning → clarifying → documenting → idle
 ```
 
-**Input:** Normalized .md documents from SCOUT, human conversation.
+**Input:** Normalized .md documents from MARCOPOLO, human conversation.
 **Output:** Scope document, constraints, domain model, risk assessment.
 
-**Human Gate:** Approves the analysis before proceeding to ARCHITECT.
+**Human Gate:** Approves the analysis before proceeding to VITRUVIUS.
 
-##### ARCHITECT — Decomposition and Structuring
+##### VITRUVIUS — Decomposition and Structuring
 
-**Role:** Takes the scope defined by ANALYST and decomposes it into a Work Breakdown Structure (WBS) with tasks. Evaluates complexity, identifies dependencies, proposes execution order, generates Gantt chart. Decides when a task is "small enough" to pass to Plan. If a task is too large, subdivides it. If it detects technical risk, flags it.
+**Role:** VITRUVIUS (decomposition and structuring) takes the scope defined by SOCRATES and decomposes it into a Work Breakdown Structure (WBS) with tasks. Evaluates complexity, identifies dependencies, proposes execution order, generates Gantt chart. Decides when a task is "small enough" to pass to Plan. If a task is too large, subdivides it. If it detects technical risk, flags it.
 
 **Skills:** Mermaid generation (Gantt, WBS), estimation, dependency analysis, framework memory consultation (to estimate better based on past projects).
 
@@ -218,16 +218,16 @@ idle → understanding → questioning → clarifying → documenting → idle
 idle → decomposing → sizing → sequencing → risk_assessing → delivering → idle
 ```
 
-**Input:** Scope document, constraints, domain model from ANALYST.
+**Input:** Scope document, constraints, domain model from SOCRATES.
 **Output:** WBS, Gantt, task list with sizing and dependencies, risk register.
 
 **Human Gate:** Approves the WBS and task decomposition. Each task that passes to Plan must be a vertical slice (db-api-ui at most one flow).
 
 #### PLAN Stage
 
-##### STRATEGIST — Technical Design and Runbook Generation
+##### SUNZI — Technical Design and Runbook Generation
 
-**Role:** Takes a single task from the WBS and generates a phased runbook. Defines the technical strategy: which patterns to use, which components to touch (db/api/ui), implementation order. Verifies that Analyze documentation exists and is sufficient — if not, alerts to return to Analyze.
+**Role:** SUNZI (technical design and runbook generation) takes a single task from the WBS and generates a phased runbook. Defines the technical strategy: which patterns to use, which components to touch (db/api/ui), implementation order. Verifies that Analyze documentation exists and is sufficient — if not, alerts to return to Analyze.
 
 **Skills:** @contract reading (existing contracts), project memory consultation, codebase analysis.
 
@@ -243,9 +243,9 @@ Exception: reading_context → context_insufficient → escalate_to_analyze
 
 **Alert Condition:** If documentation is insufficient, transitions to `escalate_to_analyze` and blocks.
 
-##### TESTER — Contract Definition and Red Tests
+##### GATSBY — Contract Definition and Red Tests
 
-**Role:** Takes each runbook stage and defines concrete tests. Writes @contract blocks. Produces executable tests in RED state. Converts intention into a verifiable contract. Does not implement — only specifies what must be true.
+**Role:** GATSBY (contract definition and RED tests) takes each runbook stage and defines concrete tests. Writes @contract blocks. Produces executable tests in RED state. Converts intention into a verifiable contract. Does not implement — only specifies what must be true.
 
 **Skills:** Test writing (dart/ts/python depending on stack), @contract generation, memory consultation for test pattern reuse.
 
@@ -254,16 +254,16 @@ Exception: reading_context → context_insufficient → escalate_to_analyze
 idle → reading_stage → designing_contracts → writing_tests → validating_red → delivering → idle
 ```
 
-**Input:** Runbook stage from STRATEGIST.
+**Input:** Runbook stage from SUNZI.
 **Output:** Test files with @contract metadata, all in RED state (failing).
 
 **Human Gate:** Confirms or modifies tests before Execute proceeds.
 
 #### EXECUTE Stage
 
-##### CODER — TDD Implementation
+##### ADA — TDD Implementation
 
-**Role:** Pure TDD implementer. Takes tests in red and turns them green. Follows the runbook stage by stage. If it encounters a tactical deviation, resolves and documents it. If it encounters a strategic deviation, escalates. Does not question the tests — fulfills them.
+**Role:** ADA (TDD implementation) is the pure TDD implementer. Takes tests in red and turns them green. Follows the runbook stage by stage. If it encounters a tactical deviation, resolves and documents it. If it encounters a strategic deviation, escalates. Does not question the tests — fulfills them.
 
 **Skills:** Stack implementation (dart/ts/python), command execution, lint, types, @contract reading.
 
@@ -283,9 +283,9 @@ idle → reading_tests → implementing → running_tests →
 - *Tactical deviation* (change library, adjust data structure, use different pattern): Resolve and document. These are alternative means to the same end.
 - *Strategic deviation* (objective unachievable as defined, spec contradiction, architectural change needed): Escalate to human. These change the contract with the human.
 
-##### REVIEWER — Quality Gate Pre-PR
+##### DIJKSTRA — Quality Gate Pre-PR
 
-**Role:** Before the PR, reviews code produced by CODER. Verifies coherence between @contracts, tests, and implementation. Checks code smells, validates that documented tactical deviations are reasonable, runs static analysis. Configurable intensity: lightweight for low-risk tasks, exhaustive for high-risk.
+**Role:** DIJKSTRA (quality gate pre-PR) reviews code produced by ADA before the PR. Verifies coherence between @contracts, tests, and implementation. Checks code smells, validates that documented tactical deviations are reasonable, runs static analysis. Configurable intensity: lightweight for low-risk tasks, exhaustive for high-risk.
 
 **Skills:** Static analysis, @contract reading, security scanning, project memory consultation.
 
@@ -300,7 +300,7 @@ idle → reading_changes → checking_contracts → checking_quality →
 **Input:** Code changes, test files, @contracts, deviation log.
 **Output:** Review report, approval or issues list.
 
-**Human Gate:** Reviews the PR with REVIEWER's report, decides on merge.
+**Human Gate:** Reviews the PR with DIJKSTRA's report, decides on merge.
 
 #### META Process
 
@@ -323,9 +323,9 @@ idle → collecting_cycle_data → comparing_plan_vs_actual →
 
 #### Cross-Cutting Mechanism
 
-##### TRACKER — Automatic State Update Hook
+##### HERMES — Automatic State Update Hook
 
-**Role:** Not an ape — a lightweight hook that executes automatically each time an ape completes a state transition. Updates a project state file (status.md) with: current task, runbook stage progress, completed apes, pending work. The orchestrator and any ape can read this file.
+**Role:** HERMES (automatic state update hook) is not an ape — it is a lightweight hook that executes automatically each time an ape completes a state transition. Updates a project state file (status.md) with: current task, runbook stage progress, completed apes, pending work. The orchestrator and any ape can read this file.
 
 **Mechanism:** Hook (automatic, does not consume an agent session).
 
@@ -335,15 +335,15 @@ idle → collecting_cycle_data → comparing_plan_vs_actual →
 
 | Stage | Ape | Role | Thinking Mode |
 |-------|-----|------|---------------|
-| Analyze | SCOUT | Ingest and normalize documents | Mechanical-selective |
-| Analyze | ANALYST | Conversation, scope, constraints | Socratic-exploratory |
-| Analyze | ARCHITECT | WBS, Gantt, sizing, dependencies | Structural-analytical |
-| Plan | STRATEGIST | Phased runbook, technical design | Tactical-sequential |
-| Plan | TESTER | @contract tests in red | Contractual-verifiable |
-| Execute | CODER | TDD implementation | Operative-iterative |
-| Execute | REVIEWER | Quality gate pre-PR, contract verification | Critical-evaluative |
+| Analyze | MARCOPOLO | Ingest and normalize documents | Mechanical-selective |
+| Analyze | SOCRATES | Conversation, scope, constraints | Socratic-exploratory |
+| Analyze | VITRUVIUS | WBS, Gantt, sizing, dependencies | Structural-analytical |
+| Plan | SUNZI | Phased runbook, technical design | Tactical-sequential |
+| Plan | GATSBY | @contract tests in red | Contractual-verifiable |
+| Execute | ADA | TDD implementation | Operative-iterative |
+| Execute | DIJKSTRA | Quality gate pre-PR, contract verification | Critical-evaluative |
 | Meta | DARWIN | Lessons learned, system evolution | Evolutionary-comparative |
-| Cross | TRACKER | Automatic state update | Automatic (not an ape) |
+| Cross | HERMES | Automatic state update | Automatic (not an ape) |
 
 **Total: 7 apes + 1 hook + DARWIN = 8 specialized agents + 1 automatic mechanism.**
 
@@ -370,7 +370,7 @@ ADRs, project-specific lessons learned, @contract blocks, deviation history. Per
 - Scope: single repository/project.
 - Contains: ADRs, @contracts, deviation logs, runbook history, status.md.
 - Lifecycle: lives with the project.
-- Access: any ape can read; CODER, REVIEWER, and DARWIN can write.
+- Access: any ape can read; ADA, DIJKSTRA, and DARWIN can write.
 
 #### Framework Memory (APE)
 
@@ -410,7 +410,7 @@ This format works identically in Dart (`///`), Python (`"""`), and TypeScript (`
 - Each test is a self-descriptive node in the dependency graph.
 - The agent does not need an external graph — the test itself carries its relationships.
 - Enables impact analysis: when code changes, the agent can identify which @contracts are affected.
-- REVIEWER uses @contracts to verify semantic coherence between spec, test, and implementation.
+- DIJKSTRA uses @contracts to verify semantic coherence between spec, test, and implementation.
 - DARWIN uses @contracts to trace failure patterns back to specifications.
 
 ### 4.3 Risk Matrix
@@ -423,11 +423,11 @@ Evolution of the binary `skipReview` flag into a calibrated risk assessment:
 
 **Gate calibration:** Risk level determines which gates are active and how intensely each ape operates.
 
-| Risk Level | Active Gates | REVIEWER Intensity | Example |
+| Risk Level | Active Gates | DIJKSTRA Intensity | Example |
 |------------|-------------|-------------------|---------|
 | Low | Tests + PR | Lightweight (contracts only) | UI label change |
 | Medium | All 4 standard gates | Standard | New API endpoint |
-| High | All gates + extended REVIEWER | Exhaustive (security, performance) | Payment flow change |
+| High | All gates + extended DIJKSTRA | Exhaustive (security, performance) | Payment flow change |
 | Critical | All gates + mandatory human review at each ape transition | Full audit | Auth system modification |
 
 Dimensions for risk assessment: financial impact, attack surface, technical complexity, reversibility, blast radius (how many components affected).
@@ -462,7 +462,7 @@ Dimensions for risk assessment: financial impact, attack surface, technical comp
 
 After each completed APE cycle, DARWIN:
 
-1. Collects cycle data: runbook, deviation logs, test results, timing, REVIEWER reports.
+1. Collects cycle data: runbook, deviation logs, test results, timing, DIJKSTRA reports.
 2. Compares plan vs. actual execution.
 3. Identifies patterns (Level 2 and Level 3).
 4. Generates a lessons-learned document for the project (Level 1 and 2).
@@ -485,26 +485,26 @@ DARWIN is the only agent whose output modifies the transition functions of other
 ```
 1. SDD Spec: Define objective and scope
 2. ANALYZE
-   ├── SCOUT: Ingest and normalize all relevant documents
-   ├── ANALYST: Understand domain, ask questions, produce scope document
+   ├── MARCOPOLO: Ingest and normalize all relevant documents
+   ├── SOCRATES: Understand domain, ask questions, produce scope document
    │   └── [Human Gate: approve analysis]
-   └── ARCHITECT: Decompose into WBS, Gantt, sized tasks
+   └── VITRUVIUS: Decompose into WBS, Gantt, sized tasks
        └── [Human Gate: approve WBS and task decomposition]
 
 3. For each task in WBS:
    ├── PLAN
-   │   ├── STRATEGIST: Generate phased runbook for this task
-   │   └── TESTER: Define @contract tests in RED for each phase
+   │   ├── SUNZI: Generate phased runbook for this task
+   │   └── GATSBY: Define @contract tests in RED for each phase
    │       └── [Human Gate: confirm or modify tests]
    │
    ├── EXECUTE
-   │   ├── CODER: Implement TDD, phase by phase
+   │   ├── ADA: Implement TDD, phase by phase
    │   │   ├── Tactical deviations: resolve + document
    │   │   └── Strategic deviations: escalate → new plan
-   │   └── REVIEWER: Quality gate, contract verification
+   │   └── DIJKSTRA: Quality gate, contract verification
    │       └── [Human Gate: review PR + merge decision]
    │
-   └── TRACKER: Updates status automatically at each transition
+   └── HERMES: Updates status automatically at each transition
 
 4. DARWIN: Analyze cycle, extract lessons, generate issues
 5. Delivery + Monitoring + Feedback to specs/tests
@@ -514,15 +514,15 @@ DARWIN is the only agent whose output modifies the transition functions of other
 
 Before entering the cycle, the orchestrator proposes a risk level based on the task scope. The human confirms or adjusts. Gates activate accordingly:
 
-- **skipReview = true** (Low risk): Gates collapse. ANALYST produces minimal scope, TESTER writes focused tests, CODER proceeds without intermediate approvals.
+- **skipReview = true** (Low risk): Gates collapse. SOCRATES produces minimal scope, GATSBY writes focused tests, ADA proceeds without intermediate approvals.
 - **Standard** (Medium risk): All 4 human gates active. Standard ape intensity.
-- **Full audit** (High/Critical risk): All gates active + REVIEWER in exhaustive mode + mandatory human verification at each ape transition.
+- **Full audit** (High/Critical risk): All gates active + DIJKSTRA in exhaustive mode + mandatory human verification at each ape transition.
 
 ### 6.3 Parallel Execution Model
 
 A single orchestrator manages one feature/project. Nothing prevents the human from launching N independent orchestrators on N different repositories. They never communicate with each other.
 
-Within a single orchestrator, apes within the same stage can work in parallel when tasks are independent (e.g., CODER working on two independent vertical slices simultaneously).
+Within a single orchestrator, apes within the same stage can work in parallel when tasks are independent (e.g., ADA working on two independent vertical slices simultaneously).
 
 ---
 
@@ -567,7 +567,7 @@ APE is stack-agnostic but has been designed and tested with:
 | **Ape** | A specialized AI sub-agent modeled as a Finite State Machine |
 | **Finite APE Machine** | The complete framework: methodology + agent architecture + evolutionary mechanism |
 | **DARWIN** | The evolutionary agent that operates on the meta-level, improving the system itself |
-| **TRACKER** | Cross-cutting hook that automatically updates project state |
+| **HERMES** | Cross-cutting hook that automatically updates project state |
 | **@contract** | Semantic metadata block in tests connecting specs with verification |
 | **AAD** | Agent-Aided Design (Analyze phase) |
 | **AAE** | Agent-Aided Engineering (Plan + Test Definition phases) |

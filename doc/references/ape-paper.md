@@ -1,4 +1,4 @@
-# Finite APE Machine: A Formal Framework for AI Agent Orchestration in Software Engineering
+# Finite APE Machine: Cooperative FSM Orchestration for AI-Assisted Software Engineering
 
 **Author:** C. Cisneros (ccisnedev)
 
@@ -46,9 +46,25 @@ Liu and Layland's [17] seminal work on scheduling algorithms for hard real-time 
 
 The field of multi-agent systems (MAS) provides foundational concepts through Wooldridge [18] and Ferber [19]. The BDI (Belief-Desire-Intention) architecture of Rao and Georgeff [20] formalized rational agent reasoning, while Smith's contract net protocol [21] established task allocation patterns. In the LLM era, Wang et al. [22] survey autonomous agent architectures, identifying profile, memory, planning, and action as core modules. Yao et al. [23] introduced ReAct, synergizing reasoning traces with environment actions. APE departs from the BDI tradition by deliberately *reducing* agent autonomy: apes do not reason about goals or negotiate — they execute within constrained state machines, and intelligence emerges from orchestration rather than individual capability.
 
+Table 1 summarizes the architectural differences between APE and the three most prominent LLM-based multi-agent frameworks:
+
+| Dimension | MetaGPT [4] | AutoGen [5] | CAMEL [6] | **APE** |
+|-----------|-------------|-------------|-----------|---------|
+| **Agent model** | Role-based SOPs | Conversable agents | Role-playing via inception prompting | FSM with prompt as δ |
+| **Orchestration** | Assembly line (implicit sequencing) | Multi-agent conversation (ad hoc) | Two-agent role-play loops | Cooperative event loop (explicit tick cycle) |
+| **Agent autonomy** | High — agents decide within SOP constraints | High — agents negotiate via conversation | High — agents converse autonomously | Low — apes execute atomic FSM transitions, no negotiation |
+| **Persistent memory** | None (session-scoped) | None (session-scoped) | None (session-scoped) | Memory as Code (git-versioned markdown with database indexing) |
+| **Cross-project learning** | None | None | None | DARWIN three-level hierarchy (project → methodology → framework) |
+| **Human oversight model** | Manual review of intermediate artifacts | Human-in-the-loop as optional agent | Minimal — autonomous completion | Semantic risk matrix (impact × domain calibrated gates) |
+| **Spec-to-test traceability** | None | None | None | @contracts (bidirectional spec ↔ test linking) |
+| **Formal model** | Informal SOPs encoded as prompt sequences | Conversation protocol | Inception prompting protocol | FSM 5-tuple A = (S, C, δ, s₀, F) |
+| **Target domain** | General software tasks | General LLM applications | General task-solving | Software engineering methodology (TDD cycle) |
+
+The key differentiator is architectural philosophy. MetaGPT, AutoGen, and CAMEL grant agents high autonomy and rely on inter-agent communication (conversation, SOPs, role-play) to coordinate behavior. APE inverts this: agents have *minimal* autonomy, no inter-agent communication, and coordination is entirely externalized to the orchestrator through shared state — producing emergent behavior from constrained components rather than negotiated consensus.
+
 ### 2.5 Test-Driven Development and Specification
 
-Beck [24] established TDD as a discipline where tests precede implementation. Nagappan et al. [25] demonstrated 40–90% defect reduction in industrial teams using TDD. Meyer's Design by Contract [26] formalized preconditions and postconditions as executable specifications. APE synthesizes these traditions through @contracts — language-agnostic semantic metadata embedded in test comments that create bidirectional traceability between specifications and verification code, and through the RED→GREEN cycle where the CODER agent operates strictly within TDD constraints.
+Beck [24] established TDD as a discipline where tests precede implementation. Nagappan et al. [25] demonstrated 40–90% defect reduction in industrial teams using TDD. Meyer's Design by Contract [26] formalized preconditions and postconditions as executable specifications. APE synthesizes these traditions through @contracts — language-agnostic semantic metadata embedded in test comments that create bidirectional traceability between specifications and verification code, and through the RED→GREEN cycle where the ADA (TDD implementation) agent operates strictly within TDD constraints.
 
 ### 2.6 Human-AI Collaboration and Automation Complacency
 
@@ -68,22 +84,24 @@ where S is a finite set of states, C is the context space (project state, memory
 
 The critical insight is that δ is a *natural language program* — the prompt — which, when combined with an LLM as execution engine, produces deterministic-in-intent behavior. The prompt constrains the LLM's output space to valid transitions, analogous to how a truth table constrains a combinational logic circuit.
 
+A crucial distinction must be made explicit: δ is deterministic in specification but stochastic in execution. The prompt defines the *intended* transition — the correct output given a state and context — but the LLM executing δ is a probabilistic system whose outputs vary across invocations. This is not a deficiency of the model; it is a design parameter. The prompt constrains the output distribution toward valid transitions, and the framework's verification mechanisms — tests, @contracts, DIJKSTRA (quality gate) validation, and BORGES (documentation compiler) schema enforcement — serve as the convergence mechanism that compensates for execution variance. In control theory terms, δ defines the setpoint, the LLM is the plant with stochastic disturbance, and the test suite is the sensor that closes the feedback loop. The system does not require deterministic execution; it requires *convergent* execution — that repeated application of the cycle produces outputs within the acceptance region defined by specifications and tests.
+
 ### 3.2 The APE Cycle
 
 The methodology follows a four-phase cycle applied to every development task:
 
-**Analyze.** The ANALYST ape examines requirements, existing code, and project memory to produce a structured analysis. Its states are {IDLE, READING, ANALYZING, COMPLETE}. The output is a scope document with risk classification.
+**Analyze.** The SOCRATES (requirements analysis) ape examines requirements, existing code, and project memory to produce a structured analysis. Its states are {IDLE, READING, ANALYZING, COMPLETE}. The output is a scope document with risk classification.
 
-**Plan.** The ANALYST (in planning mode) or a dedicated PLANNER produces a phased runbook — an ordered sequence of implementation steps, each with entry criteria, deliverables, and verification conditions. This is not a suggestion; it is the execution contract.
+**Plan.** The SOCRATES (in planning mode) or a dedicated PLANNER produces a phased runbook — an ordered sequence of implementation steps, each with entry criteria, deliverables, and verification conditions. This is not a suggestion; it is the execution contract.
 
 **Execute.** Seven specialized apes collaborate through the orchestrator, each a minimal FSM with defined states:
-- **SCOUT** ingests external documents (PDFs, Word, spreadsheets) and normalizes them into structured markdown for the memory system. States: {IDLE, INGESTING, NORMALIZING, COMPLETE}.
-- **ANALYST** decomposes requirements, classifies risk, and produces scope documents. States: {IDLE, READING, ANALYZING, COMPLETE}.
-- **ARCHITECT** generates work breakdown structures, phase ordering, effort estimation, and runbooks. States: {IDLE, DECOMPOSING, ORDERING, COMPLETE}.
-- **CODER** operates in strict TDD: RED (write failing test) → GREEN (make it pass). These are atomic states from the orchestrator's perspective. States: {IDLE, RED, GREEN, REFACTOR}.
-- **TESTER** validates test quality, coverage, and @contract compliance independently of CODER. States: {IDLE, VALIDATING, COMPLETE}.
-- **REVIEWER** performs code review against specifications, project conventions, and security criteria. States: {IDLE, REVIEWING, APPROVED, CHANGES_REQUESTED}.
-- **SCRIBE** maintains documentation consistency, enforcing schema on all memory files as a documentation compiler. States: {IDLE, VALIDATING, WRITING, COMPLETE}.
+- **MARCOPOLO** (document ingestion) ingests external documents (PDFs, Word, spreadsheets) and normalizes them into structured markdown for the memory system. States: {IDLE, INGESTING, NORMALIZING, COMPLETE}.
+- **SOCRATES** (requirements analysis) decomposes requirements, classifies risk, and produces scope documents. States: {IDLE, READING, ANALYZING, COMPLETE}.
+- **VITRUVIUS** (decomposition and structuring) generates work breakdown structures, phase ordering, effort estimation, and runbooks. States: {IDLE, DECOMPOSING, ORDERING, COMPLETE}.
+- **ADA** (TDD implementation) operates in strict TDD: RED (write failing test) → GREEN (make it pass). These are atomic states from the orchestrator's perspective. States: {IDLE, RED, GREEN, REFACTOR}.
+- **GATSBY** (contract definition and RED tests) validates test quality, coverage, and @contract compliance independently of ADA. States: {IDLE, VALIDATING, COMPLETE}.
+- **DIJKSTRA** (quality gate) performs code review against specifications, project conventions, and security criteria. States: {IDLE, REVIEWING, APPROVED, CHANGES_REQUESTED}.
+- **BORGES** (documentation compiler) maintains documentation consistency, enforcing schema on all memory files as a documentation compiler. States: {IDLE, VALIDATING, WRITING, COMPLETE}.
 
 **Learn (DARWIN).** After task completion, the DARWIN meta-agent extracts lessons from the execution trace and updates the learning hierarchy (Section 6).
 
@@ -91,8 +109,8 @@ The methodology follows a four-phase cycle applied to every development task:
 
 APE formalizes three modes of human-AI collaboration, drawing an explicit analogy to the CAD/CAE/CAM paradigm [29] that integrated design, simulation, and manufacturing:
 
-- **Agent-Aided Design (AAD):** Human designs with AI assistance. The ANALYST ape helps decompose problems, identify risks, and structure specifications. The human retains architectural authority.
-- **Agent-Aided Engineering (AAE):** Human and AI co-engineer. The CODER, TESTER, and REVIEWER apes execute within specifications while the human validates at semantic gates.
+- **Agent-Aided Design (AAD):** Human designs with AI assistance. The SOCRATES ape helps decompose problems, identify risks, and structure specifications. The human retains architectural authority.
+- **Agent-Aided Engineering (AAE):** Human and AI co-engineer. The ADA, GATSBY, and DIJKSTRA apes execute within specifications while the human validates at semantic gates.
 - **Agent-Aided Manufacturing (AAM):** AI executes mechanical tasks autonomously. Commits after green tests, documentation updates, index rebuilding — tasks where human judgment adds no value.
 
 The risk matrix (Section 7) determines which mode applies to each action, creating a continuous spectrum from full human control to full automation calibrated by actual risk.
@@ -120,14 +138,14 @@ This is a deliberate architectural choice. Holland [30] and Kauffman [31] demons
 
 ### 4.2 Interleaving and the Ghost in the Shell
 
-From CODER's perspective, execution is simple: RED → GREEN → RED → GREEN. But between each atomic state transition, the orchestrator *interleaves* other apes:
+From ADA's perspective, execution is simple: RED → GREEN → RED → GREEN. But between each atomic state transition, the orchestrator *interleaves* other apes:
 
 ```
-CODER:RED → [TESTER validates] → [GATE if high-risk] → CODER:GREEN →
-[SCRIBE updates docs] → [COMMIT] → [REVIEWER checks] → [NEXT phase]
+ADA:RED → [GATSBY validates] → [GATE if high-risk] → ADA:GREEN →
+[BORGES updates docs] → [COMMIT] → [DIJKSTRA checks] → [NEXT phase]
 ```
 
-CODER never observes this interleaving. The orchestrator is "the ghost in the shell" — the coordinating intelligence that is not itself an agent but whose scheduling decisions produce behavior no individual ape could achieve alone. This is analogous to how an operating system's scheduler creates the illusion of parallelism on a single core: the complexity is in the coordination, not the components.
+ADA never observes this interleaving. The orchestrator is "the ghost in the shell" — the coordinating intelligence that is not itself an agent but whose scheduling decisions produce behavior no individual ape could achieve alone. This is analogous to how an operating system's scheduler creates the illusion of parallelism on a single core: the complexity is in the coordination, not the components.
 
 ### 4.3 Precondition Idempotency
 
@@ -149,7 +167,7 @@ Memory as Code applies three patterns from database theory:
 
 **YAML frontmatter as WHERE clause.** Each memory file carries structured metadata in YAML frontmatter. When an ape needs to query memory (e.g., "all lessons tagged 'authentication' with severity > 3"), the query resolves against frontmatter fields — functioning as a WHERE clause over a document collection.
 
-**SCRIBE as schema enforcer.** The SCRIBE ape functions as a documentation compiler: it validates that all memory files conform to their declared schema, that cross-references resolve, and that indices are consistent. This is the equivalent of database constraints — CHECK, FOREIGN KEY, NOT NULL — applied to a markdown-based knowledge store.
+**BORGES as schema enforcer.** The BORGES ape functions as a documentation compiler: it validates that all memory files conform to their declared schema, that cross-references resolve, and that indices are consistent. This is the equivalent of database constraints — CHECK, FOREIGN KEY, NOT NULL — applied to a markdown-based knowledge store.
 
 ### 5.3 Query Optimization
 
@@ -232,9 +250,9 @@ We identify ten contributions that, to our knowledge, are novel in the literatur
 
 2. **Cooperative event loop orchestration for AI agents.** Applying the cooperative multitasking model from 8-bit embedded systems to LLM agent coordination, with apes as FSM tasks sharing state through project memory.
 
-3. **Memory as Code.** A persistent memory system for AI agents that uses version-controlled markdown files with database-inspired indexing (primary index, YAML-as-WHERE-clause, SCRIBE-as-schema-enforcer), eliminating external dependencies while maintaining queryability.
+3. **Memory as Code.** A persistent memory system for AI agents that uses version-controlled markdown files with database-inspired indexing (primary index, YAML-as-WHERE-clause, BORGES-as-schema-enforcer), eliminating external dependencies while maintaining queryability.
 
-4. **SCRIBE as documentation compiler.** An agent that enforces schema constraints on project documentation, functioning as the equivalent of database DDL enforcement applied to a markdown knowledge base.
+4. **BORGES as documentation compiler.** An agent that enforces schema constraints on project documentation, functioning as the equivalent of database DDL enforcement applied to a markdown knowledge base.
 
 5. **DARWIN as evolutionary meta-agent.** A meta-learning agent whose output modifies other agents' transition functions, operating across a three-level hierarchy (project → methodology → framework) that creates compounding improvement.
 
@@ -252,9 +270,11 @@ We identify ten contributions that, to our knowledge, are novel in the literatur
 
 ## 10. Conclusion and Future Work
 
+We present APE as a formal framework and defer empirical validation to the implementation phase, noting that the framework is currently being developed using its own methodology (APE builds APE) as initial validation. This paper establishes the theoretical foundations and architectural design; a companion paper will report empirical results from controlled experiments comparing APE-structured development against unstructured AI-assisted development.
+
 The Finite APE Machine demonstrates that the missing element in AI-assisted software development is not more capable models but more structured methodology. By applying well-understood concepts from automata theory, embedded systems, control theory, and database design to the novel domain of LLM agent orchestration, APE provides a framework where *the whole exceeds the sum of its parts* — emergent intelligent behavior from the coordination of simple, constrained agents.
 
-Future work includes: empirical validation through controlled studies comparing APE-structured development against unstructured AI-assisted development; extension of the DARWIN learning mechanism to cross-user pattern sharing; formal verification of orchestrator properties (liveness, safety, fairness); and implementation of model-routing optimization for Scenario D (cost-aware per-ape model assignment).
+Future work includes: empirical validation through the aforementioned companion study; extension of the DARWIN learning mechanism to cross-user pattern sharing; formal verification of orchestrator properties (liveness, safety, fairness); and implementation of model-routing optimization for Scenario D (cost-aware per-ape model assignment).
 
 The framework's tagline — *infinite monkeys produce noise; finite APEs produce software* — encapsulates both its thesis and its aspiration: that constraint, not freedom, is the path to reliable AI-assisted software engineering.
 

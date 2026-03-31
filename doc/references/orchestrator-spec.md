@@ -48,7 +48,7 @@ The APE orchestrator replicates this model exactly. Each ape has its FSM with at
 
 **Cooperative, not preemptive.** The orchestrator never interrupts an ape mid-state. Each ape completes its atomic block and yields. The orchestrator then evaluates and dispatches the next step.
 
-**Idempotent preconditions.** If an ape's precondition is not met (e.g., CODER is invoked but no RED tests exist), the ape does nothing and returns to IDLE. No error, no crash. The orchestrator moves to the next tick. This is critical for resilience — order independence emerges naturally.
+**Idempotent preconditions.** If an ape's precondition is not met (e.g., ADA (TDD implementation) is invoked but no RED tests exist), the ape does nothing and returns to IDLE. No error, no crash. The orchestrator moves to the next tick. This is critical for resilience — order independence emerges naturally.
 
 **State over memory.** The orchestrator reconstructs its context entirely from `status.md` on each tick. It has no memory between invocations. This means the human can close the terminal, sleep, switch machines, and resume. The orchestrator picks up exactly where it left off.
 
@@ -64,7 +64,7 @@ The orchestrator manages the **ape sequence within a single task**. A task is on
 
 ```
 Requirement (human defines)
-  └── Gantt/WBS (ARCHITECT produces)
+  └── Gantt/WBS (VITRUVIUS produces)
        ├── Task 1 ← orchestrator manages this
        ├── Task 2 ← then this
        └── Task 3 ← then this
@@ -82,12 +82,12 @@ The human chooses which task to work on. The orchestrator takes it from Analyze 
 
 ```
 AAD (Analyze)          → Human + default agent + skills (no orchestrator)
-AAE (Plan)             → Human + STRATEGIST + TESTER (orchestrator assists)
-AAM (Execute)          → Orchestrator drives: CODER ↔ REVIEWER ↔ commit cycle
+AAE (Plan)             → Human + SUNZI + GATSBY (orchestrator assists)
+AAM (Execute)          → Orchestrator drives: ADA ↔ DIJKSTRA ↔ commit cycle
 DARWIN (Learn)         → Orchestrator triggers post-cycle
 ```
 
-The orchestrator's primary value is in the Execute phase, where it manages the TDD cycle across runbook phases. During Plan, it assists by sequencing STRATEGIST → TESTER → human gate. During Analyze, it is largely passive — the human drives.
+The orchestrator's primary value is in the Execute phase, where it manages the TDD cycle across runbook phases. During Plan, it assists by sequencing SUNZI (technical design and runbook generation) → GATSBY (contract definition and RED tests) → human gate. During Analyze, it is largely passive — the human drives.
 
 ---
 
@@ -118,12 +118,12 @@ The target tool determines tick frequency:
 
 ### 3.2 Status File (`status.md`)
 
-The orchestrator's entire memory between ticks. TRACKER maintains it. Schema:
+The orchestrator's entire memory between ticks. HERMES (automatic state update hook) maintains it. Schema:
 
 ```markdown
 # Project Status
 
-> Maintained by TRACKER. Orchestrator reads this on every tick.
+> Maintained by HERMES. Orchestrator reads this on every tick.
 > Last updated: 2026-03-29T14:32:00
 
 ## Active Task
@@ -154,9 +154,9 @@ The orchestrator's entire memory between ticks. TRACKER maintains it. Schema:
 
 ## Current Ape State
 
-- ape: coder
+- ape: ada
 - ape_state: GREEN                  # The atomic state within the ape's FSM
-- previous_ape: tester
+- previous_ape: gatsby
 - previous_ape_result: tests_written
 
 ## Gate Status
@@ -187,22 +187,22 @@ IDLE
   └─[human selects task]─→ ANALYZE
 
 ANALYZE
-  ├─ SCOUT: ingest docs (if needed)
-  ├─ ANALYST: scope + constraints
-  ├─ ARCHITECT: WBS + sizing
+  ├─ MARCOPOLO: ingest docs (if needed)
+  ├─ SOCRATES: scope + constraints
+  ├─ VITRUVIUS: WBS + sizing
   └─[human approves analysis]─→ PLAN
 
 PLAN
-  ├─ STRATEGIST: generate runbook
-  ├─ TESTER: write tests for phase N (RED)
+  ├─ SUNZI: generate runbook
+  ├─ GATSBY: write tests for phase N (RED)
   └─[human approves tests OR risk=low auto-approve]─→ EXECUTE
 
 EXECUTE (per runbook phase)
-  ├─ CODER: RED (implement until tests pass)
-  ├─ CODER: GREEN (tests passing)
+  ├─ ADA: RED (implement until tests pass)
+  ├─ ADA: GREEN (tests passing)
   ├─ ape git commit (mechanical)
-  ├─ REVIEWER: verify contracts + quality
-  ├─[phase complete]─→ next phase → PLAN.TESTER (tests for phase N+1)
+  ├─ DIJKSTRA: verify contracts + quality
+  ├─[phase complete]─→ next phase → PLAN.GATSBY (tests for phase N+1)
   └─[all phases complete]─→ REVIEW
 
 REVIEW
@@ -219,27 +219,27 @@ DARWIN
 
 ### 3.4 Interleaving Detail
 
-The key insight: between any two atomic states of a single ape, the orchestrator may interleave other operations. CODER experiences RED → GREEN as its complete lifecycle. But the orchestrator intercalates:
+The key insight: between any two atomic states of a single ape, the orchestrator may interleave other operations. ADA experiences RED → GREEN as its complete lifecycle. But the orchestrator intercalates:
 
 ```
 Orchestrator tick sequence for one runbook phase:
 
-  tick 1:  TESTER → DESIGNING_CONTRACTS
-  tick 2:  TESTER → WRITING_TESTS
-  tick 3:  TESTER → VALIDATING_RED (tests fail = correct)
+  tick 1:  GATSBY → DESIGNING_CONTRACTS
+  tick 2:  GATSBY → WRITING_TESTS
+  tick 3:  GATSBY → VALIDATING_RED (tests fail = correct)
   tick 4:  [GATE: human approves tests? — depends on risk matrix]
-  tick 5:  CODER  → RED (reading tests, understanding contracts)
-  tick 6:  CODER  → RED (implementing)
-  tick 7:  CODER  → GREEN (tests pass)
-  tick 8:  [SCRIBE: validate memory, ape memory create deviation if needed]
+  tick 5:  ADA  → RED (reading tests, understanding contracts)
+  tick 6:  ADA  → RED (implementing)
+  tick 7:  ADA  → GREEN (tests pass)
+  tick 8:  [BORGES: validate memory, ape memory create deviation if needed]
   tick 9:  [ape git commit --phase N]
-  tick 10: REVIEWER → CHECKING_CONTRACTS
-  tick 11: REVIEWER → CHECKING_QUALITY
-  tick 12: REVIEWER → APPROVED (or ISSUES → loop back)
+  tick 10: DIJKSTRA → CHECKING_CONTRACTS
+  tick 11: DIJKSTRA → CHECKING_QUALITY
+  tick 12: DIJKSTRA → APPROVED (or ISSUES → loop back)
   tick 13: [Advance to next phase or PR]
 ```
 
-From CODER's perspective, it only did ticks 5-7. It never knew about ticks 1-4 or 8-12. Yet the system as a whole produced: validated tests, human-approved contracts, documented deviations, structured commits, and quality reviews. The intelligence emerged from the coordination.
+From ADA's perspective, it only did ticks 5-7. It never knew about ticks 1-4 or 8-12. Yet the system as a whole produced: validated tests, human-approved contracts, documented deviations, structured commits, and quality reviews. The intelligence emerged from the coordination.
 
 ### 3.5 Precondition Table
 
@@ -247,13 +247,13 @@ Each ape has preconditions. If they are not met, the ape stays IDLE — no error
 
 | Ape | Precondition | If Not Met |
 |-----|-------------|------------|
-| SCOUT | Documents to ingest exist | IDLE (nothing to ingest) |
-| ANALYST | SCOUT output exists or docs already normalized | IDLE |
-| ARCHITECT | Approved scope document exists | IDLE |
-| STRATEGIST | Approved WBS exists, task selected | IDLE |
-| TESTER | Runbook phase defined, no RED tests for this phase yet | IDLE |
-| CODER | RED tests exist for current phase | IDLE |
-| REVIEWER | GREEN tests exist, uncommitted or un-reviewed changes | IDLE |
+| MARCOPOLO (document ingestion and normalization) | Documents to ingest exist | IDLE (nothing to ingest) |
+| SOCRATES (conversational requirements understanding) | MARCOPOLO output exists or docs already normalized | IDLE |
+| VITRUVIUS (decomposition and structuring) | Approved scope document exists | IDLE |
+| SUNZI | Approved WBS exists, task selected | IDLE |
+| GATSBY | Runbook phase defined, no RED tests for this phase yet | IDLE |
+| ADA | RED tests exist for current phase | IDLE |
+| DIJKSTRA (quality gate pre-PR) | GREEN tests exist, uncommitted or un-reviewed changes | IDLE |
 | DARWIN | Completed cycle (PR merged or task closed) | IDLE |
 
 This is the order-independence guarantee from the microcontroller model. The orchestrator can attempt to invoke any ape at any time — the ape itself decides whether to act based on its preconditions.
@@ -272,10 +272,10 @@ In APE, the human writing in the chat is the interrupt. The orchestrator process
 Human writes: "the tests for phase 3 look wrong, redo them"
 
 Orchestrator processes interrupt:
-  1. READ status.md → phase 3, TESTER delivered, pending human gate
+  1. READ status.md → phase 3, GATSBY delivered, pending human gate
   2. INTERPRET interrupt → human rejects tests
-  3. UPDATE status.md → gate: rejected, ape: tester, ape_state: idle
-  4. NEXT TICK → TESTER re-invoked for phase 3 with human feedback
+  3. UPDATE status.md → gate: rejected, ape: gatsby, ape_state: idle
+  4. NEXT TICK → GATSBY re-invoked for phase 3 with human feedback
 ```
 
 ### 4.2 Risk Matrix as Interrupt Priority
@@ -284,9 +284,9 @@ Not all phases require human interrupts. The risk matrix determines which gates 
 
 | Risk Level | Gates Active | Orchestrator Behavior |
 |------------|-------------|----------------------|
-| Low | Tests + PR only | TESTER → CODER → REVIEWER → commit, no intermediate human approval. Human reviews at PR. |
+| Low | Tests + PR only | GATSBY → ADA → DIJKSTRA → commit, no intermediate human approval. Human reviews at PR. |
 | Medium | Analysis + Plan + Tests + PR | Human approves analysis, approves tests, reviews PR. Execute is autonomous. |
-| High | All + extended REVIEWER | Human approves at every phase transition. REVIEWER runs exhaustive checks. |
+| High | All + extended DIJKSTRA | Human approves at every phase transition. DIJKSTRA runs exhaustive checks. |
 | Critical | All + per-ape-review | Human reviews after every ape output. Nothing proceeds without explicit approval. |
 
 The orchestrator reads `gate_risk_level` from `status.md` and consults the gate configuration in `ape.yaml` to decide whether to pause for human input or proceed.
@@ -345,28 +345,28 @@ The target-specific generator translates this into the target's invocation synta
 
 **Copilot variant** — uses `@agent-name` syntax:
 ```markdown
-When CODER reaches GREEN state:
+When ADA reaches GREEN state:
 1. Run: `ape git commit --phase {N} --task {task_id}`
-2. Invoke: @reviewer to verify contracts and quality
-3. Read REVIEWER output. If APPROVED, advance phase.
+2. Invoke: @dijkstra to verify contracts and quality
+3. Read DIJKSTRA output. If APPROVED, advance phase.
 ```
 
 **Claude Code variant** — uses `Task()` tool:
 ```markdown
-When CODER reaches GREEN state:
+When ADA reaches GREEN state:
 1. Run: `ape git commit --phase {N} --task {task_id}`
-2. Use the Agent tool to launch a reviewer subagent:
+2. Use the Agent tool to launch a dijkstra subagent:
    - prompt: "Review changes for phase {N}. Verify @contracts..."
    - subagent_type: general-purpose
-3. Read reviewer result. If approved, advance phase.
+3. Read dijkstra result. If approved, advance phase.
 ```
 
 **Cursor variant** — uses `/agent-name` slash commands:
 ```markdown
-When CODER reaches GREEN state:
+When ADA reaches GREEN state:
 1. Run: `ape git commit --phase {N} --task {task_id}`
-2. Invoke: /reviewer to verify contracts and quality
-3. Read reviewer output. If approved, advance phase.
+2. Invoke: /dijkstra to verify contracts and quality
+3. Read dijkstra output. If approved, advance phase.
 ```
 
 ### 5.3 Canonical Orchestrator Prompt Structure
@@ -385,7 +385,7 @@ On every invocation (tick):
 2. Evaluate preconditions for the next expected ape
 3. Decide: invoke ape, ask human, or wait
 4. Execute the decision
-5. Update .ape/status.md via TRACKER
+5. Update .ape/status.md via HERMES
 6. Yield control
 
 ## State Machine
@@ -404,9 +404,9 @@ If no gate required:
 ## Ape Invocation
 [TARGET-SPECIFIC SECTION — generated by ape init]
 
-To invoke SCOUT:    [target-specific syntax]
-To invoke ANALYST:  [target-specific syntax]
-To invoke ARCHITECT: [target-specific syntax]
+To invoke MARCOPOLO:    [target-specific syntax]
+To invoke SOCRATES:  [target-specific syntax]
+To invoke VITRUVIUS: [target-specific syntax]
 ...
 
 ## Interrupt Handling
@@ -440,41 +440,41 @@ If status.md is missing or corrupted:
 
 Each ape's FSM defines states that are **atomic from the orchestrator's perspective**. The ape may do significant work within a state, but the orchestrator only sees state transitions.
 
-#### SCOUT
+#### MARCOPOLO
 ```
 IDLE → INGESTING → NORMALIZING → DELIVERING → IDLE
 ```
 Atomic blocks: each state is one tick. INGESTING reads and parses. NORMALIZING converts. DELIVERING produces output.
 
-#### ANALYST
+#### SOCRATES
 ```
 IDLE → UNDERSTANDING → QUESTIONING → CLARIFYING → DOCUMENTING → IDLE
 ```
 Atomic blocks: UNDERSTANDING and QUESTIONING may involve multiple chat exchanges with the human (the orchestrator is passive during Analyze — human drives).
 
-#### ARCHITECT
+#### VITRUVIUS
 ```
 IDLE → DECOMPOSING → SIZING → SEQUENCING → RISK_ASSESSING → DELIVERING → IDLE
 ```
 
-#### STRATEGIST
+#### SUNZI
 ```
 IDLE → READING_CONTEXT → DESIGNING → STAGING → DELIVERING → IDLE
 Exception: READING_CONTEXT → CONTEXT_INSUFFICIENT → ESCALATE
 ```
 
-#### TESTER
+#### GATSBY
 ```
 IDLE → READING_STAGE → DESIGNING_CONTRACTS → WRITING_TESTS → VALIDATING_RED → DELIVERING → IDLE
 ```
 
-#### CODER
+#### ADA
 ```
 IDLE → RED → GREEN → IDLE
 ```
-This is the most critical simplification. From the orchestrator's view, CODER has exactly two atomic states: RED (implement until tests pass) and GREEN (tests pass, done). Internally, CODER may loop (implement → run tests → fail → fix → run tests → pass), but the orchestrator only sees the RED→GREEN transition.
+This is the most critical simplification. From the orchestrator's view, ADA has exactly two atomic states: RED (implement until tests pass) and GREEN (tests pass, done). Internally, ADA may loop (implement → run tests → fail → fix → run tests → pass), but the orchestrator only sees the RED→GREEN transition.
 
-#### REVIEWER
+#### DIJKSTRA
 ```
 IDLE → CHECKING_CONTRACTS → CHECKING_QUALITY → CHECKING_SECURITY →
   ├── APPROVED → IDLE
@@ -488,14 +488,14 @@ IDLE → COLLECTING → COMPARING → IDENTIFYING_PATTERNS → GENERATING_LESSON
 
 ### 6.2 The Interleaving Principle
 
-Between CODER:RED completing and CODER:GREEN beginning, the orchestrator may insert:
+Between ADA:RED completing and ADA:GREEN beginning, the orchestrator may insert:
 - Nothing (low risk, auto-continue)
 - Human gate (high risk, wait for approval)
-- REVIEWER spot-check (critical risk)
+- DIJKSTRA spot-check (critical risk)
 - Memory validation (`ape memory validate`)
 - Any corrective action the orchestrator deems necessary
 
-This is the emergent behavior. CODER never knows what happened between its states. The system as a whole exhibits discipline that no individual ape possesses.
+This is the emergent behavior. ADA never knows what happened between its states. The system as a whole exhibits discipline that no individual ape possesses.
 
 ---
 
@@ -507,32 +507,32 @@ In v0.x.x, the orchestrator invokes one ape at a time. This is the cooperative m
 
 The sequence is deterministic for each runbook phase:
 ```
-TESTER → [gate?] → CODER:RED → CODER:GREEN → [commit] → REVIEWER → [next phase]
+GATSBY → [gate?] → ADA:RED → ADA:GREEN → [commit] → DIJKSTRA → [next phase]
 ```
 
 ### 7.2 Parallel Potential (v1.x.x)
 
 Future versions may exploit target-native parallelism:
 
-- **Claude Code Agent Teams:** Launch CODER on phase N while TESTER writes tests for phase N+1 (pipelining).
-- **GitHub Copilot Fleet:** Run REVIEWER on phase N-1 while CODER works phase N.
+- **Claude Code Agent Teams:** Launch ADA on phase N while GATSBY writes tests for phase N+1 (pipelining).
+- **GitHub Copilot Fleet:** Run DIJKSTRA on phase N-1 while ADA works phase N.
 - **Gemini CLI native scheduler:** Batch independent ape invocations.
 
-The precondition table (Section 3.5) already supports this: if TESTER for phase N+1 has its preconditions met (runbook exists), it can run while CODER works phase N. The orchestrator simply evaluates all apes on each tick and dispatches all whose preconditions are met.
+The precondition table (Section 3.5) already supports this: if GATSBY for phase N+1 has its preconditions met (runbook exists), it can run while ADA works phase N. The orchestrator simply evaluates all apes on each tick and dispatches all whose preconditions are met.
 
 This is the exact model from the microcontroller: the event loop iterates over all tasks, and each task that can advance does advance. The emergent behavior becomes richer with parallelism — correlations between concurrent phases may surface patterns that sequential execution would miss.
 
 ### 7.3 Pipelining Example
 
 ```
-Phase 1:  [TESTER:1] → [CODER:1 RED] → [CODER:1 GREEN] → [COMMIT:1] → [REVIEWER:1]
-Phase 2:              [TESTER:2] → .............. [CODER:2 RED] → [CODER:2 GREEN] → ...
-Phase 3:                           [TESTER:3] → ......................
+Phase 1:  [GATSBY:1] → [ADA:1 RED] → [ADA:1 GREEN] → [COMMIT:1] → [DIJKSTRA:1]
+Phase 2:              [GATSBY:2] → .............. [ADA:2 RED] → [ADA:2 GREEN] → ...
+Phase 3:                           [GATSBY:3] → ......................
 
          ────────────────────── time ──────────────────────→
 ```
 
-TESTER for phase N+1 can begin as soon as the runbook for phase N+1 is defined (which it already is — the full runbook was produced by STRATEGIST). The only hard dependency is that CODER:N cannot start until TESTER:N delivers RED tests.
+GATSBY for phase N+1 can begin as soon as the runbook for phase N+1 is defined (which it already is — the full runbook was produced by SUNZI). The only hard dependency is that ADA:N cannot start until GATSBY:N delivers RED tests.
 
 ---
 
@@ -679,39 +679,39 @@ HUMAN: "Let's work on task-005: implement login endpoint"
 TICK 1 — Orchestrator reads status.md: task-005, phase: idle
   → Task exists, runbook rb-001 exists, 4 phases defined
   → Phase 1 has no tests yet
-  → DECIDE: invoke TESTER for phase 1
-  → INVOKE: TESTER with runbook phase 1 context
-  → TESTER produces: 3 test files with @contracts, all RED
+  → DECIDE: invoke GATSBY for phase 1
+  → INVOKE: GATSBY with runbook phase 1 context
+  → GATSBY produces: 3 test files with @contracts, all RED
   → UPDATE status.md: phase=execute, sub_phase=tdd,
-    current_phase=1, ape=tester, ape_state=DELIVERING
+    current_phase=1, ape=gatsby, ape_state=DELIVERING
 
 TICK 2 — Risk is HIGH → gate required for test approval
-  → ASK HUMAN: "TESTER produced 3 tests for phase 1
+  → ASK HUMAN: "GATSBY produced 3 tests for phase 1
     (DB schema). Review @contracts and approve?"
   → HUMAN: "approved, but add a test for unique email constraint"
   → UPDATE status.md: gate=passed, human_feedback=recorded
 
-TICK 3 — TESTER incorporates feedback
-  → INVOKE: TESTER to add the additional test
-  → TESTER adds test, validates RED
-  → UPDATE status.md: ape=tester, ape_state=VALIDATING_RED
+TICK 3 — GATSBY incorporates feedback
+  → INVOKE: GATSBY to add the additional test
+  → GATSBY adds test, validates RED
+  → UPDATE status.md: ape=gatsby, ape_state=VALIDATING_RED
 
-TICK 4 — Tests ready, invoke CODER
-  → INVOKE: CODER with RED tests for phase 1
-  → CODER implements DB schema, migrations, model
+TICK 4 — Tests ready, invoke ADA
+  → INVOKE: ADA with RED tests for phase 1
+  → ADA implements DB schema, migrations, model
   → All tests pass → GREEN
-  → UPDATE status.md: ape=coder, ape_state=GREEN
+  → UPDATE status.md: ape=ada, ape_state=GREEN
 
 TICK 5 — Green phase: commit + review
-  → RUN: ape memory validate (SCRIBE check)
+  → RUN: ape memory validate (BORGES check)
   → RUN: ape git commit --phase 1 --task task-005
-  → INVOKE: REVIEWER for phase 1
-  → REVIEWER: contracts verified, quality OK, APPROVED
+  → INVOKE: DIJKSTRA for phase 1
+  → DIJKSTRA: contracts verified, quality OK, APPROVED
   → UPDATE status.md: current_phase=1 completed
 
 TICK 6 — Advance to phase 2
   → Phase 2 defined in runbook: Service layer
-  → INVOKE: TESTER for phase 2
+  → INVOKE: GATSBY for phase 2
   → [cycle repeats...]
 
 ... [phases 2, 3, 4 proceed similarly] ...
@@ -739,7 +739,7 @@ ORCHESTRATOR: "Task-005 complete. 4 phases, 1 tactical deviation,
 |----------|----------------------------|
 | **Finite APE Machine** (methodology) | Defines the ape FSMs, the control loop theory, and the AAD/AAE/AAM model that the orchestrator implements |
 | **APE CLI Specification** | Defines the `ape` commands that the orchestrator invokes (`ape memory`, `ape task`, `ape git`). The CLI is the orchestrator's programmatic API |
-| **Memory as Code Specification** | Defines the shared state structure (`.ape/memory/`, indices, SCRIBE protocol) that the orchestrator reads to evaluate preconditions and the apes write to communicate results |
+| **Memory as Code Specification** | Defines the shared state structure (`.ape/memory/`, indices, BORGES (schema enforcement, documentation compiler) protocol) that the orchestrator reads to evaluate preconditions and the apes write to communicate results |
 
 The orchestrator is the runtime that connects these three specifications into a working system.
 
@@ -751,7 +751,7 @@ The orchestrator is the runtime that connects these three specifications into a 
 
 A long-running process that auto-ticks without human invocation. Would enable:
 - Background execution of low-risk tasks.
-- Webhook-driven ticks (PR comment → REVIEWER invoked automatically).
+- Webhook-driven ticks (PR comment → DIJKSTRA invoked automatically).
 - Scheduled DARWIN runs.
 
 ### 12.2 Multi-Task Pipelining (v1.x.x)
@@ -785,7 +785,7 @@ This emergence cannot be designed — it must be observed through use. The frame
 | **Emergent behavior** | System-level intelligence arising from the coordination of simple, focused apes |
 | **Meta-prompt** | A prompt that coordinates other prompts; the orchestrator is not an ape, it is the loop |
 | **Event loop** | The orchestrator's core pattern: iterate, evaluate, dispatch, repeat |
-| **Pipelining** | Future: overlapping phases so TESTER:N+1 runs while CODER:N executes |
+| **Pipelining** | Future: overlapping phases so GATSBY:N+1 runs while ADA:N executes |
 
 ---
 

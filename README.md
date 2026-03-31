@@ -6,7 +6,7 @@ A formal framework for AI-assisted software development that models coding agent
 
 ## What is APE?
 
-APE treats AI coding agents ("apes") as deterministic automata with prompts as transition functions. A cooperative event loop orchestrator — inspired by microcontroller scheduling — coordinates specialized agents (ANALYST, ARCHITECT, CODER, TESTER, REVIEWER, SCRIBE) without any agent being aware of the others. Intelligence emerges from orchestration, not individual capability.
+APE treats AI coding agents ("apes") as deterministic automata with prompts as transition functions. A cooperative event loop orchestrator — inspired by microcontroller scheduling — coordinates specialized agents (MARCOPOLO, SOCRATES, VITRUVIUS, SUNZI, GATSBY, ADA, DIJKSTRA, BORGES, DARWIN) without any agent being aware of the others. Intelligence emerges from orchestration, not individual capability.
 
 **Core ideas:**
 
@@ -29,6 +29,7 @@ doc/
 ├── ape-cli-spec.md          # CLI tool specification (Dart)
 ├── memory-as-code-spec.md   # Memory system specification
 ├── orchestrator-spec.md     # Cooperative event loop orchestrator
+├── lore.md                  # The Apes — names, allegories, and roles
 ├── adrs.md                  # Architecture Decision Records (6)
 └── ape-paper.md             # arXiv-style paper with 36 formal references
 ```
@@ -39,7 +40,7 @@ doc/
 - [ ] `ape memory` — Memory as Code CLI commands
 - [ ] `ape task` — GitHub Issues-backed task management
 - [ ] Orchestrator prompts for Copilot (first target)
-- [ ] SCRIBE validation engine
+- [ ] BORGES validation engine
 - [ ] DARWIN learning loop
 
 ## The APE Cycle
