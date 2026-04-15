@@ -92,15 +92,15 @@ group 'InitCommand'
 
 ### Steps
 
-- [ ] 2.1 Escribir tests del pseudocódigo arriba → **RED**
-- [ ] 2.2 Crear `InitInput` — Input DTO (sin campos; `fromCliRequest` ignora el request)
-- [ ] 2.3 Crear `InitOutput` — Output DTO con `message` y `exitCode` semántico
-- [ ] 2.4 Crear `InitCommand` — Command que:
+- [x] 2.1 Escribir tests del pseudocódigo arriba → **RED**
+- [x] 2.2 Crear `InitInput` — Input DTO (workingDirectory; `fromCliRequest` usa Directory.current)
+- [x] 2.3 Crear `InitOutput` — Output DTO con `message`, `isCreated`, `exitCode` semántico
+- [x] 2.4 Crear `InitCommand` — Command que:
   - `validate()` → null (sin validación)
   - `execute()` → crea `.ape/` si no existe; retorna mensaje informativo si ya existe
-- [ ] 2.5 Ejecutar `dart test` → **GREEN**
-- [ ] 2.6 Registrar `init` como root command en `runApe()`
-- [ ] 2.7 Ejecutar `dart analyze` — cero errores
+- [x] 2.5 Ejecutar `dart test` → **GREEN** (4/4 tests pasan)
+- [x] 2.6 Registrar `init` como root command en `runApe()`
+- [x] 2.7 Ejecutar `dart analyze` — cero errores
 
 **Commit:** `feat(cli): implement ape init command`
 
