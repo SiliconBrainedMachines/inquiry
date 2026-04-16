@@ -1,3 +1,19 @@
+# Release workflow
+#
+# WORKAROUND: Windows Defender on the windows-2025 / windows-latest runner
+# image (20260413.84.1+) quarantines dart.exe from the toolcache after
+# `dart test` runs. Symptom: `dart pub get`, `dart analyze`, `dart test`
+# succeed, but `dart compile exe` fails with "dart not recognized" even
+# though $env:DART_HOME still points at a now-empty directory.
+#
+# Mitigation: before compiling, wipe the dart toolcache dir and the
+# temp zip, then re-run dart-lang/setup-dart. Defender exclusions at the
+# top of the job appear not to take effect on hosted runners but are kept
+# as a defense-in-depth hint.
+#
+# If this workaround is removed, the release build will fail in ways
+# that look (but are not) like PATH issues.
+
 name: Release
 
 on:
@@ -57,6 +73,9 @@ jobs:
       - name: Create build directories
         run: New-Item -ItemType Directory -Force -Path build\bin | Out-Null
 
+      # Defender removes dart.exe after tests run. Wipe caches so the
+      # next setup-dart step downloads a fresh SDK instead of reusing
+      # the corrupted (empty) cached dir.
       - name: Clean dart cache to force re-download
         shell: pwsh
         run: |
