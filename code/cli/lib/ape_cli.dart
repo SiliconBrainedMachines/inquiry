@@ -12,6 +12,7 @@ import 'assets.dart';
 import 'commands/init.dart';
 import 'commands/target_clean.dart';
 import 'commands/target_get.dart';
+import 'commands/uninstall.dart';
 import 'commands/upgrade.dart';
 import 'commands/version.dart';
 import 'targets/all_adapters.dart';
@@ -69,6 +70,15 @@ Future<int> runApe(List<String> args) async {
       description: 'Remove deployed APE files from all targets',
     );
   });
+
+  cli.command<UninstallInput, UninstallOutput>(
+    'uninstall',
+    (req) => UninstallCommand(
+      UninstallInput.fromCliRequest(req),
+      deployer: deployer,
+    ),
+    description: 'Remove APE CLI from the system',
+  );
 
   return cli.run(args);
 }
