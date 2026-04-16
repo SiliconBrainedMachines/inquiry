@@ -36,7 +36,10 @@ doc/
 
 ### What's next
 
-- [ ] `ape init` — project scaffolding
+- [x] `ape init` — project scaffolding
+- [x] `ape version` — print CLI version
+- [x] `ape target get` — deploy APE agents and skills to all AI coding tools
+- [x] `ape target clean` — remove deployed APE files from all targets
 - [ ] `ape memory` — Memory as Code CLI commands
 - [ ] `ape task` — GitHub Issues-backed task management
 - [ ] Orchestrator prompts for Copilot (first target)
