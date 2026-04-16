@@ -65,6 +65,11 @@ jobs:
             Write-Host "Removing $dartCache"
             Remove-Item -Recurse -Force $dartCache
           }
+          $dartZip = "D:\a\_temp\dartsdk-windows-x64-release.zip"
+          if (Test-Path $dartZip) {
+            Write-Host "Removing $dartZip"
+            Remove-Item -Force $dartZip
+          }
 
       - name: Re-setup Dart (ensure SDK present before compile)
         uses: dart-lang/setup-dart@v1
