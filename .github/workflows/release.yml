@@ -21,6 +21,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Exclude toolcache from Windows Defender
+        shell: pwsh
+        run: |
+          Add-MpPreference -ExclusionPath "C:\hostedtoolcache" -ErrorAction SilentlyContinue
+          Add-MpPreference -ExclusionPath "D:\a" -ErrorAction SilentlyContinue
+          Add-MpPreference -ExclusionProcess "dart.exe" -ErrorAction SilentlyContinue
+          # Clean a possibly-empty cached dart dir so setup-dart re-downloads
+          $dartCache = "C:\hostedtoolcache\windows\dart"
+          if (Test-Path $dartCache) {
+            Remove-Item -Recurse -Force $dartCache
+          }
+
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: '3.8.1'
