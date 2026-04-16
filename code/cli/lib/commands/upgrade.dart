@@ -79,9 +79,13 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       // 1. Fetch latest release metadata
       final releaseUrl = Uri.parse(
           'https://api.github.com/repos/$_repo/releases/latest');
+      final token = await _resolveToken();
       final metaRequest = await client.getUrl(releaseUrl);
       metaRequest.headers.set('Accept', 'application/vnd.github+json');
       metaRequest.headers.set('User-Agent', 'ape-cli/$apeVersion');
+      if (token != null) {
+        metaRequest.headers.set('Authorization', 'Bearer $token');
+      }
       final metaResponse = await metaRequest.close();
 
       if (metaResponse.statusCode != 200) {
@@ -118,14 +122,20 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
         ),
       );
 
-      final downloadUrl = asset['browser_download_url'] as String;
+      final assetId = asset['id'] as int;
 
-      // 3. Download to temp
+      // 3. Download to temp (use API URL for private repo support)
       final tempDir = Directory.systemTemp.createTempSync('ape_upgrade_');
       final zipFile = File(p.join(tempDir.path, _assetName));
 
-      final dlRequest = await client.getUrl(Uri.parse(downloadUrl));
+      final dlUrl = Uri.parse(
+          'https://api.github.com/repos/$_repo/releases/assets/$assetId');
+      final dlRequest = await client.getUrl(dlUrl);
+      dlRequest.headers.set('Accept', 'application/octet-stream');
       dlRequest.headers.set('User-Agent', 'ape-cli/$apeVersion');
+      if (token != null) {
+        dlRequest.headers.set('Authorization', 'Bearer $token');
+      }
       final dlResponse = await dlRequest.close();
 
       // Follow redirect if needed
@@ -169,5 +179,22 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
     } finally {
       if (httpClientOverride == null) client.close();
     }
+  }
+
+  /// Resolves a GitHub token from GITHUB_TOKEN env var or `gh auth token`.
+  Future<String?> _resolveToken() async {
+    final envToken = Platform.environment['GITHUB_TOKEN'];
+    if (envToken != null && envToken.isNotEmpty) return envToken;
+
+    try {
+      final result = await Process.run('gh', ['auth', 'token']);
+      if (result.exitCode == 0) {
+        final token = (result.stdout as String).trim();
+        if (token.isNotEmpty) return token;
+      }
+    } on ProcessException {
+      // gh not installed — that's fine
+    }
+    return null;
   }
 }

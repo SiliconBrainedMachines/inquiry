@@ -55,7 +55,17 @@ Write-Host "    Asset:   $($asset.name)"
 $tempZip = Join-Path $env:TEMP "ape-$($release.tag_name).zip"
 
 Write-Host '>>> Downloading...'
-Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $tempZip -Headers $headers
+# Use API URL for private repos, browser URL for public repos
+if ($env:GITHUB_TOKEN) {
+    $dlUrl = "https://api.github.com/repos/$repo/releases/assets/$($asset.id)"
+    $dlHeaders = @{
+        Accept        = 'application/octet-stream'
+        Authorization = "Bearer $env:GITHUB_TOKEN"
+    }
+    Invoke-WebRequest -Uri $dlUrl -OutFile $tempZip -Headers $dlHeaders
+} else {
+    Invoke-WebRequest -Uri $asset.browser_download_url -OutFile $tempZip
+}
 
 # Clean previous installation
 if (Test-Path $installDir) {
