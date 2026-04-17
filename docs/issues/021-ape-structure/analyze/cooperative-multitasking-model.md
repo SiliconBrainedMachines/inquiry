@@ -43,8 +43,7 @@ void ape_tick() {
 
 1. **Multiple agents per phase.** Each APE state hosts 1 or more agents. All run sequentially.
 2. **Agents are unaware of each other.** No agent knows what other agents exist. Communication is through signals routed by the scheduler (see [signal-based-coordination](signal-based-coordination.md)).
-3. **Round-robin, one step per tick.** Each agent executes one state transition and yields. Like a microcontroller, each agent has the illusion of running continuously, but only gets one time slice per tick.
-4. **Idle agents are not scheduled.** Following RTOS practice, agents in IDLE/WAITING state are not invoked. Only READY agents get CPU time.
+3. **Event-driven scheduling with round-robin among READY agents.** Each READY agent executes one state transition and yields. Like a microcontroller, each agent has the illusion of running continuously, but only gets one time slice per tick. Agents in IDLE or WAITING state are never invoked — only READY agents get CPU time (see [signal-based-coordination](signal-based-coordination.md)).
 
 ## Relationship to Existing Specs
 
