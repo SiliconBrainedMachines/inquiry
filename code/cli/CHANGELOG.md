@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.0.6]
+### Fixed
+- Revert subsumption (D19): deploy only to Copilot instead of skipping it when Claude exists (#22).
+- `target get` now deploys exclusively to `~/.copilot/` (D20: single-target until MVP).
+- `target clean` and `uninstall` still clean all 5 target directories for backward compatibility.
+### Removed
+- `effectiveAdapters` subsumption logic from deployer (D22).
+
 ## [0.0.5]
 ### Added
 - `ape uninstall` command (#16).
