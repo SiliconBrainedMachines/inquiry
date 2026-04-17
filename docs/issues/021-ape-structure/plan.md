@@ -21,11 +21,11 @@ so they become part of the specification for future work.
 Move analysis documents not addressed in this issue to `docs/references/`
 as specification material for future work.
 
-- [ ] Move `cooperative-multitasking-model.md` → `docs/references/cooperative-multitasking-model.md`
-- [ ] Move `agent-lifecycle.md` → `docs/references/agent-lifecycle.md`
-- [ ] Move `signal-based-coordination.md` → `docs/references/signal-based-coordination.md`
-- [ ] Move `cli-as-api.md` → `docs/references/cli-as-api.md`
-- [ ] Update `analyze/index.md` to reflect moved documents
+- [x] Move `cooperative-multitasking-model.md` → `docs/references/cooperative-multitasking-model.md`
+- [x] Move `agent-lifecycle.md` → `docs/references/agent-lifecycle.md`
+- [x] Move `signal-based-coordination.md` → `docs/references/signal-based-coordination.md`
+- [x] Move `cli-as-api.md` → `docs/references/cli-as-api.md`
+- [x] Update `analyze/index.md` to reflect moved documents
 - [ ] Commit: "docs: move future architecture specs to references"
 
 ## Phase 1: RED — tests for new ape init behavior
