@@ -11,16 +11,21 @@ author: socrates
 
 Analysis of the APE runtime model, state persistence, and directory structure. These documents capture architectural decisions made during conversation, including contradictions found with existing specs that need resolution.
 
-## Documents
+## Documents (in this issue)
 
 | ID | Title | Date | Status | Tags |
 |----|-------|------|--------|------|
-| cooperative-multitasking-model | Cooperative multitasking model — two-level FSM architecture | 2026-04-16 | active | architecture, fsm, rtos, scheduler, multitasking |
-| agent-lifecycle | Agent lifecycle — confirmed registry and five-state scheduler model | 2026-04-16 | active | agents, fsm, lifecycle, registry, socrates |
 | state-persistence | State persistence — .ape/ as cache, docs/ as source of truth | 2026-04-16 | active | architecture, state, persistence, gitignore, docs, resumability |
-| cli-as-api | CLI as API — skills instruct, commands execute | 2026-04-16 | active | architecture, cli, skills, commands, validation, human-usable |
-| signal-based-coordination | Signal-based coordination — RTOS event model for agent communication | 2026-04-16 | active | architecture, rtos, signals, events, scheduler, coordination |
 | ape-init-scope | ape init — minimal idempotent scope | 2026-04-17 | active | cli, init, scope, idempotent, docs-detection |
+
+## Documents (moved to docs/references/ for future work)
+
+| ID | Title | New Location |
+|----|-------|-------------|
+| cooperative-multitasking-model | Cooperative multitasking model — two-level FSM architecture | [docs/references/](../../references/cooperative-multitasking-model.md) |
+| agent-lifecycle | Agent lifecycle — confirmed registry and five-state scheduler model | [docs/references/](../../references/agent-lifecycle.md) |
+| cli-as-api | CLI as API — skills instruct, commands execute | [docs/references/](../../references/cli-as-api.md) |
+| signal-based-coordination | Signal-based coordination — RTOS event model for agent communication | [docs/references/](../../references/signal-based-coordination.md) |
 
 ## Contradictions Found with Existing Specs
 
