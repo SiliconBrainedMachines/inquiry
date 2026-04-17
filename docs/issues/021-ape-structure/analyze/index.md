@@ -16,7 +16,7 @@ Analysis of the APE runtime model, state persistence, and directory structure. T
 | ID | Title | Date | Status | Tags |
 |----|-------|------|--------|------|
 | cooperative-multitasking-model | Cooperative multitasking model — two-level FSM architecture | 2026-04-16 | active | architecture, fsm, rtos, scheduler, multitasking |
-| agent-lifecycle | Agent lifecycle — confirmed registry and IDLE/RUNNING/COMPLETE simplification | 2026-04-16 | active | agents, fsm, lifecycle, registry, socrates |
+| agent-lifecycle | Agent lifecycle — confirmed registry and five-state scheduler model | 2026-04-16 | active | agents, fsm, lifecycle, registry, socrates |
 | state-persistence | State persistence — .ape/ as cache, docs/ as source of truth | 2026-04-16 | active | architecture, state, persistence, gitignore, docs, resumability |
 | cli-as-api | CLI as API — skills instruct, commands execute | 2026-04-16 | active | architecture, cli, skills, commands, validation, human-usable |
 | signal-based-coordination | Signal-based coordination — RTOS event model for agent communication | 2026-04-16 | active | architecture, rtos, signals, events, scheduler, coordination |

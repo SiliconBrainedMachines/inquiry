@@ -70,9 +70,11 @@ cycle:
 
 ready:
   - name: socrates
-    state: RUNNING          # IDLE | RUNNING | COMPLETE
+    state: READY            # READY | RUNNING
 
-waiting: []
+waiting: []                   # agents blocked on signals
+
+complete: []                  # agents that finished
 ```
 
 ## Reconstruction Flow
@@ -83,7 +85,7 @@ repo cloned / .ape/ missing
   ▼
 ape status (or ape init)
   │
-  ├── Scan docs/ape/ for active tasks
+  ├── Scan docs/issues/ for active tasks
   ├── Read plan.md checklists for execution state
   ├── Determine current phase from artifacts
   └── Write .ape/state.yaml
