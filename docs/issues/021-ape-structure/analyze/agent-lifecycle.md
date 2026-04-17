@@ -1,6 +1,6 @@
 ---
 id: agent-lifecycle
-title: "Agent lifecycle — confirmed registry and IDLE/RUNNING/COMPLETE simplification"
+title: "Agent lifecycle — confirmed registry and five-state scheduler model"
 date: 2026-04-16
 status: active
 tags: [agents, fsm, lifecycle, registry, socrates]
@@ -44,15 +44,28 @@ author: socrates
 | DIJKSTRA | EXECUTE | Quality gate pre-PR |
 | DARWIN | RETROSPECTIVE | Lessons learned, system evolution |
 
-## The Three-State Simplification
+## The Three-State Simplification → Five-State Scheduler Model
 
 ### Decision
 
-Agent states visible to the scheduler are reduced to three:
+Agent states visible to the scheduler are five, grouped in two categories:
 
 ```
-IDLE → RUNNING → COMPLETE
+Not scheduled:  IDLE, WAITING
+Scheduled:      READY, RUNNING, COMPLETE
 ```
+
+Transitions:
+
+```
+IDLE ──[phase activated]──→ READY
+IDLE ──[phase activated, blocked on signal]──→ WAITING
+WAITING ──[signal received]──→ READY
+READY ──[scheduler tick]──→ RUNNING
+RUNNING ──[step complete]──→ READY | WAITING | COMPLETE
+```
+
+From the **agent's perspective**, only three states are visible: it is either not doing anything (IDLE/WAITING), working (READY/RUNNING), or done (COMPLETE). The agent does not know whether it was WAITING or IDLE — that distinction is managed by the scheduler via signals (see [signal-based-coordination](signal-based-coordination.md)).
 
 ### Rationale
 
@@ -63,13 +76,13 @@ SOCRATES uses the Socratic method internally (CLARIFICATION → ASSUMPTIONS → 
 The distinction:
 
 | Concept | Visible to scheduler | Visible to agent |
-|---------|---------------------|-----------------|
-| IDLE/RUNNING/COMPLETE | Yes — formal FSM | Yes |
+|---------|---------------------|------------------|
+| IDLE/WAITING/READY/RUNNING/COMPLETE | Yes — formal FSM | Partially (agent sees idle/working/complete) |
 | Internal methodology phases | No — opaque | Yes — embedded in prompt |
 
 ### Implications
 
-1. **The scheduler only tracks three states per agent.** This simplifies `.ape/state.yaml`.
+1. **The scheduler tracks five states per agent** (IDLE, WAITING, READY, RUNNING, COMPLETE), but agents only perceive three (idle, working, complete). This keeps `.ape/state.yaml` manageable while enabling signal-based coordination.
 2. **Agent intelligence lives in prompts, not in state machines.** SOCRATES can revisit any Socratic phase at any time — it's the AI's judgment, not a scheduler constraint.
 3. **COMPLETE triggers scheduler evaluation.** When all agents in a phase reach COMPLETE, the scheduler may suggest transitioning to the next APE state. The human decides.
 
@@ -80,4 +93,4 @@ The distinction:
 
 ## Contradiction with finite-ape-machine.md
 
-The spec §3.2 defines detailed FSMs per agent that imply the scheduler tracks granular states (e.g., `understanding → questioning → clarifying`). This analysis concludes those are internal methodology, not scheduler-visible states. The spec should be updated to reflect the IDLE/RUNNING/COMPLETE model.
+The spec §3.2 defines detailed FSMs per agent that imply the scheduler tracks granular states (e.g., `understanding → questioning → clarifying`). This analysis concludes those are internal methodology, not scheduler-visible states. The spec should be updated to reflect the five-state model (IDLE/WAITING/READY/RUNNING/COMPLETE) where the agent only perceives three (idle/working/complete).
