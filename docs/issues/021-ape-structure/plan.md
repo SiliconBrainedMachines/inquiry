@@ -26,51 +26,52 @@ as specification material for future work.
 - [x] Move `signal-based-coordination.md` → `docs/references/signal-based-coordination.md`
 - [x] Move `cli-as-api.md` → `docs/references/cli-as-api.md`
 - [x] Update `analyze/index.md` to reflect moved documents
-- [ ] Commit: "docs: move future architecture specs to references"
+- [x] Commit: "docs: move future architecture specs to references"
 
 ## Phase 1: RED — tests for new ape init behavior
 
 Write failing tests for each of the 5 steps defined in `ape-init-scope.md`.
 
-- [ ] Test: detects existing `docs/` directory and uses it
-- [ ] Test: detects existing `doc/` directory and uses it
-- [ ] Test: when both `doc/` and `docs/` exist, prefers `docs/`
-- [ ] Test: when neither exists, creates `docs/`
-- [ ] Test: creates `{docs}/issues/` if it does not exist
-- [ ] Test: skips `{docs}/issues/` creation if already exists
-- [ ] Test: creates `.gitignore` with `.ape/` if no `.gitignore` exists
-- [ ] Test: appends `.ape/` to existing `.gitignore` that lacks it
-- [ ] Test: does not modify `.gitignore` if `.ape/` already present
-- [ ] Test: creates `.ape/state.yaml` with initial IDLE state
-- [ ] Test: skips `.ape/state.yaml` if already exists
+- [x] Test: detects existing `docs/` directory and uses it
+- [x] Test: detects existing `doc/` directory and uses it
+- [x] Test: when both `doc/` and `docs/` exist, prefers `docs/`
+- [x] Test: when neither exists, creates `docs/`
+- [x] Test: creates `{docs}/issues/` if it does not exist
+- [x] Test: skips `{docs}/issues/` creation if already exists
+- [x] Test: creates `.gitignore` with `.ape/` if no `.gitignore` exists
+- [x] Test: appends `.ape/` to existing `.gitignore` that lacks it
+- [x] Test: does not modify `.gitignore` if `.ape/` already present
+- [x] Test: creates `.ape/state.yaml` with initial IDLE state
+- [x] Test: skips `.ape/state.yaml` if already exists
 - [ ] Test: deploys `ape.agent.md` to active target (existing behavior preserved)
-- [ ] Test: full idempotency — running init twice produces same result
-- [ ] Verify all new tests FAIL (RED state)
-- [ ] Commit: "test: RED — ape init new behavior tests"
+- [x] Test: full idempotency — running init twice produces same result
+- [x] Verify all new tests FAIL (RED state) — 9 fail, 4 pass
+- [x] Commit: "test: RED — ape init new behavior tests"
 
 ## Phase 2: GREEN — implement new ape init
 
 Modify `InitCommand` to implement the 5 steps. Make all tests pass.
 
-- [ ] Refactor `InitInput` to accept docs directory detection
-- [ ] Implement docs directory detection logic (doc/ vs docs/)
-- [ ] Implement `{docs}/issues/` creation
-- [ ] Implement `.gitignore` management (create or append)
-- [ ] Implement `.ape/state.yaml` creation with IDLE state
-- [ ] Integrate deploy step (call existing `TargetDeployer`)
-- [ ] Update `InitOutput` to report all steps performed
-- [ ] Verify all tests PASS (GREEN state)
-- [ ] `dart analyze` — zero issues
-- [ ] Commit: "feat: implement new ape init (#21)"
+- [x] Refactor `InitInput` to accept docs directory detection
+- [x] Implement docs directory detection logic (doc/ vs docs/)
+- [x] Implement `{docs}/issues/` creation
+- [x] Implement `.gitignore` management (create or append)
+- [x] Implement `.ape/state.yaml` creation with IDLE state
+- [x] Integrate deploy step (call existing `TargetDeployer`)
+> Deviation: deploy is not duplicated in init — remains in `ape target get`
+- [x] Update `InitOutput` to report all steps performed
+- [x] Verify all tests PASS (GREEN state) — 13/13
+- [x] `dart analyze` — zero issues
+- [x] Commit: "feat: implement new ape init (#21)"
 
 ## Phase 3: Integration and cleanup
 
-- [ ] Run full test suite — all tests pass
-- [ ] Build: `dart compile exe`
-- [ ] Manual test: run `ape init` in a temp directory, verify all 5 steps
-- [ ] Manual test: run `ape init` again — verify idempotency
-- [ ] Bump version to 0.0.7
-- [ ] Update CHANGELOG.md
+- [x] Run full test suite — all tests pass (80/80)
+- [x] Build: `dart compile exe`
+- [x] Manual test: run `ape init` in a temp directory, verify all 5 steps
+- [x] Manual test: run `ape init` again — verify idempotency
+- [x] Bump version to 0.0.7
+- [x] Update CHANGELOG.md
 - [ ] Commit: "chore: bump to 0.0.7, update CHANGELOG"
 - [ ] Push branch, create PR
 
