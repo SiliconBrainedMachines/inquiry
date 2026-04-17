@@ -60,6 +60,6 @@ The current implementation does not reflect this. The `memory-write` skill today
 |-------|-------------|-----------|
 | memory-write | `ape memory write` | `docs/` (persistent) |
 | memory-read | `ape memory read` | stdout (query) |
-| (future) task management | `ape task create` | `docs/ape/{issue}/` |
+| (future) task management | `ape task create` | `docs/issues/{issue}/` |
 | (future) signal | `ape signal <event>` | `.ape/state.yaml` |
 | (future) status | `ape status` | stdout (derived from docs/) |
