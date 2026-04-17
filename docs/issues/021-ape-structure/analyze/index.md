@@ -2,7 +2,7 @@
 id: index
 title: "Analysis index — #21 APE structure and .ape/ directory"
 date: 2026-04-16
-status: active
+status: completed
 tags: [index, analysis, ape-structure, init, architecture]
 author: socrates
 ---
