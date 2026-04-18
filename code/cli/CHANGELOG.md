@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.0.12]
+### Added
+- **FSM Declarative Transition Contract** (#51): YAML-based state machine contract defining allowed/forbidden transitions and operations
+- `ape state transition` command: Programmatic state transitions with precondition validation (issue-first, branch-policy)
+- Precondition validation gates: issue_selected, feature_branch_selected checks before irreversible actions
+- Fail-closed prompt fragment registry: Explicit error on missing prompt_fragment_id or referenced fragments
+- Full-cycle integration tests: Incident replay prevention, full FSM cycle validation (IDLE→ANALYZE→PLAN→EXECUTE→EVOLUTION→IDLE)
+### Changed
+- IDLE state now supports exploration without issue context, but blocks commitment actions until preconditions validated
+- State transitions now use declarative operation definitions (precheck, effects, commit_policy) instead of agent reasoning
+
 ## [0.0.11]
 ### Added
 - **Linux support**: PlatformOps abstraction with Windows and Linux implementations
