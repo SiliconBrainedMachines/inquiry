@@ -33,7 +33,7 @@ If we implement these phases in order—retroactive docs, version SSoT, TUI comm
 
 **Steps:**
 
-- [ ] **0.1: Document what v0.0.8 actually shipped**
+- [x] **0.1: Document what v0.0.8 actually shipped**
   - Add CHANGELOG entry for v0.0.8 between 0.0.7 and the upcoming 0.0.9
   - Content:
     ```markdown
@@ -68,14 +68,14 @@ grep -A5 "\[0.0.8\]" CHANGELOG.md
 
 **Steps:**
 
-- [ ] **1.1: Create version constant file**
+- [x] **1.1: Create version constant file**
   - Create `lib/src/version.dart`:
     ```dart
     /// Single source of truth for APE CLI version.
     const String apeVersion = '0.0.9';
     ```
 
-- [ ] **1.2: Write version consistency tests FIRST (RED)**
+- [x] **1.2: Write version consistency tests FIRST (RED)**
   - Create `test/version_test.dart`:
     ```dart
     // Test: apeVersion constant is exported
@@ -85,13 +85,13 @@ grep -A5 "\[0.0.8\]" CHANGELOG.md
     ```
   - **Run tests → FAIL (RED)** — imports won't resolve yet
 
-- [ ] **1.3: Update version.dart to import shared constant (GREEN)**
+- [x] **1.3: Update version.dart to import shared constant (GREEN)**
   - Remove local `const String apeVersion = '0.0.7';`
   - Add `import 'package:ape_cli/src/version.dart';`
   - Export the constant: `export 'package:ape_cli/src/version.dart';`
   - **Run tests → some may pass**
 
-- [ ] **1.4: Update doctor.dart to import shared constant (GREEN)**
+- [x] **1.4: Update doctor.dart to import shared constant (GREEN)**
   - Remove default parameter `apeVersion = '0.0.8'`
   - Import shared constant
   - Update constructor:
@@ -105,11 +105,11 @@ grep -A5 "\[0.0.8\]" CHANGELOG.md
     ```
   - **Run tests → ALL PASS (GREEN)**
 
-- [ ] **1.5: Update existing doctor tests**
+- [x] **1.5: Update existing doctor tests**
   - Ensure `doctor_test.dart` uses version override for isolation
   - **Run tests → still pass**
 
-- [ ] **1.6: Refactor and verify (REFACTOR)**
+- [x] **1.6: Refactor and verify (REFACTOR)**
   - `dart format lib/src/version.dart lib/commands/version.dart lib/commands/doctor.dart`
   - `dart analyze`
   - **Run all tests**
@@ -158,7 +158,7 @@ test_doctor_shows_correct_version:
 
 **Steps:**
 
-- [ ] **2.1: Write TUI tests FIRST (RED)**
+- [x] **2.1: Write TUI tests FIRST (RED)**
   - Create `test/tui_test.dart`:
     ```dart
     // Test: TuiInput.fromCliRequest() parses successfully
@@ -170,7 +170,7 @@ test_doctor_shows_correct_version:
     ```
   - **Run tests → FAIL (RED)** — file doesn't exist
 
-- [ ] **2.2: Create minimal stubs (compile target)**
+- [x] **2.2: Create minimal stubs (compile target)**
   - Create `lib/commands/tui.dart`:
     ```dart
     class TuiInput extends Input { ... }
@@ -182,25 +182,25 @@ test_doctor_shows_correct_version:
     ```
   - **Run tests → compile, but fail at runtime**
 
-- [ ] **2.3: Implement TuiInput (GREEN)**
+- [x] **2.3: Implement TuiInput (GREEN)**
   - Empty input (no flags required)
   - Factory `fromCliRequest()` returns `TuiInput()`
 
-- [ ] **2.4: Implement TuiOutput (GREEN)**
+- [x] **2.4: Implement TuiOutput (GREEN)**
   - Fields: `String version`, `String diagram`
   - Method `toJson()` → `{'version': version, 'diagram': diagram}`
   - Getter `exitCode` → `ExitCode.ok`
 
-- [ ] **2.5: Implement TuiCommand.execute() (GREEN)**
+- [x] **2.5: Implement TuiCommand.execute() (GREEN)**
   - Import `apeVersion` from shared constant
   - Build FSM diagram string (ASCII art):
     ```
     APE v0.0.9
     Finite Ape Machine
     
-           ╭─────────────────────────╮
+           ╭──────────────────────────╮
     IDLE → │ Analyze → Plan → Execute │ → EVOLUTION
-           ╰─────────────────────────╯
+           ╰──────────────────────────╯
     
     Commands: init, doctor, version
     Run: ape --help
@@ -208,7 +208,7 @@ test_doctor_shows_correct_version:
   - Return `TuiOutput(version: apeVersion, diagram: diagram)`
   - **Run tests → ALL PASS (GREEN)**
 
-- [ ] **2.6: Register TUI as empty route**
+- [x] **2.6: Register TUI as empty route**
   - In `lib/ape_cli.dart`, add BEFORE other commands:
     ```dart
     cli.command<TuiInput, TuiOutput>(
@@ -218,7 +218,7 @@ test_doctor_shows_correct_version:
     );
     ```
 
-- [ ] **2.7: Refactor (REFACTOR)**
+- [x] **2.7: Refactor (REFACTOR)**
   - Extract diagram to separate function or constant
   - `dart format lib/commands/tui.dart lib/ape_cli.dart`
   - `dart analyze`
@@ -273,10 +273,10 @@ test_tui_exit_code:
 
 **Steps:**
 
-- [ ] **3.1: Create skill directory**
+- [x] **3.1: Create skill directory**
   - `mkdir -p assets/skills/issue-end/`
 
-- [ ] **3.2: Create SKILL.md with frontmatter**
+- [x] **3.2: Create SKILL.md with frontmatter**
   - File: `assets/skills/issue-end/SKILL.md`
   - YAML frontmatter:
     ```yaml
@@ -286,12 +286,12 @@ test_tui_exit_code:
     ---
     ```
 
-- [ ] **3.3: Document preconditions section**
+- [x] **3.3: Document preconditions section**
   - State must be EXECUTE
   - All plan.md checkboxes must be checked
   - All tests must pass
 
-- [ ] **3.4: Document Step 1 — Verify EXECUTE phase**
+- [x] **3.4: Document Step 1 — Verify EXECUTE phase**
   ```markdown
   ## Step 1: Verify Phase
   
@@ -302,17 +302,17 @@ test_tui_exit_code:
   "Cannot end cycle: current phase is {phase}, expected EXECUTE"
   ```
 
-- [ ] **3.5: Document Step 2 — Verify plan completion**
+- [x] **3.5: Document Step 2 — Verify plan completion**
   ```markdown
   ## Step 2: Verify Plan Completion
   
   Read `docs/issues/{slug}/plan.md` and verify:
-  - All checkboxes `- [ ]` are now `- [x]`
+  - All checkboxes `- [x]` are now `- [x]`
   
   If incomplete checkboxes remain, list them and abort.
   ```
 
-- [ ] **3.6: Document Step 3 — Determine version bump**
+- [x] **3.6: Document Step 3 — Determine version bump**
   ```markdown
   ## Step 3: Determine Version Bump
   
@@ -324,7 +324,7 @@ test_tui_exit_code:
   Calculate new version from current `apeVersion`.
   ```
 
-- [ ] **3.7: Document Step 4 — Update version files**
+- [x] **3.7: Document Step 4 — Update version files**
   ```markdown
   ## Step 4: Update Version
   
@@ -333,7 +333,7 @@ test_tui_exit_code:
   2. `lib/src/version.dart`: `const String apeVersion = 'X.Y.Z';`
   ```
 
-- [ ] **3.8: Document Step 5 — Update CHANGELOG**
+- [x] **3.8: Document Step 5 — Update CHANGELOG**
   ```markdown
   ## Step 5: Update CHANGELOG
   
@@ -351,7 +351,7 @@ test_tui_exit_code:
   Derive content from plan.md phases.
   ```
 
-- [ ] **3.9: Document Step 6 — Commit**
+- [x] **3.9: Document Step 6 — Commit**
   ```markdown
   ## Step 6: Commit Release
   
@@ -363,7 +363,7 @@ test_tui_exit_code:
   Commit message format: `vX.Y.Z: <issue-title-summary>`
   ```
 
-- [ ] **3.10: Document Step 7 — Push**
+- [x] **3.10: Document Step 7 — Push**
   ```markdown
   ## Step 7: Push Branch
   
@@ -372,7 +372,7 @@ test_tui_exit_code:
   ```
   ```
 
-- [ ] **3.11: Document Step 8 — Create PR**
+- [x] **3.11: Document Step 8 — Create PR**
   ```markdown
   ## Step 8: Create Pull Request
   
@@ -385,14 +385,14 @@ test_tui_exit_code:
   {brief summary of changes}
   
   ## Checklist
-  - [ ] All tests pass
-  - [ ] CHANGELOG updated
-  - [ ] Version bumped
+  - [x] All tests pass
+  - [x] CHANGELOG updated
+  - [x] Version bumped
   "
   ```
   ```
 
-- [ ] **3.12: Document Step 9 — Transition to EVOLUTION**
+- [x] **3.12: Document Step 9 — Transition to EVOLUTION**
   ```markdown
   ## Step 9: Transition to EVOLUTION
   
@@ -410,7 +410,7 @@ test_tui_exit_code:
   When PR is merged, cycle terminates → IDLE.
   ```
 
-- [ ] **3.13: Update assets_test.dart**
+- [x] **3.13: Update assets_test.dart**
   - Increment expected skill count from 3 to 4
   - Add test for `issue-end` skill existence
 
@@ -435,7 +435,7 @@ dart test test/assets_test.dart
 
 **Steps:**
 
-- [ ] **4.1: Add CHANGELOG entry for v0.0.9**
+- [x] **4.1: Add CHANGELOG entry for v0.0.9**
   ```markdown
   ## [0.0.9]
   ### Added
@@ -448,10 +448,10 @@ dart test test/assets_test.dart
   - `ape version` now imports shared version constant
   ```
 
-- [ ] **4.2: Update pubspec.yaml version**
+- [x] **4.2: Update pubspec.yaml version**
   - Change `version: 0.0.7` to `version: 0.0.9`
 
-- [ ] **4.3: Run full test suite**
+- [x] **4.3: Run full test suite**
   ```bash
   dart pub get
   dart analyze
@@ -459,7 +459,7 @@ dart test test/assets_test.dart
   ```
   - All tests must pass
 
-- [ ] **4.4: Manual smoke test**
+- [x] **4.4: Manual smoke test**
   ```bash
   dart run bin/main.dart
   # Expected: TUI with FSM diagram, version 0.0.9
