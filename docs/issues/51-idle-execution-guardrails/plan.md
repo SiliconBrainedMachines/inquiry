@@ -65,16 +65,16 @@ Dependencias: Fase 1
 
 #### Entregables
 
-- [ ] Implementar comando de transicion (por ejemplo ape state transition).
-- [ ] El comando detecta estado actual, valida evento y ejecuta operaciones declaradas.
-- [ ] El comando retorna payload estructurado para el scheduler (nuevo estado, operaciones ejecutadas, prompt id).
-- [ ] El comando aplica prechecks de issue-first y branch policy cuando corresponda.
+- [x] Implementar comando de transicion (por ejemplo ape state transition).
+- [x] El comando detecta estado actual, valida evento y ejecuta operaciones declaradas.
+- [x] El comando retorna payload estructurado para el scheduler (nuevo estado, operaciones ejecutadas, prompt id).
+- [x] El comando aplica prechecks de issue-first y branch policy cuando corresponda.
 
 #### Criterios de aceptacion
 
-- [ ] La transicion no depende de razonamiento libre del agente.
-- [ ] El comando falla con errores accionables si faltan precondiciones.
-- [ ] Se registran efectos de transicion en salida estructurada.
+- [x] La transicion no depende de razonamiento libre del agente.
+- [x] El comando falla con errores accionables si faltan precondiciones.
+- [x] Se registran efectos de transicion en salida estructurada.
 
 #### Pruebas (pseudocodigo)
 
@@ -102,16 +102,16 @@ Dependencias: Fase 1, Fase 2
 
 #### Entregables
 
-- [ ] Crear catalogo de prompt fragments versionado por estado/evento.
-- [ ] Mapear cada transicion a skill requerida y subagente objetivo.
-- [ ] Definir merge deterministico de fragmentos (base + estado + fase + constraints).
-- [ ] Definir validaciones para evitar prompt incompleto.
+- [x] Crear catalogo de prompt fragments versionado por estado/evento.
+- [x] Mapear cada transicion a skill requerida y subagente objetivo.
+- [x] Definir merge deterministico de fragmentos (base + estado + fase + constraints).
+- [x] Definir validaciones para evitar prompt incompleto.
 
 #### Criterios de aceptacion
 
-- [ ] Cada transicion permitida tiene prompt fragment definido.
-- [ ] El scheduler consume prompt id entregado por el comando.
-- [ ] Falta de fragmento produce error explicito, no fallback silencioso.
+- [x] Cada transicion permitida tiene prompt fragment definido.
+- [x] El scheduler consume prompt id entregado por el comando.
+- [x] Falta de fragmento produce error explicito, no fallback silencioso.
 
 #### Pruebas (pseudocodigo)
 

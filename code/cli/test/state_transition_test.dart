@@ -1,23 +1,112 @@
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+import 'package:test/test.dart';
+
+import 'package:ape_cli/commands/state_transition.dart';
+
+void main() {
+  group('state transition command', () {
+    late Directory tempDir;
+
+    setUp(() {
+      tempDir = Directory.systemTemp.createTempSync('ape_state_transition_');
+      _writeContract(tempDir.path);
+      _writeState(tempDir.path, 'IDLE');
+      Directory(p.join(tempDir.path, '.ape')).createSync(recursive: true);
+    });
+
+    tearDown(() {
+      if (tempDir.existsSync()) {
+        tempDir.deleteSync(recursive: true);
+      }
+    });
+
+    test('rejects illegal transition IDLE + go_execute', () async {
+      final input = StateTransitionInput(
+        currentState: 'IDLE',
+        event: 'go_execute',
+        workingDirectory: tempDir.path,
+      );
+      final command = StateTransitionCommand(
+        input,
+        branchProvider: (_) async => 'main',
+      );
+
+      final output = await command.execute();
+
+      expect(output.allowed, isFalse);
+      expect(output.exitCode, 64);
+      expect(output.message, contains('forbidden'));
+    });
+
+    test('returns prompt descriptor for ANALYZE -> PLAN', () async {
+      _writeState(tempDir.path, 'ANALYZE');
+      _writeContext(tempDir.path, 'issue: 51\n');
+
+      final input = StateTransitionInput(
+        currentState: null,
+        event: 'complete_analysis',
+        workingDirectory: tempDir.path,
+      );
+      final command = StateTransitionCommand(
+        input,
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      );
+
+      final output = await command.execute();
+
+      expect(output.allowed, isTrue);
+      expect(output.nextState, 'PLAN');
+      expect(output.promptFragmentId, 'analyze_to_plan');
+      expect(output.requiredRole, 'DESCARTES');
+      expect(output.operationsExecuted, contains('generate_plan'));
+    });
+
+    test('fails precheck when commitment needs issue/branch and issue missing',
+        () async {
+      _writeState(tempDir.path, 'PLAN');
+
+      final input = StateTransitionInput(
+        currentState: null,
+        event: 'approve_plan',
+        workingDirectory: tempDir.path,
+      );
+      final command = StateTransitionCommand(
+        input,
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      );
+
+      final output = await command.execute();
+
+      expect(output.allowed, isFalse);
+      expect(output.exitCode, 7);
+      expect(output.message, contains('ERROR_PRECONDITION_ISSUE_FIRST'));
+    });
+  });
+}
+
+void _writeState(String root, String state) {
+  final file = File(p.join(root, '.ape', 'state.yaml'));
+  file.createSync(recursive: true);
+  file.writeAsStringSync('cycle:\n  phase: $state\n');
+}
+
+void _writeContext(String root, String content) {
+  final file = File(p.join(root, '.ape', 'context.yaml'));
+  file.createSync(recursive: true);
+  file.writeAsStringSync(content);
+}
+
+void _writeContract(String root) {
+  final file = File(p.join(root, 'assets', 'fsm', 'transition_contract.yaml'));
+  file.createSync(recursive: true);
+  file.writeAsStringSync('''
 metadata:
   version: "1.0.0"
   description: "APE FSM transition contract"
-
-states:
-  - IDLE
-  - ANALYZE
-  - PLAN
-  - EXECUTE
-  - EVOLUTION
-
-events:
-  - start_analyze
-  - complete_analysis
-  - approve_plan
-  - finish_execute
-  - finish_evolution
-  - block
-  - go_execute
-
+states: [IDLE, ANALYZE, PLAN, EXECUTE, EVOLUTION]
+events: [start_analyze, complete_analysis, approve_plan, finish_execute, finish_evolution, block, go_execute]
 transitions:
   - from: IDLE
     event: start_analyze
@@ -318,47 +407,16 @@ preconditions:
     kind: filesystem
 
 prompt_fragments:
-  idle_to_analyze:
-    role: SOCRATES
-    skill: memory-read
-    template: "analyze.clarification"
-  idle_block:
-    role: APE
-    skill: memory-read
-    template: "idle.blocked"
-  analyze_continue:
-    role: SOCRATES
-    skill: memory-read
-    template: "analyze.iterate"
-  analyze_to_plan:
-    role: DESCARTES
-    skill: memory-write
-    template: "plan.from_diagnosis"
-  analyze_to_idle:
-    role: APE
-    skill: memory-read
-    template: "analyze.pause"
-  plan_to_execute:
-    role: BASHO
-    skill: issue-start
-    template: "execute.phase"
-  plan_to_idle:
-    role: APE
-    skill: memory-read
-    template: "plan.pause"
-  execute_to_evolution:
-    role: DARWIN
-    skill: issue-end
-    template: "evolution.from_execution"
-  execute_to_idle:
-    role: APE
-    skill: memory-read
-    template: "execute.pause"
-  execute_continue:
-    role: BASHO
-    skill: issue-start
-    template: "execute.continue"
-  evolution_to_idle:
-    role: APE
-    skill: memory-read
-    template: "idle.resume"
+  idle_to_analyze: { role: SOCRATES, template: "analyze.clarification" }
+  idle_block: { role: APE, template: "idle.blocked" }
+  analyze_continue: { role: SOCRATES, template: "analyze.iterate" }
+  analyze_to_plan: { role: DESCARTES, template: "plan.from_diagnosis" }
+  analyze_to_idle: { role: APE, template: "analyze.pause" }
+  plan_to_execute: { role: BASHO, template: "execute.phase" }
+  plan_to_idle: { role: APE, template: "plan.pause" }
+  execute_to_evolution: { role: DARWIN, template: "evolution.from_execution" }
+  execute_to_idle: { role: APE, template: "execute.pause" }
+  execute_continue: { role: BASHO, template: "execute.continue" }
+  evolution_to_idle: { role: APE, template: "idle.resume" }
+''');
+}

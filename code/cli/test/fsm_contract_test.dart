@@ -65,6 +65,38 @@ void main() {
     expect(contract.promptFragments.keys, contains('plan_to_execute'));
     final fragment = contract.promptFragments['plan_to_execute']!;
     expect(fragment.role, 'BASHO');
+    expect(fragment.skill, 'issue-start');
     expect(fragment.template, 'execute.phase');
+  });
+
+  test('fails closed when allowed transition misses prompt fragment', () {
+    final invalidYaml = '''
+metadata:
+  version: "1.0.0"
+  description: "invalid"
+states: [IDLE]
+events: [start_analyze]
+transitions:
+  - from: IDLE
+    event: start_analyze
+    to: IDLE
+    allowed: true
+    operations:
+      prechecks: []
+      effects: [noop]
+      artifacts: []
+      commit_policy: none
+      prompt_fragment_id: missing_prompt
+prompt_fragments:
+  idle_to_analyze:
+    role: SOCRATES
+    skill: memory-read
+    template: "analyze.clarification"
+''';
+
+    expect(
+      () => parseFsmContract(invalidYaml),
+      throwsA(isA<StateError>()),
+    );
   });
 }

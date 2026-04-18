@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 import 'assets.dart';
 import 'commands/doctor.dart';
 import 'commands/init.dart';
+import 'commands/state_transition.dart';
 import 'commands/target_clean.dart';
 import 'commands/target_get.dart';
 import 'commands/tui.dart';
@@ -92,6 +93,15 @@ Future<int> runApe(List<String> args) async {
         deployer: cleaner,
       ),
       description: 'Remove deployed APE files from all targets',
+    );
+  });
+
+  cli.module('state', (m) {
+    m.command<StateTransitionInput, StateTransitionOutput>(
+      'transition',
+      (req) => StateTransitionCommand(StateTransitionInput.fromCliRequest(req)),
+      description:
+          'Run deterministic FSM transition by --event (optional --state)',
     );
   });
 

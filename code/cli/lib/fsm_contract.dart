@@ -84,8 +84,13 @@ class PreconditionsContract {
 class PromptFragmentContract {
   final String role;
   final String template;
+  final String skill;
 
-  const PromptFragmentContract({required this.role, required this.template});
+  const PromptFragmentContract({
+    required this.role,
+    required this.template,
+    required this.skill,
+  });
 }
 
 class FsmContract {
@@ -121,6 +126,22 @@ class FsmContract {
         if (!transitions.containsKey((state, event))) {
           throw StateError('Missing transition: ${state.value} + ${event.value}');
         }
+      }
+    }
+  }
+
+  void assertAllowedTransitionsHavePromptFragments() {
+    for (final transition in transitions.values.where((t) => t.allowed)) {
+      final promptId = transition.operations?.promptFragmentId ?? '';
+      if (promptId.isEmpty) {
+        throw StateError(
+          'Allowed transition ${transition.from.value} + ${transition.event.value} is missing prompt_fragment_id',
+        );
+      }
+      if (!promptFragments.containsKey(promptId)) {
+        throw StateError(
+          'Missing prompt fragment "$promptId" for transition ${transition.from.value} + ${transition.event.value}',
+        );
       }
     }
   }
@@ -203,6 +224,7 @@ FsmContract parseFsmContract(String yamlContent) {
     parsedPromptFragments[key] = PromptFragmentContract(
       role: value['role'] as String,
       template: value['template'] as String,
+      skill: (value['skill'] as String?) ?? 'none',
     );
   }
 
@@ -217,5 +239,6 @@ FsmContract parseFsmContract(String yamlContent) {
   );
 
   contract.assertMatrixIsTotal();
+  contract.assertAllowedTransitionsHavePromptFragments();
   return contract;
 }
