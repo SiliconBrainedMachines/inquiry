@@ -2,7 +2,7 @@
 id: plan
 title: Plan de implementacion para robustecer IDLE y transiciones FSM programaticas
 date: 2026-04-18
-status: active
+status: completed
 tags: [plan, idle, fsm, issue-first, transition-command, skills]
 author: github-copilot-ape
 ---
@@ -137,16 +137,16 @@ Dependencias: Fase 1, Fase 2
 
 #### Entregables
 
-- [ ] En IDLE, mantener capacidades de exploracion (leer, buscar, analizar, editar).
-- [ ] Antes de acciones de compromiso, ejecutar checkpoint formal de precondiciones.
-- [ ] Requerir issue seleccionada/creada y rama asociada para commit/push/PR.
-- [ ] Mensajes accionables para reparar precondiciones faltantes.
+- [x] En IDLE, mantener capacidades de exploracion (leer, buscar, analizar, editar).
+- [x] Antes de acciones de compromiso, ejecutar checkpoint formal de precondiciones.
+- [x] Requerir issue seleccionada/creada y rama asociada para commit/push/PR.
+- [x] Mensajes accionables para reparar precondiciones faltantes.
 
 #### Criterios de aceptacion
 
-- [ ] IDLE sigue siendo util para triage.
-- [ ] No hay commits en rama principal desde flujo no autorizado.
-- [ ] El sistema fuerza trazabilidad via issue y PR.
+- [x] IDLE sigue siendo util para triage.
+- [x] No hay commits en rama principal desde flujo no autorizado.
+- [x] El sistema fuerza trazabilidad via issue y PR.
 
 #### Pruebas (pseudocodigo)
 
@@ -174,16 +174,16 @@ Dependencias: Fase 2, Fase 3, Fase 4
 
 #### Entregables
 
-- [ ] Probar replay del incidente (install.sh y upgrade.dart) con nuevo flujo.
-- [ ] Probar camino positivo completo IDLE -> ANALYZE -> PLAN -> EXECUTE.
-- [ ] Probar transiciones ilegales y validar errores esperados.
-- [ ] Emitir reporte de validacion final.
+- [x] Probar replay del incidente (install.sh y upgrade.dart) con nuevo flujo.
+- [x] Probar camino positivo completo IDLE -> ANALYZE -> PLAN -> EXECUTE.
+- [x] Probar transiciones ilegales y validar errores esperados.
+- [x] Emitir reporte de validacion final.
 
 #### Criterios de aceptacion
 
-- [ ] El incidente original no se reproduce como violacion.
-- [ ] Todas las transiciones autorizadas ejecutan operaciones previstas.
-- [ ] Las transiciones ilegales fallan de manera cerrada y explicita.
+- [x] El incidente original no se reproduce como violacion.
+- [x] Todas las transiciones autorizadas ejecutan operaciones previstas.
+- [x] Las transiciones ilegales fallan de manera cerrada y explicita.
 
 #### Pruebas (pseudocodigo)
 
@@ -208,7 +208,7 @@ TEST full_cycle_uses_transition_command_each_step
 
 ## Criterio de finalizacion del plan
 
-- [ ] Todas las fases cerradas con evidencia de pruebas.
-- [ ] Ninguna transicion depende de inferencia ad hoc para operaciones criticas.
-- [ ] El scheduler opera sobre comando de transicion + catalogo de prompts/skills.
-- [ ] Se preserva objetivo real de IDLE: triage robusto sin romper seguridad de integracion.
+- [x] Todas las fases cerradas con evidencia de pruebas.
+- [x] Ninguna transicion depende de inferencia ad hoc para operaciones criticas.
+- [x] El scheduler opera sobre comando de transicion + catalogo de prompts/skills.
+- [x] Se preserva objetivo real de IDLE: triage robusto sin romper seguridad de integracion.
