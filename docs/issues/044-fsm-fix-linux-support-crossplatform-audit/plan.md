@@ -38,27 +38,27 @@ Track A is documentation-only. No code compilation, no tests. It modifies the AP
 
 **Steps:**
 
-- [ ] A1.1 — Add END state between EXECUTE and EVOLUTION in the States section.
+- [x] A1.1 — Add END state between EXECUTE and EVOLUTION in the States section.
   - END description: user gate for PR creation.
   - Entry condition: EXECUTE report approved by user.
   - Exit action: user authorizes `gh pr create`.
   - BASHŌ no longer runs `gh pr create` — that moves to END.
 
-- [ ] A1.2 — Make EVOLUTION optional.
+- [x] A1.2 — Make EVOLUTION optional.
   - Add rule: if `.ape/config.yaml` has `evolution.enabled: false` (default OFF), skip EVOLUTION and go directly from END → IDLE.
   - Update EVOLUTION section to document this behavior.
 
-- [ ] A1.3 — Update Transitions table.
+- [x] A1.3 — Update Transitions table.
   - Remove: `EXECUTE → EVOLUTION` with PR effect.
   - Add: `EXECUTE → END` (user approves execution report, effect: `git commit`, `git push`).
   - Add: `END → EVOLUTION` (user authorizes PR, effect: `gh pr create`). If EVOLUTION disabled: `END → IDLE`.
   - Add: `END → IDLE` (if EVOLUTION is disabled, after PR).
   - Update illegal transitions if needed.
 
-- [ ] A1.4 — Update State Announcement section.
+- [x] A1.4 — Update State Announcement section.
   - Add `[APE: END]` to the list of announcements.
 
-- [ ] A1.5 — Formalize retrospective in EXECUTE.
+- [x] A1.5 — Formalize retrospective in EXECUTE.
   - In BASHŌ's "Final phase" subsection, specify that BASHŌ produces `retrospective.md` with:
     - What went well.
     - What deviated from the plan.
@@ -66,13 +66,13 @@ Track A is documentation-only. No code compilation, no tests. It modifies the AP
     - Spawn issues identified.
   - `retrospective.md` becomes input for DARWIN alongside `diagnosis.md` and `plan.md`.
 
-- [ ] A1.6 — Add git workflow conventions.
+- [x] A1.6 — Add git workflow conventions.
   - New section "Git Conventions" (or add to existing rules):
     - Branch: `NNN-slug`
     - Commits: `type(NNN): description`
     - PR: `gh pr create --title "NNN: slug" --body "Closes #NNN"`
 
-- [ ] A1.7 — Update DARWIN input list.
+- [x] A1.7 — Update DARWIN input list.
   - Add `retrospective.md` to the list of documents DARWIN receives.
 
 **Verification:**
@@ -95,7 +95,7 @@ Track A is documentation-only. No code compilation, no tests. It modifies the AP
 
 **Steps:**
 
-- [ ] A2.1 — Copy `code/cli/assets/agents/ape.agent.md` to `code/cli/build/assets/agents/ape.agent.md`.
+- [x] A2.1 — Copy `code/cli/assets/agents/ape.agent.md` to `code/cli/build/assets/agents/ape.agent.md`.
 
 **Verification:**
 - `diff` between the two files returns no differences.
@@ -109,8 +109,8 @@ Track A is documentation-only. No code compilation, no tests. It modifies the AP
 
 **Steps:**
 
-- [ ] A3.1 — `git add code/cli/assets/agents/ape.agent.md code/cli/build/assets/agents/ape.agent.md`
-- [ ] A3.2 — `git commit -m "feat(044): rewrite FSM — add END state, optional EVOLUTION, retrospective, git conventions"`
+- [x] A3.1 — `git add code/cli/assets/agents/ape.agent.md code/cli/build/assets/agents/ape.agent.md`
+- [x] A3.2 — `git commit -m "feat(044): rewrite FSM — add END state, optional EVOLUTION, retrospective, git conventions"`
 
 **Verification:**
 - `git log --oneline -1` shows the commit with correct conventional format.
@@ -131,7 +131,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B1.1 — RED: Create `code/cli/test/platform_ops_test.dart` with contract tests.
+- [x] B1.1 — RED: Create `code/cli/test/platform_ops_test.dart` with contract tests.
   ```pseudo
   group('PlatformOps contract') {
     test('FakePlatformOps implements all methods')
@@ -144,9 +144,9 @@ Track B involves code changes. TDD applies where indicated: write failing test (
     test('runPostInstall completes without error')
   }
   ```
-- [ ] B1.2 — RED: Verify `dart test test/platform_ops_test.dart` fails (files don't exist yet).
+- [x] B1.2 — RED: Verify `dart test test/platform_ops_test.dart` fails (files don't exist yet).
 
-- [ ] B1.3 — GREEN: Create `code/cli/lib/targets/platform_ops.dart`.
+- [x] B1.3 — GREEN: Create `code/cli/lib/targets/platform_ops.dart`.
   - Abstract class `PlatformOps` with:
     - `String get binaryName`
     - `String get assetName`
@@ -157,16 +157,16 @@ Track B involves code changes. TDD applies where indicated: write failing test (
     - `Future<void> runPostInstall(String installDir)`
   - Factory `PlatformOps.current()` that returns `WindowsPlatformOps()` or `LinuxPlatformOps()` based on `Platform.isWindows`.
 
-- [ ] B1.4 — GREEN: Create `FakePlatformOps` in the test file (or a test helper).
+- [x] B1.4 — GREEN: Create `FakePlatformOps` in the test file (or a test helper).
   - Implements `PlatformOps`.
   - All methods are no-ops or return configurable values.
   - Records method calls for verification.
 
-- [ ] B1.5 — GREEN: Verify `dart test test/platform_ops_test.dart` passes (Windows).
+- [x] B1.5 — GREEN: Verify `dart test test/platform_ops_test.dart` passes (Windows).
 
-- [ ] B1.6 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd /mnt/c/.../finite_ape_machine/code/cli && dart test test/platform_ops_test.dart"`.
+- [x] B1.6 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd /mnt/c/.../finite_ape_machine/code/cli && dart test test/platform_ops_test.dart"`.
 
-- [ ] B1.7 — Verify `dart analyze` has no errors in the new files.
+- [x] B1.7 — Verify `dart analyze` has no errors in the new files.
 
 **Verification:**
 - All contract tests pass.
@@ -185,7 +185,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B2.1 — RED: Add Windows-specific tests to `platform_ops_test.dart`.
+- [x] B2.1 — RED: Add Windows-specific tests to `platform_ops_test.dart`.
   ```pseudo
   group('WindowsPlatformOps') {
     test('binaryName is ape.exe')
@@ -196,7 +196,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   ```
   Note: tests that require real shell calls should use `FakePlatformOps` or be marked `@TestOn('windows')`.
 
-- [ ] B2.2 — GREEN: Create `code/cli/lib/targets/windows_platform_ops.dart`.
+- [x] B2.2 — GREEN: Create `code/cli/lib/targets/windows_platform_ops.dart`.
   - `class WindowsPlatformOps extends PlatformOps`
   - Extract existing PowerShell logic from `upgrade.dart` into the methods.
   - `binaryName` → `'ape.exe'`
@@ -205,9 +205,9 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   - `setEnvVariable()` → `setx`
   - `selfReplace()` → rename-then-replace pattern (existing logic from upgrade.dart)
 
-- [ ] B2.3 — GREEN: Verify tests pass (Windows).
-- [ ] B2.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/platform_ops_test.dart"`.
-- [ ] B2.5 — Verify `dart analyze` clean.
+- [x] B2.3 — GREEN: Verify tests pass (Windows).
+- [x] B2.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/platform_ops_test.dart"`.
+- [x] B2.5 — Verify `dart analyze` clean.
 
 **Verification:**
 - `WindowsPlatformOps` passes all contract tests + Windows-specific tests.
@@ -223,7 +223,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B3.1 — RED: Add Linux-specific tests to `platform_ops_test.dart`.
+- [x] B3.1 — RED: Add Linux-specific tests to `platform_ops_test.dart`.
   ```pseudo
   group('LinuxPlatformOps') {
     test('binaryName is ape')
@@ -233,7 +233,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   }
   ```
 
-- [ ] B3.2 — GREEN: Create `code/cli/lib/targets/linux_platform_ops.dart`.
+- [x] B3.2 — GREEN: Create `code/cli/lib/targets/linux_platform_ops.dart`.
   - `class LinuxPlatformOps extends PlatformOps`
   - `binaryName` → `'ape'`
   - `assetName` → `'ape-linux-x64.tar.gz'`
@@ -241,9 +241,9 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   - `setEnvVariable()` → guidance/echo (Linux env vars differ from Windows)
   - `selfReplace()` → `mv` or `cp` + `chmod +x`
 
-- [ ] B3.3 — GREEN: Verify tests pass (Windows).
-- [ ] B3.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/platform_ops_test.dart"`.
-- [ ] B3.5 — Verify `dart analyze` clean.
+- [x] B3.3 — GREEN: Verify tests pass (Windows).
+- [x] B3.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/platform_ops_test.dart"`.
+- [x] B3.5 — Verify `dart analyze` clean.
 
 **Verification:**
 - `LinuxPlatformOps` passes all contract tests + Linux-specific tests.
@@ -259,7 +259,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B4.1 — RED: Create/update `code/cli/test/upgrade_test.dart`.
+- [x] B4.1 — RED: Create/update `code/cli/test/upgrade_test.dart`.
   ```pseudo
   group('UpgradeCommand') {
     test('uses PlatformOps.assetName for download URL')
@@ -271,7 +271,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   ```
   All tests use `FakePlatformOps`.
 
-- [ ] B4.2 — GREEN: Modify `code/cli/lib/commands/upgrade.dart`.
+- [x] B4.2 — GREEN: Modify `code/cli/lib/commands/upgrade.dart`.
   - Add `PlatformOps` as constructor parameter (DI).
   - Replace hardcoded `_assetName = 'ape-windows-x64.zip'` with `platformOps.assetName`.
   - Replace inline PowerShell `Expand-Archive` with `platformOps.expandArchive()`.
@@ -279,10 +279,10 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   - Add graceful handling when release asset is missing (D8): detect HTTP 404 or `gh` error, return informative `UpgradeOutput` instead of crashing.
   - Update `UpgradeInput.fromCliRequest` or command registration to inject `PlatformOps.current()`.
 
-- [ ] B4.3 — GREEN: Verify `dart test test/upgrade_test.dart` passes (Windows).
-- [ ] B4.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/upgrade_test.dart"`.
-- [ ] B4.5 — Verify `dart analyze` clean.
-- [ ] B4.6 — Verify existing behavior on Windows is preserved (manual smoke test or existing tests).
+- [x] B4.3 — GREEN: Verify `dart test test/upgrade_test.dart` passes (Windows).
+- [x] B4.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/upgrade_test.dart"`.
+- [x] B4.5 — Verify `dart analyze` clean.
+- [x] B4.6 — Verify existing behavior on Windows is preserved (manual smoke test or existing tests).
 
 **Verification:**
 - No `Platform.isWindows` branches remain in `upgrade.dart`.
@@ -302,7 +302,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B5.1 — RED: Update `code/cli/test/uninstall_test.dart`.
+- [x] B5.1 — RED: Update `code/cli/test/uninstall_test.dart`.
   ```pseudo
   group('UninstallCommand') {
     test('uses PlatformOps.getEnvVariable to find install path')
@@ -310,13 +310,13 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   }
   ```
 
-- [ ] B5.2 — GREEN: Modify `code/cli/lib/commands/uninstall.dart`.
+- [x] B5.2 — GREEN: Modify `code/cli/lib/commands/uninstall.dart`.
   - Add `PlatformOps` as constructor parameter.
   - Replace inline platform branches with PlatformOps method calls.
 
-- [ ] B5.3 — GREEN: Verify `dart test test/uninstall_test.dart` passes (Windows).
-- [ ] B5.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/uninstall_test.dart"`.
-- [ ] B5.5 — Verify `dart analyze` clean.
+- [x] B5.3 — GREEN: Verify `dart test test/uninstall_test.dart` passes (Windows).
+- [x] B5.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/uninstall_test.dart"`.
+- [x] B5.5 — Verify `dart analyze` clean.
 
 **Verification:**
 - No `Platform.isWindows` branches remain in `uninstall.dart`.
@@ -333,7 +333,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B6.1 — RED: Update `code/cli/test/init_command_test.dart`.
+- [x] B6.1 — RED: Update `code/cli/test/init_command_test.dart`.
   ```pseudo
   group('init _relative fix') {
     test('relative path works with forward slashes')
@@ -342,7 +342,7 @@ Track B involves code changes. TDD applies where indicated: write failing test (
   }
   ```
 
-- [ ] B6.2 — GREEN: Modify `code/cli/lib/commands/init.dart`.
+- [x] B6.2 — GREEN: Modify `code/cli/lib/commands/init.dart`.
   - Replace the `_relative(String root, String path)` method (currently at ~L147):
     ```dart
     // BEFORE:
@@ -354,9 +354,9 @@ Track B involves code changes. TDD applies where indicated: write failing test (
     ```
   - Verify `import 'package:path/path.dart' as p;` already exists (it does in the file).
 
-- [ ] B6.3 — GREEN: Verify `dart test test/init_command_test.dart` passes (Windows).
-- [ ] B6.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/init_command_test.dart"`.
-- [ ] B6.5 — Verify `dart analyze` clean.
+- [x] B6.3 — GREEN: Verify `dart test test/init_command_test.dart` passes (Windows).
+- [x] B6.4 — GREEN: Verify tests pass on WSL: `wsl -e bash -c "cd ... && dart test test/init_command_test.dart"`.
+- [x] B6.5 — Verify `dart analyze` clean.
 
 **Verification:**
 - `_relative` method body is a single call to `p.relative()`.
@@ -371,12 +371,12 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B7.1 — Read existing `doctor.dart` to understand current check pattern and DI approach (`_runProcess`).
-- [ ] B7.2 — Add a check for VS Code Copilot Chat extension.
+- [x] B7.1 — Read existing `doctor.dart` to understand current check pattern and DI approach (`_runProcess`).
+- [x] B7.2 — Add a check for VS Code Copilot Chat extension.
   - Use `code --list-extensions` or equivalent to check for `GitHub.copilot-chat`.
   - Follow the existing `_runProcess` DI pattern for testability.
-- [ ] B7.3 — Verify `dart analyze` clean.
-- [ ] B7.4 — Manual smoke test: `dart run bin/ape.dart doctor` shows the new check.
+- [x] B7.3 — Verify `dart analyze` clean.
+- [x] B7.4 — Manual smoke test: `dart run bin/ape.dart doctor` shows the new check.
 
 **Verification:**
 - `ape doctor` output includes a line for VS Code Copilot Chat.
@@ -393,14 +393,14 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B8.1 — Create `.github/workflows/ci.yml`.
+- [x] B8.1 — Create `.github/workflows/ci.yml`.
   - Trigger: `pull_request` + `push` to `main`.
   - Path filter: `code/cli/**`.
   - Matrix: `[ubuntu-latest, windows-latest]`.
   - Steps: checkout → `dart-lang/setup-dart@v1` → `dart pub get` → `dart analyze` → `dart test`.
   - Working directory: `code/cli`.
 
-- [ ] B8.2 — Review: no secrets required, no publish step, no compile step.
+- [x] B8.2 — Review: no secrets required, no publish step, no compile step.
 
 **Verification:**
 - YAML is valid (`yamllint` or manual review).
@@ -422,8 +422,8 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B9.1 — Read current `release.yml` fully to understand existing logic.
-- [ ] B9.2 — Restructure to 3 jobs:
+- [x] B9.1 — Read current `release.yml` fully to understand existing logic.
+- [x] B9.2 — Restructure to 3 jobs:
   - **Job 1: `check-version`** (ubuntu-latest) — keep existing version check logic.
   - **Job 2: `create-release`** (ubuntu-latest, needs: check-version) — `gh release create v$VERSION --verify-tag --title "v$VERSION" --generate-notes`. Published immediately (NOT draft, per D8).
   - **Job 3: `build`** (matrix, needs: create-release) — build + upload per OS.
@@ -432,14 +432,14 @@ Track B involves code changes. TDD applies where indicated: write failing test (
       - `{ os: ubuntu-latest, asset: ape-linux-x64.tar.gz, build_script: scripts/build.sh }`
     - Steps: checkout → setup-dart → pub get → compile exe → package → `gh release upload`.
 
-- [ ] B9.3 — **CRITICAL (R1):** Preserve Windows Defender workaround in the `build` job for the Windows matrix entry ONLY.
+- [x] B9.3 — **CRITICAL (R1):** Preserve Windows Defender workaround in the `build` job for the Windows matrix entry ONLY.
   - The workaround (clean `C:\hostedtoolcache\windows\dart`, clean temp zip, re-run `setup-dart`) MUST remain.
   - Add a conditional: `if: runner.os == 'Windows'` on the Defender cleanup steps.
   - Verify the workaround comment block is preserved for future maintainers.
 
-- [ ] B9.4 — Replace `softprops/action-gh-release@v2` with `gh` CLI calls.
+- [x] B9.4 — Replace `softprops/action-gh-release@v2` with `gh` CLI calls.
 
-- [ ] B9.5 — Verify the tag is created from `check-version` output and propagated to `create-release` and `build` jobs via `needs` outputs.
+- [x] B9.5 — Verify the tag is created from `check-version` output and propagated to `create-release` and `build` jobs via `needs` outputs.
 
 **Verification:**
 - YAML is valid.
@@ -462,25 +462,25 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B10.1 — Create `code/site/install.sh`.
+- [x] B10.1 — Create `code/site/install.sh`.
   - Download latest release asset `ape-linux-x64.tar.gz` from GitHub.
   - Extract to `~/.ape/bin/`.
   - Add to PATH (print guidance for `.bashrc` / `.zshrc`).
   - `chmod +x`.
   - Verify with `ape --version`.
 
-- [ ] B10.2 — Create `code/cli/scripts/build.sh`.
+- [x] B10.2 — Create `code/cli/scripts/build.sh`.
   - Mirror logic of existing `build.ps1` but for bash.
   - `dart pub get` → `dart compile exe` → package as `.tar.gz`.
 
-- [ ] B10.3 — Modify `code/site/index.html`.
+- [x] B10.3 — Modify `code/site/index.html`.
   - Add Windows/Linux tabs for install instructions.
   - Windows tab: existing PowerShell install command.
   - Linux tab: `curl -fsSL ... | bash` pointing to `install.sh`.
 
-- [ ] B10.4 — Verify `install.sh` has `#!/bin/bash` shebang and is parseable (`bash -n install.sh` or shellcheck).
-- [ ] B10.5 — Verify `build.sh` has shebang and is parseable.
-- [ ] B10.6 — Verify `index.html` renders correctly (open in browser, check tab switching).
+- [x] B10.4 — Verify `install.sh` has `#!/bin/bash` shebang and is parseable (`bash -n install.sh` or shellcheck).
+- [x] B10.5 — Verify `build.sh` has shebang and is parseable.
+- [x] B10.6 — Verify `index.html` renders correctly (open in browser, check tab switching).
 
 **Verification:**
 - `install.sh` exists, is executable, downloads correct asset name.
@@ -498,10 +498,10 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] B11.1 — Run full test suite on Windows: `dart test` from `code/cli/`.
-- [ ] B11.2 — Run full test suite on WSL: `wsl -e bash -c "cd /mnt/c/.../finite_ape_machine/code/cli && dart test"`.
-- [ ] B11.3 — Run `dart analyze` from `code/cli/`.
-- [ ] B11.4 — Stage and commit in logical groups:
+- [x] B11.1 — Run full test suite on Windows: `dart test` from `code/cli/`.
+- [x] B11.2 — Run full test suite on WSL: `wsl -e bash -c "cd /mnt/c/.../finite_ape_machine/code/cli && dart test"`.
+- [x] B11.3 — Run `dart analyze` from `code/cli/`.
+- [x] B11.4 — Stage and commit in logical groups:
   - `git add` PlatformOps files → `git commit -m "feat(044): add PlatformOps abstraction with Windows and Linux implementations"`
   - `git add` upgrade + uninstall refactors → `git commit -m "refactor(044): upgrade and uninstall use PlatformOps DI"`
   - `git add` init fix → `git commit -m "fix(044): init.dart use p.relative() for cross-platform paths"`
@@ -528,12 +528,12 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] F1.1 — Bump version in `code/cli/pubspec.yaml`: `0.0.10` → `0.0.11`.
-- [ ] F1.2 — Update `code/cli/CHANGELOG.md` with v0.0.11 entry:
+- [x] F1.1 — Bump version in `code/cli/pubspec.yaml`: `0.0.10` → `0.0.11`.
+- [x] F1.2 — Update `code/cli/CHANGELOG.md` with v0.0.11 entry:
   - **Added:** END state in FSM, optional EVOLUTION, retrospective, git conventions, PlatformOps, Linux support, ci.yml, install.sh, build.sh, OS tabs, doctor Copilot check.
   - **Changed:** release.yml to 3-job pattern, upgrade.dart and uninstall.dart to PlatformOps DI.
   - **Fixed:** init.dart cross-platform path handling.
-- [ ] F1.3 — `git commit -m "chore(044): bump version to 0.0.11 + CHANGELOG"`
+- [x] F1.3 — `git commit -m "chore(044): bump version to 0.0.11 + CHANGELOG"`
 
 **Verification:**
 - `grep 'version:' code/cli/pubspec.yaml` shows `0.0.11`.
@@ -548,19 +548,19 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] F2.1 — Run `gh issue list --repo ccisnedev/finite_ape_machine --state open` to get current open issues.
-- [ ] F2.2 — Verify the following issues are addressed by this PR and will be closed:
+- [x] F2.1 — Run `gh issue list --repo ccisnedev/finite_ape_machine --state open` to get current open issues.
+- [x] F2.2 — Verify the following issues are addressed by this PR and will be closed:
   - **#43** — END state + EVOLUTION optional → addressed by Track A (ape.agent.md rewrite).
   - **#32** — Git workflow integration → addressed by Track A (git conventions section).
   - **#30** — Post-EXECUTE retrospective → addressed by Track A (retrospective formalization).
-- [ ] F2.3 — Verify the following issues remain open (NOT addressed by this PR):
+- [x] F2.3 — Verify the following issues remain open (NOT addressed by this PR):
   - **#33** — PLAN specialized agent (out of scope).
   - **#31** — Spawn issue mechanism (deferred).
   - **#29** — Document linter/gate (deferred).
   - **#28** — Two entry paths (deferred).
   - **#27** — Risks as artifacts (deferred).
-- [ ] F2.4 — Check if any OTHER open issues are incidentally addressed by v0.0.11 changes (e.g., cross-platform issues, CI issues). If found, add them to the PR body.
-- [ ] F2.5 — Prepare PR body text:
+- [x] F2.4 — Check if any OTHER open issues are incidentally addressed by v0.0.11 changes (e.g., cross-platform issues, CI issues). If found, add them to the PR body.
+- [x] F2.5 — Prepare PR body text:
   ```
   ## v0.0.11 — FSM fix + Linux support + cross-platform audit
 
@@ -598,12 +598,12 @@ Track B involves code changes. TDD applies where indicated: write failing test (
 
 **Steps:**
 
-- [ ] F3.1 — Run `dart analyze` one final time.
-- [ ] F3.2 — Run `dart test` on Windows one final time.
-- [ ] F3.3 — Run `dart test` on WSL one final time: `wsl -e bash -c "cd /mnt/c/.../finite_ape_machine/code/cli && dart test"`.
-- [ ] F3.3 — Review `git log --oneline` for the full commit sequence. Verify conventional format.
-- [ ] F3.4 — `git push origin 044-fsm-fix-linux-support-crossplatform-audit`.
-- [ ] F3.5 — **END STATE GATE:** User authorizes PR creation.
+- [x] F3.1 — Run `dart analyze` one final time.
+- [x] F3.2 — Run `dart test` on Windows one final time.
+- [x] F3.3 — Run `dart test` on WSL one final time: `wsl -e bash -c "cd /mnt/c/.../finite_ape_machine/code/cli && dart test"`.
+- [x] F3.3 — Review `git log --oneline` for the full commit sequence. Verify conventional format.
+- [x] F3.4 — `git push origin 044-fsm-fix-linux-support-crossplatform-audit`.
+- [x] F3.5 — **END STATE GATE:** User authorizes PR creation.
   - `gh pr create --title "044: FSM fix + Linux support + cross-platform audit" --body "<F2.5 text>" --base main`
   - This is the END state action per the new FSM (D5). BASHŌ does NOT create the PR — the user gates it.
 
