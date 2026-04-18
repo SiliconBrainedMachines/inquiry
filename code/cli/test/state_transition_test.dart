@@ -83,6 +83,48 @@ void main() {
       expect(output.exitCode, 7);
       expect(output.message, contains('ERROR_PRECONDITION_ISSUE_FIRST'));
     });
+
+    test('allows IDLE exploration transition without issue context', () async {
+      _writeState(tempDir.path, 'IDLE');
+
+      final input = StateTransitionInput(
+        currentState: null,
+        event: 'start_analyze',
+        workingDirectory: tempDir.path,
+      );
+      final command = StateTransitionCommand(
+        input,
+        branchProvider: (_) async => 'main',
+      );
+
+      final output = await command.execute();
+
+      expect(output.allowed, isTrue);
+      expect(output.exitCode, 0);
+      expect(output.nextState, 'ANALYZE');
+      expect(output.promptFragmentId, 'idle_to_analyze');
+    });
+
+    test('blocks commitment transition on main branch', () async {
+      _writeState(tempDir.path, 'PLAN');
+      _writeContext(tempDir.path, 'issue: 51\n');
+
+      final input = StateTransitionInput(
+        currentState: null,
+        event: 'approve_plan',
+        workingDirectory: tempDir.path,
+      );
+      final command = StateTransitionCommand(
+        input,
+        branchProvider: (_) async => 'main',
+      );
+
+      final output = await command.execute();
+
+      expect(output.allowed, isFalse);
+      expect(output.exitCode, 7);
+      expect(output.message, contains('ERROR_PRECONDITION_BRANCH_POLICY'));
+    });
   });
 }
 
