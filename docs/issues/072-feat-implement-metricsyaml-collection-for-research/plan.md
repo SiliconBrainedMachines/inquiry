@@ -440,13 +440,13 @@ VERIFICAR:
 
 ### Pasos
 
-- [ ] **6.1** Crear `docs/issues/072-feat-implement-metricsyaml-collection-for-research/retrospective.md` con:
+- [x] **6.1** Crear `docs/issues/072-feat-implement-metricsyaml-collection-for-research/retrospective.md` con:
   - **What went well:** Lista de lo que funcionó.
   - **What deviated:** Cualquier desviación respecto a este plan.
   - **What surprised:** Hallazgos inesperados durante ejecución.
   - **Spawn issues:** Issues identificados para trabajo futuro (ej: effect executor D7-etapa-3, `ape metrics collect`).
 
-- [ ] **6.2** Verificar que `retrospective.md` es consistente con las desviaciones anotadas en este `plan.md` durante ejecución.
+- [x] **6.2** Verificar que `retrospective.md` es consistente con las desviaciones anotadas en este `plan.md` durante ejecución.
 
 ### Verificación Fase 6
 
