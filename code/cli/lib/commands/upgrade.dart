@@ -88,6 +88,9 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
     final client = httpClientOverride ?? HttpClient();
     try {
       // 1. Fetch latest release metadata
+      stderr.writeln('Current version: $apeVersion');
+      stderr.writeln('Checking for updates...');
+
       final releaseUrl = Uri.parse(
         'https://api.github.com/repos/$_repo/releases/latest',
       );
@@ -113,6 +116,8 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
           ? tagName.substring(1)
           : tagName;
 
+      stderr.writeln('Latest version available: $latestVersion');
+
       if (latestVersion == apeVersion) {
         return UpgradeOutput(
           message: 'Already on the latest version',
@@ -121,6 +126,8 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
           upgraded: false,
         );
       }
+
+      stderr.writeln('Found v$latestVersion, downloading...');
 
       // 2. Find the asset for this platform
       final expectedAsset = platformOps.assetName;
@@ -145,11 +152,13 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       final dlResponse = await dlRequest.close();
 
       // Follow redirect if needed
+      stderr.writeln('Downloading asset: $expectedAsset');
       final sink = zipFile.openWrite();
       await dlResponse.pipe(sink);
 
       // 4. Extract over current installation via PlatformOps
       final installDir = input.installDir;
+      stderr.writeln('Applying update in: $installDir');
 
       try {
         // Windows locks running executables — rename before extraction
@@ -171,6 +180,7 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
           }
         }
       } catch (e) {
+        stderr.writeln('Upgrade failed during apply step: $e');
         tempDir.deleteSync(recursive: true);
         return UpgradeOutput(
           message: 'Failed to extract: $e',
@@ -183,7 +193,9 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       tempDir.deleteSync(recursive: true);
 
       // 5. Redeploy targets using the new binary
+      stderr.writeln('Deploying targets...');
       await platformOps.runPostInstall(installDir);
+      stderr.writeln('Upgrade completed successfully.');
 
       return UpgradeOutput(
         message: 'Upgraded from $apeVersion to $latestVersion',
