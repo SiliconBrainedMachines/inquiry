@@ -243,18 +243,12 @@ npx vsce package --no-dependencies  # → ape-vscode-0.0.1.vsix
 **Entry criteria:** Phase 5 completa, smoke test manual OK
 **Dependencias:** Phase 5
 
-- [ ] **6.1** Escribir `README.md` para Marketplace:
-  - Qué es APE (una línea)
-  - Qué hace esta extensión (4 bullet points = las 4 features)
-  - Screenshot de la status bar mostrando estado
-  - Requisitos: VS Code ≥ 1.85, directorio `.ape/` en workspace
-  - Link al repo de APE CLI
-- [ ] **6.2** Escribir `CHANGELOG.md`:
-  - `## [0.0.1] - 2026-XX-XX` con las 4 features
-- [ ] **6.3** Agregar `icon` en package.json (reusar o crear SVG 128×128 mínimo)
-- [ ] **6.4** Agregar campos Marketplace en package.json: `repository`, `categories` (`["Other"]`), `keywords` (`["ape", "cli", "fsm"]`)
-- [ ] **6.5** Empaquetar: `npx vsce package --no-dependencies`
-- [ ] **6.6** Publicar: `npx vsce publish` (con PAT de ccisnedev)
+- [x] **6.1** Escribir `README.md` para Marketplace (sin screenshot — se añade post-publish)
+- [x] **6.2** Escribir `CHANGELOG.md`: `[0.0.1] - 2026-04-19`
+- [x] **6.3** `icon.png` 128×128 (SVG→PNG, vsce requiere PNG)
+- [x] **6.4** `repository`, `categories`, `keywords` en package.json
+- [x] **6.5** `ape-vscode-0.0.1.vsix` — 61 KB, 19 files
+- [ ] **6.6** Publicar: `npx vsce publish` — pendiente autorización usuario
 
 **Verificación:**
 - [ ] La extensión aparece en marketplace.visualstudio.com

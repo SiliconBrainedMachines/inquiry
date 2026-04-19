@@ -4,7 +4,13 @@
   "publisher": "ccisnedev",
   "version": "0.0.1",
   "description": "APE — Autonomous Programming Engine for VS Code",
-  "icon": "assets/icon.svg",
+  "icon": "assets/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ccisne-dev/finite_ape_machine"
+  },
+  "categories": ["Other"],
+  "keywords": ["ape", "cli", "fsm", "state-machine"],
   "engines": {
     "vscode": "^1.85.0"
   },
