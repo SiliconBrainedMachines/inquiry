@@ -62,7 +62,7 @@ observations: |                    # Freeform notes (optional)
 | `plan.total_phases` | int | no | Phases in plan.md |
 | `plan.completed_phases` | int | no | Phases marked [x] at merge |
 | `plan.deviations` | int | no | Count of plan changes vs original |
-| `tests.before` | int | no | Test count at cycle start. Captured via `dart test --reporter json` (preferred) or `grep -rc 'test('` (approximate) at IDLE → ANALYZE transition (`.ape/metrics_snapshot.yaml`). |
+| `tests.before` | int | no | Test count at cycle start. Captured via `cd code/cli && dart test 2>&1 | tail -1` (exact) or `grep -rc 'test('` (approximate) at IDLE → ANALYZE transition (`.ape/metrics_snapshot.yaml`). |
 | `tests.after` | int | no | Test count at cycle end |
 | `tests.delta` | int | no | Net change |
 | `delta_failures.count` | int | no | Times δ failed (prompt non-compliance) |
