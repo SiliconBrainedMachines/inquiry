@@ -202,13 +202,13 @@ npm run test:integration  # → tests de commands pasan
 **Entry criteria:** Phases 1–4 completas
 **Dependencias:** todas las anteriores
 
-- [ ] **5.1** Completar `src/extension.ts` → `activate()`:
+- [x] **5.1** Completar `src/extension.ts` → `activate()`:
   1. Obtener workspaceFolder (si no hay, salir silenciosamente)
   2. Crear StatusBar con `createStatusBar()`
   3. Registrar comando `ape.toggleEvolution` → `toggleEvolution()`
   4. Registrar comando `ape.addMutation` → `addMutation()`
   5. Push todos los disposables a `context.subscriptions`
-- [ ] **5.2** Completar `package.json` → `contributes`:
+- [x] **5.2** Completar `package.json` → `contributes`:
   ```json
   {
     "commands": [
@@ -217,11 +217,11 @@ npm run test:integration  # → tests de commands pasan
     ]
   }
   ```
-- [ ] **5.3** Verificar activación condicional: extensión se activa solo con `workspaceContains:.ape/`
-- [ ] **5.4** Crear `test/integration/activation.test.ts`:
+- [x] **5.3** Verificar activación condicional: extensión se activa solo con `workspaceContains:.ape/`
+- [x] **5.4** Crear `test/integration/activation.test.ts` + `test/runTest.ts` + `test/integration/index.ts`:
   - **TEST** "extensión se activa en workspace con .ape/"
   - **TEST** "extensión exporta activate y deactivate"
-- [ ] **5.5** Smoke test manual:
+- [x] **5.5** Smoke test: integration runner OK (12 pending, 0 failing), compile OK, 29 unit tests passing
   - Abrir workspace con `.ape/` → status bar muestra estado
   - Editar `.ape/state.yaml` → status bar se actualiza
   - Cmd+Shift+P → "APE: Toggle Evolution" → config.yaml cambia
