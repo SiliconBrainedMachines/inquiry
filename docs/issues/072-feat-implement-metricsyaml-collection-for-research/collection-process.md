@@ -27,7 +27,7 @@ solo ciclos futuros que alcancen EVOLUTION generan métricas.
 **Cuándo:** Al transitar de IDLE a ANALYZE (effect `snapshot_metrics`).
 **Quién:** El orquestador APE (no un subagente).
 **Qué captura:**
-- `tests_before`: conteo de tests actual (`dart test --reporter json 2>/dev/null | grep -c '"testID"'`, preferido; fallback: `grep -rc 'test(' test/`)
+- `tests_before`: conteo de tests actual (`cd code/cli && dart test 2>&1 | tail -1 | grep -oP '\+\K\d+'`, exacto; fallback: `grep -rc 'test(' code/cli/test/`)
 - `branch_created`: timestamp del momento del snapshot (`date -u +"%Y-%m-%dT%H:%M:%SZ"` o equivalente PowerShell)
 
 **Dónde escribe:** `.ape/metrics_snapshot.yaml`
