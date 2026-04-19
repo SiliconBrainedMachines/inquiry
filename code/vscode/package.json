@@ -4,6 +4,7 @@
   "publisher": "ccisnedev",
   "version": "0.0.1",
   "description": "APE — Autonomous Programming Engine for VS Code",
+  "icon": "assets/icon.svg",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -11,7 +12,12 @@
   "activationEvents": [
     "workspaceContains:.ape/"
   ],
-  "contributes": {},
+  "contributes": {
+    "commands": [
+      { "command": "ape.toggleEvolution", "title": "APE: Toggle Evolution" },
+      { "command": "ape.addMutation", "title": "APE: Add Mutation Note" }
+    ]
+  },
   "scripts": {
     "compile": "webpack --mode production",
     "watch": "webpack --mode development --watch",
