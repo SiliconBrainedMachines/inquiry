@@ -51,7 +51,7 @@ Use practical wisdom (Aristotle's **phronesis**) to determine the course of acti
    - Update `.ape/state.yaml` with `phase: ANALYZE` and `task: "<NNN>"`
 5. When infrastructure is ready (issue + branch + `docs/issues/NNN-slug/analyze/`), suggest transitioning to ANALYZE.
 6. If `.ape/config.yaml` exists AND `evolution.enabled: true`, capture a metrics snapshot before transitioning. If `.ape/config.yaml` does not exist, skip this step (assume evolution disabled).
-   - Count current tests: `dart test --reporter json 2>/dev/null | grep -c '"testID"'` (preferred, exact count). Fallback: `grep -rc 'test(' test/ | tail -1` (approximate).
+   - Count current tests: `cd code/cli && dart test 2>&1 | tail -1 | grep -oP '\+\K\d+'` (exact count from test runner). Fallback: `grep -rc 'test(' code/cli/test/ | tail -1` (approximate).
    - Record snapshot timestamp: `date -u +"%Y-%m-%dT%H:%M:%SZ"` (or PowerShell: `Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"`)
    - Write `.ape/metrics_snapshot.yaml` with fields `tests_before` and `branch_created`
 
@@ -510,7 +510,7 @@ After evaluating the cycle, generate `.ape/metrics.yaml` with these fields:
 | `plan.completed_phases` | `docs/issues/<slug>/plan.md` | `grep -c "\[x\]" plan.md` |
 | `plan.deviations` | `docs/issues/<slug>/plan.md` | Count deviation annotations |
 | `tests.before` | `.ape/metrics_snapshot.yaml` | Read file (captured at cycle start) |
-| `tests.after` | Current test count | `dart test --reporter json 2>/dev/null \| grep -c '"testID"'` (preferred). Fallback: `grep -rc 'test(' test/ \| tail -1` |
+| `tests.after` | Current test count | `cd code/cli && dart test 2>&1 \| tail -1 \| grep -oP '\+\K\d+'` (exact). Fallback: `grep -rc 'test(' code/cli/test/ \| tail -1` |
 | `tests.delta` | Derived | `tests.after - tests.before` |
 | `delta_failures.count` | Self-report | Times you needed corrections |
 | `observations` | Freeform | Notable observations from the cycle |
