@@ -6,3 +6,8 @@ export interface ApeState {
 export interface ApeConfig {
   evolutionEnabled: boolean;
 }
+
+export interface StatusBarData {
+  text: string;
+  tooltip: string;
+}
