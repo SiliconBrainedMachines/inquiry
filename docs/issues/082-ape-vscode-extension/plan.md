@@ -126,28 +126,28 @@ npm run test:unit  # → todos los tests de parsers pasan (~13 tests)
 
 ### 3A: Formateo del status bar (lógica pura)
 
-- [ ] **3A.1** Crear `test/unit/status-format.test.ts` — RED:
+- [x] **3A.1** Crear `test/unit/status-format.test.ts` — RED:
   - **TEST** "formatStatus('IDLE', '') retorna {text: '$(circle-outline) APE: IDLE', tooltip: 'APE: IDLE'}"
   - **TEST** "formatStatus('ANALYZE', '042') retorna {text: '$(search) APE: ANALYZE #042', tooltip: 'APE: ANALYZE — Task #042'}"
   - **TEST** "formatStatus('PLAN', '042') retorna {text: '$(list-ordered) APE: PLAN #042', ...}"
   - **TEST** "formatStatus('EXECUTE', '042') retorna {text: '$(rocket) APE: EXECUTE #042', ...}"
   - **TEST** "formatStatus('EVOLUTION', '') retorna {text: '$(sparkle) APE: EVOLUTION', ...}"
   - **TEST** "formatStatus con phase desconocido retorna el text tal cual con ícono default"
-- [ ] **3A.2** Implementar `formatStatus(phase: string, task: string): StatusBarData` en `src/status-bar.ts` — GREEN
-- [ ] **3A.3** Definir mapa de phase → codicon icon en el mismo archivo
+- [x] **3A.2** Implementar `formatStatus(phase: string, task: string): StatusBarData` en `src/status-bar.ts` — GREEN
+- [x] **3A.3** Definir mapa de phase → codicon icon en el mismo archivo
 
 ### 3B: StatusBarItem + FileSystemWatcher (integración VS Code)
 
-- [ ] **3B.1** Crear `test/integration/status-bar.test.ts` — RED:
+- [x] **3B.1** Crear `test/integration/status-bar.test.ts` — RED (skip — Phase 5):
   - **TEST** "createStatusBar crea un StatusBarItem visible"
   - **TEST** "updateStatusBar con ApeState actualiza text y tooltip del item"
   - **TEST** "dispose limpia el item y el watcher"
-- [ ] **3B.2** Implementar `createStatusBar`, `updateStatusBar`, `disposeStatusBar` en `src/status-bar.ts` — GREEN
+- [x] **3B.2** Implementar `createStatusBar`, `updateStatusBar`, `disposeStatusBar` en `src/status-bar.ts` — GREEN
   - `createStatusBar()`: llama `vscode.window.createStatusBarItem(StatusBarAlignment.Left)`
   - Lee `.ape/state.yaml` inicial → `parseState` → `formatStatus` → asigna al item
   - Crea `FileSystemWatcher` para `.ape/state.yaml` → en onChange/onCreate relee y actualiza
   - Retorna `{item, watcher}` como disposables
-- [ ] **3B.3** REFACTOR — verificar que el watcher no filtra eventos válidos
+- [x] **3B.3** REFACTOR — verificar que el watcher no filtra eventos válidos
 
 **Verificación:**
 ```bash
