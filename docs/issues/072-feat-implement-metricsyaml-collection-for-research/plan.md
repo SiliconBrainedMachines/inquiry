@@ -100,7 +100,7 @@ VERIFICAR:
 
 ### Sub-fase 2A — Instrucción de snapshot en IDLE
 
-- [ ] **2A.1** En la sección `### IDLE — Triage` (líneas 36-58), agregar una instrucción después del paso 5 (cuando la infraestructura está lista) que indique al orquestador capturar el snapshot de métricas antes de transitar a ANALYZE.
+- [x] **2A.1** En la sección `### IDLE — Triage` (líneas 36-58), agregar una instrucción después del paso 5 (cuando la infraestructura está lista) que indique al orquestador capturar el snapshot de métricas antes de transitar a ANALYZE.
   - Texto a agregar (después de la línea que dice "suggest transitioning to ANALYZE"):
     ```
     6. If `.ape/config.yaml` → `evolution.enabled: true`, capture a metrics snapshot before transitioning:
@@ -112,7 +112,7 @@ VERIFICAR:
 
 ### Sub-fase 2B — Instrucciones de EVOLUTION para métricas
 
-- [ ] **2B.1** En la sección `### EVOLUTION — Automatic process evaluation via DARWIN` (líneas 155-174), insertar un paso de generación de métricas entre la invocación de DARWIN y la transición a IDLE.
+- [x] **2B.1** En la sección `### EVOLUTION — Automatic process evaluation via DARWIN` (líneas 155-174), insertar un paso de generación de métricas entre la invocación de DARWIN y la transición a IDLE.
   - El flujo actual (líneas 161-169) es:
     1. Invocar DARWIN con artefactos
     2. DARWIN evalúa
@@ -125,20 +125,20 @@ VERIFICAR:
     4. Si `remote origin ≈ ccisnedev/finite_ape_machine`: copiar `.ape/metrics.yaml` → `docs/issues/<slug>/metrics.yaml` (nuevo)
     5. Transición a IDLE (sin cambios)
 
-- [ ] **2B.2** Agregar texto explícito sobre la generación de métricas en la lista numerada de EVOLUTION. Después del punto 5 (DARWIN creates issues), agregar:
+- [x] **2B.2** Agregar texto explícito sobre la generación de métricas en la lista numerada de EVOLUTION. Después del punto 5 (DARWIN creates issues), agregar:
   ```
   6. DARWIN generates `.ape/metrics.yaml` using cycle artifacts (see DARWIN prompt below for field mapping).
   7. Conditional copy: if `git remote get-url origin` contains `ccisnedev/finite_ape_machine`, copy `.ape/metrics.yaml` to `docs/issues/<slug>/metrics.yaml`.
   ```
 
-- [ ] **2B.3** En las **Rules** de EVOLUTION (líneas 171-174), agregar una regla sobre métricas:
+- [x] **2B.3** En las **Rules** de EVOLUTION (líneas 171-174), agregar una regla sobre métricas:
   ```
   - metrics.yaml is generated ONLY for complete cycles (IDLE → ANALYZE → PLAN → EXECUTE → EVOLUTION). If evolution.enabled is false, no metrics are generated.
   ```
 
 ### Sub-fase 2C — Ampliar prompt de DARWIN
 
-- [ ] **2C.1** En la sección `## DARWIN — Subagent Prompt (EVOLUTION)` (líneas 453-491), agregar una nueva sección `## Metrics Collection` dentro del prompt (entre `## Process` y `## Rules`). Contenido:
+- [x] **2C.1** En la sección `## DARWIN — Subagent Prompt (EVOLUTION)` (líneas 453-491), agregar una nueva sección `## Metrics Collection` dentro del prompt (entre `## Process` y `## Rules`). Contenido:
   ```
   ## Metrics Collection
 
@@ -173,12 +173,12 @@ VERIFICAR:
   Omit any field you cannot reliably determine — do not fabricate data.
   ```
 
-- [ ] **2C.2** Modificar el constraint de DARWIN en `## Rules` (línea 487) para reflejar la excepción de escritura en `.ape/`:
+- [x] **2C.2** Modificar el constraint de DARWIN en `## Rules` (línea 487) para reflejar la excepción de escritura en `.ape/`:
   - Estado actual: `- Never modify the project's code or documentation.`
   - Estado deseado: `- Never modify the project's code or documentation. Exception: write `.ape/metrics.yaml` as part of metrics collection.`
   - Justificación: D11 — `.ape/` es espacio de trabajo del framework, no código ni documentación del proyecto. El constraint se refina sin relajar su intención.
 
-- [ ] **2C.3** Agregar `.ape/metrics.yaml` a la lista de artefactos que DARWIN genera, en la línea 488:
+- [x] **2C.3** Agregar `.ape/metrics.yaml` a la lista de artefactos que DARWIN genera, en la línea 488:
   - Estado actual: `- Only create issues/comments in the finite_ape_machine repository.`
   - Estado deseado: `- Only create issues/comments in the finite_ape_machine repository. Also write `.ape/metrics.yaml` locally.`
 

@@ -50,6 +50,10 @@ Use practical wisdom (Aristotle's **phronesis**) to determine the course of acti
    - Create `index.md` with standard header
    - Update `.ape/state.yaml` with `phase: ANALYZE` and `task: "<NNN>"`
 5. When infrastructure is ready (issue + branch + `docs/issues/NNN-slug/analyze/`), suggest transitioning to ANALYZE.
+6. If `.ape/config.yaml` → `evolution.enabled: true`, capture a metrics snapshot before transitioning:
+   - Count current tests: `grep -rc 'test(' test/ | tail -1` or `dart test --reporter json 2>/dev/null | grep -c '"testID"'`
+   - Record branch creation time: `git log --reverse --format=%aI HEAD | head -1`
+   - Write `.ape/metrics_snapshot.yaml` with fields `tests_before` and `branch_created`
 
 **Rules:**
 - Do not rush to ANALYZE. Conversational exploration is valuable.
@@ -166,12 +170,15 @@ DARWIN uses **natural selection**: observe what worked, what failed, what mutate
 3. DARWIN searches for existing issues: `gh issue list --repo ccisnedev/finite_ape_machine --search "keyword"`.
 4. If match found → `gh issue comment NNN --body "..."`.
 5. If no match → `gh issue create --repo ccisnedev/finite_ape_machine --title "..."`.
-6. Transition to IDLE automatically (no user gate).
+6. DARWIN generates `.ape/metrics.yaml` using cycle artifacts (see DARWIN prompt below for field mapping).
+7. Conditional copy: if `git remote get-url origin` contains `ccisnedev/finite_ape_machine`, copy `.ape/metrics.yaml` to `docs/issues/<slug>/metrics.yaml`.
+8. Transition to IDLE automatically (no user gate).
 
 **Rules:**
 - This state is automatic. No user approval required.
 - Can be disabled: if `.ape/config.yaml` has `evolution.enabled: false` (default OFF), skip this state entirely — END goes directly to IDLE.
 - DARWIN never modifies the project code or documentation — only creates issues/comments in the APE repo.
+- metrics.yaml is generated ONLY for complete cycles (IDLE → ANALYZE → PLAN → EXECUTE → EVOLUTION). If evolution.enabled is false, no metrics are generated.
 
 ---
 
@@ -482,10 +489,42 @@ You receive the complete cycle artifacts:
 5. If match found: `gh issue comment <NNN> --body "Observation from cycle..."
 6. If no match: `gh issue create --repo ccisnedev/finite_ape_machine --title "..." --body "..."`
 
+## Metrics Collection
+
+After evaluating the cycle, generate `.ape/metrics.yaml` with these fields:
+
+### Field mapping
+
+| Field | Source | Command/Method |
+|-------|--------|----------------|
+| `issue` | `.ape/state.yaml` → `cycle.task` | Read file |
+| `version` | `pubspec.yaml` → `version` or `lib/src/version.dart` | Read file |
+| `model` | Self-report | Your model identifier |
+| `agent` | Context | Agent runtime (copilot, crush, local) |
+| `cycle.completed` | Implicit | `true` (you are in EVOLUTION) |
+| `cycle.darwin_activated` | Implicit | `true` (you are DARWIN) |
+| `cycle.darwin_issue` | Your output | Issue # you created/commented |
+| `timing.branch_created` | `.ape/metrics_snapshot.yaml` | Read file (captured at cycle start) |
+| `timing.pr_merged` | `gh pr view --json mergedAt` | May be empty if PR not yet merged |
+| `plan.total_phases` | `docs/issues/<slug>/plan.md` | `grep -c "^## Fase\|^### Fase\|^## Phase" plan.md` |
+| `plan.completed_phases` | `docs/issues/<slug>/plan.md` | `grep -c "\[x\]" plan.md` |
+| `plan.deviations` | `docs/issues/<slug>/plan.md` | Count deviation annotations |
+| `tests.before` | `.ape/metrics_snapshot.yaml` | Read file (captured at cycle start) |
+| `tests.after` | Current test count | `grep -rc 'test(' test/ \| tail -1` |
+| `tests.delta` | Derived | `tests.after - tests.before` |
+| `delta_failures.count` | Self-report | Times you needed corrections |
+| `observations` | Freeform | Notable observations from the cycle |
+
+### Output format
+
+Write `.ape/metrics.yaml` following the schema in `docs/research/ape_builds_ape/metrics-schema.md`.
+If `.ape/metrics_snapshot.yaml` does not exist, omit `tests.before` and `timing.branch_created`.
+Omit any field you cannot reliably determine — do not fabricate data.
+
 ## Rules
 
-- Never modify the project's code or documentation.
-- Only create issues/comments in the finite_ape_machine repository.
+- Never modify the project's code or documentation. Exception: write `.ape/metrics.yaml` as part of metrics collection.
+- Only create issues/comments in the finite_ape_machine repository. Also write `.ape/metrics.yaml` locally.
 - Be specific and actionable in observations.
 - Reference concrete examples from the cycle.
 ```
