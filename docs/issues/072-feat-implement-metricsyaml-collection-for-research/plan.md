@@ -48,22 +48,22 @@ Fase 1 ──► Fase 2 ──► Fase 3
 
 ### Pasos
 
-- [ ] **1.1** En la transición `IDLE → ANALYZE` (evento `start_analyze`, líneas 22-31), agregar `snapshot_metrics` a la lista `effects`.
+- [x] **1.1** En la transición `IDLE → ANALYZE` (evento `start_analyze`, líneas 22-31), agregar `snapshot_metrics` a la lista `effects`.
   - Estado actual: `effects: [open_analysis_context, reset_mutations]`
   - Estado deseado: `effects: [open_analysis_context, reset_mutations, snapshot_metrics]`
   - Justificación: D8 — capturar `tests.before` y `timing.branch_created` al inicio del ciclo.
 
-- [ ] **1.2** En la transición `EVOLUTION → IDLE` (evento `finish_evolution`, líneas 279-288), agregar `collect_metrics` a la lista `effects`.
+- [x] **1.2** En la transición `EVOLUTION → IDLE` (evento `finish_evolution`, líneas 279-288), agregar `collect_metrics` a la lista `effects`.
   - Estado actual: `effects: [close_cycle, reset_mutations]`
   - Estado deseado: `effects: [close_cycle, reset_mutations, collect_metrics]`
   - Justificación: D9/D12 — señal para generar metrics.yaml final al cerrar el ciclo completo.
 
-- [ ] **1.3** Agregar `.ape/metrics_snapshot.yaml` a los `artifacts` de `IDLE → ANALYZE`.
+- [x] **1.3** Agregar `.ape/metrics_snapshot.yaml` a los `artifacts` de `IDLE → ANALYZE`.
   - Estado actual: `artifacts: [analysis/index.md]`
   - Estado deseado: `artifacts: [analysis/index.md, .ape/metrics_snapshot.yaml]`
   - Justificación: Documenta que esta transición produce un artefacto de snapshot.
 
-- [ ] **1.4** Agregar `.ape/metrics.yaml` a los `artifacts` de `EVOLUTION → IDLE`.
+- [x] **1.4** Agregar `.ape/metrics.yaml` a los `artifacts` de `EVOLUTION → IDLE`.
   - Estado actual: `artifacts: [retrospective.md]`
   - Estado deseado: `artifacts: [retrospective.md, .ape/metrics.yaml]`
   - Justificación: Documenta que esta transición produce el artefacto final de métricas.
