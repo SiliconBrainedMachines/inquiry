@@ -8,7 +8,7 @@
 #   1. Detects Linux x64
 #   2. Downloads the latest .tar.gz from GitHub Releases
 #   3. Extracts to ~/.ape/
-#   4. Prints PATH guidance for .bashrc / .zshrc
+#   4. Symlinks to ~/.local/bin (XDG standard, in default PATH)
 #   5. Runs `ape target get`
 #   6. Verifies with `ape version`
 
@@ -72,19 +72,26 @@ rm -f "$TEMP_FILE"
 # Make binary executable
 chmod +x "$BIN_DIR/ape"
 
-# ─── PATH guidance ───────────────────────────────────────────────────────────
+# ─── PATH integration ────────────────────────────────────────────────────────
 
-if [[ ":$PATH:" != *":$BIN_DIR:"* ]]; then
-  echo ""
-  echo ">>> Add APE to your PATH by adding this line to your shell profile:"
-  echo ""
-  echo "    export PATH=\"\$HOME/.ape/bin:\$PATH\""
-  echo ""
-  echo "    For bash:  echo 'export PATH=\"\$HOME/.ape/bin:\$PATH\"' >> ~/.bashrc"
-  echo "    For zsh:   echo 'export PATH=\"\$HOME/.ape/bin:\$PATH\"' >> ~/.zshrc"
-  echo ""
-  # Add to current session for deploy/verify steps below
-  export PATH="$BIN_DIR:$PATH"
+# Symlink to ~/.local/bin (XDG standard, in default PATH on most distros)
+LINK_DIR="$HOME/.local/bin"
+LINK_PATH="$LINK_DIR/ape"
+mkdir -p "$LINK_DIR"
+
+if [ -L "$LINK_PATH" ] && [ "$(readlink "$LINK_PATH")" = "$BIN_DIR/ape" ]; then
+  echo ">>> Symlink already configured: $LINK_PATH -> $BIN_DIR/ape"
+else
+  ln -sf "$BIN_DIR/ape" "$LINK_PATH"
+  echo ">>> Symlink configured: $LINK_PATH -> $BIN_DIR/ape"
+fi
+
+# Ensure ~/.local/bin is in PATH for current session
+if [[ ":$PATH:" != *":$LINK_DIR:"* ]]; then
+  export PATH="$LINK_DIR:$PATH"
+  echo ">>> Added $LINK_DIR to PATH for this session"
+else
+  echo ">>> PATH already includes $LINK_DIR"
 fi
 
 # ─── Deploy and verify ───────────────────────────────────────────────────────
