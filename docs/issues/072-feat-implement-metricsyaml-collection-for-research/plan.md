@@ -213,22 +213,22 @@ VERIFICAR:
 
 ### Pasos
 
-- [ ] **3.1** Actualizar el comentario de cabecera del schema (línea 10 de `metrics-schema.md`):
+- [x] **3.1** Actualizar el comentario de cabecera del schema (línea 10 de `metrics-schema.md`):
   - Estado actual: `# docs/issues/NNN-slug/metrics.yaml`
   - Estado deseado: `# .ape/metrics.yaml (primary) → docs/issues/NNN-slug/metrics.yaml (conditional copy)`
   - Justificación: D11 — reflejar almacenamiento dual.
 
-- [ ] **3.2** Agregar notas de captura en dos puntos al campo `tests.before`:
+- [x] **3.2** Agregar notas de captura en dos puntos al campo `tests.before`:
   - Localización: tabla `Field Reference`, fila de `tests.before` (línea 65).
   - Actualizar columna `Description`:
     - De: `Test count at cycle start`
     - A: `Test count at cycle start. Captured via snapshot at IDLE → ANALYZE transition (.ape/metrics_snapshot.yaml). May be approximate.`
 
-- [ ] **3.3** Agregar nota similar a `timing.branch_created`:
+- [x] **3.3** Agregar nota similar a `timing.branch_created`:
   - De: `When feature branch was created`
   - A: `When feature branch was created. Captured via snapshot at IDLE → ANALYZE transition (.ape/metrics_snapshot.yaml).`
 
-- [ ] **3.4** Actualizar la sección `## Notes` (líneas 108-113) para reflejar la nueva arquitectura:
+- [x] **3.4** Actualizar la sección `## Notes` (líneas 108-113) para reflejar la nueva arquitectura:
   - Reemplazar el contenido actual por:
     ```markdown
     ## Notes
@@ -243,7 +243,7 @@ VERIFICAR:
     - `timing.pr_merged` may be empty at generation time (PR not yet merged); can be filled post-merge.
     ```
 
-- [ ] **3.5** Actualizar la línea 109 del schema:
+- [x] **3.5** Actualizar la línea 109 del schema:
   - De: `- This file is created at cycle end (during END or EVOLUTION state)`
   - A: (eliminada, reemplazada por el bloque de Notes en 3.4)
 
