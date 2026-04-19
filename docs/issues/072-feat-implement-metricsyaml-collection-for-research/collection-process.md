@@ -27,8 +27,8 @@ solo ciclos futuros que alcancen EVOLUTION generan métricas.
 **Cuándo:** Al transitar de IDLE a ANALYZE (effect `snapshot_metrics`).
 **Quién:** El orquestador APE (no un subagente).
 **Qué captura:**
-- `tests_before`: conteo de tests actual (`grep -rc 'test(' test/`)
-- `branch_created`: timestamp de creación del branch (`git log --reverse --format=%aI HEAD | head -1`)
+- `tests_before`: conteo de tests actual (`dart test --reporter json 2>/dev/null | grep -c '"testID"'`, preferido; fallback: `grep -rc 'test(' test/`)
+- `branch_created`: timestamp del momento del snapshot (`date -u +"%Y-%m-%dT%H:%M:%SZ"` o equivalente PowerShell)
 
 **Dónde escribe:** `.ape/metrics_snapshot.yaml`
 
@@ -67,8 +67,8 @@ branch_created: "2025-07-18T10:00:00Z"
 
 **Cuándo:** Después de generar `.ape/metrics.yaml`.
 **Condición:** `git remote get-url origin` contiene `ccisnedev/finite_ape_machine`.
-**Acción:** Copiar `.ape/metrics.yaml` → `docs/issues/<slug>/metrics.yaml`.
-**Quién:** Side-effect del flujo de EVOLUTION (no DARWIN directamente).
+**Acción:** Copiar `.ape/metrics.yaml` → `docs/issues/<slug>/metrics.yaml` y `git add`.
+**Quién:** El orquestador APE (no DARWIN). APE ejecuta la copia después de que DARWIN retorna.
 
 ## Almacenamiento dual (D11)
 
