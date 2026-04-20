@@ -85,6 +85,4 @@ created: 2026-04-20
 
 ## Spawn Issues
 
-- **PAT rotation reminder mechanism** — Currently the unit test warns at 30 days, but
-  there's no proactive notification outside of running tests. A GitHub Actions scheduled
-  workflow (cron) that checks `.pat-expires` weekly could provide advance notice.
+None identified.
