@@ -1,3 +1,20 @@
+# VS Code Marketplace publish workflow — 3-job pattern: check-version + test (parallel) → publish
+#
+# Two-gate approach:
+#   1. Path filter: only triggers on changes to code/vscode/** or this workflow file
+#   2. Version check: compares local package.json version against Marketplace; skips if unchanged
+#
+# Secret requirements:
+#   VSCE_PAT — Azure DevOps Personal Access Token with Marketplace (Manage) scope.
+#   Create at: https://dev.azure.com → User Settings → Personal Access Tokens
+#   Organization: "All accessible organizations" (required — specific org causes 403 in CI)
+#   Scopes: Marketplace → Manage
+#
+# PAT expiry guard:
+#   The file code/vscode/.pat-expires contains the PAT expiration date (YYYY-MM-DD).
+#   The publish job checks this before attempting to publish.
+#   Update .pat-expires whenever the VSCE_PAT secret is rotated.
+
 name: VS Code Marketplace
 
 on:
