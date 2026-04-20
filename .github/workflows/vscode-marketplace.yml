@@ -65,3 +65,30 @@ jobs:
           node-version: 20
       - run: npm ci
       - run: npm run test:unit
+
+  publish:
+    needs: [check-version, test]
+    if: needs.check-version.outputs.should_publish == 'true'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: code/vscode
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - run: npm ci
+      - name: Check PAT expiration
+        run: |
+          expires=$(cat .pat-expires | tr -d '[:space:]')
+          today=$(date -u +%Y-%m-%d)
+          if [[ "$today" > "$expires" || "$today" == "$expires" ]]; then
+            echo "::error::VSCE PAT expired on $expires. Rotate the token."
+            exit 1
+          fi
+      - run: npm run compile
+      - name: Publish to Marketplace
+        run: npx @vscode/vsce publish --no-dependencies
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
