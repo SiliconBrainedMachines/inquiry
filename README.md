@@ -60,22 +60,7 @@ ape                      # show TUI banner with current FSM state
 
 ## The APE cycle
 
-```
-IDLE ──start_analyze──▶ ANALYZE ──complete_analysis──▶ PLAN
-                          │                              │
-                          │                       approve_plan
-                          │                              ▼
-                          └────── start_analyze ──── EXECUTE
-                                                        │
-                                                  finish_execute
-                                                        ▼
-                          IDLE ◀── finish_end ──── END (PR gate)
-                            ▲                          │
-                            │                    finish_end
-                            │                          ▼
-                            └─── finish_evolution ── EVOLUTION
-                                  (when enabled)
-```
+![APE finite state machine](code/site/img/fsm.svg)
 
 | State | Agent | Function | Output |
 |---|---|---|---|
