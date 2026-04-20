@@ -1,0 +1,51 @@
+name: VS Code Marketplace
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'code/vscode/**'
+      - '.github/workflows/vscode-marketplace.yml'
+
+jobs:
+  check-version:
+    runs-on: ubuntu-latest
+    outputs:
+      should_publish: ${{ steps.compare.outputs.should_publish }}
+      local_version: ${{ steps.local.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Read local version
+        id: local
+        run: |
+          version=$(node -p "require('./code/vscode/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Query Marketplace version
+        id: marketplace
+        run: |
+          set +e
+          output=$(npx @vscode/vsce show ccisnedev.ape-vscode 2>&1)
+          exit_code=$?
+          set -e
+          if [ $exit_code -ne 0 ]; then
+            echo "Extension not found on Marketplace (first publish)"
+            echo "version=" >> "$GITHUB_OUTPUT"
+          else
+            mp_version=$(echo "$output" | grep -oP '^\s*Version:\s*\K[\d.]+' || echo "")
+            echo "version=$mp_version" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Compare versions
+        id: compare
+        run: |
+          local="${{ steps.local.outputs.version }}"
+          marketplace="${{ steps.marketplace.outputs.version }}"
+          if [ -z "$marketplace" ] || [ "$local" != "$marketplace" ]; then
+            echo "should_publish=true" >> "$GITHUB_OUTPUT"
+            echo "Version changed: $marketplace -> $local"
+          else
+            echo "should_publish=false" >> "$GITHUB_OUTPUT"
+            echo "Version unchanged: $local"
+          fi
