@@ -7,7 +7,7 @@
 
 ---
 
-## ✨ Overview
+##  Overview
 
 APE (Autonomous Programming Engine) is a strict six-state FSM that structures AI-assisted development: **IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION**.
 
@@ -15,36 +15,40 @@ This extension brings APE's lifecycle into VS Code — no CLI execution needed. 
 
 ---
 
-## 🧩 Features
+##  Features
 
 | Feature | Description |
 |---------|-------------|
-| 📊 **Status Bar** | Live display of the current APE state with phase-specific icons |
-| 🔄 **Toggle Evolution** | Enable/disable the EVOLUTION phase via `.ape/config.yaml` |
-| 📝 **Add Mutation Note** | Append observations to `.ape/mutations.md` from the Command Palette |
-| ⚡ **Auto-activation** | Extension activates automatically when `.ape/` exists in the workspace |
+|  **Init** | Detect, install, and initialize APE CLI — full bootstrap from VS Code |
+|  **Status Bar** | Live display of the current APE state with phase-specific icons |
+|  **Toggle Evolution** | Enable/disable the EVOLUTION phase via `.ape/config.yaml` |
+|  **Add Mutation Note** | Append observations to `.ape/mutations.md` from the Command Palette |
+|  **Guard Clause** | All commands validate CLI + workspace before executing |
+|  **Auto-activation** | Extension activates automatically when `.ape/` exists in the workspace |
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 1. Install the extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ccisnedev.ape-vscode)
-2. Open a workspace that contains a `.ape/` directory
-3. The status bar shows the current FSM state
-4. Use `Ctrl+Shift+P` → **APE: Toggle Evolution** or **APE: Add Mutation Note**
+2. `Ctrl+Shift+P` → **APE: Init**
+3. If the CLI is missing, the extension offers to install it (Windows + Linux)
+4. `ape init` runs in the integrated terminal, creating `.ape/`
+5. The status bar appears — you're ready to work
 
 ---
 
-## 💾 Commands
+##  Commands
 
 | Command | Action |
 |---------|--------|
+| **APE: Init** | Detect CLI, install if missing, run `ape init` in workspace |
 | **APE: Toggle Evolution** | Flip `evolution.enabled` in `.ape/config.yaml` |
 | **APE: Add Mutation Note** | Prompt for text → append to `.ape/mutations.md` |
 
 ---
 
-## 📊 Status Bar Icons
+##  Status Bar Icons
 
 | State | Icon |
 |-------|------|
@@ -60,26 +64,26 @@ This extension brings APE's lifecycle into VS Code — no CLI execution needed. 
 ## Requirements
 
 - VS Code ≥ 1.85
-- A workspace with a `.ape/` directory (created by the [APE CLI](https://github.com/ccisne-dev/finite_ape_machine))
+- Windows or Linux (macOS not yet supported)
+- The [APE CLI](https://github.com/ccisne-dev/finite_ape_machine) — installed automatically via `APE: Init` if missing
 
 ---
 
-## 🔭 Roadmap
+##  Roadmap
 
-- CLI integration (`ape` command execution from VS Code)
 - Tree view for `.ape/` directory contents
 - state.yaml editing via UI
 - Multi-root workspace support
 
 ---
 
-## 🧾 License
+##  License
 
 MIT © 2026 Cristian Cisneros
 
 ---
 
-## 🧩 Links
+##  Links
 
-- 🧠 APE CLI: [ccisne-dev/finite_ape_machine](https://github.com/ccisne-dev/finite_ape_machine)
-- 💬 Report issues: [GitHub Issues](https://github.com/ccisne-dev/finite_ape_machine/issues)
+-  APE CLI: [ccisne-dev/finite_ape_machine](https://github.com/ccisne-dev/finite_ape_machine)
+-  Report issues: [GitHub Issues](https://github.com/ccisne-dev/finite_ape_machine/issues)
