@@ -23,12 +23,12 @@ author: descartes
 
 ### Cambios
 
-- [ ] `code/site/index.html` L6: `<title>` → `APE — Analyze. Plan. Execute.`
-- [ ] `code/site/index.html` L7: `<meta name="description">` → `A methodology framework for AI-assisted development. Currently available for GitHub Copilot.`
-- [ ] `code/site/index.html` L10: `og:title` → `APE — Analyze. Plan. Execute.`
-- [ ] `code/site/index.html` L11: `og:description` → `Analyze. Plan. Execute. A methodology framework for AI-assisted development. Currently available for GitHub Copilot.`
-- [ ] `code/site/index.html` L16: `twitter:title` → `APE — Analyze. Plan. Execute.`
-- [ ] `code/site/index.html` L17: `twitter:description` → `Analyze. Plan. Execute. A methodology framework for AI-assisted development. Currently available for GitHub Copilot.`
+- [x] `code/site/index.html` L6: `<title>` → `APE — Analyze. Plan. Execute.`
+- [x] `code/site/index.html` L7: `<meta name="description">` → `A methodology framework for AI-assisted development. Currently available for GitHub Copilot.`
+- [x] `code/site/index.html` L10: `og:title` → `APE — Analyze. Plan. Execute.`
+- [x] `code/site/index.html` L11: `og:description` → `Analyze. Plan. Execute. A methodology framework for AI-assisted development. Currently available for GitHub Copilot.`
+- [x] `code/site/index.html` L16: `twitter:title` → `APE — Analyze. Plan. Execute.`
+- [x] `code/site/index.html` L17: `twitter:description` → `Analyze. Plan. Execute. A methodology framework for AI-assisted development. Currently available for GitHub Copilot.`
 
 ### Test
 
@@ -51,8 +51,8 @@ author: descartes
 
 ### Cambios
 
-- [ ] `code/site/index.html` L34: `primary-tagline` → `Analyze. Plan. Execute.`
-- [ ] `code/site/index.html` L35: `secondary-tagline` → `Currently available for GitHub Copilot. More targets coming soon.`
+- [x] `code/site/index.html` L34: `primary-tagline` → `Analyze. Plan. Execute.`
+- [x] `code/site/index.html` L35: `secondary-tagline` → `Currently available for GitHub Copilot. More targets coming soon.`
 
 ### Decisiones implícitas
 
@@ -78,9 +78,9 @@ author: descartes
 
 ### Cambios
 
-- [ ] `README.md` L3: eliminar blockquote `> Infinite monkeys produce noise. Finite APEs produce software.`
-- [ ] `README.md` L3 (nueva): insertar `**Analyze. Plan. Execute.**` como línea inmediatamente después del h1
-- [ ] `README.md` L5 (actual): revisar primer párrafo — reemplazar "replaces 'vibe coding' with" por "structures AI coding agents into" o redacción equivalente orientada a valor
+- [x] `README.md` L3: eliminar blockquote `> Infinite monkeys produce noise. Finite APEs produce software.`
+- [x] `README.md` L3 (nueva): insertar `**Analyze. Plan. Execute.**` como línea inmediatamente después del h1
+- [x] `README.md` L5 (actual): revisar primer párrafo — reemplazar "replaces 'vibe coding' with" por "structures AI coding agents into" o redacción equivalente orientada a valor
 
 ### Resultado esperado
 
@@ -114,9 +114,9 @@ A methodology framework for AI-assisted development that models coding agents as
 
 ### Cambios
 
-- [ ] `code/vscode/package.json` → `description`: cambiar a `Analyze. Plan. Execute. AI-aided development methodology for GitHub Copilot (more targets coming soon).`
-- [ ] `code/vscode/package.json` → `activationEvents`: eliminar `"onCommand:ape.init"` (redundante — auto-generado por contributes.commands)
-- [ ] `code/vscode/package.json` → `version`: bump `0.0.4` → `0.0.5`
+- [x] `code/vscode/package.json` → `description`: cambiar a `Analyze. Plan. Execute. AI-aided development methodology for GitHub Copilot (more targets coming soon).`
+- [x] `code/vscode/package.json` → `activationEvents`: eliminar `"onCommand:ape.init"` (redundante — auto-generado por contributes.commands)
+- [x] `code/vscode/package.json` → `version`: bump `0.0.4` → `0.0.5`
 
 ### Decisión: formato del tagline en description
 
@@ -153,14 +153,14 @@ npm run test:unit # 59 tests deben pasar
 
 El README ya fue reescrito como landing page. Verificar alineación:
 
-- [ ] `code/vscode/README.md` L3: confirmar que usa `Analyze → Plan → Execute.` (en contexto de ciclo, flechas son correctas) o alinear con `Analyze. Plan. Execute.` (como tagline). **Decisión:** usar **puntos** en la tagline bold de L3 para consistencia con el resto de touchpoints: `**Analyze. Plan. Execute.**`
-- [ ] `code/vscode/README.md`: confirmar que NO dice "any AI coding agent" en ningún lugar
-- [ ] `code/vscode/README.md`: confirmar que menciona "GitHub Copilot" explícitamente como target
-- [ ] `code/vscode/README.md` Requirements section: confirmar que dice `GitHub Copilot (recommended)` o similar honesto
+- [x] `code/vscode/README.md` L3: confirmar que usa `Analyze → Plan → Execute.` (en contexto de ciclo, flechas son correctas) o alinear con `Analyze. Plan. Execute.` (como tagline). **Decisión:** usar **puntos** en la tagline bold de L3 para consistencia con el resto de touchpoints: `**Analyze. Plan. Execute.**`
+- [x] `code/vscode/README.md`: confirmar que NO dice "any AI coding agent" en ningún lugar
+- [x] `code/vscode/README.md`: confirmar que menciona "GitHub Copilot" explícitamente como target
+- [x] `code/vscode/README.md` Requirements section: confirmar que dice `GitHub Copilot (recommended)` o similar honesto
 
 ### Cambios en CHANGELOG
 
-- [ ] `code/vscode/CHANGELOG.md`: agregar entrada `## [0.0.5]` con:
+- [x] `code/vscode/CHANGELOG.md`: agregar entrada `## [0.0.5]` con:
   - `description` alineada con branding
   - `activationEvents` limpiado
   - README alineado con identidad unificada
@@ -184,33 +184,33 @@ El README ya fue reescrito como landing page. Verificar alineación:
 
 ### Checklist de identidad
 
-- [ ] **"Analyze. Plan. Execute."** aparece en:
+- [x] **"Analyze. Plan. Execute."** aparece en:
   - `code/site/index.html` (title + primary-tagline)
   - `code/vscode/package.json` (description)
   - `code/vscode/README.md` (tagline bold)
   - `README.md` (después del h1)
-- [ ] **"APE — Analyze. Plan. Execute."** aparece en:
+- [x] **"APE — Analyze. Plan. Execute."** aparece en:
   - `code/site/index.html` (title, og:title, twitter:title)
-- [ ] **Copilot como target explícito** aparece en:
+- [x] **Copilot como target explícito** aparece en:
   - `code/site/index.html` (meta description, og:description, twitter:description, secondary-tagline)
   - `code/vscode/package.json` (description)
   - `code/vscode/README.md` (múltiples menciones)
-- [ ] **Frase de monos eliminada** de:
+- [x] **Frase de monos eliminada** de:
   - `code/site/index.html` (secondary-tagline)
   - `README.md` (blockquote)
-- [ ] **"any AI coding agent" eliminado** de:
+- [x] **"any AI coding agent" eliminado** de:
   - `code/site/index.html` (primary-tagline, meta tags)
 
 ### Tests automatizados
 
-- [ ] CLI: `cd code/cli && dart test` → 131 tests pass
-- [ ] VS Code: `cd code/vscode && npm run test:unit` → 59 tests pass
+- [x] CLI: `cd code/cli && dart test` → 131 tests pass
+- [x] VS Code: `cd code/vscode && npm run test:unit` → 59 tests pass
 
 ### Smoke test manual
 
-- [ ] Sitio: abrir `index.html` localmente, verificar hero y title
-- [ ] Extensión: `vsce package --no-dependencies` genera .vsix sin error
-- [ ] Repo: preview de `README.md` en VS Code
+- [x] Sitio: abrir `index.html` localmente, verificar hero y title
+- [x] Extensión: `vsce package --no-dependencies` genera .vsix sin error
+- [x] Repo: preview de `README.md` en VS Code
 
 ---
 
