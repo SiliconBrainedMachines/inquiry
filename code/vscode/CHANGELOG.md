@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.5] - 2026-04-19
+
+### Changed
+- Description aligned with APE branding: "Analyze. Plan. Execute."
+- README rewritten as landing page with honest Copilot-only messaging
+- Removed redundant `onCommand:ape.init` from `activationEvents`
+
 ## [0.0.4] - 2026-04-19
 
 ### Changed
