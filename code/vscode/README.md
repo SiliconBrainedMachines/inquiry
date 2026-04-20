@@ -13,18 +13,13 @@
 
 ## How it works
 
-```
-IDLE ──→ ANALYZE ──→ PLAN ──→ EXECUTE ──→ END ──→ IDLE
-              ↑                   │           ↑         │
-              └───────────────────┘           └─────────┘
-            re-analyze if needed          opt-in EVOLUTION
-```
+![APE finite state machine](https://raw.githubusercontent.com/ccisnedev/finite_ape_machine/main/code/site/img/fsm.svg)
 
 | Phase | What happens | Output |
 |-------|-------------|--------|
-| **ANALYZE** | SOCRATES asks questions, challenges assumptions | `diagnosis.md` |
-| **PLAN** | DESCARTES decomposes into checkable steps | `plan.md` |
-| **EXECUTE** | BASHŌ implements exactly what the plan says | code + commits |
+| **ANALYZE** | Questions, challenges assumptions, clarifies scope | `diagnosis.md` |
+| **PLAN** | Decomposes into checkable steps with tests | `plan.md` |
+| **EXECUTE** | Implements exactly what the plan says | code + commits |
 
 Each phase has a dedicated agent. Transitions are enforced — no skipping steps.
 
