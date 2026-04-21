@@ -21,11 +21,11 @@ author: DESCARTES
 
 **Justificación:** El bump de versión es una dependencia transversal. Hacerlo primero evita que fases posteriores trabajen con la versión vieja (0.0.16) y tengan que parchearlo después. Es la fase más simple y sin dependencias. Se usa v0.1.0 (no v0.0.1) porque el repo se transfiere con toda su historia — los tags v0.0.1 a v0.0.16 ya existen.
 
-- [ ] `code/cli/pubspec.yaml`: cambiar `version: 0.0.16` → `version: 0.1.0`
-- [ ] `code/cli/lib/src/version.dart`: cambiar `const String apeVersion = '0.0.16'` → `const String inquiryVersion = '0.1.0'`
+- [x] `code/cli/pubspec.yaml`: cambiar `version: 0.0.16` → `version: 0.1.0`
+- [x] `code/cli/lib/src/version.dart`: cambiar `const String apeVersion = '0.0.16'` → `const String inquiryVersion = '0.1.0'`
   - Renombrar la constante `apeVersion` → `inquiryVersion`
   - Actualizar el comentario del doc: "Single source of truth for Inquiry CLI version"
-- [ ] `code/cli/CHANGELOG.md`: añadir entrada `## [0.1.0]` al inicio con:
+- [x] `code/cli/CHANGELOG.md`: añadir entrada `## [0.1.0]` al inicio con:
   ```
   ## [0.1.0]
   ### Changed
@@ -35,7 +35,7 @@ author: DESCARTES
   - GitHub org: siliconbrainedmachines, repo: siliconbrainedmachines/inquiry
   ```
 - [ ] `code/vscode/package.json`: versión será `0.1.0` (se aplica en Fase 8 junto con otros cambios de extension)
-- [ ] Buscar todas las referencias a `apeVersion` en el codebase Dart y actualizar a `inquiryVersion`
+- [x] Buscar todas las referencias a `apeVersion` en el codebase Dart y actualizar a `inquiryVersion`
   - Comando: `grep -rn "apeVersion" code/cli/lib/ code/cli/test/`
   - Archivos esperados: `upgrade.dart`, `version_test.dart`, `version_sync_test.dart`
 
@@ -54,16 +54,16 @@ author: DESCARTES
 
 **Justificación:** El logo desbloquea la extensión VS Code (icono), el sitio web (favicon), y el org avatar (AC-12 Step 1). Es parcialmente manual — el usuario finalizará el SVG en Inkscape.
 
-- [ ] Finalizar `icon.svg` a partir del borrador: "iq" mark, dark bg `#0D1117`, green accent `#5CE6B8`, legible a 16×16
-- [ ] Rasterizar `icon.png` (128×128) desde `icon.svg`
+- [x] Finalizar `icon.svg` a partir del borrador: "iq" mark, dark bg `#0D1117`, green accent `#5CE6B8`, legible a 16×16
+- [x] Rasterizar `icon.png` (128×128) desde `icon.svg`
   - Herramienta: Inkscape export o `convert` de ImageMagick
-- [ ] Crear `sidebar.svg`: versión monocromática del "iq" mark para activity bar VS Code (24×24 lógico, sin rellenos, single color)
-- [ ] Crear `favicon.svg`: "iq" mark optimizado para favicon (16×16 lógico)
-- [ ] Colocar archivos:
-  - [ ] `code/vscode/assets/icon.svg` ← reemplaza el actual
-  - [ ] `code/vscode/assets/icon.png` ← reemplaza el actual
-  - [ ] `code/vscode/assets/sidebar.svg` ← reemplaza el actual
-  - [ ] `code/site/img/favicon.svg` ← reemplaza el actual
+- [x] Crear `sidebar.svg`: versión monocromática del "iq" mark para activity bar VS Code (24×24 lógico, sin rellenos, single color)
+- [x] Crear `favicon.svg`: "iq" mark optimizado para favicon (16×16 lógico)
+- [x] Colocar archivos:
+  - [x] `code/vscode/assets/icon.svg` ← reemplaza el actual
+  - [x] `code/vscode/assets/icon.png` ← reemplaza el actual
+  - [x] `code/vscode/assets/sidebar.svg` ← reemplaza el actual
+  - [x] `code/site/img/favicon.svg` ← reemplaza el actual
 - [ ] Definir TUI banner ASCII para "Inquiry" / "iq" (3-5 líneas, monospace)
   - Se implementará en código Dart en Fase 2 (donde se toque el TUI)
 

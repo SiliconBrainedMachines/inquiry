@@ -15,7 +15,7 @@ void main() {
       final cmd = TuiCommand(TuiInput());
       final output = await cmd.execute();
 
-      expect(output.version, equals(apeVersion));
+      expect(output.version, equals(inquiryVersion));
     });
 
     test('TuiOutput.diagram contains FSM states', () async {
@@ -33,7 +33,7 @@ void main() {
       final cmd = TuiCommand(TuiInput());
       final output = await cmd.execute();
 
-      expect(output.diagram, contains(apeVersion));
+      expect(output.diagram, contains(inquiryVersion));
     });
 
     test('TuiOutput.exitCode is 0', () async {
@@ -48,7 +48,7 @@ void main() {
       final output = await cmd.execute();
 
       final json = output.toJson();
-      expect(json, containsPair('version', apeVersion));
+      expect(json, containsPair('version', inquiryVersion));
       expect(json, contains('diagram'));
       expect(json['diagram'], isA<String>());
     });

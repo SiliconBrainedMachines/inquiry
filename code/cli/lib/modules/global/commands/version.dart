@@ -46,6 +46,6 @@ class VersionCommand implements Command<VersionInput, VersionOutput> {
 
   @override
   Future<VersionOutput> execute() async {
-    return VersionOutput(version: apeVersion);
+    return VersionOutput(version: inquiryVersion);
   }
 }
