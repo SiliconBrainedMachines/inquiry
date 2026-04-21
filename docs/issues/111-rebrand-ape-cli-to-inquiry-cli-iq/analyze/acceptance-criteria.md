@@ -44,8 +44,8 @@ Granular, testable acceptance criteria derived from impact surface analysis + SO
 
 ## AC-2: Alias Creation
 
-- [ ] Install scripts create both `inquiry` and `iq` executables
-- [ ] Windows: `inquiry.exe` + `iq.exe` (file copy) in bin directory
+- [ ] Install scripts create both `inquiry` and `iq` entry points
+- [ ] Windows: `inquiry.exe` + `iq.cmd` (batch shim: `@"%~dp0inquiry.exe" %*`) in bin directory
 - [ ] Linux/macOS: `inquiry` + `iq` (symlink → inquiry) in bin directory
 - [ ] Both `inquiry --version` and `iq --version` work after install
 
