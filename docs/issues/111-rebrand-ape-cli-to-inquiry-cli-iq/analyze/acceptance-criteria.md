@@ -15,11 +15,11 @@ Granular, testable acceptance criteria derived from impact surface analysis + SO
 
 | Decision | Value |
 |----------|-------|
-| GitHub org | `openpragma` |
-| Domain | `openpragma.dev` |
-| Repo | `openpragma/inquiry` |
-| VS Code publisher | `openpragma` |
-| Extension ID | `openpragma.inquiry-vscode` |
+| GitHub org | `siliconbrainedmachines` |
+| Domain | `si14bm.com` |
+| Repo | `siliconbrainedmachines/inquiry` |
+| VS Code publisher | `siliconbrainedmachines` |
+| Extension ID | `siliconbrainedmachines.inquiry-vscode` |
 | Binary | `inquiry` (primary) |
 | Alias | `iq` (copy on Windows, symlink on Linux/macOS) |
 | Config dir | `.inquiry/` |
@@ -68,7 +68,7 @@ Granular, testable acceptance criteria derived from impact surface analysis + SO
 - [ ] Linux/macOS scripts create `iq` via symlink after installing `inquiry`
 - [ ] Success messages reference "Inquiry CLI" (not "APE CLI")
 - [ ] Commands shown post-install: `iq doctor`, `iq init`, `iq target get`
-- [ ] Repo URL updated to `openpragma/inquiry`
+- [ ] Repo URL updated to `siliconbrainedmachines/inquiry`
 
 ## AC-5: CI/CD Release Workflow
 
@@ -77,36 +77,36 @@ Granular, testable acceptance criteria derived from impact surface analysis + SO
 - [ ] Dart compile step outputs correct binary name
 - [ ] Release asset upload uses new names
 - [ ] Windows Defender workaround re-tested with renamed binary
-- [ ] Repo reference updated to `openpragma/inquiry`
+- [ ] Repo reference updated to `siliconbrainedmachines/inquiry`
 
 ## AC-6: VS Code Extension — New (inquiry-vscode)
 
-- [ ] New publisher `openpragma` created on VS Code Marketplace
-- [ ] New extension ID: `openpragma.inquiry-vscode`
+- [ ] New publisher `siliconbrainedmachines` created on VS Code Marketplace
+- [ ] New extension ID: `siliconbrainedmachines.inquiry-vscode`
 - [ ] Display name: `Inquiry`
 - [ ] Commands prefixed `inquiry.*`: `inquiry.init`, `inquiry.toggleEvolution`, `inquiry.addMutation`
 - [ ] Activation event: `workspaceContains:.inquiry/`
 - [ ] `guard.ts` functions renamed: `getInquiryBinaryPath()`, `isInquiryInstalled()`, `isInquiryWorkspace()`
 - [ ] `guard.ts` paths updated: `.inquiry/bin/inquiry` (Linux), `inquiry\bin\inquiry.exe` (Windows)
-- [ ] `installer.ts` URL updated to `openpragma/inquiry` repo
+- [ ] `installer.ts` URL updated to `siliconbrainedmachines/inquiry` repo
 - [ ] `installer.ts` asset patterns: `inquiry-windows-x64`, `inquiry-linux-x64`
 - [ ] Extension icon is the new "iq" mark (SVG + PNG)
 - [ ] Sidebar icon is the new "iq" mark (monochrome SVG)
 - [ ] README.md describes Inquiry, not APE
-- [ ] Published to VS Code Marketplace as `openpragma.inquiry-vscode`
-- [ ] New PAT created for publisher `openpragma`
+- [ ] Published to VS Code Marketplace as `siliconbrainedmachines.inquiry-vscode`
+- [ ] New PAT created for publisher `siliconbrainedmachines`
 - [ ] GitHub secret `VSCE_PAT` updated with new PAT
 
 ## AC-7: VS Code Extension — Deprecate Old (ape-vscode)
 
 - [ ] Final version of `ccisnedev.ape-vscode` published with:
   - Display name: `APE (Deprecated — use Inquiry)`
-  - Description: "DEPRECATED: Replaced by Inquiry (openpragma.inquiry-vscode)"
-  - `extensionDependencies`: `["openpragma.inquiry-vscode"]`
+  - Description: "DEPRECATED: Replaced by Inquiry (siliconbrainedmachines.inquiry-vscode)"
+  - `extensionDependencies`: `["siliconbrainedmachines.inquiry-vscode"]`
   - All commands and activation events removed (empty shell)
   - README replaced with deprecation notice + link to Inquiry
 - [ ] Marketplace page shows deprecation banner
-- [ ] CI workflow `vscode-marketplace.yml` updated to publish `inquiry-vscode` under `openpragma`
+- [ ] CI workflow `vscode-marketplace.yml` updated to publish `inquiry-vscode` under `siliconbrainedmachines`
 
 ## AC-8: Logo — iq Mark
 
@@ -121,14 +121,14 @@ Granular, testable acceptance criteria derived from impact surface analysis + SO
 
 - [ ] `index.html` title updated to reflect Inquiry branding
 - [ ] `index.html` meta tags (description, og:description, twitter:description) updated
-- [ ] `index.html` install commands use new URLs pointing to `openpragma/inquiry`
+- [ ] `index.html` install commands use new URLs pointing to `siliconbrainedmachines/inquiry`
 - [ ] `methodology.html` breadcrumbs and title updated
 - [ ] `agents.html` breadcrumbs and title updated
 - [ ] `evolution.html` breadcrumbs and title updated
 - [ ] `ape-builds-ape.html` — content stays (methodology reference), breadcrumbs updated
 - [ ] Favicon reference points to new "iq" favicon
 - [ ] Badge version updated
-- [ ] Site domain: evaluate migration to `openpragma.dev` (or keep `ccisne.dev` with redirect)
+- [ ] Site domain: evaluate migration to `si14bm.com` (or keep `ccisne.dev` with redirect)
 
 ## AC-10: Documentation
 
@@ -159,24 +159,26 @@ Granular, testable acceptance criteria derived from impact surface analysis + SO
 ## AC-12: GitHub Org + Repo Transfer
 
 ### Step 1: Create org
-- [ ] Create GitHub org `openpragma` (**already exists**)
-- [ ] Verify user `ccisnedev` is owner
+- [ ] Create GitHub org `siliconbrainedmachines` on GitHub
+- [ ] Set org email to `ops@si14bm.com`
+- [ ] Add user `ccisnedev` as owner
+- [ ] Set org avatar to `Si¹⁴` logo
 
 ### Step 2: Rename repo
 - [ ] Rename `ccisnedev/finite_ape_machine` → `ccisnedev/inquiry`
 - [ ] Verify redirect: `ccisnedev/finite_ape_machine` → `ccisnedev/inquiry`
 
 ### Step 3: Transfer repo
-- [ ] Transfer `ccisnedev/inquiry` → `openpragma/inquiry`
-- [ ] Verify redirect chain: `ccisnedev/finite_ape_machine` → `openpragma/inquiry`
-- [ ] Update local clone: `git remote set-url origin https://github.com/openpragma/inquiry.git`
+- [ ] Transfer `ccisnedev/inquiry` → `siliconbrainedmachines/inquiry`
+- [ ] Verify redirect chain: `ccisnedev/finite_ape_machine` → `siliconbrainedmachines/inquiry`
+- [ ] Update local clone: `git remote set-url origin https://github.com/siliconbrainedmachines/inquiry.git`
 
 ### Step 4: Post-transfer setup
 - [ ] Recreate GitHub Actions secret `VSCE_PAT` (lost during transfer)
-- [ ] Verify GitHub Pages and custom domain (`openpragma.dev`)
+- [ ] Verify GitHub Pages and custom domain (`si14bm.com` or subdomain like `inquiry.si14bm.com`)
 - [ ] Verify CI workflows trigger correctly
 - [ ] GitHub repo About/description updated: "Inquiry CLI — structured development through the APE methodology"
-- [ ] All install scripts, CI, `installer.ts` reference `openpragma/inquiry`
+- [ ] All install scripts, CI, `installer.ts` reference `siliconbrainedmachines/inquiry`
 
 ---
 
@@ -199,8 +201,8 @@ Granular, testable acceptance criteria derived from impact surface analysis + SO
 - AC-2: Specified copy (Windows) vs symlink (Linux) explicitly
 - AC-4: Added repo URL update and alias creation details
 - AC-5: Added Defender workaround re-test
-- AC-6: Changed publisher from `ccisnedev` to `openpragma`, added PAT/secret setup
-- AC-7: Updated deprecation to point to `openpragma.inquiry-vscode`
+- AC-6: Changed publisher from `ccisnedev` to `siliconbrainedmachines`, added PAT/secret setup
+- AC-7: Updated deprecation to point to `siliconbrainedmachines.inquiry-vscode`
 - AC-8: Locked design decisions (lighthouse, Gatsby green, full `iq`)
 - AC-9: Added domain evaluation
 - AC-12: Expanded to 4-step process (create org → rename → transfer → post-transfer)

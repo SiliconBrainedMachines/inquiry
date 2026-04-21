@@ -30,11 +30,11 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 | Primary noun | `cleanroom` | Controlled environment metaphor; no CLI collision; memorable |
 | Logo mark | `iq` | Lighthouse `i` (slab-serif stem, beacon dot with green radial gradient), circular `q` with descender |
 | Logo color | `#5CE6B8` on `#0D1117` | Green "Gatsby light" — the beacon that illuminates the indeterminate situation |
-| GitHub org | `openpragma` | Umbrella studio org; pragmatism = philosophical root of inquiry. Already exists: github.com/openpragma |
-| Repository | `openpragma/inquiry` | Rename `ccisnedev/finite_ape_machine` → transfer to `openpragma` org |
-| Domain | `openpragma.dev` | Already owned; umbrella for inquiry, gainline, and future products |
-| VS Code publisher | `openpragma` | Coherent with org; separates project from personal identity (`ccisnedev`) |
-| Extension ID | `openpragma.inquiry-vscode` | Replaces `ccisnedev.ape-vscode` |
+| GitHub org | `siliconbrainedmachines` | Corporate umbrella org for all OSS + commercial projects (Silicon Brained Machines, Inc.). Single org maximizes cross-project discoverability |
+| Repository | `siliconbrainedmachines/inquiry` | Rename `ccisnedev/finite_ape_machine` → transfer to `siliconbrainedmachines` org |
+| Domain | `si14bm.com` | Owned. Logo `Si¹⁴` (periodic table style) anchors the short numeronym |
+| VS Code publisher | `siliconbrainedmachines` | Coherent with org; separates project from personal identity (`ccisnedev`) |
+| Extension ID | `siliconbrainedmachines.inquiry-vscode` | Replaces `ccisnedev.ape-vscode` |
 | Backward compat | None | v0.0.x series; breaking change is the contract |
 | Methodology name | APE (unchanged) | Analyze-Plan-Execute; the FSM, agents, philosophy all stay |
 | Version | Reset to v0.0.1 | New identity = new version lineage (decided during analysis) |
@@ -43,7 +43,7 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 
 ### Technical
 - GitHub repo transfer preserves Git history, issues, PRs, stars — but loses Actions secrets and branch protection rules
-- GitHub redirects `ccisnedev/finite_ape_machine` → `openpragma/inquiry` automatically (chain redirect through rename + transfer)
+- GitHub redirects `ccisnedev/finite_ape_machine` → `siliconbrainedmachines/inquiry` automatically (chain redirect through rename + transfer)
 - VS Code Marketplace does not support true extension "replacement" — only `extensionDependencies` + deprecation banner
 - Windows file copy for alias means `iq.exe` is a full duplicate (~5-6 MB), not a pointer
 - The `dart compile exe` output name is set in build scripts, not in `pubspec.yaml`
@@ -51,7 +51,7 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 ### Process
 - The repo transfer must happen AFTER all internal URL references are updated but BEFORE publishing the new extension
 - The old extension `ccisnedev.ape-vscode` deprecation is a one-time manual publish
-- New VS Code Marketplace publisher `openpragma` requires a new Azure DevOps PAT
+- New VS Code Marketplace publisher `siliconbrainedmachines` requires a new Azure DevOps PAT
 - GitHub Pages custom domain needs verification after transfer
 
 ### Scope
@@ -67,7 +67,8 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 | Repo transfer loses GitHub Actions secrets | CI fails silently | Recreate `VSCE_PAT` immediately after transfer; run test workflow |
 | Install script URL becomes stale during rename window | Users get 404 | Do rename + transfer in quick succession; GitHub redirects cover the gap |
 | Old extension users don't see deprecation | Fragmented user base | `extensionDependencies` auto-installs new extension alongside; deprecation banner in Marketplace |
-| `openpragma` org/domain issues | Unexpected problems | Org and domain already exist and are owned — risk is minimal |
+| `siliconbrainedmachines` org name conflict | Cannot create org | Verified available via `gh api` — risk neutralized |
+| `si14bm.com` DNS / GitHub Pages setup delays | Site downtime | Domain owned; configure DNS before transfer |
 | Asset name mismatch between CI and install scripts | Silent install failure | Single source of truth: matrix in `release.yml` defines names, scripts consume them |
 
 ## 5. Scope
@@ -79,7 +80,7 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 - Logo creation (iq mark in 4 contexts: icon, favicon, sidebar, TUI)
 - Install scripts update
 - CI/CD workflow update
-- VS Code extension: publish new `openpragma.inquiry-vscode`
+- VS Code extension: publish new `siliconbrainedmachines.inquiry-vscode`
 - VS Code extension: deprecate old `ccisnedev.ape-vscode`
 - Website update (titles, meta, install URLs, favicon)
 - Documentation update (README, specs, architecture, agent/skill files)
@@ -93,7 +94,7 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 - Philosophy references (Peirce, Dewey, pragmatism) — unchanged
 - Methodology name "APE" — unchanged
 - `cleanroom` command implementation — separate issue after rebrand
-- `openpragma.dev` DNS and GitHub Pages setup — can be done independently
+- `si14bm.com` DNS and GitHub Pages setup — can be done independently
 - Migration tooling for existing `.ape/` workspaces — no backward compat in v0.0.x
 
 ## 6. Execution Order
