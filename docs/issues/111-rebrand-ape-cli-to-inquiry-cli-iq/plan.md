@@ -272,7 +272,7 @@ author: DESCARTES
 
 ### 5a: release.yml
 
-- [ ] Matrix strategy: actualizar nombres
+- [x] Matrix strategy: actualizar nombres
   ```yaml
   - os: windows-latest
     asset: inquiry-windows-x64.zip
@@ -281,18 +281,18 @@ author: DESCARTES
     asset: inquiry-linux-x64.tar.gz
     binary: inquiry
   ```
-- [ ] `dart compile exe bin/main.dart -o build/bin/${{ matrix.binary }}` → ya usa la variable, no necesita cambio en la línea de compile, pero verificar
-- [ ] Comentarios del workflow: actualizar refs a "ape"
-- [ ] Windows Defender workaround: no cambia (es sobre `dart.exe`, no el output binary) — pero re-verificar que funciona con `inquiry.exe`
-- [ ] Repo ref en paths trigger: `code/cli/**` → no cambia (path no contiene "ape")
+- [x] `dart compile exe bin/main.dart -o build/bin/${{ matrix.binary }}` → ya usa la variable, no necesita cambio en la línea de compile, pero verificar
+- [x] Comentarios del workflow: actualizar refs a "ape"
+- [x] Windows Defender workaround: no cambia (es sobre `dart.exe`, no el output binary) — pero re-verificar que funciona con `inquiry.exe`
+- [x] Repo ref en paths trigger: `code/cli/**` → no cambia (path no contiene "ape")
 
 ### 5b: vscode-marketplace.yml
 
-- [ ] Query Marketplace step: `ccisnedev.ape-vscode` → `siliconbrainedmachines.inquiry-vscode`
-- [ ] Publisher: actualizar a `siliconbrainedmachines`
-- [ ] PAT reference: sigue usando `secrets.VSCE_PAT` (el secret se recreará post-transfer en Fase 6)
+- [x] Query Marketplace step: `ccisnedev.ape-vscode` → `siliconbrainedmachines.inquiry-vscode`
+- [x] Publisher: actualizar a `siliconbrainedmachines`
+- [x] PAT reference: sigue usando `secrets.VSCE_PAT` (el secret se recreará post-transfer en Fase 6)
 - [ ] `.pat-expires` file: actualizar con fecha del nuevo PAT
-- [ ] working-directory: sigue siendo `code/vscode` → no cambia
+- [x] working-directory: sigue siendo `code/vscode` → no cambia
 
 **Verificación:**
 - `grep -n "ape" .github/workflows/release.yml | grep -vi "APE methodology"` → solo refs en comentarios de Defender workaround (que hablan de `dart.exe`, no `ape.exe`)
@@ -311,33 +311,33 @@ author: DESCARTES
 
 ### 6a: README.md (raíz del repo)
 
-- [ ] Título: "Finite APE Machine" → "Inquiry CLI"
-- [ ] Subtítulo/descripción: actualizar
-- [ ] Install section: URLs apuntan a `siliconbrainedmachines/inquiry`
-- [ ] Command table: `ape init` → `iq init`, `ape doctor` → `iq doctor`, etc.
-- [ ] Config dir refs: `.ape/` → `.inquiry/`
-- [ ] Badge: actualizar versión a v0.1.0 y repo URL
+- [x] Título: "Finite APE Machine" → "Inquiry CLI"
+- [x] Subtítulo/descripción: actualizar
+- [x] Install section: URLs apuntan a `siliconbrainedmachines/inquiry`
+- [x] Command table: `ape init` → `iq init`, `ape doctor` → `iq doctor`, etc.
+- [x] Config dir refs: `.ape/` → `.inquiry/`
+- [x] Badge: actualizar versión a v0.1.0 y repo URL
 
 ### 6b: Specs
 
-- [ ] Renombrar `docs/spec/ape-cli-spec.md` → `docs/spec/inquiry-cli-spec.md`
+- [x] Renombrar `docs/spec/ape-cli-spec.md` → `docs/spec/inquiry-cli-spec.md`
   - Dentro: todos los `.ape/` → `.inquiry/`, todos los `ape` (como tool) → `inquiry`/`iq`
   - Mantener refs a "APE methodology", "APE FSM" sin cambios
-- [ ] `docs/spec/index.md`: actualizar referencia al filename renombrado
-- [ ] `docs/spec/finite-ape-machine.md`: refs al tool (no a la metodología) → actualizar
-- [ ] Auditoría: `grep -rn "ape" docs/spec/ | grep -vi "APE\|Analyze.Plan.Execute\|ape_builds"` → verificar
+- [x] `docs/spec/index.md`: actualizar referencia al filename renombrado
+- [x] `docs/spec/finite-ape-machine.md`: refs al tool (no a la metodología) → actualizar
+- [x] Auditoría: `grep -rn "ape" docs/spec/ | grep -vi "APE\|Analyze.Plan.Execute\|ape_builds"` → verificar
 
 ### 6c: Otros docs
 
-- [ ] `docs/architecture.md`: `.ape/` → `.inquiry/`, command examples
-- [ ] `docs/roadmap.md`: refs al tool name
-- [ ] `docs/lore.md`: refs al tool (la metodología se queda como APE)
+- [x] `docs/architecture.md`: `.ape/` → `.inquiry/`, command examples
+- [x] `docs/roadmap.md`: refs al tool name
+- [x] `docs/lore.md`: refs al tool (la metodología se queda como APE)
 
 ### 6d: Agent y skill files (contenido, ya renombrados en Fase 2d/2e)
 
-- [ ] Verificar que `inquiry.agent.md` tiene contenido actualizado
-- [ ] Verificar que skill files tienen commands actualizados
-- [ ] Auditoría final: `grep -rn '"ape"\|ape doctor\|ape init\|ape target' code/cli/assets/` → 0 resultados (excepto refs a "APE methodology")
+- [x] Verificar que `inquiry.agent.md` tiene contenido actualizado
+- [x] Verificar que skill files tienen commands actualizados
+- [x] Auditoría final: `grep -rn '"ape"\|ape doctor\|ape init\|ape target' code/cli/assets/` → 0 resultados (excepto refs a "APE methodology")
 
 **Verificación:**
 - `grep -rn "finite_ape_machine" docs/ README.md` → 0 resultados (excepto en `docs/issues/` que son históricos)
