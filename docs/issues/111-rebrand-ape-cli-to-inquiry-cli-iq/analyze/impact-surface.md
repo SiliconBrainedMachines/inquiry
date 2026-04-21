@@ -136,20 +136,20 @@ New org + rename + transfer:
 
 | Step | Action | Result |
 |------|--------|--------|
-| 1 | Create org `finiteapemachine` on GitHub | New org exists |
+| 1 | Create org `openpragma` on GitHub | **Already exists** |
 | 2 | Rename repo `ccisnedev/finite_ape_machine` → `ccisnedev/inquiry` | Redirect active |
-| 3 | Transfer `ccisnedev/inquiry` → `finiteapemachine/inquiry` | Final location |
+| 3 | Transfer `ccisnedev/inquiry` → `openpragma/inquiry` | Final location |
 
 Post-transfer:
 - Recreate `VSCE_PAT` secret (lost during transfer)
 - Verify GitHub Pages / custom domain
 - Update local clone remote URL
-- All install scripts, CI, `installer.ts` must reference `finiteapemachine/inquiry`
+- All install scripts, CI, `installer.ts` must reference `openpragma/inquiry`
 
 ### VS Code Marketplace Publisher
 
-New publisher `finiteapemachine` — coherent with org name:
-- Extension ID: `finiteapemachine.inquiry-vscode`
+New publisher `openpragma` — coherent with org name:
+- Extension ID: `openpragma.inquiry-vscode`
 - Requires new PAT from Azure DevOps (All accessible organizations, Marketplace Manage scope)
 - Old extension `ccisnedev.ape-vscode` gets deprecation update under old publisher
 
