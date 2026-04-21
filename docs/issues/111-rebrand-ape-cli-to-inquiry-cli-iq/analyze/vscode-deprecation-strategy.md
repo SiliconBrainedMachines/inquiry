@@ -38,8 +38,8 @@ Better approach — publish a final version with:
    ```json
    {
      "displayName": "APE (Deprecated — use Inquiry)",
-     "description": "DEPRECATED: This extension has been replaced by Inquiry (openpragma.inquiry-vscode). Install Inquiry instead.",
-     "extensionDependencies": ["openpragma.inquiry-vscode"]
+     "description": "DEPRECATED: This extension has been replaced by Inquiry (siliconbrainedmachines.inquiry-vscode). Install Inquiry instead.",
+     "extensionDependencies": ["siliconbrainedmachines.inquiry-vscode"]
    }
    ```
 
@@ -47,7 +47,7 @@ Better approach — publish a final version with:
    ```markdown
    # APE (Deprecated)
    
-   > This extension has been replaced by **[Inquiry](https://marketplace.visualstudio.com/items?itemName=openpragma.inquiry-vscode)**.
+   > This extension has been replaced by **[Inquiry](https://marketplace.visualstudio.com/items?itemName=siliconbrainedmachines.inquiry-vscode)**.
    > 
    > APE is now Inquiry. Install the new extension and uninstall this one.
    ```
@@ -64,8 +64,8 @@ Since ~2023, VS Code Marketplace supports a `replacement` field:
 {
   "badges": [],
   "replacement": {
-    "extensionId": "openpragma.inquiry-vscode",
-    "url": "https://marketplace.visualstudio.com/items?itemName=openpragma.inquiry-vscode"
+    "extensionId": "siliconbrainedmachines.inquiry-vscode",
+    "url": "https://marketplace.visualstudio.com/items?itemName=siliconbrainedmachines.inquiry-vscode"
   }
 }
 ```
@@ -76,15 +76,15 @@ Note: This field may need to be set via the Marketplace web UI or publisher port
 
 ## Execution Order
 
-1. **First:** Create publisher `openpragma` on VS Code Marketplace
-2. **Second:** Publish `openpragma.inquiry-vscode` as a new extension (fully functional)
-3. **Third:** Publish final version of `ccisnedev.ape-vscode` with deprecation notice + `extensionDependencies` pointing to `openpragma.inquiry-vscode`
+1. **First:** Create publisher `siliconbrainedmachines` on VS Code Marketplace
+2. **Second:** Publish `siliconbrainedmachines.inquiry-vscode` as a new extension (fully functional)
+3. **Third:** Publish final version of `ccisnedev.ape-vscode` with deprecation notice + `extensionDependencies` pointing to `siliconbrainedmachines.inquiry-vscode`
 4. **Fourth:** Mark `ape-vscode` as deprecated in the Marketplace portal
 
 ## CI/CD Impact
 
-- New workflow or updated `vscode-marketplace.yml` must publish under publisher `openpragma`
-- New PAT required for `openpragma` publisher (Azure DevOps, All accessible orgs, Marketplace Manage)
+- New workflow or updated `vscode-marketplace.yml` must publish under publisher `siliconbrainedmachines`
+- New PAT required for `siliconbrainedmachines` publisher (Azure DevOps, All accessible orgs, Marketplace Manage)
 - One-time manual step: publish the deprecation version of `ccisnedev.ape-vscode`
 - After deprecation, the old workflow can be removed
 
