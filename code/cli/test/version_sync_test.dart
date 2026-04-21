@@ -27,23 +27,23 @@ void main() {
   });
 
   test('version.dart matches pubspec.yaml', () {
-    expect(apeVersion, equals(yamlVersion),
+    expect(inquiryVersion, equals(yamlVersion),
         reason:
-            'version.dart ($apeVersion) != pubspec.yaml ($yamlVersion). '
+            'version.dart ($inquiryVersion) != pubspec.yaml ($yamlVersion). '
             'Fix: update code/cli/lib/src/version.dart OR code/cli/pubspec.yaml');
   });
 
   test('site index.html badge matches version.dart', () {
-    expect(webVersion, equals(apeVersion),
+    expect(webVersion, equals(inquiryVersion),
         reason:
-            'index.html badge (v$webVersion) != version.dart ($apeVersion). '
+            'index.html badge (v$webVersion) != version.dart ($inquiryVersion). '
             'Fix: update <span class="badge"> in code/site/index.html');
   });
 
   test('all three version sources are consistent', () {
     final sources = {
       'code/cli/pubspec.yaml': yamlVersion,
-      'code/cli/lib/src/version.dart': apeVersion,
+      'code/cli/lib/src/version.dart': inquiryVersion,
       'code/site/index.html badge': webVersion,
     };
     final unique = sources.values.toSet();

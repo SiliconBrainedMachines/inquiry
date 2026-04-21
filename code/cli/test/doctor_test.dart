@@ -123,7 +123,7 @@ void main() {
       return DoctorCommand(
         DoctorInput(),
         runProcess: runProcess ?? fakeRunner(),
-        apeVersionOverride: version,
+        inquiryVersionOverride: version,
         fileSystemOps: fs ?? allPassFs('/home/testuser', testSkills),
         assets: assets ?? testAssets,
       );

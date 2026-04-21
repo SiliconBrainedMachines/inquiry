@@ -9,12 +9,12 @@ void main() {
       final output = await command.execute();
 
       expect(output.exitCode, 0);
-      expect(output.version, apeVersion);
+      expect(output.version, inquiryVersion);
       expect(output.version, isNotEmpty);
     });
 
     test('version matches expected format', () {
-      expect(apeVersion, matches(RegExp(r'^\d+\.\d+\.\d+$')));
+      expect(inquiryVersion, matches(RegExp(r'^\d+\.\d+\.\d+$')));
     });
   });
 }

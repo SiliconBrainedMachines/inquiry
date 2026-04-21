@@ -88,7 +88,7 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
     final client = httpClientOverride ?? HttpClient();
     try {
       // 1. Fetch latest release metadata
-      stderr.writeln('Current version: $apeVersion');
+      stderr.writeln('Current version: $inquiryVersion');
       stderr.writeln('Checking for updates...');
 
       final releaseUrl = Uri.parse(
@@ -96,15 +96,15 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       );
       final metaRequest = await client.getUrl(releaseUrl);
       metaRequest.headers.set('Accept', 'application/vnd.github+json');
-      metaRequest.headers.set('User-Agent', 'ape-cli/$apeVersion');
+      metaRequest.headers.set('User-Agent', 'ape-cli/$inquiryVersion');
       final metaResponse = await metaRequest.close();
 
       if (metaResponse.statusCode != 200) {
         return UpgradeOutput(
           message:
               'Failed to fetch release info (HTTP ${metaResponse.statusCode})',
-          previousVersion: apeVersion,
-          newVersion: apeVersion,
+          previousVersion: inquiryVersion,
+          newVersion: inquiryVersion,
           upgraded: false,
         );
       }
@@ -118,11 +118,11 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
 
       stderr.writeln('Latest version available: $latestVersion');
 
-      if (latestVersion == apeVersion) {
+      if (latestVersion == inquiryVersion) {
         return UpgradeOutput(
           message: 'Already on the latest version',
-          previousVersion: apeVersion,
-          newVersion: apeVersion,
+          previousVersion: inquiryVersion,
+          newVersion: inquiryVersion,
           upgraded: false,
         );
       }
@@ -148,7 +148,7 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       final zipFile = File(p.join(tempDir.path, expectedAsset));
 
       final dlRequest = await client.getUrl(Uri.parse(downloadUrl));
-      dlRequest.headers.set('User-Agent', 'ape-cli/$apeVersion');
+      dlRequest.headers.set('User-Agent', 'ape-cli/$inquiryVersion');
       final dlResponse = await dlRequest.close();
 
       // Follow redirect if needed
@@ -184,7 +184,7 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
         tempDir.deleteSync(recursive: true);
         return UpgradeOutput(
           message: 'Failed to extract: $e',
-          previousVersion: apeVersion,
+          previousVersion: inquiryVersion,
           newVersion: latestVersion,
           upgraded: false,
         );
@@ -198,8 +198,8 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       stderr.writeln('Upgrade completed successfully.');
 
       return UpgradeOutput(
-        message: 'Upgraded from $apeVersion to $latestVersion',
-        previousVersion: apeVersion,
+        message: 'Upgraded from $inquiryVersion to $latestVersion',
+        previousVersion: inquiryVersion,
         newVersion: latestVersion,
         upgraded: true,
       );
