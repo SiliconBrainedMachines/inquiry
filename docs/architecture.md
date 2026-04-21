@@ -11,7 +11,7 @@
 └──────────────────────────────────┬──────────────────────────────────┘
                                    │
 ┌──────────────────────────────────▼──────────────────────────────────┐
-│  ape CLI                                                            │
+│  Inquiry CLI                                                        │
 │                                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐  │
 │  │  FSM Engine (transition_contract.yaml)                        │  │
@@ -22,10 +22,10 @@
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 │  ┌──────────────┐    ┌──────────────────────────────────────────┐   │
-│  │ .ape/        │    │ Target Deployer                          │   │
+│  │ .inquiry/    │    │ Target Deployer                          │   │
 │  │  state.yaml  │    │                                          │   │
-│  │  config.yaml │    │  ape target get → copies to ~/.copilot/  │   │
-│  │  mutations.md│    │    agents/ape.agent.md                   │   │
+│  │  config.yaml │    │  iq target get → copies to ~/.copilot/   │   │
+│  │  mutations.md│    │    agents/inquiry.agent.md               │   │
 │  └──────────────┘    │    skills/{issue-start,issue-end,...}    │   │
 │                      └──────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
@@ -36,9 +36,9 @@
 │  AI Coding Tool (Copilot, future: Claude/Crush/Gemini/Codex)        │
 │                                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  ape.agent.md (orchestrator)                                  │  │
+│  │  inquiry.agent.md (orchestrator)                              │  │
 │  │                                                               │  │
-│  │  Reads .ape/state.yaml → knows current FSM state              │  │
+│  │  Reads .inquiry/state.yaml → knows current FSM state          │  │
 │  │  Activates the agent for that state:                          │  │
 │  │                                                               │  │
 │  │    ANALYZE  → SOCRATES  (mayéutica, produces diagnosis.md)    │  │
@@ -63,9 +63,9 @@
 ┌──────────────────────────────────▼──────────────────────────────────┐
 │  Repository (Memory as Code)                                        │
 │                                                                     │
-│  .ape/state.yaml        ← current FSM state (IDLE, ANALYZE, etc.)   │
-│  .ape/config.yaml       ← cycle config (evolution.enabled, etc.)    │
-│  .ape/mutations.md      ← human notes for DARWIN                    │
+│  .inquiry/state.yaml        ← current FSM state (IDLE, ANALYZE, etc.)   │
+│  .inquiry/config.yaml       ← cycle config (evolution.enabled, etc.)    │
+│  .inquiry/mutations.md      ← human notes for DARWIN                    │
 │  docs/issues/NNN-slug/  ← per-cycle artifacts (plan.md, metrics)    │
 │  docs/spec/             ← canonical specifications                  │
 └─────────────────────────────────────────────────────────────────────┘
@@ -105,15 +105,15 @@ Each allowed transition carries:
 | `commit_policy` | When to commit (none, after_effects, after_artifacts) |
 | `prompt_fragment_id` | Links to agent prompt section for this transition |
 
-The CLI enforces this via `ape state transition --event <e>`: reads `.ape/state.yaml`, looks up `(current_state, event)` in the contract, validates prechecks, applies effects, writes new state.
+The CLI enforces this via `iq state transition --event <e>`: reads `.inquiry/state.yaml`, looks up `(current_state, event)` in the contract, validates prechecks, applies effects, writes new state.
 
 ## Agent architecture
 
-There is **one agent file** (`ape.agent.md`) that acts as orchestrator. It is NOT 4 separate agents — it is one prompt that **behaves differently depending on FSM state**:
+There is **one agent file** (`inquiry.agent.md`) that acts as orchestrator. It is NOT 4 separate agents — it is one prompt that **behaves differently depending on FSM state**:
 
 ```
-ape.agent.md
-├── Reads .ape/state.yaml → determines active phase
+inquiry.agent.md
+├── Reads .inquiry/state.yaml → determines active phase
 ├── IDLE: waits for user to invoke issue-start skill
 ├── ANALYZE: becomes SOCRATES (asks questions, writes diagnosis.md)
 ├── PLAN: becomes DESCARTES (decomposes, writes plan.md with phases)
@@ -143,11 +143,11 @@ Skills are **shared across targets** (same SKILL.md for Copilot, Claude, etc.). 
 ## Deployment model
 
 ```
-ape target get
+iq target get
     │
-    ├── Reads bundled assets/ from alongside the ape binary
+    ├── Reads bundled assets/ from alongside the inquiry binary
     ├── Cleans ~/.copilot/{agents,skills}/  (idempotent reset)
-    ├── Copies ape.agent.md → ~/.copilot/agents/
+    ├── Copies inquiry.agent.md → ~/.copilot/agents/
     └── Copies skills/ → ~/.copilot/skills/
          ├── issue-start/SKILL.md
          ├── issue-end/SKILL.md
@@ -155,7 +155,7 @@ ape target get
          └── memory-write/SKILL.md
 ```
 
-Only **Copilot** is active in v0.0.x ([ADR D20](spec/target-specific-agents.md)). Adapters for Claude, Codex, Crush, and Gemini exist but are deferred — they only participate in `ape target clean` (removes orphaned files from previous multi-target deploys).
+Only **Copilot** is active in v0.0.x ([ADR D20](spec/target-specific-agents.md)). Adapters for Claude, Codex, Crush, and Gemini exist but are deferred — they only participate in `iq target clean` (removes orphaned files from previous multi-target deploys).
 
 ## Cycle lifecycle
 
@@ -181,10 +181,10 @@ A complete APE cycle from issue to merge:
 
 | Decision | Choice | Why |
 |---|---|---|
-| **One agent, many behaviors** | Single ape.agent.md, state-driven | Simpler deployment, no inter-agent coordination needed |
+| **One agent, many behaviors** | Single inquiry.agent.md, state-driven | Simpler deployment, no inter-agent coordination needed |
 | **Total FSM** | Every (state,event) explicit | No undefined behavior, contract is auditable |
 | **CLI enforces, agent proposes** | Transitions go through CLI | Agent can't corrupt state; human is gate |
 | **Skills are protocols** | Step-by-step markdown, not code | Portable across any LLM that reads markdown |
-| **Memory in repo** | .ape/ + docs/, no external DB | Version-controlled, survives any infrastructure change |
+| **Memory in repo** | .inquiry/ + docs/, no external DB | Version-controlled, survives any infrastructure change |
 | **Single target until MVP** | Copilot only (D20) | Prove methodology on one tool before fragmenting |
 | **EVOLUTION is opt-in** | config.yaml flag | Self-modification is powerful but must be conscious |

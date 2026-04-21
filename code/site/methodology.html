@@ -103,7 +103,7 @@
       </p>
       <div class="memory-cols">
         <div class="memory-col">
-          <h3><code>.ape/</code> — per-repo state</h3>
+          <h3><code>.inquiry/</code> — per-repo state</h3>
           <ul class="memory-list">
             <li><code>state.yaml</code> — current FSM state and last transition</li>
             <li><code>config.yaml</code> — feature flags (<code>evolution.enabled</code>, target, etc.)</li>
@@ -129,10 +129,10 @@
     <section aria-labelledby="risk-heading">
       <h2 id="risk-heading">The risk matrix</h2>
       <p class="section-intro">
-        Spec-only today. The idea: <code>ape state transition</code> should gate on human approval only when the engineering risk warrants it. Low-risk mechanical transitions (scaffolding, formatting, test scaffolding) proceed silently. High-risk ones (schema changes, production deploys, external API mutations) demand explicit approval.
+        Spec-only today. The idea: <code>iq state transition</code> should gate on human approval only when the engineering risk warrants it. Low-risk mechanical transitions (scaffolding, formatting, test scaffolding) proceed silently. High-risk ones (schema changes, production deploys, external API mutations) demand explicit approval.
       </p>
       <div class="callout callout--warn">
-        <strong>Roadmap item.</strong> Until the matrix is implemented, every state transition requires operator confirmation. The default is safe but verbose. See the <a href="https://github.com/ccisnedev/finite_ape_machine/blob/main/roadmap.md">roadmap</a> under long-term items.
+        <strong>Roadmap item.</strong> Until the matrix is implemented, every state transition requires operator confirmation. The default is safe but verbose. See the <a href="https://github.com/siliconbrainedmachines/inquiry/blob/main/roadmap.md">roadmap</a> under long-term items.
       </div>
     </section>
 
@@ -160,7 +160,7 @@
           <h3>APE builds APE →</h3>
           <p>The empirical bootstrap. Evidence that the methodology works — or what's still missing.</p>
         </a>
-        <a href="https://github.com/ccisnedev/finite_ape_machine/blob/main/docs/spec/finite-ape-machine.md" class="deeper-card">
+        <a href="https://github.com/siliconbrainedmachines/inquiry/blob/main/docs/spec/finite-ape-machine.md" class="deeper-card">
           <h3>Read the spec →</h3>
           <p>The formal specification, referenced throughout this page.</p>
         </a>
@@ -169,8 +169,8 @@
 
     <footer>
       <a href="index.html">Home</a>·
-      <a href="https://github.com/ccisnedev/finite_ape_machine">GitHub</a>·
-      <a href="https://github.com/ccisnedev/finite_ape_machine/blob/main/roadmap.md">Roadmap</a>·
+      <a href="https://github.com/siliconbrainedmachines/inquiry">GitHub</a>·
+      <a href="https://github.com/siliconbrainedmachines/inquiry/blob/main/roadmap.md">Roadmap</a>·
       MIT License
     </footer>
   </div>
