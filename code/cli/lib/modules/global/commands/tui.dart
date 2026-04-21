@@ -54,8 +54,8 @@ class TuiCommand implements Command<TuiInput, TuiOutput> {
 
   @override
   Future<TuiOutput> execute() async {
-    final diagram = _buildDiagram(apeVersion);
-    return TuiOutput(version: apeVersion, diagram: diagram);
+    final diagram = _buildDiagram(inquiryVersion);
+    return TuiOutput(version: inquiryVersion, diagram: diagram);
   }
 }
 

@@ -1,5 +1,5 @@
-/// Single source of truth for APE CLI version.
+/// Single source of truth for Inquiry CLI version.
 ///
 /// Update this constant when bumping version in pubspec.yaml.
 /// Both are kept in sync manually to avoid build-time complexity.
-const String apeVersion = '0.0.16';
+const String inquiryVersion = '0.1.0';

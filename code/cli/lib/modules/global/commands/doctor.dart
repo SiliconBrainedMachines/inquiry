@@ -195,12 +195,12 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   final List<TargetAdapter> _activeAdapters;
 
   /// Current APE version (injected for testability).
-  final String apeVersion;
+  final String inquiryVersion;
 
   DoctorCommand(
     this.input, {
     ProcessRunner? runProcess,
-    String? apeVersionOverride,
+    String? inquiryVersionOverride,
     FileSystemOps? fileSystemOps,
     Assets? assets,
     List<TargetAdapter>? activeAdapters,
@@ -208,7 +208,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
        _fileSystem = fileSystemOps ?? RealFileSystemOps(),
        _assets = assets,
        _activeAdapters = activeAdapters ?? [CopilotAdapter()],
-       apeVersion = apeVersionOverride ?? version_lib.apeVersion;
+       inquiryVersion = inquiryVersionOverride ?? version_lib.inquiryVersion;
 
   @override
   String? validate() => null;
@@ -219,7 +219,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     var prereqPassed = true;
 
     // Check 1: APE version (always passes, internal)
-    checks.add(DoctorCheck(name: 'ape', passed: true, version: apeVersion));
+    checks.add(DoctorCheck(name: 'ape', passed: true, version: inquiryVersion));
 
     // Check 2: git --version
     final gitCheck = await _checkCommand(

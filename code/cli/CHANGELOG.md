@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.0]
+### Changed
+- **Rebrand**: APE CLI renamed to Inquiry CLI (`inquiry` binary, `iq` alias)
+- Config directory changed from `.ape/` to `.inquiry/`
+- Package renamed from `ape_cli` to `inquiry_cli`
+- GitHub org: siliconbrainedmachines, repo: siliconbrainedmachines/inquiry
+
 ## [0.0.16]
 ### Added
 - **Site validation tests** (`site_test.dart`): 14 tests validating `code/site/` HTML structure, meta tags, install scripts, and secondary pages

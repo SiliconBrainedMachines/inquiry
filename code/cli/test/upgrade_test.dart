@@ -13,8 +13,8 @@ void main() {
     test('UpgradeOutput reports no upgrade when already latest', () {
       final output = UpgradeOutput(
         message: 'Already on the latest version',
-        previousVersion: apeVersion,
-        newVersion: apeVersion,
+        previousVersion: inquiryVersion,
+        newVersion: inquiryVersion,
         upgraded: false,
       );
       expect(output.exitCode, 0);
