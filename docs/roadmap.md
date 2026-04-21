@@ -32,8 +32,8 @@ Open issues actively being worked or queued. Grouped by theme.
 - **#63** — Backward transitions: `PLAN → ANALYZE`, `EXECUTE → ANALYZE`; mark `EVOLUTION + block` illegal
 
 ### Cycle memory infrastructure
-- **#47** — `evolution_notes.md` lifecycle in `.ape/`
-- **#48** — `.ape/` as cycle memory accessible to subagents
+- **#47** — `evolution_notes.md` lifecycle in `.inquiry/`
+- **#48** — `.inquiry/` as cycle memory accessible to subagents
 - **#49** — Single-task-per-cycle rule (one issue → one cycle, no scope drift)
 - **#57** — EVOLUTION fully internal (no human intervention required during DARWIN's pass)
 
@@ -51,17 +51,17 @@ Open issues actively being worked or queued. Grouped by theme.
 
 Larger features that require infrastructure from the near-term to land first. Not yet split into discrete issues.
 
-### `ape memory` CLI
+### `iq memory` CLI
 First-class commands for the Memory-as-Code spec:
-- `ape memory query` — index-aware lookup over `docs/`
-- `ape memory validate` — schema enforcement (this is where **BORGES** materializes as a skill, not a separate agent)
-- `ape memory write` — guided creation of new memory artifacts
+- `iq memory query` — index-aware lookup over `docs/`
+- `iq memory validate` — schema enforcement (this is where **BORGES** materializes as a skill, not a separate agent)
+- `iq memory write` — guided creation of new memory artifacts
 
-### `ape task` CLI
-Replace the manual `gh issue create / gh pr create / gh pr merge` dance with a single command per FSM transition. Currently the agent calls `gh` directly; `ape task` would wrap that with prechecks (issue exists, branch matches issue number, no scope drift per #49).
+### `iq task` CLI
+Replace the manual `gh issue create / gh pr create / gh pr merge` dance with a single command per FSM transition. Currently the agent calls `gh` directly; `iq task` would wrap that with prechecks (issue exists, branch matches issue number, no scope drift per #49).
 
 ### Multi-target reactivation
-The deferred half of [ADR D20](docs/spec/target-specific-agents.md). Adapters already exist for Claude Code, Crush, Codex, and Gemini — they just aren't wired into `ape target get`. Reactivation requires:
+The deferred half of [ADR D20](docs/spec/target-specific-agents.md). Adapters already exist for Claude Code, Crush, Codex, and Gemini — they just aren't wired into `iq target get`. Reactivation requires:
 1. Stable agent prompt API (so the same APE methodology runs identically across hosts)
 2. A test matrix that runs the same APE cycle against multiple targets
 3. The metrics system from #72 to compare targets quantitatively
@@ -83,7 +83,7 @@ Publish the empirical paper on APE-builds-APE. Requires the full metrics dataset
 Currently DARWIN proposes mutations only to *this* repo's APE. The long-term vision is a community-level DARWIN that aggregates evolution issues across many APE-using projects to propose changes upstream to the framework itself.
 
 ### Risk-matrix-driven UX
-The semantic risk matrix exists in spec but not yet in CLI behavior. End-state: `ape state transition` automatically gates on human approval only when the risk class warrants it, and silently proceeds otherwise.
+The semantic risk matrix exists in spec but not yet in CLI behavior. End-state: `iq state transition` automatically gates on human approval only when the risk class warrants it, and silently proceeds otherwise.
 
 ## Lore vs reality
 
@@ -101,8 +101,8 @@ The original [docs/lore.md](docs/lore.md) sketched 9+ apes. After two months of 
 | **GATSBY** | Absorbed | Test pseudocode lives in `plan.md` written by DESCARTES |
 | **ADA** | Replaced | BASHŌ's techne replaces explicit TDD as a separate phase |
 | **DIJKSTRA** | Future skill | Quality-gate becomes a `pre-pr-review` skill inside END, not a separate agent |
-| **BORGES** | Future skill | Schema validation becomes `ape memory validate`, not a standalone ape |
-| **HERMES** | Materialized | State transitions are now `ape state transition` (CLI command, not an agent) |
+| **BORGES** | Future skill | Schema validation becomes `iq memory validate`, not a standalone ape |
+| **HERMES** | Materialized | State transitions are now `iq state transition` (CLI command, not an agent) |
 
 The lesson: **the framework wants fewer, sharper agents, not more**. Each absorption was driven by a real cycle where two agents were doing what one could do better.
 

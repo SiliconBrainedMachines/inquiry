@@ -22,7 +22,7 @@ Technical specifications and architectural references.
 
 | Document | Description |
 |----------|-------------|
-| [ape-cli-spec.md](ape-cli-spec.md) | APE CLI/TUI technical specification |
+| [inquiry-cli-spec.md](inquiry-cli-spec.md) | Inquiry CLI/TUI technical specification |
 | [cli-as-api.md](cli-as-api.md) | CLI as API principle — commands as programmatic interface |
 
 ## Deployment

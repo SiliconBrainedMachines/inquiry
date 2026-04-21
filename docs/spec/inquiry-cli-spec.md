@@ -1,4 +1,4 @@
-# APE CLI/TUI — Technical Specification
+# Inquiry CLI/TUI — Technical Specification
 
 **Finite APE Machine — Command Line Interface & Terminal User Interface**
 
@@ -11,34 +11,34 @@ Supersedes: v0.1.0-spec (March 28, 2026)
 
 ## 1. Overview
 
-`ape` is the command-line tool for the Finite APE Machine framework. It configures development repositories to work with the APE methodology (Analyze → Plan → Execute + DARWIN) by installing agents, skills, prompts, hooks, and configuration files tailored to the user's AI coding tool of choice.
+`inquiry` (aliased as `iq`) is the command-line tool for the Finite APE Machine framework. It configures development repositories to work with the APE methodology (Analyze → Plan → Execute + DARWIN) by installing agents, skills, prompts, hooks, and configuration files tailored to the user's AI coding tool of choice.
 
-`ape` is also the **programmatic API** for apes. Skills do not write files directly — they execute `ape memory create`, `ape task create`, `ape git commit`, etc. The CLI enforces validation via BORGES (schema enforcement, documentation compiler), maintains indices, and guarantees consistency. This is a key architectural decision: the CLI is the single gateway through which all structured writes pass.
+`inquiry` is also the **programmatic API** for apes. Skills do not write files directly — they execute `iq memory create`, `iq task create`, `iq git commit`, etc. The CLI enforces validation via BORGES (schema enforcement, documentation compiler), maintains indices, and guarantees consistency. This is a key architectural decision: the CLI is the single gateway through which all structured writes pass.
 
-`ape` is a single native binary that operates in two modes:
+`inquiry` is a single native binary that operates in two modes:
 
-- **TUI mode** (`ape` with no arguments): launches an interactive terminal UI for guided configuration and management.
-- **CLI mode** (`ape <command>`): executes specific commands directly for scripting, automation, and ape invocation.
+- **TUI mode** (`iq` with no arguments): launches an interactive terminal UI for guided configuration and management.
+- **CLI mode** (`iq <command>`): executes specific commands directly for scripting, automation, and ape invocation.
 
 ### 1.1 Design Principles
 
 - **Single binary, zero runtime dependencies.** The user downloads one executable. No Dart SDK, no package manager, no runtime required.
-- **Separation of CLI tool and repo configuration.** The `ape` binary lives on the machine. The `.ape/` directory lives in the repo. They version independently.
+- **Separation of CLI tool and repo configuration.** The `inquiry` binary lives on the machine. The `.inquiry/` directory lives in the repo. They version independently.
 - **Semantic migrations, not snapshots.** Repo upgrades apply structured transformation scripts, not brute-force backup/restore.
-- **Target-agnostic source of truth.** `.ape/` is the canonical configuration. Target-specific files (`.github/agents/`, `.claude/`, `.cursorrules`) are generated from it and can be regenerated at any time.
-- **CLI as API.** Apes interact with memory, tasks, and git through `ape` commands, never through direct file manipulation. The CLI is the validation boundary.
+- **Target-agnostic source of truth.** `.inquiry/` is the canonical configuration. Target-specific files (`.github/agents/`, `.claude/`, `.cursorrules`) are generated from it and can be regenerated at any time.
+- **CLI as API.** Apes interact with memory, tasks, and git through `iq` commands, never through direct file manipulation. The CLI is the validation boundary.
 - **Memory as Code.** Project memory lives as structured .md files in the repository, versioned with git, readable by humans and agents. No external database dependencies. See: *Memory as Code Specification*.
 
 ### 1.2 Prerequisites
 
-The following tools MUST be installed and available in PATH before `ape` can operate:
+The following tools MUST be installed and available in PATH before `iq` can operate:
 
 | Prerequisite | Minimum Version | Purpose |
 |-------------|----------------|---------|
 | `git` | 2.30+ | Version control, branching, commits |
 | `gh` (GitHub CLI) | 2.0+ | Task management (Issues), PR creation, DARWIN issue creation |
 
-These are **hard requirements**, not optional integrations. `ape init` verifies their presence and aborts with a clear error message if either is missing. The rationale: git is the substrate of Memory as Code, and GitHub is the task backend for v0.x.x.
+These are **hard requirements**, not optional integrations. `iq init` verifies their presence and aborts with a clear error message if either is missing. The rationale: git is the substrate of Memory as Code, and GitHub is the task backend for v0.x.x.
 
 ---
 
@@ -66,10 +66,10 @@ Dart does not support cross-compilation. Each platform binary must be compiled o
 
 | Platform | Binary | Compilation |
 |----------|--------|-------------|
-| Windows | `ape.exe` | `dart compile exe bin/ape.dart -o ape.exe` |
-| Linux | `ape` | `dart compile exe bin/ape.dart -o ape` |
-| macOS (Intel) | `ape` | `dart compile exe bin/ape.dart -o ape` |
-| macOS (ARM) | `ape` | `dart compile exe bin/ape.dart -o ape` |
+| Windows | `inquiry.exe` | `dart compile exe bin/main.dart -o inquiry.exe` |
+| Linux | `inquiry` | `dart compile exe bin/main.dart -o inquiry` |
+| macOS (Intel) | `inquiry` | `dart compile exe bin/main.dart -o inquiry` |
+| macOS (ARM) | `inquiry` | `dart compile exe bin/main.dart -o inquiry` |
 
 Note: Windows users with WSL can also use the Linux binary directly.
 
@@ -87,22 +87,22 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            artifact: ape-linux-x64
+            artifact: inquiry-linux-x64
             ext: ""
           - os: macos-latest
-            artifact: ape-macos-arm64
+            artifact: inquiry-macos-arm64
             ext: ""
           - os: macos-13
-            artifact: ape-macos-x64
+            artifact: inquiry-macos-x64
             ext: ""
           - os: windows-latest
-            artifact: ape-windows-x64
+            artifact: inquiry-windows-x64
             ext: ".exe"
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
       - uses: dart-lang/setup-dart@v1
-      - run: dart compile exe bin/ape.dart -o ${{ matrix.artifact }}${{ matrix.ext }}
+      - run: dart compile exe bin/main.dart -o ${{ matrix.artifact }}${{ matrix.ext }}
       - uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact }}
@@ -116,10 +116,10 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           files: |
-            ape-linux-x64/ape-linux-x64
-            ape-macos-arm64/ape-macos-arm64
-            ape-macos-x64/ape-macos-x64
-            ape-windows-x64/ape-windows-x64.exe
+            inquiry-linux-x64/inquiry-linux-x64
+            inquiry-macos-arm64/inquiry-macos-arm64
+            inquiry-macos-x64/inquiry-macos-x64
+            inquiry-windows-x64/inquiry-windows-x64.exe
 ```
 
 ### 3.3 Installation
@@ -141,9 +141,9 @@ Download the binary from GitHub Releases, place it in PATH.
 
 1. Detect platform and architecture.
 2. Download the appropriate binary from the latest GitHub Release.
-3. Place binary in a standard location (`~/.ape/bin/` or `%USERPROFILE%\.ape\bin\`).
+3. Place binary in a standard location (`~/.inquiry/bin/` or `%USERPROFILE%\.inquiry\bin\`).
 4. Add to PATH if not already present.
-5. Verify installation with `ape --version`.
+5. Verify installation with `iq --version`.
 
 ---
 
@@ -188,7 +188,7 @@ ape darwin --rebuild-reports         # Rebuild materialized views
 
 ### 4.3 Command Reference
 
-#### `ape` (no arguments)
+#### `iq` (no arguments)
 
 **Mode:** TUI
 
@@ -197,13 +197,13 @@ Launches the interactive terminal user interface. The TUI provides:
 - **Init wizard:** guided repo configuration with visual selection of agent target, stack, risk defaults.
 - **Status dashboard:** current repo configuration, agent health, task overview, memory statistics.
 - **Reconfigure:** change target, add/remove skills, modify risk defaults.
-- **Upgrade manager:** visual diff of what `ape repo upgrade` will change before applying.
+- **Upgrade manager:** visual diff of what `iq repo upgrade` will change before applying.
 - **Memory browser:** navigate memory files, view indices, check BORGES status.
 - **Task board:** visual task management backed by GitHub Issues.
 
 ---
 
-#### `ape init`
+#### `iq init`
 
 **Mode:** CLI (with inline prompts)
 
@@ -211,7 +211,7 @@ Initializes APE configuration in the current repository.
 
 ```
 $ cd my-project
-$ ape init
+$ iq init
 
 Checking prerequisites...
   ✓ git 2.43.0 found
@@ -235,12 +235,12 @@ Checking prerequisites...
     Low
     High
 
-✓ Created .ape/ape.yaml
-✓ Created .ape/agents/ (8 agents)
-✓ Created .ape/skills/ (12 skills + BORGES protocol)
-✓ Created .ape/templates/ (6 templates)
-✓ Created .ape/hooks/tracker.sh
-✓ Created .ape/memory/ (structure + taxonomy + empty indices)
+✓ Created .inquiry/inquiry.yaml
+✓ Created .inquiry/agents/ (8 agents)
+✓ Created .inquiry/skills/ (12 skills + BORGES protocol)
+✓ Created .inquiry/templates/ (6 templates)
+✓ Created .inquiry/hooks/tracker.sh
+✓ Created .inquiry/memory/ (structure + taxonomy + empty indices)
 ✓ Generated .github/agents/ (target: GitHub Copilot)
 ✓ APE v0.2.0 initialized successfully
 ```
@@ -249,27 +249,27 @@ Checking prerequisites...
 - `--target <name>`: skip target selection prompt.
 - `--stack <list>`: skip stack selection prompt.
 - `--risk <level>`: skip risk level prompt.
-- `--force`: overwrite existing `.ape/` configuration.
+- `--force`: overwrite existing `.inquiry/` configuration.
 - `--dry-run`: show what would be created without writing files.
 
 **Behavior:**
 1. Verifies prerequisites: `git` and `gh` in PATH, `gh auth status` returns authenticated.
-2. If `.ape/` already exists, warns and exits (unless `--force`).
-3. Writes `.ape/` directory with full configuration.
+2. If `.inquiry/` already exists, warns and exits (unless `--force`).
+3. Writes `.inquiry/` directory with full configuration.
 4. Creates complete memory structure: directories, empty `index.md` files with headers, `taxonomy.md` with default vocabulary.
 5. Generates target-specific files based on selected agent target.
-6. Adds `.ape/status.md` to `.gitignore` suggestions (memory files ARE versioned).
+6. Adds `.inquiry/status.md` to `.gitignore` suggestions (memory files ARE versioned).
 
 ---
 
-#### `ape status`
+#### `iq status`
 
 **Mode:** CLI
 
 Shows current repo configuration, task overview, and memory health.
 
 ```
-$ ape status
+$ iq status
 
 Finite APE Machine v0.2.0
 Repo config: v0.2.0 ✓ (up to date)
@@ -300,18 +300,18 @@ DARWIN reports: 3 pending lessons
 
 ---
 
-#### `ape upgrade`
+#### `iq upgrade`
 
 **Mode:** CLI
 
-Upgrades the `ape` binary itself to the latest version.
+Upgrades the `iq` binary itself to the latest version.
 
 ```
-$ ape upgrade
+$ iq upgrade
 
 Current version: 0.1.0
 Latest version:  0.2.0
-Downloading ape-windows-x64.exe... done
+Downloading inquiry-windows-x64.exe... done
 ✓ Upgraded to v0.2.0
 
 Note: Run 'ape repo upgrade' in your repos to migrate configurations.
@@ -322,18 +322,18 @@ Note: Run 'ape repo upgrade' in your repos to migrate configurations.
 2. Compares with current version.
 3. Downloads appropriate binary for current platform.
 4. Replaces current binary (platform-appropriate swap mechanism).
-5. Reminds user to run `ape repo upgrade` in their repos.
+5. Reminds user to run `iq repo upgrade` in their repos.
 
 ---
 
-#### `ape repo upgrade`
+#### `iq repo upgrade`
 
 **Mode:** CLI
 
-Migrates the `.ape/` configuration in the current repo to match the installed CLI version.
+Migrates the `.inquiry/` configuration in the current repo to match the installed CLI version.
 
 ```
-$ ape repo upgrade
+$ iq repo upgrade
 
 Repo config version: 0.1.0
 CLI version:         0.2.0
@@ -352,12 +352,12 @@ Running doctor... ✓
 ```
 
 **Behavior:**
-1. Reads `version` from `.ape/ape.yaml`.
+1. Reads `version` from `.inquiry/inquiry.yaml`.
 2. Reads CLI version.
 3. Finds migration chain in embedded migration scripts.
 4. Shows user what will change (human gate).
 5. Applies migrations sequentially.
-6. Updates `version` in `ape.yaml`.
+6. Updates `version` in `inquiry.yaml`.
 7. Regenerates target-specific files.
 8. Runs `doctor` to verify integrity.
 
@@ -367,22 +367,22 @@ Running doctor... ✓
 
 ---
 
-#### `ape repo doctor`
+#### `iq repo doctor`
 
 **Mode:** CLI
 
-Verifies the integrity of the `.ape/` configuration and optionally validates memory.
+Verifies the integrity of the `.inquiry/` configuration and optionally validates memory.
 
 ```
-$ ape repo doctor
+$ iq repo doctor
 
-Checking .ape/ integrity...
+Checking .inquiry/ integrity...
   ✓ Prerequisites: git 2.43.0, gh 2.45.0
-  ✓ ape.yaml valid
+  ✓ inquiry.yaml valid
   ✓ All 8 agent prompts present
   ✓ All shared skills present (including BORGES)
   ✓ Templates intact
-  ✓ Target files in sync with .ape/
+  ✓ Target files in sync with .inquiry/
   ⚠ hooks/tracker.sh not executable (fixing...)
   ✓ Fixed
   ✓ Task backend reachable (GitHub)
@@ -393,12 +393,12 @@ All checks passed.
 **With `--memory` flag:**
 
 ```
-$ ape repo doctor --memory
+$ iq repo doctor --memory
 
-Checking .ape/ integrity... ✓ (all checks passed)
+Checking .inquiry/ integrity... ✓ (all checks passed)
 
 BORGES Validation:
-  Scanning .ape/memory/...
+  Scanning .inquiry/memory/...
   ✓ taxonomy.md present and valid
   ✓ All index.md files present (5/5 directories)
   ✓ Frontmatter schema: 17/17 files valid
@@ -415,17 +415,17 @@ BORGES Validation:
 
 **Checks performed (base):**
 - Prerequisites verification (`git`, `gh` in PATH, `gh auth status`).
-- `ape.yaml` schema validation.
+- `inquiry.yaml` schema validation.
 - All required agent prompt files exist.
 - All required skill files exist (including BORGES protocol).
 - Templates exist and match expected structure.
-- Target-specific files are in sync with `.ape/` source of truth.
+- Target-specific files are in sync with `.inquiry/` source of truth.
 - Hooks have correct permissions.
 - Version consistency.
 - Task backend reachable.
 
 **Additional checks with `--memory`:**
-- BORGES validation: parse all frontmatter YAML in `.ape/memory/`.
+- BORGES validation: parse all frontmatter YAML in `.inquiry/memory/`.
 - Validate against schemas (per memory type).
 - Check all cross-references (no dangling pointers).
 - Verify index consistency (indices match files).
@@ -435,40 +435,40 @@ BORGES Validation:
 
 ---
 
-#### `ape repo retarget <target>`
+#### `iq repo retarget <target>`
 
 **Mode:** CLI
 
 Changes the agent target without losing configuration.
 
 ```
-$ ape repo retarget claude
+$ iq repo retarget claude
 
 Removing: .github/agents/ (old target: GitHub Copilot)
 Generating: .claude/ (new target: Claude Code)
-Updating: .ape/ape.yaml → target: claude
+Updating: .inquiry/inquiry.yaml → target: claude
 
 ✓ Retargeted to Claude Code
 ```
 
 **Behavior:**
 1. Removes old target-specific files.
-2. Generates new target-specific files from `.ape/` source of truth.
-3. Updates target in `ape.yaml`.
+2. Generates new target-specific files from `.inquiry/` source of truth.
+3. Updates target in `inquiry.yaml`.
 4. Runs `doctor` to verify.
 
 ---
 
-#### `ape memory status`
+#### `iq memory status`
 
 **Mode:** CLI
 
 Shows memory health overview.
 
 ```
-$ ape memory status
+$ iq memory status
 
-Memory as Code — .ape/memory/
+Memory as Code — .inquiry/memory/
   Taxonomy: 28 tags (4 categories)
 
   ADRs:        3 files (2 accepted, 1 draft)
@@ -485,14 +485,14 @@ Memory as Code — .ape/memory/
 
 ---
 
-#### `ape memory search <query>`
+#### `iq memory search <query>`
 
 **Mode:** CLI
 
 Searches memory files using the query planner strategy (index scan → filter → partial read).
 
 ```
-$ ape memory search "payments"
+$ iq memory search "payments"
 
 Searching indices...
   adrs/index.md: 1 match
@@ -517,14 +517,14 @@ Results:
 
 ---
 
-#### `ape memory validate`
+#### `iq memory validate`
 
 **Mode:** CLI
 
-Runs full BORGES validation on all memory files. Equivalent to `ape repo doctor --memory` but memory-only.
+Runs full BORGES validation on all memory files. Equivalent to `iq repo doctor --memory` but memory-only.
 
 ```
-$ ape memory validate
+$ iq memory validate
 
 BORGES Validation:
   ✓ 17/17 files — schema valid
@@ -539,18 +539,18 @@ All memory files pass BORGES validation.
 - `0`: all valid.
 - `1`: violations found (printed to stderr).
 
-This allows apes to call `ape memory validate` as a pre-flight check and react to failures programmatically.
+This allows apes to call `iq memory validate` as a pre-flight check and react to failures programmatically.
 
 ---
 
-#### `ape memory create <type>`
+#### `iq memory create <type>`
 
 **Mode:** CLI (with validation)
 
 Creates a new memory file with correct schema, unique ID, and updates the index.
 
 ```
-$ ape memory create adr --title "Authentication Strategy" --tags "auth,security,jwt" --cycle cycle-003
+$ iq memory create adr --title "Authentication Strategy" --tags "auth,security,jwt" --cycle cycle-003
 
 Generating ID: adr-004 (next in sequence)
 BORGES validation:
@@ -558,8 +558,8 @@ BORGES validation:
   ✓ Tags in taxonomy
   ✓ Schema complete
 
-✓ Created .ape/memory/adrs/adr-004-auth-strategy.md
-✓ Updated .ape/memory/adrs/index.md
+✓ Created .inquiry/memory/adrs/adr-004-auth-strategy.md
+✓ Updated .inquiry/memory/adrs/index.md
 ```
 
 **Arguments:**
@@ -592,16 +592,16 @@ The CLI guarantees BORGES compliance, index consistency, and unique IDs.
 
 ---
 
-#### `ape memory rebuild-index`
+#### `iq memory rebuild-index`
 
 **Mode:** CLI
 
 Rebuilds all index.md files from the actual memory files. Recovery command for when indices get out of sync.
 
 ```
-$ ape memory rebuild-index
+$ iq memory rebuild-index
 
-Scanning .ape/memory/...
+Scanning .inquiry/memory/...
   Rebuilding adrs/index.md (3 files)... ✓
   Rebuilding specs/index.md (5 files)... ✓
   Rebuilding runbooks/index.md (4 files)... ✓
@@ -613,22 +613,22 @@ Scanning .ape/memory/...
 
 ---
 
-#### `ape task create <title>`
+#### `iq task create <title>`
 
 **Mode:** CLI
 
 Creates a task backed by a GitHub Issue.
 
 ```
-$ ape task create "Implement login endpoint" --tags "auth,api" --risk high --spec spec-001
+$ iq task create "Implement login endpoint" --tags "auth,api" --risk high --spec spec-001
 
 Creating GitHub Issue...
   Title: Implement login endpoint
-  Labels: ape-task, risk:high, auth, api
+  Labels: iq-task, risk:high, auth, api
   Body: [generated from spec-001 reference]
 
 ✓ Created task-005 (GitHub Issue #42)
-✓ Updated .ape/status.md
+✓ Updated .inquiry/status.md
 ```
 
 **Flags:**
@@ -640,20 +640,20 @@ Creating GitHub Issue...
 - `--body <file>`: path to a file with the issue body.
 - `--json`: output task metadata as JSON.
 
-**Backend:** GitHub Issues via `gh` CLI. The task ID mapping (`task-005` → `Issue #42`) is maintained in `.ape/status.md`.
+**Backend:** GitHub Issues via `gh` CLI. The task ID mapping (`task-005` → `Issue #42`) is maintained in `.inquiry/status.md`.
 
-**Design note:** `ape task` is deliberately abstract. The interface is designed so that v1.x.x can support Jira, Linear, Gainline, or any other backend by implementing a `TaskBackend` interface. In v0.x.x, GitHub is the only backend, and `gh` is the only dependency.
+**Design note:** `iq task` is deliberately abstract. The interface is designed so that v1.x.x can support Jira, Linear, Gainline, or any other backend by implementing a `TaskBackend` interface. In v0.x.x, GitHub is the only backend, and `gh` is the only dependency.
 
 ---
 
-#### `ape task list`
+#### `iq task list`
 
 **Mode:** CLI
 
 Lists tasks from the configured backend.
 
 ```
-$ ape task list
+$ iq task list
 
 ID        Status       Risk    Title                          Issue
 task-005  in_progress  high    Implement login endpoint       #42
@@ -671,14 +671,14 @@ task-008  pending      medium  Refactor user service           #45
 
 ---
 
-#### `ape task status [task-id]`
+#### `iq task status [task-id]`
 
 **Mode:** CLI
 
 Shows detailed status of a specific task, or current active task if no ID given.
 
 ```
-$ ape task status task-005
+$ iq task status task-005
 
 Task: task-005 — Implement login endpoint
 Issue: #42 (https://github.com/org/repo/issues/42)
@@ -699,7 +699,7 @@ Tests: 12 green, 3 red (phase 3)
 
 ---
 
-#### `ape task update <task-id>`
+#### `iq task update <task-id>`
 
 **Mode:** CLI
 
@@ -712,30 +712,30 @@ Updates task metadata.
 
 ---
 
-#### `ape task close <task-id>`
+#### `iq task close <task-id>`
 
 **Mode:** CLI
 
 Closes a task and its backing GitHub Issue.
 
 ```
-$ ape task close task-005
+$ iq task close task-005
 
 Closing GitHub Issue #42...
 ✓ task-005 closed
-✓ Updated .ape/status.md
+✓ Updated .inquiry/status.md
 ```
 
 ---
 
-#### `ape git branch <task-id>`
+#### `iq git branch <task-id>`
 
 **Mode:** CLI (skill)
 
 Creates a git branch from a task, following naming conventions.
 
 ```
-$ ape git branch task-005
+$ iq git branch task-005
 
 Creating branch: task-005/login-endpoint
   Source: main
@@ -748,14 +748,14 @@ Creating branch: task-005/login-endpoint
 
 ---
 
-#### `ape git commit`
+#### `iq git commit`
 
 **Mode:** CLI (skill)
 
 Creates a commit at the end of a green phase. This is a **skill** — it is invoked by apes (typically ADA — TDD implementation) after tests pass, not by humans directly (though humans can use it).
 
 ```
-$ ape git commit --phase 3 --task task-005
+$ iq git commit --phase 3 --task task-005
 
 Pre-commit checks:
   ✓ Tests passing (green)
@@ -775,7 +775,7 @@ Creating commit...
 - `--message <msg>`: override generated commit message.
 
 **Behavior:**
-1. Verifies tests are green (runs test command from `ape.yaml`).
+1. Verifies tests are green (runs test command from `inquiry.yaml`).
 2. Stages all relevant changes (source + memory files modified during the phase).
 3. Generates a structured commit message: `<task-id> phase <n>: <description>`.
 4. Commits. No human gate — a commit after green tests is a mechanical fact, not a decision.
@@ -785,14 +785,14 @@ Creating commit...
 
 ---
 
-#### `ape git pr`
+#### `iq git pr`
 
 **Mode:** CLI (skill)
 
 Creates a pull request for the current task branch.
 
 ```
-$ ape git pr --task task-005
+$ iq git pr --task task-005
 
 Pushing task-005/login-endpoint to origin...
 
@@ -818,14 +818,14 @@ Creating PR:
 
 ---
 
-#### `ape darwin --rebuild-reports`
+#### `iq darwin --rebuild-reports`
 
 **Mode:** CLI
 
 Forces a full rebuild of DARWIN's materialized views from source memory files.
 
 ```
-$ ape darwin --rebuild-reports
+$ iq darwin --rebuild-reports
 
 Reading all memory files...
   Deviations: 7
@@ -843,13 +843,13 @@ This is the recovery mechanism described in the Memory as Code spec — normally
 
 ---
 
-## 5. Repo Configuration (`.ape/`)
+## 5. Repo Configuration (`.inquiry/`)
 
 ### 5.1 Directory Structure
 
 ```
-.ape/
-├── ape.yaml                        # Main configuration file
+.inquiry/
+├── inquiry.yaml                        # Main configuration file
 │
 ├── agents/                         # Agent prompts (transition functions)
 │   ├── scout.md                    # MARCOPOLO: document ingestion
@@ -910,12 +910,12 @@ This is the recovery mechanism described in the Memory as Code spec — normally
 ```
 
 **Versioning rules:**
-- Everything in `.ape/` is versioned in git EXCEPT `status.md`.
+- Everything in `.inquiry/` is versioned in git EXCEPT `status.md`.
 - `status.md` is listed in `.gitignore` — it is ephemeral working state.
 - However, `status.md` IS committed at milestone boundaries (end of APE cycle, tag, release). This captures a snapshot of project state at meaningful points.
-- Memory files (`.ape/memory/`) are fully versioned. Git history IS the audit trail.
+- Memory files (`.inquiry/memory/`) are fully versioned. Git history IS the audit trail.
 
-### 5.2 Configuration File (`ape.yaml`)
+### 5.2 Configuration File (`inquiry.yaml`)
 
 ```yaml
 # Finite APE Machine Configuration
@@ -968,7 +968,7 @@ gates:
 tasks:
   backend: github                   # github (only backend in v0.x.x)
   sync_status: true                 # Sync task status with GitHub Issue labels
-  labels_prefix: "ape-"             # Prefix for APE-managed labels
+  labels_prefix: "iq-"             # Prefix for Inquiry-managed labels
 
 # DARWIN configuration
 darwin:
@@ -981,13 +981,13 @@ test_command: "dart test"           # or "npm test", "pytest", etc.
 ```
 
 **Changes from v0.1.0:**
-- Removed `memory.provider` and `memory.project_path`. Memory is always `.ape/memory/` as structured .md files. There is no provider choice — Memory as Code is the architecture.
+- Removed `memory.provider` and `memory.project_path`. Memory is always `.inquiry/memory/` as structured .md files. There is no provider choice — Memory as Code is the architecture.
 - Added `tasks` section with `backend`, `sync_status`, `labels_prefix`.
-- Added `test_command` for green verification during `ape git commit`.
+- Added `test_command` for green verification during `iq git commit`.
 
 ### 5.3 Agent Prompt Files
 
-Each file in `.ape/agents/` is the complete prompt for that ape — its transition function. Structure:
+Each file in `.inquiry/agents/` is the complete prompt for that ape — its transition function. Structure:
 
 ```markdown
 # MARCOPOLO — Document Ingestion and Normalization
@@ -1011,17 +1011,17 @@ Your role is to ingest heterogeneous documents and produce structured markdown.
 ## Skills Available
 - markitdown: convert PDF, Word, Excel, PowerPoint to markdown
 - codebase: read and analyze repository structure
-- memory: consult project and framework memory via `ape memory search`
+- memory: consult project and framework memory via `iq memory search`
 
 ## BORGES Protocol (Mandatory)
-[Embedded from .ape/skills/_shared/scribe.md]
+[Embedded from .inquiry/skills/_shared/scribe.md]
 
 ## CLI API
-When you need to create or modify structured data, use the `ape` CLI:
-- Create memory: `ape memory create <type> --title "..." --tags "..." --json`
-- Search memory: `ape memory search "<query>" --json`
-- Validate: `ape memory validate`
-Do NOT write to .ape/memory/ directly. The CLI enforces BORGES validation.
+When you need to create or modify structured data, use the `iq` CLI:
+- Create memory: `iq memory create <type> --title "..." --tags "..." --json`
+- Search memory: `iq memory search "<query>" --json`
+- Validate: `iq memory validate`
+Do NOT write to .inquiry/memory/ directly. The CLI enforces BORGES validation.
 
 ## Output Contract
 Produce one .md file per input document in the following structure:
@@ -1035,23 +1035,23 @@ Produce one .md file per input document in the following structure:
 
 ### 5.4 Target File Generation
 
-`ape init` and `ape repo retarget` generate target-specific files from `.ape/`:
+`iq init` and `iq repo retarget` generate target-specific files from `.inquiry/`:
 
 | Target | Files Generated | Source |
 |--------|----------------|--------|
-| GitHub Copilot | `.github/copilot-instructions.md` | `.ape/ape.yaml` + context |
-| | `.github/agents/<ape>.md` | `.ape/agents/<ape>.md` |
-| Claude Code | `CLAUDE.md` | `.ape/ape.yaml` + context |
-| | `.claude/settings.json` | `.ape/ape.yaml` |
-| | `.claude/agents/<ape>.md` | `.ape/agents/<ape>.md` |
-| Cursor | `.cursor/rules/ape.mdc` | `.ape/agents/*` combined |
-| | `.cursorrules` | `.ape/ape.yaml` + context |
-| Gemini CLI | `AGENTS.md` | `.ape/agents/*` combined |
-| | `.gemini/settings.json` | `.ape/ape.yaml` |
-| OpenCode | `.opencode/agents/<ape>.md` | `.ape/agents/<ape>.md` |
-| | `.opencode/config.yaml` | `.ape/ape.yaml` |
+| GitHub Copilot | `.github/copilot-instructions.md` | `.inquiry/inquiry.yaml` + context |
+| | `.github/agents/<ape>.md` | `.inquiry/agents/<ape>.md` |
+| Claude Code | `CLAUDE.md` | `.inquiry/inquiry.yaml` + context |
+| | `.claude/settings.json` | `.inquiry/inquiry.yaml` |
+| | `.claude/agents/<ape>.md` | `.inquiry/agents/<ape>.md` |
+| Cursor | `.cursor/rules/ape.mdc` | `.inquiry/agents/*` combined |
+| | `.cursorrules` | `.inquiry/inquiry.yaml` + context |
+| Gemini CLI | `AGENTS.md` | `.inquiry/agents/*` combined |
+| | `.gemini/settings.json` | `.inquiry/inquiry.yaml` |
+| OpenCode | `.opencode/agents/<ape>.md` | `.inquiry/agents/<ape>.md` |
+| | `.opencode/config.yaml` | `.inquiry/inquiry.yaml` |
 
-The generation is deterministic: given the same `.ape/` contents, the same target files are always produced. This means target files can be `.gitignore`d if preferred, or committed for teams that don't use `ape`.
+The generation is deterministic: given the same `.inquiry/` contents, the same target files are always produced. This means target files can be `.gitignore`d if preferred, or committed for teams that don't use `iq`.
 
 ---
 
@@ -1102,30 +1102,30 @@ List<Migration> resolveMigrationChain(String from, String to) {
 ```
 Description: Add @contract template, update DIJKSTRA prompt
 Changes:
-  + .ape/templates/contract.md (new file)
-  ~ .ape/agents/reviewer.md (add @contract verification section)
-  ~ .ape/ape.yaml (version bump)
+  + .inquiry/templates/contract.md (new file)
+  ~ .inquiry/agents/reviewer.md (add @contract verification section)
+  ~ .inquiry/inquiry.yaml (version bump)
 ```
 
 **v0.1.1 → v0.2.0:**
 ```
 Description: Add memory structure, task config, BORGES protocol, CLI API instructions
 Changes:
-  + .ape/memory/ (full directory structure with indices and taxonomy)
-  + .ape/skills/_shared/scribe.md (BORGES protocol)
-  + .ape/skills/git/skill.md (git operations skill)
-  ~ .ape/ape.yaml (remove memory.provider, add tasks section, add test_command)
-  ~ .ape/agents/*.md (add BORGES protocol section, CLI API section to all agents)
-  ~ .ape/templates/deviation.md (new format with frontmatter)
-  + .ape/templates/status.md (updated with task/memory sections)
+  + .inquiry/memory/ (full directory structure with indices and taxonomy)
+  + .inquiry/skills/_shared/scribe.md (BORGES protocol)
+  + .inquiry/skills/git/skill.md (git operations skill)
+  ~ .inquiry/inquiry.yaml (remove memory.provider, add tasks section, add test_command)
+  ~ .inquiry/agents/*.md (add BORGES protocol section, CLI API section to all agents)
+  ~ .inquiry/templates/deviation.md (new format with frontmatter)
+  + .inquiry/templates/status.md (updated with task/memory sections)
 ```
 
 ### 6.4 Safety Guarantees
 
 - Migrations are **atomic**: if any step fails, the entire migration rolls back.
 - Migrations are **idempotent**: running the same migration twice produces the same result.
-- `ape repo upgrade --dry-run` always shows what will change before applying.
-- A `.ape/.backup/` snapshot is created before each migration chain, deleted on success.
+- `iq repo upgrade --dry-run` always shows what will change before applying.
+- A `.inquiry/.backup/` snapshot is created before each migration chain, deleted on success.
 
 ---
 
@@ -1188,7 +1188,7 @@ finite-ape-machine/
 │   │       └── ape_theme.dart
 │   │
 │   ├── core/                       # Core domain logic
-│   │   ├── config.dart             # ApeConfig model (ape.yaml)
+│   │   ├── config.dart             # ApeConfig model (inquiry.yaml)
 │   │   ├── agent.dart              # Agent model
 │   │   ├── skill.dart              # Skill model
 │   │   ├── version.dart            # Version parsing and comparison
@@ -1272,7 +1272,7 @@ finite-ape-machine/
 
 ## 8. Embedded Assets
 
-The `ape` binary embeds all default agent prompts, skills, templates, hooks, and memory initialization files. These are extracted during `ape init`.
+The `iq` binary embeds all default agent prompts, skills, templates, hooks, and memory initialization files. These are extracted during `iq init`.
 
 Dart supports embedding assets at compile time. Default agent prompts and skills are stored as Dart string constants in `lib/assets/` and written to disk during init.
 
@@ -1288,11 +1288,11 @@ const scoutPrompt = r'''
 
 | Category | Contents | Extracted To |
 |----------|----------|-------------|
-| Agents | 8 agent prompts (transition functions) | `.ape/agents/` |
-| Skills | Shared skills (BORGES, memory, contracts, hermes) + specialized (markitdown, mermaid, tdd, git, security) | `.ape/skills/` |
-| Templates | Runbook, WBS, @contract, deviation, darwin-report, status | `.ape/templates/` |
-| Hooks | tracker.sh | `.ape/hooks/` |
-| Memory | taxonomy.md (default vocabulary), empty index.md templates (one per type), frontmatter schema templates | `.ape/memory/` |
+| Agents | 8 agent prompts (transition functions) | `.inquiry/agents/` |
+| Skills | Shared skills (BORGES, memory, contracts, hermes) + specialized (markitdown, mermaid, tdd, git, security) | `.inquiry/skills/` |
+| Templates | Runbook, WBS, @contract, deviation, darwin-report, status | `.inquiry/templates/` |
+| Hooks | tracker.sh | `.inquiry/hooks/` |
+| Memory | taxonomy.md (default vocabulary), empty index.md templates (one per type), frontmatter schema templates | `.inquiry/memory/` |
 
 ### 8.2 BORGES Protocol Asset
 
@@ -1300,7 +1300,7 @@ The BORGES skill is the most critical shared asset. It contains:
 
 1. The validation checklist (11 checks).
 2. The query planner protocol (index → filter → partial → full).
-3. The memory write protocol (always via `ape` CLI commands).
+3. The memory write protocol (always via `iq` CLI commands).
 4. Schema definitions for all 5 memory types.
 5. The index update protocol.
 
@@ -1309,7 +1309,7 @@ This is embedded in every agent prompt during target file generation.
 ### 8.3 Offline Guarantee
 
 This ensures:
-- No network request needed during `ape init` (works offline, after initial binary download).
+- No network request needed during `iq init` (works offline, after initial binary download).
 - Assets are versioned with the binary (each CLI version carries its matching assets).
 - Migrations can compare embedded defaults with repo files to detect customizations.
 
@@ -1362,12 +1362,12 @@ The canonical workflow through APE commands:
 ### 9.2 Skills Use CLI as API
 
 This is a fundamental architectural decision. Apes do NOT:
-- Write .md files directly to `.ape/memory/`.
+- Write .md files directly to `.inquiry/memory/`.
 - Modify `index.md` files manually.
 - Create GitHub Issues via `gh` directly.
 - Run `git commit` directly.
 
-Instead, they execute `ape` CLI commands. This creates a single validation boundary:
+Instead, they execute `iq` CLI commands. This creates a single validation boundary:
 
 ```
 [Ape prompt] → executes → [ape memory create ...] → [BORGES validates] → [file written + index updated]
@@ -1421,9 +1421,9 @@ ape install agent <name>
 
 ### 10.5 Team Configuration
 
-For teams, a shared `.ape/` configuration committed to the repo ensures all developers use the same methodology. Team-specific overrides could be supported via:
+For teams, a shared `.inquiry/` configuration committed to the repo ensures all developers use the same methodology. Team-specific overrides could be supported via:
 ```
-.ape/
+.inquiry/
 └── overrides/
     └── <user>.yaml     # Per-developer gate preferences, risk tolerance
 ```
@@ -1434,16 +1434,16 @@ For teams, a shared `.ape/` configuration committed to the repo ensures all deve
 
 | Term | Definition |
 |------|-----------|
-| **CLI as API** | Architectural decision: apes interact with memory, tasks, and git through `ape` commands, not direct file manipulation |
+| **CLI as API** | Architectural decision: apes interact with memory, tasks, and git through `iq` commands, not direct file manipulation |
 | **Memory as Code** | Architecture where project memory lives as structured .md files, versioned with git, no external database |
 | **BORGES** | Shared skill (documentation compiler) enforcing schema, structure, and cross-reference integrity on all memory files |
-| **BORGES validation** | Automated checks run by `ape repo doctor --memory` and `ape memory validate` |
+| **BORGES validation** | Automated checks run by `iq repo doctor --memory` and `iq memory validate` |
 | **Task backend** | Abstract interface for task management; GitHub Issues in v0.x.x |
-| **Green phase** | A completed TDD cycle where all tests pass — triggers `ape git commit` |
-| **Prerequisite** | External tool required by `ape` (git, gh) — verified during `ape init` |
+| **Green phase** | A completed TDD cycle where all tests pass — triggers `iq git commit` |
+| **Prerequisite** | External tool required by `iq` (git, gh) — verified during `iq init` |
 | **Target** | The AI coding tool that apes run in (Copilot, Claude Code, Cursor, etc.) |
 | **Materialized view** | Aggregate report maintained incrementally by DARWIN (`cycle-summary.md`, `risk-patterns.md`) |
-| **Taxonomy** | Controlled vocabulary for tags in `.ape/memory/taxonomy.md` |
+| **Taxonomy** | Controlled vocabulary for tags in `.inquiry/memory/taxonomy.md` |
 
 ---
 

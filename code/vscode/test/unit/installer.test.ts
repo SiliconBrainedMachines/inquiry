@@ -21,13 +21,13 @@ function createMockProcess() {
 describe('getInstallScriptUrl', () => {
   it('returns ps1 URL on win32', () => {
     const result = getInstallScriptUrl('win32');
-    assert.strictEqual(result.url, 'https://www.ccisne.dev/finite_ape_machine/install.ps1');
+    assert.strictEqual(result.url, 'https://www.si14bm.com/inquiry/install.ps1');
     assert.strictEqual(result.filename, 'ape-install.ps1');
   });
 
   it('returns sh URL on linux', () => {
     const result = getInstallScriptUrl('linux');
-    assert.strictEqual(result.url, 'https://www.ccisne.dev/finite_ape_machine/install.sh');
+    assert.strictEqual(result.url, 'https://www.si14bm.com/inquiry/install.sh');
     assert.strictEqual(result.filename, 'ape-install.sh');
   });
 
@@ -87,7 +87,7 @@ describe('installApeCli', () => {
     };
 
     await installApeCli(deps);
-    assert.strictEqual(downloadedUrl, 'https://www.ccisne.dev/finite_ape_machine/install.ps1');
+    assert.strictEqual(downloadedUrl, 'https://www.si14bm.com/inquiry/install.ps1');
     assert.strictEqual(downloadedDest, 'C:\\temp\\ape-install.ps1');
     assert.strictEqual(spawnedCmd, 'powershell');
     assert.deepStrictEqual(spawnedArgs, [
@@ -116,7 +116,7 @@ describe('installApeCli', () => {
     };
 
     await installApeCli(deps);
-    assert.strictEqual(downloadedUrl, 'https://www.ccisne.dev/finite_ape_machine/install.sh');
+    assert.strictEqual(downloadedUrl, 'https://www.si14bm.com/inquiry/install.sh');
     assert.strictEqual(spawnedCmd, 'bash');
   });
 

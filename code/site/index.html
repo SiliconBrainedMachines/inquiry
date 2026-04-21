@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>APE — Analyze. Plan. Execute.</title>
+  <title>Inquiry — Analyze. Plan. Execute.</title>
   <meta name="description" content="Analyze. Plan. Execute. AI-assisted development methodology for GitHub Copilot.">
   <meta name="theme-color" content="#0a0e1a">
 
-  <meta property="og:title" content="APE — Analyze. Plan. Execute.">
+  <meta property="og:title" content="Inquiry — Analyze. Plan. Execute.">
   <meta property="og:description" content="Analyze. Plan. Execute. AI-assisted development methodology for GitHub Copilot.">
   <meta property="og:type" content="website">
-  <meta property="og:url" content="https://www.ccisne.dev/finite_ape_machine/">
+  <meta property="og:url" content="https://www.si14bm.com/inquiry/">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="APE — Analyze. Plan. Execute.">
+  <meta name="twitter:title" content="Inquiry — Analyze. Plan. Execute.">
   <meta name="twitter:description" content="Analyze. Plan. Execute. AI-assisted development methodology for GitHub Copilot.">
 
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
@@ -31,7 +31,7 @@
       <h1><span class="ape">APE</span></h1>
       <p class="primary-tagline">Analyze. Plan. Execute.</p>
       <p class="secondary-tagline">Currently available for GitHub Copilot. More targets coming soon.</p>
-      <span class="badge">v0.0.16</span>
+      <span class="badge">v0.1.0</span>
 
       <div class="hero-install" id="install">
         <div class="os-tabs" role="tablist" aria-label="Operating system">
@@ -43,17 +43,17 @@
           <div class="install-block">
             <span class="label">PowerShell</span>
             <button class="copy-btn" onclick="copy(this)" aria-label="Copy install command">Copy</button>
-            <code>irm https://www.ccisne.dev/finite_ape_machine/install.ps1 | iex</code>
+            <code>irm https://www.si14bm.com/inquiry/install.ps1 | iex</code>
           </div>
-          <p class="install-note">Installs to <code>%LOCALAPPDATA%\ape\</code>, adds to <code>PATH</code>, and deploys APE agents to your AI coding tool.</p>
+          <p class="install-note">Installs to <code>%LOCALAPPDATA%\inquiry\</code>, adds to <code>PATH</code>, and deploys APE agents to your AI coding tool.</p>
         </div>
         <div id="panel-linux" class="os-panel" role="tabpanel" aria-labelledby="tab-linux" hidden>
           <div class="install-block">
             <span class="label">Bash</span>
             <button class="copy-btn" onclick="copy(this)" aria-label="Copy install command">Copy</button>
-            <code>curl -fsSL https://www.ccisne.dev/finite_ape_machine/install.sh | bash</code>
+            <code>curl -fsSL https://www.si14bm.com/inquiry/install.sh | bash</code>
           </div>
-          <p class="install-note">Installs to <code>~/.ape/</code> and deploys APE agents to your AI coding tool.</p>
+          <p class="install-note">Installs to <code>~/.inquiry/</code> and deploys APE agents to your AI coding tool.</p>
         </div>
       </div>
 
@@ -90,27 +90,27 @@
 
     <section id="quickstart">
       <h2>Quick start</h2>
-      <pre class="quickstart"><span class="comment"># verify prerequisites (ape, git, gh, gh auth)</span>
-<span class="cmd">ape doctor</span>
+      <pre class="quickstart"><span class="comment"># verify prerequisites (inquiry, git, gh, gh auth)</span>
+<span class="cmd">iq doctor</span>
 
 <span class="comment"># deploy APE agent + skills to your AI tool (Copilot today)</span>
-<span class="cmd">ape target get</span>
+<span class="cmd">iq target get</span>
 
-<span class="comment"># scaffold .ape/ in your repo</span>
-<span class="cmd">cd your-repo &amp;&amp; ape init</span></pre>
+<span class="comment"># scaffold .inquiry/ in your repo</span>
+<span class="cmd">cd your-repo &amp;&amp; iq init</span></pre>
     </section>
 
     <section id="commands">
       <h2>Commands</h2>
       <ul class="commands">
-        <li class="cmd"><code>ape</code><span class="desc">Print ASCII banner + version</span></li>
-        <li class="cmd"><code>ape init</code><span class="desc">Scaffold <code>.ape/</code> (state, config, mutations)</span></li>
-        <li class="cmd"><code>ape doctor</code><span class="desc">Verify prerequisites</span></li>
-        <li class="cmd"><code>ape target get</code><span class="desc">Deploy agent + skills to AI tool</span></li>
-        <li class="cmd"><code>ape state transition</code><span class="desc">Execute a deterministic FSM transition</span></li>
-        <li class="cmd"><code>ape upgrade</code><span class="desc">Update to the latest release</span></li>
+        <li class="cmd"><code>iq</code><span class="desc">Print ASCII banner + version</span></li>
+        <li class="cmd"><code>iq init</code><span class="desc">Scaffold <code>.inquiry/</code> (state, config, mutations)</span></li>
+        <li class="cmd"><code>iq doctor</code><span class="desc">Verify prerequisites</span></li>
+        <li class="cmd"><code>iq target get</code><span class="desc">Deploy agent + skills to AI tool</span></li>
+        <li class="cmd"><code>iq state transition</code><span class="desc">Execute a deterministic FSM transition</span></li>
+        <li class="cmd"><code>iq upgrade</code><span class="desc">Update to the latest release</span></li>
       </ul>
-      <p class="see-all">9 commands total — see <a href="https://github.com/ccisnedev/finite_ape_machine#available-commands">the full table on GitHub</a>.</p>
+      <p class="see-all">9 commands total — see <a href="https://github.com/siliconbrainedmachines/inquiry#available-commands">the full table on GitHub</a>.</p>
     </section>
 
     <section id="targets">
@@ -123,7 +123,7 @@
         <li class="target-badge future"><span class="dot"></span>Crush</li>
         <li class="target-badge future"><span class="dot"></span>Gemini</li>
       </ul>
-      <p class="install-note">Adapters for Claude, Codex, Crush, and Gemini already exist — awaiting a stable agent prompt API before being wired in (<a href="https://github.com/ccisnedev/finite_ape_machine/blob/main/docs/spec/target-specific-agents.md">ADR D20</a>).</p>
+      <p class="install-note">Adapters for Claude, Codex, Crush, and Gemini already exist — awaiting a stable agent prompt API before being wired in (<a href="https://github.com/siliconbrainedmachines/inquiry/blob/main/docs/spec/target-specific-agents.md">ADR D20</a>).</p>
     </section>
 
     <section id="deeper">
@@ -149,9 +149,9 @@
     </aside>
 
     <footer>
-      <a href="https://github.com/ccisnedev/finite_ape_machine">GitHub</a>·
-      <a href="https://github.com/ccisnedev/finite_ape_machine/blob/main/roadmap.md">Roadmap</a>·
-      <a href="https://github.com/ccisnedev/finite_ape_machine/blob/main/docs/spec/finite-ape-machine.md">Spec</a>·
+      <a href="https://github.com/siliconbrainedmachines/inquiry">GitHub</a>·
+      <a href="https://github.com/siliconbrainedmachines/inquiry/blob/main/roadmap.md">Roadmap</a>·
+      <a href="https://github.com/siliconbrainedmachines/inquiry/blob/main/docs/spec/finite-ape-machine.md">Spec</a>·
       MIT License
     </footer>
   </div>

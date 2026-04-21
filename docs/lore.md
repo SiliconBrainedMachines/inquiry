@@ -88,7 +88,7 @@ mizu no oto          sound of water
 
 **The allegory.** Charles Darwin (1809–1882) did not invent evolution — he discovered its mechanism: natural selection. Organisms do not improve by design; they improve because variants that survive reproduce, and variants that fail do not. The insight is that *the system improves itself through its own operation*, without a designer directing the improvement.
 
-**The ape.** DARWIN is the only agent whose output targets APE itself. After each completed cycle, it reads the full artifacts (diagnosis.md, plan.md, commits, deviations), evaluates APE's process performance, and generates improvement proposals as GitHub issues. Before creating a new issue, DARWIN searches for existing ones (`gh issue list --repo finite_ape_machine --search "keyword"`) and comments on matches instead of duplicating. DARWIN is automatic and requires no user approval. It can be disabled via `.ape/config.yaml` (`evolution.enabled: false`). Like its namesake, DARWIN does not design improvements — it observes what worked, what failed, and what mutated, then *selects* the adaptations that make the system fitter.
+**The ape.** DARWIN is the only agent whose output targets APE itself. After each completed cycle, it reads the full artifacts (diagnosis.md, plan.md, commits, deviations), evaluates APE's process performance, and generates improvement proposals as GitHub issues. Before creating a new issue, DARWIN searches for existing ones (`gh issue list --repo finite_ape_machine --search "keyword"`) and comments on matches instead of duplicating. DARWIN is automatic and requires no user approval. It can be disabled via `.inquiry/config.yaml` (`evolution.enabled: false`). Like its namesake, DARWIN does not design improvements — it observes what worked, what failed, and what mutated, then *selects* the adaptations that make the system fitter.
 
 **Key artifact:** Issues/comments in the `finite_ape_machine` repository
 
@@ -143,14 +143,14 @@ mizu no oto          sound of water
 ### BORGES
 
 **Original function:** `scribe` — Schema Enforcement and Documentation Compilation
-**Current status:** Future — may become a CLI validation layer (`ape doctor --memory`)
+**Current status:** Future — may become a CLI validation layer (`iq doctor --memory`)
 
 **The allegory.** Jorge Luis Borges (1899–1986) — librarian, author of *The Library of Babel*. The value of a library is not in its contents but in its order.
 
 ### HERMES
 
 **Original function:** `tracker` — Automatic State Update (hook, not an ape)
-**Current status:** Future — may become `ape state transition` command
+**Current status:** Future — may become `iq state transition` command
 
 **The allegory.** Hermes (Ἑρμῆς), messenger of the gods, moved between worlds carrying information without altering it. Pure communication: ensuring every realm knew the state of the others.
 
@@ -178,4 +178,4 @@ mizu no oto          sound of water
 | ADA | TDD implementation | Replaced by BASHŌ |
 | DIJKSTRA | Quality gate | Future (skill in EXECUTE) |
 | BORGES | Schema enforcement | Future (CLI validation) |
-| HERMES | State updates | Future (`ape state transition`) |
+| HERMES | State updates | Future (`iq state transition`) |
