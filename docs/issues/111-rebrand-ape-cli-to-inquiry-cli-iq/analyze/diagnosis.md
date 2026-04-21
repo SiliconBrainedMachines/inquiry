@@ -25,7 +25,7 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 |----------|-------|---------------|
 | Binary name | `inquiry` | Self-documenting; first encounter reveals purpose |
 | Alias | `iq` | Daily-use shorthand (`iq` is to `inquiry` as `gh` is to `github`) |
-| Alias mechanism | Copy on Windows, symlink on Linux/macOS | Windows symlinks require admin/Developer Mode; copy avoids permission issues |
+| Alias mechanism | Batch shim (`iq.cmd`) on Windows, symlink on Linux/macOS | Batch shim: no admin privileges, works in all shells (CMD, PowerShell, Git Bash), stays in sync with upgrades. Industry standard (npm, volta, cargo). Symlink on Linux has no privilege issues |
 | Config directory | `.inquiry/` | Replaces `.ape/`; hard cutover, no migration |
 | Primary noun | `cleanroom` | Controlled environment metaphor; no CLI collision; memorable |
 | Logo mark | `iq` | Lighthouse `i` (slab-serif stem, beacon dot with green radial gradient), circular `q` with descender |
@@ -37,7 +37,7 @@ This is not a cosmetic rename. It is a **reification of the epistemological insi
 | Extension ID | `siliconbrainedmachines.inquiry-vscode` | Replaces `ccisnedev.ape-vscode` |
 | Backward compat | None | v0.0.x series; breaking change is the contract |
 | Methodology name | APE (unchanged) | Analyze-Plan-Execute; the FSM, agents, philosophy all stay |
-| Version | Reset to v0.0.1 | New identity = new version lineage (decided during analysis) |
+| Version | Bump to v0.1.0 | Continuity: repo transfers with full history, existing tags v0.0.1-v0.0.16 preserved |
 
 ## 3. Constraints
 
