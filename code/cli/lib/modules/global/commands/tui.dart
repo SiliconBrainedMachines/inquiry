@@ -1,4 +1,4 @@
-/// `ape` (no args) — displays TUI with FSM diagram and version.
+/// `inquiry` (no args) — displays TUI with FSM diagram and version.
 library;
 
 import 'package:cli_router/cli_router.dart';
@@ -54,8 +54,8 @@ class TuiCommand implements Command<TuiInput, TuiOutput> {
 
   @override
   Future<TuiOutput> execute() async {
-    final diagram = _buildDiagram(apeVersion);
-    return TuiOutput(version: apeVersion, diagram: diagram);
+    final diagram = _buildDiagram(inquiryVersion);
+    return TuiOutput(version: inquiryVersion, diagram: diagram);
   }
 }
 
@@ -64,7 +64,7 @@ class TuiCommand implements Command<TuiInput, TuiOutput> {
 /// Builds the FSM diagram with the given version.
 String _buildDiagram(String version) {
   return '''
-Finite Ape Machine v$version
+Inquiry v$version — powered by the Finite APE Machine
 
        ╭──────────────────────────╮
 IDLE → │ Analyze → Plan → Execute │ → EVOLUTION
@@ -72,5 +72,5 @@ IDLE → │ Analyze → Plan → Execute │ → EVOLUTION
 
 
 Commands: init, doctor, version
-Run: ape --help''';
+Run: inquiry --help''';
 }

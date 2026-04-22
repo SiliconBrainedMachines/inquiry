@@ -1,4 +1,4 @@
-/// `ape version` — prints the current CLI version.
+/// `inquiry version` — prints the current CLI version.
 library;
 
 import 'package:cli_router/cli_router.dart';
@@ -46,6 +46,6 @@ class VersionCommand implements Command<VersionInput, VersionOutput> {
 
   @override
   Future<VersionOutput> execute() async {
-    return VersionOutput(version: apeVersion);
+    return VersionOutput(version: inquiryVersion);
   }
 }

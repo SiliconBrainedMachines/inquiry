@@ -12,10 +12,10 @@ import 'platform_ops.dart';
 /// Concrete [PlatformOps] for Linux.
 class LinuxPlatformOps implements PlatformOps {
   @override
-  String get binaryName => 'ape';
+  String get binaryName => 'inquiry';
 
   @override
-  String get assetName => 'ape-linux-x64.tar.gz';
+  String get assetName => 'inquiry-linux-x64.tar.gz';
 
   @override
   Future<void> expandArchive(String archivePath, String destDir) async {
