@@ -39,5 +39,5 @@ export async function inquiryInit(
 
   const terminal = createTerminal('Inquiry Init');
   terminal.show();
-  terminal.sendText(`"${binaryPath()}" init`);
+  terminal.sendText(`& "${binaryPath()}" init`);
 }
