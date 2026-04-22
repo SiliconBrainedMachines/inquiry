@@ -26,7 +26,7 @@ transitions:
     operations:
       prechecks: []
       effects: [open_analysis_context, reset_mutations, snapshot_metrics]
-      artifacts: [analysis/index.md, .ape/metrics_snapshot.yaml]
+      artifacts: [analysis/index.md, .inquiry/metrics_snapshot.yaml]
       commit_policy: none
       prompt_fragment_id: idle_to_analyze
 
@@ -283,7 +283,7 @@ transitions:
     operations:
       prechecks: [retrospective_recorded]
       effects: [close_cycle, reset_mutations, collect_metrics]
-      artifacts: [retrospective.md, .ape/metrics.yaml]
+      artifacts: [retrospective.md, .inquiry/metrics.yaml]
       commit_policy: none
       prompt_fragment_id: evolution_to_idle
 
