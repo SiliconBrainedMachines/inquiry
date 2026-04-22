@@ -100,5 +100,64 @@ void main() {
       final output = await command.execute();
       expect(output.exitCode, ExitCode.ok);
     });
+
+    test('removes bin dir from PATH via platformOps', () async {
+      final binDir = p.join(tempDir.path, 'bin');
+      final sep = Platform.isWindows ? ';' : ':';
+      final otherA = Platform.isWindows ? r'C:\other' : '/other';
+      final otherB = Platform.isWindows ? r'C:\more' : '/more';
+      final fakePath = '$otherA$sep$binDir$sep$otherB';
+      final ops = FakePlatformOps(fakeEnvValue: fakePath);
+
+      final command = UninstallCommand(
+        UninstallInput(installDir: tempDir.path),
+        deployer: deployer,
+        platformOps: ops,
+      );
+
+      await command.execute();
+
+      expect(ops.calls, contains('getEnvVariable(PATH)'));
+      final expectedNew = '$otherA$sep$otherB';
+      expect(
+        ops.calls,
+        contains('setEnvVariable(PATH, $expectedNew)'),
+      );
+    });
+
+    test('does not call setEnvVariable when bin dir is not in PATH', () async {
+      final sep = Platform.isWindows ? ';' : ':';
+      final otherA = Platform.isWindows ? r'C:\other' : '/other';
+      final otherB = Platform.isWindows ? r'C:\more' : '/more';
+      final ops = FakePlatformOps(fakeEnvValue: '$otherA$sep$otherB');
+
+      final command = UninstallCommand(
+        UninstallInput(installDir: tempDir.path),
+        deployer: deployer,
+        platformOps: ops,
+      );
+
+      await command.execute();
+
+      expect(ops.calls, contains('getEnvVariable(PATH)'));
+      expect(
+        ops.calls.where((c) => c.startsWith('setEnvVariable')),
+        isEmpty,
+      );
+    });
+
+    test('schedules deletion of install directory', () async {
+      final ops = FakePlatformOps();
+
+      final command = UninstallCommand(
+        UninstallInput(installDir: tempDir.path),
+        deployer: deployer,
+        platformOps: ops,
+      );
+
+      await command.execute();
+
+      expect(ops.calls, contains('scheduleDeletion(${tempDir.path})'));
+    });
   });
 }

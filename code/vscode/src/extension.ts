@@ -5,8 +5,18 @@ import { toggleEvolution, addMutation } from './commands';
 import { withGuard } from './command-guard';
 import { inquiryInit } from './init';
 import { installInquiryCli } from './installer';
+import { getInquiryBinDir } from './guard';
 
 export function activate(context: vscode.ExtensionContext): void {
+  // Inject inquiry bin dir into terminal PATH so `inquiry` and `iq` work
+  // in new terminals without requiring a VS Code restart after install.
+  const binDir = getInquiryBinDir();
+  if (binDir) {
+    const envCollection = context.environmentVariableCollection;
+    envCollection.prepend('PATH', binDir + path.delimiter);
+    envCollection.description = 'Adds Inquiry CLI to terminal PATH';
+  }
+
   context.subscriptions.push(
     vscode.commands.registerCommand('inquiry.init', () => {
       const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
@@ -16,7 +26,7 @@ export function activate(context: vscode.ExtensionContext): void {
         if (isInquiryInstalled()) {
           const terminal = vscode.window.createTerminal('Inquiry Init');
           terminal.show();
-          terminal.sendText(`"${getInquiryBinaryPath(getPlatform())}" init`);
+          terminal.sendText(`& "${getInquiryBinaryPath(getPlatform())}" init`);
         } else {
           vscode.window.showErrorMessage('Inquiry CLI installation failed. Please install manually.');
         }
