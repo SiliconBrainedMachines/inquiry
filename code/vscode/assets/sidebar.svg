@@ -1,3 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-  <text x="12" y="16" text-anchor="middle" font-family="'JetBrains Mono', 'Courier New', monospace" font-weight="700" font-size="10" fill="currentColor" letter-spacing="-0.5">APE</text>
+  <!-- Simplified iq for activity bar -->
+  <!-- i: dot + stem -->
+  <circle cx="7" cy="5" r="1.5" fill="currentColor"/>
+  <rect x="5.5" y="8" width="3" height="12" rx="0.5" fill="currentColor"/>
+  <!-- q: circle + descender -->
+  <circle cx="17" cy="13" r="5" fill="none" stroke="currentColor" stroke-width="2.5"/>
+  <rect x="20" y="8" width="2.5" height="16" rx="0.5" fill="currentColor"/>
 </svg>
