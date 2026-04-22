@@ -2,7 +2,7 @@
 
 **Analyze. Plan. Execute.**
 
-> Select **@ape** as your GitHub Copilot custom agent.
+> Select **@inquiry** as your GitHub Copilot custom agent.
 > Every task follows a strict cycle: **ANALYZE → PLAN → EXECUTE**.
 > No freestyling. No hallucinated plans. Structure from analysis to PR.
 
@@ -27,7 +27,7 @@ Each phase has a dedicated agent. Transitions are enforced — no skipping steps
 1. Install from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=siliconbrainedmachines.inquiry-vscode)
 2. `Ctrl+Shift+P` → **Inquiry: Init**
 3. The extension installs the CLI if missing, runs `iq init`, creates `.inquiry/`
-4. Open Copilot Chat → select **@ape** → describe your task
+4. Open Copilot Chat → select **@inquiry** → describe your task
 
 That's it. APE takes over: analysis first, then plan, then execute.
 

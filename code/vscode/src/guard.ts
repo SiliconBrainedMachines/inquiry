@@ -15,6 +15,17 @@ export function getInquiryBinaryPath(platform: string): string {
   throw new Error(`Unsupported platform: ${platform}`);
 }
 
+export function getInquiryBinDir(): string {
+  const platform = getPlatform();
+  if (platform === 'win32') {
+    return path.join(process.env.LOCALAPPDATA ?? '', 'inquiry', 'bin');
+  }
+  if (platform === 'linux') {
+    return path.join(process.env.HOME ?? '', '.inquiry', 'bin');
+  }
+  return '';
+}
+
 export function isInquiryInstalled(
   platform?: string,
   existsSync: (p: fs.PathLike) => boolean = fs.existsSync
