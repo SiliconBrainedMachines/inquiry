@@ -123,11 +123,15 @@ class InitCommand implements Command<InitInput, InitOutput> {
     if (gitignore.existsSync()) {
       final content = gitignore.readAsStringSync();
       if (!content.contains('.inquiry/')) {
-        gitignore.writeAsStringSync('$content.inquiry/\n');
+        gitignore.writeAsStringSync(
+          '$content\n# Inquiry — local cycle state (do not commit)\n.inquiry/\n',
+        );
         steps.add('Added .inquiry/ to .gitignore');
       }
     } else {
-      gitignore.writeAsStringSync('.inquiry/\n');
+      gitignore.writeAsStringSync(
+        '# Inquiry — local cycle state (do not commit)\n.inquiry/\n',
+      );
       steps.add('Created .gitignore with .inquiry/');
     }
   }
