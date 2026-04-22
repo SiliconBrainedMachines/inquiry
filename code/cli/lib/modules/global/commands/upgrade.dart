@@ -14,7 +14,7 @@ import 'package:path/path.dart' as p;
 import '../../../targets/platform_ops.dart';
 import 'version.dart';
 
-const String _repo = 'ccisnedev/finite_ape_machine';
+const String _repo = 'siliconbrainedmachines/inquiry';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 

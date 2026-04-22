@@ -26,7 +26,7 @@ The design draws directly from cooperative multitasking on 8-bit microcontroller
 | `while(true)` event loop | Chat invocations (ticks) |
 | Task with `switch(state)` | Ape with FSM (atomic states) |
 | Atomic block (`case:`) | Single ape state (RED, GREEN...) |
-| Global variables | `status.md` + `.ape/memory/` + source code |
+| Global variables | `status.md` + `.inquiry/memory/` + source code |
 | Hardware interrupt | Human writes in chat |
 | Interrupt flag / priority | Risk matrix (decides whether to ask) |
 | One core, N tasks | One prompt, N apes |
@@ -322,10 +322,10 @@ The orchestrator must speak each target's native language. The behavior is ident
 
 ### 5.2 Generation Strategy
 
-`ape init` and `ape repo retarget` generate the target-specific orchestrator from the canonical `.ape/agents/orchestrator.md`:
+`ape init` and `ape repo retarget` generate the target-specific orchestrator from the canonical `.inquiry/agents/orchestrator.md`:
 
 ```
-.ape/agents/orchestrator.md          # Canonical: behavior, state machine, rules
+.inquiry/agents/orchestrator.md          # Canonical: behavior, state machine, rules
         │
         ├──[copilot]──→ .github/agents/orchestrator.agent.md
         ├──[claude]───→ .claude/agents/orchestrator.md
@@ -381,11 +381,11 @@ You do not produce artifacts. You read state, decide, invoke, update.
 
 ## Tick Lifecycle
 On every invocation (tick):
-1. Read .ape/status.md to reconstruct current state
+1. Read .inquiry/status.md to reconstruct current state
 2. Evaluate preconditions for the next expected ape
 3. Decide: invoke ape, ask human, or wait
 4. Execute the decision
-5. Update .ape/status.md via HERMES
+5. Update .inquiry/status.md via HERMES
 6. Yield control
 
 ## State Machine
@@ -426,7 +426,7 @@ Use `ape` commands for all structured operations:
 
 ## Recovery Protocol
 If status.md is missing or corrupted:
-1. Read .ape/memory/ indices to reconstruct task state
+1. Read .inquiry/memory/ indices to reconstruct task state
 2. Read git log to determine last commit / branch state
 3. Read runbook to determine expected phase
 4. Reconstruct status.md and ask human to confirm
@@ -600,7 +600,7 @@ GATSBY for phase N+1 can begin as soon as the runbook for phase N+1 is defined (
 - The Conductor pattern (spec.md + plan.md in git) aligns naturally with Memory as Code.
 
 **State persistence:**
-- `status.md` and all `.ape/memory/` files are native Markdown — Gemini reads them directly.
+- `status.md` and all `.inquiry/memory/` files are native Markdown — Gemini reads them directly.
 - Gemini's native parallel batching enables pipelining when the orchestrator dispatches contiguous agent calls.
 
 **Key adaptation:**
@@ -629,10 +629,10 @@ If `status.md` is lost or corrupted, the orchestrator can reconstruct state from
 |--------|----------------|
 | `git branch --show-current` | Active task (branch name = `task-NNN/slug`) |
 | `git log --oneline` | Completed phases (commit messages = `task-NNN phase M: ...`) |
-| `.ape/memory/runbooks/` | Expected phases and their order |
-| `.ape/memory/deviations/` | Deviations encountered so far |
+| `.inquiry/memory/runbooks/` | Expected phases and their order |
+| `.inquiry/memory/deviations/` | Deviations encountered so far |
 | Test runner output | Current test state (RED/GREEN/none) |
-| `.ape/memory/*/index.md` | All memory produced so far |
+| `.inquiry/memory/*/index.md` | All memory produced so far |
 
 The orchestrator's recovery protocol:
 1. Detect missing/corrupted `status.md`.
@@ -739,7 +739,7 @@ ORCHESTRATOR: "Task-005 complete. 4 phases, 1 tactical deviation,
 |----------|----------------------------|
 | **Finite APE Machine** (methodology) | Defines the ape FSMs, the control loop theory, and the AAD/AAE/AAM model that the orchestrator implements |
 | **APE CLI Specification** | Defines the `ape` commands that the orchestrator invokes (`ape memory`, `ape task`, `ape git`). The CLI is the orchestrator's programmatic API |
-| **Memory as Code Specification** | Defines the shared state structure (`.ape/memory/`, indices, BORGES (schema enforcement, documentation compiler) protocol) that the orchestrator reads to evaluate preconditions and the apes write to communicate results |
+| **Memory as Code Specification** | Defines the shared state structure (`.inquiry/memory/`, indices, BORGES (schema enforcement, documentation compiler) protocol) that the orchestrator reads to evaluate preconditions and the apes write to communicate results |
 
 The orchestrator is the runtime that connects these three specifications into a working system.
 
@@ -781,7 +781,7 @@ This emergence cannot be designed — it must be observed through use. The frame
 | **Interrupt** | Human input in the chat, processed by the orchestrator on the next tick |
 | **Gate** | A human approval point, activated or deactivated by the risk matrix |
 | **Cooperative scheduling** | Each ape yields control after completing its atomic block; the orchestrator decides next |
-| **Shared state** | `status.md`, `.ape/memory/`, source code — the communication medium between apes |
+| **Shared state** | `status.md`, `.inquiry/memory/`, source code — the communication medium between apes |
 | **Emergent behavior** | System-level intelligence arising from the coordination of simple, focused apes |
 | **Meta-prompt** | A prompt that coordinates other prompts; the orchestrator is not an ape, it is the loop |
 | **Event loop** | The orchestrator's core pattern: iterate, evaluate, dispatch, repeat |

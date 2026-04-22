@@ -65,12 +65,12 @@ La extensión se activa cuando VS Code detecta archivos de proyecto:
 ]
 ```
 
-**Equivalente APE:** Activar cuando se detecte `.ape/` o `ape.yaml`.
+**Equivalente APE:** Activar cuando se detecte `.inquiry/` o `ape.yaml`.
 
 ```json
 "activationEvents": [
   "workspaceContains:.ape",
-  "workspaceContains:.ape/config.yaml"
+  "workspaceContains:.inquiry/config.yaml"
 ]
 ```
 
@@ -134,7 +134,7 @@ Cuando NO encuentra el SDK:
 ```
 1. Buscar ape.exe en PATH
 2. Si no existe → ofrecer instalación automática:
-   - Windows: descargar release de GitHub → extraer a ~/.ape/bin/
+   - Windows: descargar release de GitHub → extraer a ~/.inquiry/bin/
    - Agregar a PATH (vía PowerShell profile o terminal PATH)
 3. Si existe pero versión vieja → ofrecer actualización
 ```
@@ -160,7 +160,7 @@ Se setean con `vscode.commands.executeCommand('setContext', key, value)`.
 **Equivalente APE:**
 
 ```typescript
-"ape:projectLoaded"        // .ape/ detectado
+"ape:projectLoaded"        // .inquiry/ detectado
 "ape:cliInstalled"         // ape.exe en PATH
 "ape:cycleActive"          // Ciclo APE activo (no IDLE)
 "ape:evolutionEnabled"     // EVOLUTION habilitado
@@ -333,7 +333,7 @@ context.subscriptions.push(
 
 | Comando | Título | Cuando |
 |---------|--------|--------|
-| `ape.init` | Initialize APE Project | siempre |
+| `inquiry.init` | Initialize APE Project | siempre |
 | `ape.status` | Show Cycle Status | `ape:projectLoaded` |
 | `ape.analyze` | Start Analysis | `ape:projectLoaded && ape:currentState == IDLE` |
 | `ape.plan` | Create Plan | `ape:currentState == ANALYZE` |
@@ -410,7 +410,7 @@ const watcher = vs.workspace.createFileSystemWatcher("**/pubspec.yaml");
 watcher.onDidChange(() => runPubGet());
 ```
 
-**Para APE:** Observar `.ape/config.yaml`, `.ape/mutations.md`, `plan.md`.
+**Para APE:** Observar `.inquiry/config.yaml`, `.inquiry/mutations.md`, `plan.md`.
 
 ### 8.4 WebView Provider
 
@@ -462,7 +462,7 @@ class ApeIssuesProvider implements vs.TreeDataProvider<ApeIssue> {
 |---------|-----|
 | `vscode` (API) | Core |
 | `semver` | Comparar versiones de ape.exe |
-| `yaml` | Parsear `.ape/config.yaml` |
+| `yaml` | Parsear `.inquiry/config.yaml` |
 | `node-fetch` o `https` | Descargar releases de GitHub |
 
 ---
@@ -483,7 +483,7 @@ class ApeIssuesProvider implements vs.TreeDataProvider<ApeIssue> {
 ## 11. Arquitectura Propuesta para APE Extension
 
 ```
-ape-vscode/
+inquiry-vscode/
 ├── package.json                ← Manifest
 ├── webpack.config.js
 ├── tsconfig.json
@@ -513,7 +513,7 @@ ape-vscode/
 │   ├── status-bar/
 │   │   └── cycle-indicator.ts ← "APE: IDLE" in status bar
 │   └── watchers/
-│       └── config-watcher.ts  ← Watch .ape/ for changes
+│       └── config-watcher.ts  ← Watch .inquiry/ for changes
 ```
 
 ---
