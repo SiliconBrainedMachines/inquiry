@@ -5,13 +5,13 @@ import { getInquiryBinaryPath, isInquiryInstalled, isInquiryWorkspace, getPlatfo
 describe('getInquiryBinaryPath', () => {
   it('returns LOCALAPPDATA path on win32', () => {
     const result = getInquiryBinaryPath('win32');
-    const expected = path.join(process.env.LOCALAPPDATA!, 'inquiry', 'bin', 'inquiry.exe');
+    const expected = path.join(process.env.LOCALAPPDATA ?? '', 'inquiry', 'bin', 'inquiry.exe');
     assert.strictEqual(result, expected);
   });
 
   it('returns HOME path on linux', () => {
     const result = getInquiryBinaryPath('linux');
-    const expected = path.join(process.env.HOME!, '.inquiry', 'bin', 'inquiry');
+    const expected = path.join(process.env.HOME ?? '', '.inquiry', 'bin', 'inquiry');
     assert.strictEqual(result, expected);
   });
 
