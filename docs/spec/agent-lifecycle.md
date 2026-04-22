@@ -35,7 +35,7 @@ IDLE → ANALYZE → PLAN → EXECUTE → EVOLUTION
 
 **EXECUTE** — BASHŌ implements the plan phase by phase, like a haiku master working within formal constraints (the plan's restrictions = the 5-7-5 form). Each phase produces a commit. The final phase includes product retrospective: an implementation report with validation instructions for the user. If a deviation is detected, returns to ANALYZE (like falsifying a hypothesis in the scientific method). The user approves execution (commit + push + PR) before transitioning.
 
-**EVOLUTION** — DARWIN reads the complete cycle (diagnosis, plan, commits, deviations) and evaluates APE's own process. Searches for existing issues in `finite_ape_machine` repo (`gh issue list --search`), comments on matches or creates new issues. Automatic, no user approval required. Opt-out via `.ape/config.yaml` (`evolution.enabled: false`).
+**EVOLUTION** — DARWIN reads the complete cycle (diagnosis, plan, commits, deviations) and evaluates APE's own process. Searches for existing issues in `inquiry` repo (`gh issue list --search`), comments on matches or creates new issues. Automatic, no user approval required. Opt-out via `.inquiry/config.yaml` (`evolution.enabled: false`).
 
 ## Agent Registry
 

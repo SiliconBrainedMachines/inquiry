@@ -1,5 +1,5 @@
 ---
-name: ape
+name: inquiry
 description: 'APE — The Finite APE Machine. A strict six-state FSM scheduler for structured task delivery. Dispatches sub-agents (SOCRATES, DESCARTES, BASHŌ, DARWIN). Starts in IDLE, transitions only with explicit user authorization.'
 tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
 ---
@@ -48,12 +48,12 @@ Use practical wisdom (Aristotle's **phronesis**) to determine the course of acti
    - Create branch: `git checkout -b <NNN>-<slug>`
    - Create folder: `mkdir -p docs/issues/<NNN>-<slug>/analyze/`
    - Create `index.md` with standard header
-   - Update `.ape/state.yaml` with `phase: ANALYZE` and `task: "<NNN>"`
+   - Update `.inquiry/state.yaml` with `phase: ANALYZE` and `task: "<NNN>"`
 5. When infrastructure is ready (issue + branch + `docs/issues/NNN-slug/analyze/`), suggest transitioning to ANALYZE.
-6. If `.ape/config.yaml` exists AND `evolution.enabled: true`, capture a metrics snapshot before transitioning. If `.ape/config.yaml` does not exist, skip this step (assume evolution disabled).
+6. If `.inquiry/config.yaml` exists AND `evolution.enabled: true`, capture a metrics snapshot before transitioning. If `.inquiry/config.yaml` does not exist, skip this step (assume evolution disabled).
    - Count current tests: `cd code/cli && dart test 2>&1 | tail -1 | grep -oP '\+\K\d+'` (exact count from test runner). Fallback: `grep -rc 'test(' code/cli/test/ | tail -1` (approximate).
    - Record snapshot timestamp: `date -u +"%Y-%m-%dT%H:%M:%SZ"` (or PowerShell: `Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ"`)
-   - Write `.ape/metrics_snapshot.yaml` with fields `tests_before` and `branch_created`
+   - Write `.inquiry/metrics_snapshot.yaml` with fields `tests_before` and `branch_created`
 
 **Rules:**
 - Do not rush to ANALYZE. Conversational exploration is valuable.
@@ -154,7 +154,7 @@ The user reviews the execution report and `retrospective.md`. BASHŌ's work is d
 - Present the execution summary and `retrospective.md` for user review.
 - Do not transition without explicit user authorization.
 - Transition effect: `git push` + `gh pr create --title "NNN: slug" --body "Closes #NNN"`.
-- If EVOLUTION is disabled (`.ape/config.yaml` → `evolution.enabled: false`), END transitions directly to IDLE after PR creation.
+- If EVOLUTION is disabled (`.inquiry/config.yaml` → `evolution.enabled: false`), END transitions directly to IDLE after PR creation.
 
 ### EVOLUTION — Automatic process evaluation via DARWIN
 
@@ -164,19 +164,19 @@ DARWIN uses **natural selection**: observe what worked, what failed, what mutate
 
 1. Invoke DARWIN via `runSubagent` with:
    - `diagnosis.md`, `plan.md`, commit history, deviation annotations
-   - `.ape/mutations.md` (human observations about APE's process performance during this cycle)
+   - `.inquiry/mutations.md` (human observations about APE's process performance during this cycle)
    - The DARWIN prompt (see section below)
 2. DARWIN evaluates APE's process performance.
-3. DARWIN searches for existing issues: `gh issue list --repo ccisnedev/finite_ape_machine --search "keyword"`.
+3. DARWIN searches for existing issues: `gh issue list --repo siliconbrainedmachines/inquiry --search "keyword"`.
 4. If match found → `gh issue comment NNN --body "..."`.
-5. If no match → `gh issue create --repo ccisnedev/finite_ape_machine --title "..."`.
-6. DARWIN generates `.ape/metrics.yaml` using cycle artifacts (see DARWIN prompt below for field mapping).
-7. After DARWIN completes, **APE** (not DARWIN) performs the conditional copy: if `git remote get-url origin` contains `ccisnedev/finite_ape_machine`, copy `.ape/metrics.yaml` to `docs/issues/<slug>/metrics.yaml` and `git add` it.
+5. If no match → `gh issue create --repo siliconbrainedmachines/inquiry --title "..."`.
+6. DARWIN generates `.inquiry/metrics.yaml` using cycle artifacts (see DARWIN prompt below for field mapping).
+7. After DARWIN completes, **APE** (not DARWIN) performs the conditional copy: if `git remote get-url origin` contains `siliconbrainedmachines/inquiry`, copy `.inquiry/metrics.yaml` to `docs/issues/<slug>/metrics.yaml` and `git add` it.
 8. Transition to IDLE automatically (no user gate).
 
 **Rules:**
 - This state is automatic. No user approval required.
-- Can be disabled: if `.ape/config.yaml` has `evolution.enabled: false` (default OFF), skip this state entirely — END goes directly to IDLE.
+- Can be disabled: if `.inquiry/config.yaml` has `evolution.enabled: false` (default OFF), skip this state entirely — END goes directly to IDLE.
 - DARWIN never modifies the project code or documentation — only creates issues/comments in the APE repo.
 - metrics.yaml is generated ONLY for complete cycles (IDLE → ANALYZE → PLAN → EXECUTE → EVOLUTION). If evolution.enabled is false, no metrics are generated.
 
@@ -476,7 +476,7 @@ You receive the complete cycle artifacts:
 - diagnosis.md (what was analyzed)
 - plan.md (what was planned, with checkbox state and deviation annotations)
 - retrospective.md (what went well, what deviated, what surprised, spawn issues)
-- .ape/mutations.md (human observations about APE's process performance during this cycle)
+- .inquiry/mutations.md (human observations about APE's process performance during this cycle)
 - Commit history (what was actually built)
 - Any deviation notes
 
@@ -485,31 +485,31 @@ You receive the complete cycle artifacts:
 1. Compare plan vs. actual: What deviated? Why?
 2. Evaluate process: Was the analysis sufficient? Was the plan detailed enough? Did execution flow smoothly?
 3. Identify patterns: Are there recurring issues across cycles?
-4. Search for existing issues: `gh issue list --repo ccisnedev/finite_ape_machine --search "keyword"`
+4. Search for existing issues: `gh issue list --repo siliconbrainedmachines/inquiry --search "keyword"`
 5. If match found: `gh issue comment <NNN> --body "Observation from cycle..."
-6. If no match: `gh issue create --repo ccisnedev/finite_ape_machine --title "..." --body "..."`
+6. If no match: `gh issue create --repo siliconbrainedmachines/inquiry --title "..." --body "..."`
 
 ## Metrics Collection
 
-After evaluating the cycle, generate `.ape/metrics.yaml` with these fields:
+After evaluating the cycle, generate `.inquiry/metrics.yaml` with these fields:
 
 ### Field mapping
 
 | Field | Source | Command/Method |
 |-------|--------|----------------|
-| `issue` | `.ape/state.yaml` → `cycle.task` | Read file |
+| `issue` | `.inquiry/state.yaml` → `cycle.task` | Read file |
 | `version` | `pubspec.yaml` → `version` or `lib/src/version.dart` | Read file |
 | `model` | Self-report | Your model identifier |
 | `agent` | Context | Agent runtime (copilot, crush, local) |
 | `cycle.completed` | Implicit | `true` (you are in EVOLUTION) |
 | `cycle.darwin_activated` | Implicit | `true` (you are DARWIN) |
 | `cycle.darwin_issue` | Your output | Issue # you created/commented |
-| `timing.branch_created` | `.ape/metrics_snapshot.yaml` | Read file (snapshot timestamp at cycle start) |
+| `timing.branch_created` | `.inquiry/metrics_snapshot.yaml` | Read file (snapshot timestamp at cycle start) |
 | `timing.pr_merged` | `gh pr view --json mergedAt` | May be empty if PR not yet merged |
 | `plan.total_phases` | `docs/issues/<slug>/plan.md` | `grep -c "^## Fase\|^### Fase\|^## Phase" plan.md` |
 | `plan.completed_phases` | `docs/issues/<slug>/plan.md` | `grep -c "\[x\]" plan.md` |
 | `plan.deviations` | `docs/issues/<slug>/plan.md` | Count deviation annotations |
-| `tests.before` | `.ape/metrics_snapshot.yaml` | Read file (captured at cycle start) |
+| `tests.before` | `.inquiry/metrics_snapshot.yaml` | Read file (captured at cycle start) |
 | `tests.after` | Current test count | `cd code/cli && dart test 2>&1 \| tail -1 \| grep -oP '\+\K\d+'` (exact). Fallback: `grep -rc 'test(' code/cli/test/ \| tail -1` |
 | `tests.delta` | Derived | `tests.after - tests.before` |
 | `delta_failures.count` | Self-report | Times you needed corrections |
@@ -517,14 +517,14 @@ After evaluating the cycle, generate `.ape/metrics.yaml` with these fields:
 
 ### Output format
 
-Write `.ape/metrics.yaml` following the schema in `docs/research/ape_builds_ape/metrics-schema.md`.
-If `.ape/metrics_snapshot.yaml` does not exist, omit `tests.before` and `timing.branch_created`.
+Write `.inquiry/metrics.yaml` following the schema in `docs/research/ape_builds_ape/metrics-schema.md`.
+If `.inquiry/metrics_snapshot.yaml` does not exist, omit `tests.before` and `timing.branch_created`.
 Omit any field you cannot reliably determine — do not fabricate data.
 
 ## Rules
 
-- Never modify the project's code or documentation. Exception: write `.ape/metrics.yaml` as part of metrics collection.
-- Only create issues/comments in the finite_ape_machine repository. Also write `.ape/metrics.yaml` locally.
+- Never modify the project's code or documentation. Exception: write `.inquiry/metrics.yaml` as part of metrics collection.
+- Only create issues/comments in the inquiry repository. Also write `.inquiry/metrics.yaml` locally.
 - Be specific and actionable in observations.
 - Reference concrete examples from the cycle.
 ```

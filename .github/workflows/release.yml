@@ -88,11 +88,11 @@ jobs:
       matrix:
         include:
           - os: windows-latest
-            asset: ape-windows-x64.zip
-            binary: ape.exe
+            asset: inquiry-windows-x64.zip
+            binary: inquiry.exe
           - os: ubuntu-latest
-            asset: ape-linux-x64.tar.gz
-            binary: ape
+            asset: inquiry-linux-x64.tar.gz
+            binary: inquiry
     defaults:
       run:
         working-directory: code/cli

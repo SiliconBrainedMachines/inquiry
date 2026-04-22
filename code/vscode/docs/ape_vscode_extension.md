@@ -1,5 +1,5 @@
 ---
-id: ape-vscode-extension
+id: inquiry-vscode-extension
 title: "APE VS Code Extension — Architecture & Specification"
 date: 2026-04-19
 status: draft
@@ -27,7 +27,7 @@ status bar, y command palette — sin perder la opción de usar la terminal.
 |---------------|---------------|
 | `ape doctor` en terminal | Panel visual con check/fail por prerequisito |
 | `ape state transition -e start_analysis` | Click en botón "Start Analysis" |
-| Editar `.ape/mutations.md` manualmente | Editor inline en sidebar con timestamp |
+| Editar `.inquiry/mutations.md` manualmente | Editor inline en sidebar con timestamp |
 | No saber en qué estado estás | Status bar permanente: `APE: ANALYZE #42` |
 | Instalar `ape.exe` manualmente | Prompt automático: "Install APE CLI?" → un click |
 | Leer `plan.md` en otro tab | TreeView con checkboxes del plan |
@@ -37,7 +37,7 @@ status bar, y command palette — sin perder la opción de usar la terminal.
 ## 2. Estructura del Proyecto
 
 ```
-ape-vscode/
+inquiry-vscode/
 ├── package.json                 ← Manifiesto (commands, views, settings, menus)
 ├── tsconfig.json
 ├── webpack.config.js            ← Bundle → out/dist/extension.js
@@ -73,7 +73,7 @@ ape-vscode/
 │   │   └── version.ts           ← Parsear/comparar versiones semver
 │   │
 │   ├── commands/                ← Implementación de comandos VS Code
-│   │   ├── init.ts              ← ape.init
+│   │   ├── init.ts              ← inquiry.init
 │   │   ├── cycle.ts             ← analyze, plan, execute, evolve, end
 │   │   ├── mutations.ts         ← add mutation note
 │   │   ├── doctor.ts            ← ape.doctor
@@ -91,8 +91,8 @@ ape-vscode/
 │   │   └── cycle-indicator.ts   ← "APE: IDLE" / "APE: ANALYZE #42"
 │   │
 │   ├── watchers/
-│   │   ├── state-watcher.ts     ← Watch .ape/state.yaml → refresh views
-│   │   ├── config-watcher.ts    ← Watch .ape/config.yaml
+│   │   ├── state-watcher.ts     ← Watch .inquiry/state.yaml → refresh views
+│   │   ├── config-watcher.ts    ← Watch .inquiry/config.yaml
 │   │   └── plan-watcher.ts      ← Watch docs/issues/*/plan.md
 │   │
 │   └── utils/
@@ -120,8 +120,8 @@ ape-vscode/
 {
   "activationEvents": [
     "workspaceContains:.ape",
-    "workspaceContains:.ape/state.yaml",
-    "onCommand:ape.init",
+    "workspaceContains:.inquiry/state.yaml",
+    "onCommand:inquiry.init",
     "onCommand:ape.install",
     "onCommand:ape.doctor"
   ]
@@ -129,7 +129,7 @@ ape-vscode/
 ```
 
 La extensión se activa si:
-- El workspace contiene `.ape/` (proyecto APE existente)
+- El workspace contiene `.inquiry/` (proyecto APE existente)
 - El usuario ejecuta un comando APE manualmente (init, install, doctor)
 
 ### 3.2 Flujo de activate()
@@ -140,19 +140,19 @@ activate()
 ├─ 1. detectCli()
 │     ├─ config.ape.cliPath → check exists
 │     ├─ which("ape") → check PATH
-│     ├─ ~/.ape/bin/ape → known location
+│     ├─ ~/.inquiry/bin/ape → known location
 │     └─ NOT FOUND → setContext("ape:cliInstalled", false)
 │                   → show notification: "Install APE CLI?"
 │
 ├─ 2. detectProject()
-│     ├─ search .ape/state.yaml in workspace folders
+│     ├─ search .inquiry/state.yaml in workspace folders
 │     ├─ FOUND → parse state.yaml → setContext("ape:projectLoaded", true)
 │     │        → setContext("ape:currentState", state.cycle.phase)
 │     │        → setContext("ape:currentTask", state.cycle.task)
 │     └─ NOT FOUND → setContext("ape:projectLoaded", false)
 │
 ├─ 3. readConfig()
-│     ├─ parse .ape/config.yaml
+│     ├─ parse .inquiry/config.yaml
 │     └─ setContext("ape:evolutionEnabled", config.evolution.enabled)
 │
 ├─ 4. registerCommands()          ← todos los commands
@@ -173,7 +173,7 @@ Context keys controlan la visibilidad condicional de toda la UI.
 
 // Detección
 "ape:cliInstalled"          // boolean — ape.exe encontrado
-"ape:projectLoaded"         // boolean — .ape/ encontrado en workspace
+"ape:projectLoaded"         // boolean — .inquiry/ encontrado en workspace
 
 // Estado FSM
 "ape:currentState"          // string — IDLE | ANALYZE | PLAN | EXECUTE | END | EVOLUTION
@@ -202,7 +202,7 @@ await vscode.commands.executeCommand("setContext", "ape:currentState", "ANALYZE"
 
 | ID | Título | Categoría | When (visible) | Implementación |
 |----|--------|-----------|-----------------|----------------|
-| `ape.init` | Initialize Project | APE | siempre | `ape init` |
+| `inquiry.init` | Initialize Project | APE | siempre | `ape init` |
 | `ape.doctor` | Run Doctor | APE | siempre | `ape doctor` → parse output |
 | `ape.version` | Show Version | APE | `ape:cliInstalled` | `ape version` |
 | `ape.install` | Install CLI | APE | `!ape:cliInstalled` | GitHub Release download |
@@ -219,7 +219,7 @@ await vscode.commands.executeCommand("setContext", "ape:currentState", "ANALYZE"
 | `ape.returnToAnalysis` | Return to Analysis | APE Cycle | `ape:currentState == PLAN` | `ape state transition -e return_analysis` |
 | `ape.evolution.toggle` | Toggle Evolution | APE Config | `ape:projectLoaded` | Edita `config.yaml` |
 | `ape.mutations.add` | Add Mutation Note | APE | `ape:projectLoaded` | InputBox → append a `mutations.md` |
-| `ape.mutations.open` | Open Mutations | APE | `ape:projectLoaded` | Open `.ape/mutations.md` en editor |
+| `ape.mutations.open` | Open Mutations | APE | `ape:projectLoaded` | Open `.inquiry/mutations.md` en editor |
 | `ape.openPlan` | Open Plan | APE | `ape:hasPlan` | Open `plan.md` en editor |
 | `ape.openDiagnosis` | Open Diagnosis | APE | `ape:hasDiagnosis` | Open `diagnosis.md` en editor |
 
@@ -230,7 +230,7 @@ await vscode.commands.executeCommand("setContext", "ape:currentState", "ANALYZE"
   "contributes": {
     "commands": [
       {
-        "command": "ape.init",
+        "command": "inquiry.init",
         "title": "Initialize Project",
         "category": "APE"
       },
@@ -269,7 +269,7 @@ await vscode.commands.executeCommand("setContext", "ape:currentState", "ANALYZE"
 {
   "menus": {
     "commandPalette": [
-      { "command": "ape.init" },
+      { "command": "inquiry.init" },
       { "command": "ape.doctor" },
       { "command": "ape.install", "when": "!ape:cliInstalled" },
       { "command": "ape.update", "when": "ape:cliInstalled" },
@@ -477,7 +477,7 @@ Ejecuta `ape doctor` y muestra resultados:
 
 ### 6.6 Panel: Mutations Editor (WebView)
 
-Editor inline para `.ape/mutations.md` con:
+Editor inline para `.inquiry/mutations.md` con:
 - Textarea para escribir notas rápidas
 - Botón "Add" que agrega con timestamp
 - Preview del contenido actual
@@ -583,7 +583,7 @@ async function detectCli(): Promise<string | null> {
   const fromPath = await which("ape");
   if (fromPath) return fromPath;
 
-  // 3. Ubicación conocida (~/.ape/bin/)
+  // 3. Ubicación conocida (~/.inquiry/bin/)
   const knownPath = path.join(os.homedir(), ".ape", "bin", isWindows ? "ape.exe" : "ape");
   if (existsSync(knownPath)) return knownPath;
 
@@ -611,7 +611,7 @@ Cuando `detectCli()` retorna `null`:
 
 async function installApeCli(): Promise<boolean> {
   // 1. Obtener latest release de GitHub
-  const release = await getLatestRelease("ccisnedev", "finite_ape_machine");
+  const release = await getLatestRelease("siliconbrainedmachines", "inquiry");
 
   // 2. Determinar asset según OS
   const asset = release.assets.find(a =>
@@ -626,7 +626,7 @@ async function installApeCli(): Promise<boolean> {
       const zipPath = await download(asset.browser_download_url, tmpDir);
 
       progress.report({ increment: 50, message: "Extracting..." });
-      await extract(zipPath, installDir);  // ~/.ape/bin/
+      await extract(zipPath, installDir);  // ~/.inquiry/bin/
 
       progress.report({ increment: 90, message: "Verifying..." });
       await verifyInstallation(installDir);
@@ -662,7 +662,7 @@ Cuando `ape version` reporta una versión más vieja que la última release:
 // watchers/state-watcher.ts
 
 const stateWatcher = vscode.workspace.createFileSystemWatcher(
-  new vscode.RelativePattern(workspaceFolder, ".ape/state.yaml")
+  new vscode.RelativePattern(workspaceFolder, ".inquiry/state.yaml")
 );
 
 stateWatcher.onDidChange(async () => {
@@ -685,7 +685,7 @@ stateWatcher.onDidDelete(async () => {
 
 ```typescript
 const configWatcher = vscode.workspace.createFileSystemWatcher(
-  new vscode.RelativePattern(workspaceFolder, ".ape/config.yaml")
+  new vscode.RelativePattern(workspaceFolder, ".inquiry/config.yaml")
 );
 
 configWatcher.onDidChange(async () => {
@@ -721,7 +721,7 @@ planWatcher.onDidChange(() => planTreeProvider.refresh());
           "ape.cliPath": {
             "type": ["null", "string"],
             "default": null,
-            "markdownDescription": "Path to `ape` executable. If not set, auto-detected from PATH and `~/.ape/bin/`.",
+            "markdownDescription": "Path to `ape` executable. If not set, auto-detected from PATH and `~/.inquiry/bin/`.",
             "scope": "machine-overridable"
           },
           "ape.checkForUpdates": {
@@ -739,7 +739,7 @@ planWatcher.onDidChange(() => planTreeProvider.refresh());
           "ape.autoRefreshViews": {
             "type": "boolean",
             "default": true,
-            "description": "Automatically refresh sidebar views when .ape/ files change.",
+            "description": "Automatically refresh sidebar views when .inquiry/ files change.",
             "scope": "window"
           },
           "ape.mutationTimestamp": {
@@ -808,7 +808,7 @@ class ApeRunner {
   }
 
   async getState(): Promise<ApeState> {
-    // Parse .ape/state.yaml directamente (más rápido que ejecutar CLI)
+    // Parse .inquiry/state.yaml directamente (más rápido que ejecutar CLI)
     return parseStateYaml();
   }
 }

@@ -1,10 +1,10 @@
 import 'package:test/test.dart';
 
-import 'package:ape_cli/modules/global/commands/upgrade.dart';
-import 'package:ape_cli/modules/global/commands/version.dart';
+import 'package:inquiry_cli/modules/global/commands/upgrade.dart';
+import 'package:inquiry_cli/modules/global/commands/version.dart';
 
 void main() {
-  group('ape upgrade', () {
+  group('inquiry upgrade', () {
     test('UpgradeInput serializes correctly', () {
       final input = UpgradeInput(installDir: '/fake/dir');
       expect(input.toJson(), {'installDir': '/fake/dir'});
@@ -13,8 +13,8 @@ void main() {
     test('UpgradeOutput reports no upgrade when already latest', () {
       final output = UpgradeOutput(
         message: 'Already on the latest version',
-        previousVersion: apeVersion,
-        newVersion: apeVersion,
+        previousVersion: inquiryVersion,
+        newVersion: inquiryVersion,
         upgraded: false,
       );
       expect(output.exitCode, 0);

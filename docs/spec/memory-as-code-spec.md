@@ -29,7 +29,7 @@ Memory as Code borrows concepts from database engine design and applies them to 
 
 | Database Concept | Memory as Code Equivalent |
 |-----------------|--------------------------|
-| Table | Directory (e.g., `.ape/memory/adrs/`) |
+| Table | Directory (e.g., `.inquiry/memory/adrs/`) |
 | Row | Individual .md file |
 | Schema | Frontmatter YAML structure (enforced by BORGES (schema enforcement, documentation compiler)) |
 | Primary Index | `index.md` per directory |
@@ -71,7 +71,7 @@ An agent needing information from project memory follows a strategy analogous to
 QUERY: "What architectural decisions affect the payments module?"
 
 STEP 1 — Index Scan
-  Read: .ape/memory/adrs/index.md
+  Read: .inquiry/memory/adrs/index.md
   Result: Table of all ADRs with ID, title, date, status, tags
   Cost: 1 file read
 
@@ -99,7 +99,7 @@ VERSUS NAIVE: Read all 50 ADR files = 50 reads
 
 | Pattern | Strategy | Example |
 |---------|----------|---------|
-| Find by ID | Direct file access | "Read ADR-007" → `.ape/memory/adrs/adr-007.md` |
+| Find by ID | Direct file access | "Read ADR-007" → `.inquiry/memory/adrs/adr-007.md` |
 | Find by tag | Index scan → filter → full read | "ADRs about security" → index → filter tags → read matches |
 | Find by date range | Index scan → filter → full read | "Decisions last month" → index → filter date → read matches |
 | Find latest N | Index scan → sort → take N → full read | "Last 5 deviations" → index → sort by date → read top 5 |
@@ -114,7 +114,7 @@ Every ape that reads memory receives this instruction as part of the BORGES skil
 ```
 ## Memory Access Protocol
 
-When you need information from .ape/memory/:
+When you need information from .inquiry/memory/:
 
 1. ALWAYS read the relevant index.md FIRST. Never read individual
    files without consulting the index.
@@ -135,7 +135,7 @@ When you need information from .ape/memory/:
 
 ### 3.1 Universal Frontmatter (All Memory Files)
 
-Every file in `.ape/memory/` MUST begin with a YAML frontmatter block. This is the schema — non-negotiable, enforced by BORGES.
+Every file in `.inquiry/memory/` MUST begin with a YAML frontmatter block. This is the schema — non-negotiable, enforced by BORGES.
 
 ```yaml
 ---
@@ -155,7 +155,7 @@ related_tasks: [<task-id>, ...]        # WBS task references
 
 **Rules:**
 - `id` must be globally unique within the memory directory.
-- `tags` must use lowercase, hyphenated terms from a controlled vocabulary maintained in `.ape/memory/taxonomy.md`.
+- `tags` must use lowercase, hyphenated terms from a controlled vocabulary maintained in `.inquiry/memory/taxonomy.md`.
 - `status` transitions follow defined lifecycle (see Section 3.5).
 - All `related_*` fields use IDs that exist in their respective indices. Dangling references are schema violations.
 
@@ -398,7 +398,7 @@ Invalid transitions are schema violations. An ADR cannot go from `draft` to `sup
 
 ### 4.1 Cycle Summary (Maintained by DARWIN)
 
-`.ape/memory/reports/cycle-summary.md`
+`.inquiry/memory/reports/cycle-summary.md`
 
 ```markdown
 # Cycle Summary
@@ -444,7 +444,7 @@ Invalid transitions are schema violations. An ADR cannot go from `draft` to `sup
 
 ### 4.2 Risk Patterns (Maintained by DARWIN)
 
-`.ape/memory/reports/risk-patterns.md`
+`.inquiry/memory/reports/risk-patterns.md`
 
 ```markdown
 # Risk Patterns
@@ -488,7 +488,7 @@ BORGES is a **shared skill** available to every ape. It is not an agent — it i
 - All required fields MUST be present and non-empty.
 - All `id` fields MUST be unique (check against index before writing).
 - All `related_*` references MUST point to existing IDs (check against relevant indices).
-- All `tags` MUST exist in the taxonomy (`.ape/memory/taxonomy.md`).
+- All `tags` MUST exist in the taxonomy (`.inquiry/memory/taxonomy.md`).
 - All `status` values MUST be valid for the document type.
 
 **Structure Compliance:**
@@ -507,7 +507,7 @@ BORGES is a **shared skill** available to every ape. It is not an agent — it i
 
 ### 5.3 BORGES Validation Checklist
 
-Every ape, before completing a write to `.ape/memory/`, runs this checklist:
+Every ape, before completing a write to `.inquiry/memory/`, runs this checklist:
 
 ```
 BORGES VALIDATION:
@@ -533,14 +533,14 @@ BORGES is implemented as a section in every ape's prompt:
 ```markdown
 ## BORGES Protocol (Mandatory)
 
-You have write access to .ape/memory/. Every write MUST comply with
+You have write access to .inquiry/memory/. Every write MUST comply with
 the BORGES protocol:
 
 1. Before writing, read the schema for this document type from
-   .ape/skills/_shared/contracts.md
+   .inquiry/skills/_shared/contracts.md
 2. Generate the frontmatter YAML with ALL required fields.
 3. Verify: is the ID unique? Check the relevant index.md.
-4. Verify: do all tags exist in .ape/memory/taxonomy.md?
+4. Verify: do all tags exist in .inquiry/memory/taxonomy.md?
 5. Verify: do all related_* IDs exist? Check relevant indices.
 6. Write the file following the section template exactly.
 7. Update the relevant index.md immediately after writing.
@@ -559,7 +559,7 @@ ape repo doctor --memory
 ```
 
 This command (in the APE CLI) would:
-1. Parse all frontmatter YAML in `.ape/memory/`.
+1. Parse all frontmatter YAML in `.inquiry/memory/`.
 2. Validate against schemas.
 3. Check all cross-references.
 4. Verify index consistency.
@@ -581,19 +581,19 @@ DARWIN is the primary consumer and producer of aggregate memory. While other ape
 
 ```
 1. Read ALL deviation logs for current cycle
-   Source: .ape/memory/deviations/index.md → filter by cycle
+   Source: .inquiry/memory/deviations/index.md → filter by cycle
 
 2. Read the runbook for current cycle
-   Source: .ape/memory/runbooks/ → match by cycle
+   Source: .inquiry/memory/runbooks/ → match by cycle
 
 3. Read DIJKSTRA reports for current cycle
    Source: cycle artifacts (not in memory — in PR/commit)
 
 4. Read current cycle-summary.md
-   Source: .ape/memory/reports/cycle-summary.md
+   Source: .inquiry/memory/reports/cycle-summary.md
 
 5. Read current risk-patterns.md
-   Source: .ape/memory/reports/risk-patterns.md
+   Source: .inquiry/memory/reports/risk-patterns.md
 ```
 
 #### Analysis Operations (In-Memory)
@@ -623,19 +623,19 @@ DARWIN is the primary consumer and producer of aggregate memory. While other ape
 
 ```
 1. Create lesson file (if pattern identified)
-   Target: .ape/memory/lessons/lesson-NNN.md
+   Target: .inquiry/memory/lessons/lesson-NNN.md
    BORGES: full validation
 
 2. Update cycle-summary.md (always)
-   Target: .ape/memory/reports/cycle-summary.md
+   Target: .inquiry/memory/reports/cycle-summary.md
    Method: incremental update, not rewrite
 
 3. Update risk-patterns.md (if new patterns)
-   Target: .ape/memory/reports/risk-patterns.md
+   Target: .inquiry/memory/reports/risk-patterns.md
    Method: add/modify patterns, recalculate frequencies
 
 4. Update indices (via BORGES protocol)
-   Target: .ape/memory/lessons/index.md
+   Target: .inquiry/memory/lessons/index.md
 ```
 
 ### 6.3 DARWIN's Decision: When to Create an Issue
@@ -715,7 +715,7 @@ This ensures:
 
 | Writer | Can Write To | Cannot Write To |
 |--------|-------------|-----------------|
-| MARCOPOLO (document ingestion and normalization) | `.ape/memory/` (ingested docs, but typically not memory) | indices |
+| MARCOPOLO (document ingestion and normalization) | `.inquiry/memory/` (ingested docs, but typically not memory) | indices |
 | SOCRATES (conversational requirements understanding) | `specs/` | other ape's outputs, indices |
 | VITRUVIUS (decomposition and structuring) | `specs/` (WBS addendum) | other ape's outputs, indices |
 | SUNZI (technical design and runbook generation) | `runbooks/` | other ape's outputs, indices |
@@ -750,7 +750,7 @@ Sequential numbers are assigned by reading the latest index and incrementing. Si
 
 ### 8.1 v0.x.x: Pure Markdown
 
-- Memory lives entirely in `.ape/memory/` as .md files.
+- Memory lives entirely in `.inquiry/memory/` as .md files.
 - Indices are markdown tables in `index.md` files.
 - BORGES is a prompt-based protocol.
 - DARWIN reads files directly.
@@ -758,7 +758,7 @@ Sequential numbers are assigned by reading the latest index and incrementing. Si
 
 ### 8.2 v1.x.x: Optional SQLite Cache
 
-- `.ape/memory/` remains the source of truth.
+- `.inquiry/memory/` remains the source of truth.
 - Optional SQLite database generated FROM the .md files as a read cache.
 - FTS5 index built from frontmatter + content for faster search.
 - `ape repo index --rebuild` regenerates SQLite from .md files at any time.
@@ -785,7 +785,7 @@ At every version, the .md files are the canonical source. SQLite is always a der
 ## 9. Complete Directory Structure
 
 ```
-.ape/memory/
+.inquiry/memory/
 ├── taxonomy.md                         # Controlled vocabulary for tags
 │
 ├── adrs/                               # Architecture Decision Records

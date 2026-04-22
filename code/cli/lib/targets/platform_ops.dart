@@ -16,10 +16,10 @@ import 'windows_platform_ops.dart';
 /// Implementations: [WindowsPlatformOps], [LinuxPlatformOps].
 /// For tests: create a fake that implements this class.
 abstract class PlatformOps {
-  /// The compiled binary name for this platform (e.g. `ape.exe` or `ape`).
+  /// The compiled binary name for this platform (e.g. `inquiry.exe` or `inquiry`).
   String get binaryName;
 
-  /// The release asset name for this platform (e.g. `ape-windows-x64.zip`).
+  /// The release asset name for this platform (e.g. `inquiry-windows-x64.zip`).
   String get assetName;
 
   /// Extract an archive to [destDir].

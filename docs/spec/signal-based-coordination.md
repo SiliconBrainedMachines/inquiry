@@ -41,7 +41,7 @@ The emitter does not know who (if anyone) listens. It just signals.
 The scheduler maintains a routing table that maps signals to state changes:
 
 ```yaml
-# Embedded in ape.exe, NOT in .ape/
+# Embedded in ape.exe, NOT in .inquiry/
 signals:
   issue_ready:
     transition: IDLE → ANALYZE
@@ -104,7 +104,7 @@ EXECUTE:
 EVOLUTION:
   DARWIN invoked with full cycle artifacts
   DARWIN evaluates APE process
-  DARWIN: gh issue list --repo finite_ape_machine --search "keyword"
+  DARWIN: gh issue list --repo inquiry --search "keyword"
   DARWIN: creates/comments on issues
   Automatic → signal: cycle_complete → transition to IDLE
 ```
@@ -123,7 +123,7 @@ Sub-agent reaches COMPLETE
 
 The human's explicit approval is itself a signal — the highest-priority interrupt.
 
-**Exception:** EVOLUTION → IDLE is automatic (no human gate). DARWIN runs and completes. This can be disabled via `.ape/config.yaml` (`evolution.enabled: false`).
+**Exception:** EVOLUTION → IDLE is automatic (no human gate). DARWIN runs and completes. This can be disabled via `.inquiry/config.yaml` (`evolution.enabled: false`).
 
 ## Relationship to Existing Specs
 
@@ -133,6 +133,6 @@ The signal model replaces polling with events. Instead of checking preconditions
 
 ## Open Questions
 
-1. **Signal persistence.** If a signal fires while no agent is waiting on it, is it lost? In RTOS, event flags persist until cleared. Should `.ape/state.yaml` record pending signals?
+1. **Signal persistence.** If a signal fires while no agent is waiting on it, is it lost? In RTOS, event flags persist until cleared. Should `.inquiry/state.yaml` record pending signals?
 2. **Error signals.** What happens when BASHŌ emits `execute-blocked` instead of completing? The routing table needs error paths that return to ANALYZE.
 3. **Human signals.** Beyond approval, what other signals can the human emit? `ape abort`, `ape retry`, `ape skip`?

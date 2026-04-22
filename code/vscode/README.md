@@ -1,4 +1,4 @@
-# APE
+# Inquiry
 
 **Analyze. Plan. Execute.**
 
@@ -10,7 +10,7 @@
 
 ## How it works
 
-![APE finite state machine](https://raw.githubusercontent.com/ccisnedev/finite_ape_machine/main/code/site/img/fsm.png)
+![APE finite state machine](https://raw.githubusercontent.com/siliconbrainedmachines/inquiry/main/code/site/img/fsm.png)
 
 | Phase | What happens | Output |
 |-------|-------------|--------|
@@ -24,9 +24,9 @@ Each phase has a dedicated agent. Transitions are enforced — no skipping steps
 
 ## Quick start
 
-1. Install from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ccisnedev.ape-vscode)
-2. `Ctrl+Shift+P` → **APE: Init**
-3. The extension installs the CLI if missing, runs `ape init`, creates `.ape/`
+1. Install from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=siliconbrainedmachines.inquiry-vscode)
+2. `Ctrl+Shift+P` → **Inquiry: Init**
+3. The extension installs the CLI if missing, runs `iq init`, creates `.inquiry/`
 4. Open Copilot Chat → select **@ape** → describe your task
 
 That's it. APE takes over: analysis first, then plan, then execute.
@@ -37,9 +37,9 @@ That's it. APE takes over: analysis first, then plan, then execute.
 
 | Command | What it does |
 |---------|-------------|
-| `APE: Init` | Install CLI + scaffold `.ape/` in your workspace |
-| `APE: Toggle Evolution` | Enable/disable DARWIN's process improvement cycle |
-| `APE: Add Mutation Note` | Record an observation for DARWIN to evaluate |
+| `Inquiry: Init` | Install CLI + scaffold `.inquiry/` in your workspace |
+| `Inquiry: Toggle Evolution` | Enable/disable DARWIN's process improvement cycle |
+| `Inquiry: Add Mutation Note` | Record an observation for DARWIN to evaluate |
 
 ---
 
@@ -61,8 +61,8 @@ The status bar shows the current FSM phase in real time:
 
 ## Links
 
-- [Website](https://www.ccisne.dev/finite_ape_machine/) · [GitHub](https://github.com/ccisne-dev/finite_ape_machine) · [Issues](https://github.com/ccisne-dev/finite_ape_machine/issues)
+- [Website](https://www.si14bm.com/inquiry/) · [GitHub](https://github.com/siliconbrainedmachines/inquiry) · [Issues](https://github.com/siliconbrainedmachines/inquiry/issues)
 
-For the full methodology, see [ccisne.dev/finite_ape_machine](https://www.ccisne.dev/finite_ape_machine/).
+For the full methodology, see [si14bm.com/inquiry](https://www.si14bm.com/inquiry/).
 
 MIT © 2026 Cristian Cisneros

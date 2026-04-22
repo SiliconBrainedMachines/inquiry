@@ -1,10 +1,10 @@
-# Finite APE Machine
+# Inquiry CLI
 
-**Analyze. Plan. Execute.**
+**Powered by the Finite APE Machine** — Analyze. Plan. Execute.
 
 A methodology for AI-assisted software development that models coding agents as a cooperative finite state machine — **Analyze → Plan → Execute → End → [Evolution] → Idle** — where the value is in the process, not the model.
 
-**Status:** `v0.0.14` · 131 tests · 12 GitHub releases · Windows + Linux · Single-target MVP (Copilot)
+**Status:** `v0.1.0` · 131 tests · 12 GitHub releases · Windows + Linux · Single-target MVP (Copilot)
 
 ## What is APE?
 
@@ -14,7 +14,7 @@ APE treats coding agents ("apes") as states of a finite state machine. Each stat
 
 - **Agents as FSM states** — each phase has one ape; transitions are declarative, total, and validated (`code/cli/assets/transition_contract.yaml`)
 - **Methodology over model** — a smaller model following APE's runbook beats a frontier model freestyling
-- **Memory as Code** — project memory as version-controlled markdown in `.ape/` and `docs/`. No vector DB, no cloud dependency
+- **Memory as Code** — project memory as version-controlled markdown in `.inquiry/` and `docs/`. No vector DB, no cloud dependency
 - **DARWIN** — an evolutionary meta-agent that proposes mutations to APE itself after each cycle
 - **Semantic risk matrix** — human approval only when engineering judgment matters
 
@@ -23,40 +23,40 @@ APE treats coding agents ("apes") as states of a finite state machine. Each stat
 ### Install (Windows)
 
 ```powershell
-irm https://www.ccisne.dev/finite_ape_machine/install.ps1 | iex
+irm https://www.si14bm.com/inquiry/install.ps1 | iex
 ```
 
 ### Install (Linux)
 
 ```bash
-curl -fsSL https://www.ccisne.dev/finite_ape_machine/install.sh | bash
+curl -fsSL https://www.si14bm.com/inquiry/install.sh | bash
 ```
 
-The installer downloads the latest release, places `ape` on `PATH`, and verifies prerequisites.
+The installer downloads the latest release, places `inquiry` (aliased as `iq`) on `PATH`, and verifies prerequisites.
 
 ### Initialize a repository
 
 ```bash
-ape doctor               # verify ape, git, gh, gh auth
-ape target get           # deploy APE agent + skills to ~/.copilot
+iq doctor               # verify inquiry, git, gh, gh auth
+iq target get           # deploy APE agent + skills to ~/.copilot
 cd your-repo
-ape init                 # create .ape/{state,config,mutations}
-ape                      # show TUI banner with current FSM state
+iq init                 # create .inquiry/{state,config,mutations}
+iq                      # show TUI banner with current FSM state
 ```
 
 ## Available commands
 
 | Command | Purpose |
 |---|---|
-| `ape` | TUI banner with current FSM state and diagram |
-| `ape init` | Idempotent scaffolding of `.ape/` (state.yaml, config.yaml, mutations.md) |
-| `ape doctor` | Verify prerequisites: `ape`, `git`, `gh`, `gh auth` |
-| `ape version` | Print CLI version |
-| `ape upgrade` | Download and install latest release |
-| `ape uninstall` | Remove `ape` binary and deployed assets |
-| `ape target get` | Deploy APE agent and skills to active AI tool (Copilot) |
-| `ape target clean` | Remove deployed APE files from all known targets |
-| `ape state transition --event <e>` | Execute a deterministic FSM transition with prechecks/effects |
+| `iq` | TUI banner with current FSM state and diagram |
+| `iq init` | Idempotent scaffolding of `.inquiry/` (state.yaml, config.yaml, mutations.md) |
+| `iq doctor` | Verify prerequisites: `inquiry`, `git`, `gh`, `gh auth` |
+| `iq version` | Print CLI version |
+| `iq upgrade` | Download and install latest release |
+| `iq uninstall` | Remove `inquiry` binary and deployed assets |
+| `iq target get` | Deploy APE agent and skills to active AI tool (Copilot) |
+| `iq target clean` | Remove deployed APE files from all known targets |
+| `iq state transition --event <e>` | Execute a deterministic FSM transition with prechecks/effects |
 
 ## The APE cycle
 
@@ -70,15 +70,15 @@ ape                      # show TUI banner with current FSM state
 | **END** | — | PR gate — `gh pr create` + `gh pr merge` | merged PR |
 | **EVOLUTION** | DARWIN | Natural selection — propose APE mutations | issues in this repo |
 
-EVOLUTION is opt-in (`evolution.enabled` in `.ape/config.yaml`) and one-shot: if interrupted, the cycle simply returns to IDLE.
+EVOLUTION is opt-in (`evolution.enabled` in `.inquiry/config.yaml`) and one-shot: if interrupted, the cycle simply returns to IDLE.
 
 ## Architecture
 
-- **CLI:** Dart, compiled to a single cross-platform binary, built on top of [`modular_cli_sdk`](https://github.com/ccisnedev/modular_cli_sdk)
+- **CLI:** Dart, compiled to a single cross-platform binary, built on top of [`modular_cli_sdk`](https://github.com/siliconbrainedmachines/modular_cli_sdk)
 - **Modules:** `global` (init, doctor, version, upgrade, uninstall, tui), `target` (get, clean), `state` (transition)
 - **FSM:** declarative `transition_contract.yaml` parsed into `FsmContract` — every (state, event) pair is total (allowed or explicitly illegal)
 - **Targets:** Copilot only in v0.0.x per [ADR D20](docs/spec/target-specific-agents.md). Adapters for Claude/Codex/Crush/Gemini exist for cleanup but are deferred until MVP
-- **Memory:** `.ape/` (per-cycle runtime), `docs/issues/NNN-slug/` (per-cycle artifacts), `docs/spec/` (canonical specs)
+- **Memory:** `.inquiry/` (per-cycle runtime), `docs/issues/NNN-slug/` (per-cycle artifacts), `docs/spec/` (canonical specs)
 
 ## Documentation
 
@@ -102,4 +102,4 @@ MIT
 
 ## Related work
 
-The idea of a CLI that **installs prompts and skills** into whatever AI coding agent you use — instead of keeping custom agents and skills scattered across each tool's config — comes from [gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) (Gentleman Programming). APE takes that packaging idea in a different direction: a single-target deterministic FSM contract enforced by the CLI, with the methodology itself as the durable artifact.
+The idea of a CLI that **installs prompts and skills** into whatever AI coding agent you use — instead of keeping custom agents and skills scattered across each tool's config — comes from [gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) (Gentleman Programming). Inquiry takes that packaging idea in a different direction: a single-target deterministic FSM contract enforced by the CLI, with the methodology itself as the durable artifact.

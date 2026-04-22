@@ -12,10 +12,10 @@ import 'platform_ops.dart';
 /// Concrete [PlatformOps] for Windows.
 class WindowsPlatformOps implements PlatformOps {
   @override
-  String get binaryName => 'ape.exe';
+  String get binaryName => 'inquiry.exe';
 
   @override
-  String get assetName => 'ape-windows-x64.zip';
+  String get assetName => 'inquiry-windows-x64.zip';
 
   @override
   Future<void> expandArchive(String archivePath, String destDir) async {

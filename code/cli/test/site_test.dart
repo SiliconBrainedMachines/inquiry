@@ -6,6 +6,7 @@ import 'package:test/test.dart';
 /// These tests ensure the site stays deployable and well-formed.
 void main() {
   final siteDir = Directory('../../code/site');
+  final inquiryDir = Directory('../../code/site/inquiry');
 
   group('site directory structure', () {
     test('site directory exists', () {
@@ -13,12 +14,21 @@ void main() {
           reason: 'code/site/ must exist');
     });
 
-    test('index.html exists', () {
+    test('root index.html exists', () {
       expect(File('${siteDir.path}/index.html').existsSync(), isTrue);
     });
 
+    test('inquiry subdirectory exists', () {
+      expect(inquiryDir.existsSync(), isTrue,
+          reason: 'code/site/inquiry/ must exist');
+    });
+
+    test('inquiry/index.html exists', () {
+      expect(File('${inquiryDir.path}/index.html').existsSync(), isTrue);
+    });
+
     test('install.ps1 exists and is non-empty', () {
-      final file = File('${siteDir.path}/install.ps1');
+      final file = File('${inquiryDir.path}/install.ps1');
       expect(file.existsSync(), isTrue,
           reason: 'install.ps1 must exist for Windows install');
       expect(file.lengthSync(), greaterThan(0),
@@ -26,7 +36,7 @@ void main() {
     });
 
     test('install.sh exists and is non-empty', () {
-      final file = File('${siteDir.path}/install.sh');
+      final file = File('${inquiryDir.path}/install.sh');
       expect(file.existsSync(), isTrue,
           reason: 'install.sh must exist for Linux install');
       expect(file.lengthSync(), greaterThan(0),
@@ -38,7 +48,7 @@ void main() {
     late String html;
 
     setUpAll(() {
-      html = File('${siteDir.path}/index.html').readAsStringSync();
+      html = File('${inquiryDir.path}/index.html').readAsStringSync();
     });
 
     test('has DOCTYPE declaration', () {
@@ -96,8 +106,8 @@ void main() {
   group('secondary pages exist', () {
     for (final page in ['methodology.html', 'agents.html', 'evolution.html']) {
       test('$page exists', () {
-        expect(File('${siteDir.path}/$page').existsSync(), isTrue,
-            reason: '$page must exist in code/site/');
+        expect(File('${inquiryDir.path}/$page').existsSync(), isTrue,
+            reason: '$page must exist in code/site/inquiry/');
       });
     }
   });
