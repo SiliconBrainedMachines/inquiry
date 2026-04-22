@@ -66,7 +66,7 @@ The current implementation does not reflect this. The `memory-write` skill today
 | api-design | (domain skill for BASHŌ) | Source code | EXECUTE |
 | db-as-code | (domain skill for BASHŌ) | Migration files | EXECUTE |
 | evolution | `gh issue list`, `gh issue create`, `gh issue comment` | Issues in APE repo | EVOLUTION |
-| (future) signal | `ape signal <event>` | `.ape/state.yaml` | Any |
+| (future) signal | `ape signal <event>` | `.inquiry/state.yaml` | Any |
 | (future) status | `ape status` | stdout (derived from docs/) | Any |
 
 ## CLI Commands: Existing and Planned
@@ -75,7 +75,7 @@ The current implementation does not reflect this. The `memory-write` skill today
 
 | Command | Description |
 |---------|-------------|
-| `ape init` | Initialize APE in a repo (docs/issues/, .gitignore, .ape/state.yaml) |
+| `ape init` | Initialize APE in a repo (docs/issues/, .gitignore, .inquiry/state.yaml) |
 | `ape target get` | Deploy agent + skills to target (Copilot) |
 | `ape target clean` | Remove deployed files |
 | `ape upgrade` | Upgrade CLI binary |
@@ -88,5 +88,5 @@ The current implementation does not reflect this. The `memory-write` skill today
 |---------|-------------|
 | `ape issue start <NNN>` | Create branch + checkout + working directory from issue |
 | `ape doctor` | Verify prerequisites: git, gh, gh auth status |
-| `ape config set <key> <value>` | Configure APE settings (.ape/config.yaml) |
+| `ape config set <key> <value>` | Configure APE settings (.inquiry/config.yaml) |
 | `ape state transition <event>` | Execute state transition with effects (commit, push, etc.) |
