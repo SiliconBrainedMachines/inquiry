@@ -19,9 +19,10 @@ stateDiagram-v2
     PLAN --> IDLE : block
 
     EXECUTE --> ANALYZE : start_analyze
-    EXECUTE --> EVOLUTION : finish_execute
+    EXECUTE --> END : finish_execute
     EXECUTE --> EXECUTE : go_execute
-    EXECUTE --> IDLE : block
+    END --> EVOLUTION : pr_ready
+    END --> IDLE : pr_ready_no_evolution
 
     EVOLUTION --> IDLE : finish_evolution
 
@@ -44,10 +45,15 @@ stateDiagram-v2
     end note
 
     note right of EXECUTE
-        Prechecks for → EVOLUTION:
+        Prechecks for → END:
         issue_selected
         feature_branch_selected
-        pr_created
+    end note
+
+    note right of END
+        Prechecks for → EVOLUTION / IDLE:
+        issue_selected
+        feature_branch_selected
     end note
 
     note right of EVOLUTION

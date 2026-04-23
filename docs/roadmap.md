@@ -1,6 +1,8 @@
 # Roadmap
 
-> Where APE is going next. For where APE is today, see [README.md](../README.md).
+> Status note: This roadmap is a strategic and partially historical planning document. It preserves backlog framing from earlier releases and should not be used as the authoritative description of the current operational model. For the current canonical explanation, see [architecture.md](architecture.md), [spec/finite-ape-machine.md](spec/finite-ape-machine.md), and [thinking-tools.md](thinking-tools.md).
+
+> Where APE is going next. For where APE is today, see [../README.md](../README.md).
 
 This roadmap is **descriptive, not prescriptive**: it reflects the open issues currently in the backlog and the long-running theses that motivate the project. Anything not backed by an issue is exploratory.
 
@@ -14,14 +16,14 @@ APE aims to be a **methodology that survives any AI market scenario**. Three the
 
 The end-state is an **APE that builds APE**: a self-improving framework where every cycle generates evidence (in `metrics.yaml`, in evolution issues, in mutations.md) that feeds the next cycle.
 
-## Where we are (v0.0.14)
+## Historical planning snapshot (v0.0.14)
 
 - 5-state FSM with declarative transition contract (IDLE / ANALYZE / PLAN / EXECUTE / EVOLUTION)
 - 9 working CLI commands across 3 modules (`global`, `target`, `state`)
-- Single-target deployment (Copilot) per [ADR D20](docs/spec/target-specific-agents.md)
+- Single-target deployment (Copilot) per [ADR D20](spec/target-specific-agents.md)
 - 4 active agents: SOCRATES, DESCARTES, BASHŌ, DARWIN
 - 131 tests, cross-platform (Windows + Linux), 12 GitHub releases
-- Empirical bootstrap underway: APE is being built using APE (see [bootstrap-validation](docs/research/ape_builds_ape/bootstrap-validation.md))
+- Empirical bootstrap underway: APE is being built using APE (see [bootstrap-validation](research/ape_builds_ape/bootstrap-validation.md))
 
 ## Near-term (v0.0.x → v0.1.0)
 
@@ -61,7 +63,7 @@ First-class commands for the Memory-as-Code spec:
 Replace the manual `gh issue create / gh pr create / gh pr merge` dance with a single command per FSM transition. Currently the agent calls `gh` directly; `iq task` would wrap that with prechecks (issue exists, branch matches issue number, no scope drift per #49).
 
 ### Multi-target reactivation
-The deferred half of [ADR D20](docs/spec/target-specific-agents.md). Adapters already exist for Claude Code, Crush, Codex, and Gemini — they just aren't wired into `iq target get`. Reactivation requires:
+The deferred half of [ADR D20](spec/target-specific-agents.md). Adapters already exist for Claude Code, Crush, Codex, and Gemini — they just aren't wired into `iq target get`. Reactivation requires:
 1. Stable agent prompt API (so the same APE methodology runs identically across hosts)
 2. A test matrix that runs the same APE cycle against multiple targets
 3. The metrics system from #72 to compare targets quantitatively
@@ -77,7 +79,7 @@ Theses that take the project beyond a CLI tool.
 A reference deployment running entirely on local models (Gemma, Qwen, etc.) with no cloud dependency. This is the hardest test of thesis #1: if APE makes a 7B local model competitive with a frontier cloud model on real cycles, the framework's value is proven.
 
 ### Bootstrap-validation paper
-Publish the empirical paper on APE-builds-APE. Requires the full metrics dataset from #72 and at least 30 cycles of clean data. Plan: [docs/research/ape_builds_ape/bootstrap-validation.md](docs/research/ape_builds_ape/bootstrap-validation.md).
+Publish the empirical paper on APE-builds-APE. Requires the full metrics dataset from #72 and at least 30 cycles of clean data. Plan: [research/ape_builds_ape/bootstrap-validation.md](research/ape_builds_ape/bootstrap-validation.md).
 
 ### DARWIN community-level learning
 Currently DARWIN proposes mutations only to *this* repo's APE. The long-term vision is a community-level DARWIN that aggregates evolution issues across many APE-using projects to propose changes upstream to the framework itself.
@@ -87,7 +89,7 @@ The semantic risk matrix exists in spec but not yet in CLI behavior. End-state: 
 
 ## Lore vs reality
 
-The original [docs/lore.md](docs/lore.md) sketched 9+ apes. After two months of building APE with APE, the roster collapsed to 4 active agents. This is honest accounting, not a roadmap commitment to revive deferred ones — most were absorbed by simpler agents that turned out to do the job better.
+The original [lore.md](lore.md) sketched 9+ apes. After two months of building APE with APE, the roster collapsed to 4 active agents. This is honest accounting, not a roadmap commitment to revive deferred ones — most were absorbed by simpler agents that turned out to do the job better.
 
 | Lore agent | Status | What happened |
 |---|---|---|
