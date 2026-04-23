@@ -100,6 +100,13 @@ void main() {
       expect(content, isNotEmpty);
     });
 
+    test('reads skills/issue-start/SKILL.md with cleanrooms paths', () {
+      final content = assets.loadString('skills/issue-start/SKILL.md');
+      expect(content, contains('docs/cleanrooms/<NNN>-<slug>/analyze/'));
+      expect(content, isNot(contains('docs/issues/<NNN>-<slug>/analyze/')));
+      expect(content, isNotEmpty);
+    });
+
     test('listDirectory skills returns all skill directories', () {
       final dirs = assets.listDirectory('skills');
       expect(

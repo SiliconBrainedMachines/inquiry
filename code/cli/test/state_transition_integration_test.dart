@@ -74,14 +74,21 @@ void main() {
 
       final t4 = await transition('finish_execute');
       expect(t4.allowed, isTrue);
-      expect(t4.nextState, 'EVOLUTION');
+      expect(t4.nextState, 'END');
       expect(t4.promptFragmentId, isNotNull);
       current = t4.nextState!;
 
-      final t5 = await transition('finish_evolution');
+      final t5 = await transition('pr_ready');
       expect(t5.allowed, isTrue);
-      expect(t5.nextState, 'IDLE');
+      expect(t5.nextState, 'EVOLUTION');
       expect(t5.promptFragmentId, isNotNull);
+
+      current = t5.nextState!;
+
+      final t6 = await transition('finish_evolution');
+      expect(t6.allowed, isTrue);
+      expect(t6.nextState, 'IDLE');
+      expect(t6.promptFragmentId, isNotNull);
     });
   });
 }

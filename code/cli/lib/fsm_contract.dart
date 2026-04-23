@@ -7,6 +7,7 @@ enum FsmState {
   analyze('ANALYZE'),
   plan('PLAN'),
   execute('EXECUTE'),
+  end('END'),
   evolution('EVOLUTION');
 
   const FsmState(this.value);
@@ -25,6 +26,8 @@ enum FsmEvent {
   completeAnalysis('complete_analysis'),
   approvePlan('approve_plan'),
   finishExecute('finish_execute'),
+  prReady('pr_ready'),
+  prReadyNoEvolution('pr_ready_no_evolution'),
   finishEvolution('finish_evolution'),
   block('block'),
   goExecute('go_execute');

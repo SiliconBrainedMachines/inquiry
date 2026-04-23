@@ -7,6 +7,7 @@ states:
   - ANALYZE
   - PLAN
   - EXECUTE
+  - END
   - EVOLUTION
 
 events:
@@ -14,6 +15,8 @@ events:
   - complete_analysis
   - approve_plan
   - finish_execute
+  - pr_ready
+  - pr_ready_no_evolution
   - finish_evolution
   - block
   - go_execute
@@ -47,6 +50,18 @@ transitions:
     to: ILLEGAL
     allowed: false
     reason: "IDLE cannot finish execute"
+
+  - from: IDLE
+    event: pr_ready
+    to: ILLEGAL
+    allowed: false
+    reason: "IDLE cannot create PR or enter evolution"
+
+  - from: IDLE
+    event: pr_ready_no_evolution
+    to: ILLEGAL
+    allowed: false
+    reason: "IDLE cannot create PR or skip evolution"
 
   - from: IDLE
     event: finish_evolution
@@ -106,6 +121,18 @@ transitions:
     reason: "ANALYZE cannot finish execute"
 
   - from: ANALYZE
+    event: pr_ready
+    to: ILLEGAL
+    allowed: false
+    reason: "ANALYZE cannot create PR or enter evolution"
+
+  - from: ANALYZE
+    event: pr_ready_no_evolution
+    to: ILLEGAL
+    allowed: false
+    reason: "ANALYZE cannot create PR or skip evolution"
+
+  - from: ANALYZE
     event: finish_evolution
     to: ILLEGAL
     allowed: false
@@ -163,6 +190,18 @@ transitions:
     reason: "PLAN cannot finish execute"
 
   - from: PLAN
+    event: pr_ready
+    to: ILLEGAL
+    allowed: false
+    reason: "PLAN cannot create PR or enter evolution"
+
+  - from: PLAN
+    event: pr_ready_no_evolution
+    to: ILLEGAL
+    allowed: false
+    reason: "PLAN cannot create PR or skip evolution"
+
+  - from: PLAN
     event: finish_evolution
     to: ILLEGAL
     allowed: false
@@ -215,14 +254,26 @@ transitions:
 
   - from: EXECUTE
     event: finish_execute
-    to: EVOLUTION
+    to: END
     allowed: true
     operations:
-      prechecks: [issue_selected, feature_branch_selected, pr_created]
+      prechecks: [issue_selected, feature_branch_selected]
       effects: [finalize_execution]
       artifacts: [execution_summary.md]
-      commit_policy: push_and_pr
-      prompt_fragment_id: execute_to_evolution
+      commit_policy: stage_only
+      prompt_fragment_id: execute_to_end
+
+  - from: EXECUTE
+    event: pr_ready
+    to: ILLEGAL
+    allowed: false
+    reason: "EXECUTE must go through END before PR creation"
+
+  - from: EXECUTE
+    event: pr_ready_no_evolution
+    to: ILLEGAL
+    allowed: false
+    reason: "EXECUTE must go through END before returning to IDLE"
 
   - from: EXECUTE
     event: finish_evolution
@@ -232,14 +283,9 @@ transitions:
 
   - from: EXECUTE
     event: block
-    to: IDLE
-    allowed: true
-    operations:
-      prechecks: []
-      effects: [pause_execute]
-      artifacts: []
-      commit_policy: none
-      prompt_fragment_id: execute_to_idle
+    to: ILLEGAL
+    allowed: false
+    reason: "EXECUTE cannot pause directly to IDLE; return to ANALYZE or finish execution"
 
   - from: EXECUTE
     event: go_execute
@@ -251,6 +297,70 @@ transitions:
       artifacts: []
       commit_policy: branch_required
       prompt_fragment_id: execute_continue
+
+  - from: END
+    event: start_analyze
+    to: ILLEGAL
+    allowed: false
+    reason: "END cannot start analyze"
+
+  - from: END
+    event: complete_analysis
+    to: ILLEGAL
+    allowed: false
+    reason: "END cannot complete analysis"
+
+  - from: END
+    event: approve_plan
+    to: ILLEGAL
+    allowed: false
+    reason: "END cannot approve plan"
+
+  - from: END
+    event: finish_execute
+    to: ILLEGAL
+    allowed: false
+    reason: "END cannot finish execute again"
+
+  - from: END
+    event: pr_ready
+    to: EVOLUTION
+    allowed: true
+    operations:
+      prechecks: [issue_selected, feature_branch_selected]
+      effects: [push_branch, create_pull_request]
+      artifacts: [pull_request.md]
+      commit_policy: push_and_pr
+      prompt_fragment_id: end_to_evolution
+
+  - from: END
+    event: pr_ready_no_evolution
+    to: IDLE
+    allowed: true
+    operations:
+      prechecks: [issue_selected, feature_branch_selected]
+      effects: [push_branch, create_pull_request]
+      artifacts: [pull_request.md]
+      commit_policy: push_and_pr
+      prompt_fragment_id: end_to_idle
+
+  - from: END
+    event: finish_evolution
+    to: ILLEGAL
+    allowed: false
+    reason: "END cannot finish evolution"
+
+  - from: END
+    event: block
+    to: ILLEGAL
+    allowed: false
+    reason: "END is an explicit PR gate and cannot be paused"
+
+  - from: END
+    event: go_execute
+    to: ILLEGAL
+    allowed: false
+    reason: "END -> EXECUTE is forbidden"
 
   - from: EVOLUTION
     event: start_analyze
@@ -275,6 +385,18 @@ transitions:
     to: ILLEGAL
     allowed: false
     reason: "EVOLUTION cannot finish execute"
+
+  - from: EVOLUTION
+    event: pr_ready
+    to: ILLEGAL
+    allowed: false
+    reason: "EVOLUTION cannot create PR or re-enter itself"
+
+  - from: EVOLUTION
+    event: pr_ready_no_evolution
+    to: ILLEGAL
+    allowed: false
+    reason: "EVOLUTION cannot skip itself after it has started"
 
   - from: EVOLUTION
     event: finish_evolution
@@ -351,14 +473,10 @@ prompt_fragments:
     role: APE
     skill: memory-read
     template: "plan.pause"
-  execute_to_evolution:
-    role: DARWIN
-    skill: issue-end
-    template: "evolution.from_execution"
-  execute_to_idle:
+  execute_to_end:
     role: APE
-    skill: memory-read
-    template: "execute.pause"
+    skill: issue-end
+    template: "end.review"
   execute_continue:
     role: BASHO
     skill: issue-start
@@ -371,6 +489,14 @@ prompt_fragments:
     role: SOCRATES
     skill: memory-read
     template: "analyze.reopen"
+  end_to_evolution:
+    role: DARWIN
+    skill: issue-end
+    template: "evolution.from_end"
+  end_to_idle:
+    role: APE
+    skill: issue-end
+    template: "idle.resume"
   evolution_to_idle:
     role: APE
     skill: memory-read

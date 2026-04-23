@@ -21,6 +21,7 @@ void main() {
 
   test('matrix is total for all known states and events', () {
     expect(() => contract.assertMatrixIsTotal(), returnsNormally);
+    expect(contract.states, contains(FsmState.end));
 
     for (final state in contract.states) {
       for (final event in contract.events) {
@@ -53,6 +54,30 @@ void main() {
     expect(transition.operations!.prechecks, contains('issue_selected_or_created'));
     expect(transition.operations!.commitPolicy, 'stage_only');
     expect(transition.operations!.promptFragmentId, 'analyze_to_plan');
+  });
+
+  test('EXECUTE passes through END before PR creation', () {
+    final finishExecution = contract.transitionFor(
+      FsmState.execute,
+      FsmEvent.finishExecute,
+    );
+    final createPr = contract.transitionFor(FsmState.end, FsmEvent.prReady);
+    final skipEvolution = contract.transitionFor(
+      FsmState.end,
+      FsmEvent.prReadyNoEvolution,
+    );
+
+    expect(finishExecution.allowed, isTrue);
+    expect(finishExecution.to, FsmState.end);
+    expect(finishExecution.operations!.promptFragmentId, 'execute_to_end');
+
+    expect(createPr.allowed, isTrue);
+    expect(createPr.to, FsmState.evolution);
+    expect(createPr.operations!.promptFragmentId, 'end_to_evolution');
+
+    expect(skipEvolution.allowed, isTrue);
+    expect(skipEvolution.to, FsmState.idle);
+    expect(skipEvolution.operations!.promptFragmentId, 'end_to_idle');
   });
 
   test('preconditions contract exists for irreversible actions', () {

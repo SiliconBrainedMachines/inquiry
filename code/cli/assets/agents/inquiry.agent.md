@@ -178,7 +178,7 @@ DARWIN uses **natural selection**: observe what worked, what failed, what mutate
 - This state is automatic. No user approval required.
 - Can be disabled: if `.inquiry/config.yaml` has `evolution.enabled: false` (default OFF), skip this state entirely — END goes directly to IDLE.
 - DARWIN never modifies the project code or documentation — only creates issues/comments in the APE repo.
-- metrics.yaml is generated ONLY for complete cycles (IDLE → ANALYZE → PLAN → EXECUTE → EVOLUTION). If evolution.enabled is false, no metrics are generated.
+- metrics.yaml is generated ONLY for complete cycles (IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION). If evolution.enabled is false, no metrics are generated.
 
 ---
 
@@ -249,7 +249,7 @@ docs/cleanrooms/NNN-<slug>/
 
 ## SOCRATES — Subagent Prompt (ANALYZE)
 
-APE constructs the SOCRATES prompt on each invocation. SOCRATES is a subagent that **does not know** about PLAN, EXECUTE, EVOLUTION, or state transitions. Its entire world is analysis.
+APE constructs the SOCRATES prompt on each invocation. SOCRATES is a subagent that **does not know** about PLAN, EXECUTE, END, EVOLUTION, or state transitions. Its entire world is analysis.
 
 ### Base Prompt (always included)
 
@@ -355,7 +355,7 @@ Ask: "Are we asking the right questions?", "Is there a better question we should
 
 ## DESCARTES — Subagent Prompt (PLAN)
 
-DESCARTES is a subagent that **does not know** about ANALYZE, EXECUTE, or EVOLUTION. Its entire world is planning.
+DESCARTES is a subagent that **does not know** about ANALYZE, EXECUTE, END, or EVOLUTION. Its entire world is planning.
 
 ### Prompt
 
@@ -403,7 +403,7 @@ The plan's structure is immutable after approval. Only checkboxes and deviation 
 
 ## BASHŌ — Subagent Prompt (EXECUTE)
 
-BASHŌ is a subagent that **does not know** about IDLE, ANALYZE, or EVOLUTION. Its entire world is implementation.
+BASHŌ is a subagent that **does not know** about IDLE, ANALYZE, END, or EVOLUTION. Its entire world is implementation.
 
 ### Prompt
 
