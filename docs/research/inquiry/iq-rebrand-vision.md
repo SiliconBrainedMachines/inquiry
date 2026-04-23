@@ -9,6 +9,10 @@ author: ccisnedev
 
 # Inquiry CLI (`iq`) — Rebrand Vision
 
+> Status note: This document captures the rebrand vision at the moment it was formulated. It is useful as historical reasoning about why Inquiry became the public identity, but it is not the authoritative description of the current repository layout or command surface.
+>
+> In particular, examples here that mention `.ape/`, `ape` commands, or `docs/issues/<NNN-slug>/` reflect the transition context in which the rebrand was being designed. For the current repository doctrine, start with [../../index.md](../../index.md), [../../architecture.md](../../architecture.md), [../../spec/finite-ape-machine.md](../../spec/finite-ape-machine.md), and [../inquiry/index.md](index.md).
+
 ## Origin
 
 During the Socratic analysis of issue #110 (naming APE's primary subcommand noun), a deeper insight emerged: **inquiry is not a subcommand of APE — inquiry IS the identity**. APE (Analyze-Plan-Execute) is the methodology that inquiry employs, not the other way around.

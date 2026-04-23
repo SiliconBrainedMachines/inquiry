@@ -1,21 +1,22 @@
 # The Apes — Lore
 
+> This document is the repository's nomenclature, allegory, and historical-context companion for the named agents. For the current canonical explanation of Thinking Tools, see [thinking-tools.md](thinking-tools.md). For the current system-level explanation of APE as orchestrating methodology, see [architecture.md](architecture.md).
+
+> Historical naming note: APE was the project's initial working name. Inquiry is the current system name and public identity. The individual sub-agents remain "apes" here as a lore and avatar convention, and the phrase "APE builds APE" is preserved only as historical bootstrap wording from that earlier phase.
+
 > Every ape in the Finite APE Machine carries two identities: a **name** drawn from history and literature that embodies its essence, and a **function** expressed as a CLI command that describes what it does. The name is the soul; the command is the hand.
 
 ---
 
 ## Active Model (v0.0.8+)
 
-The current APE cycle uses four sub-agents, each embodying a thinking tool from a different discipline, era, and culture:
+The current APE cycle uses four sub-agents, each embodying a thinking tool from a different discipline, era, and culture, plus an explicit END gate before EVOLUTION:
 
 ```
-IDLE ──→ ANALYZE ──→ PLAN ──→ EXECUTE ──→ EVOLUTION
- │         │          │         │            │
- APE      SOCRATES   DESCARTES  BASHŌ       DARWIN
- (triage)  (mayéutica) (método)  (techne)    (selección)
+IDLE ──→ ANALYZE ──→ PLAN ──→ EXECUTE ──→ END ──→ EVOLUTION
 ```
 
-APE is NOT an ape — it is the Finite APE Machine, the scheduler, the RTOS event loop. It has no personality and no namesake. The four sub-agents below are the thinking tools it dispatches.
+APE is NOT an ape — it is the Finite APE Machine, the scheduler, the RTOS event loop. It has no personality and no namesake. It operates directly in IDLE and at the END gate; the four sub-agents below are the thinking tools it dispatches in the other states.
 
 ---
 
@@ -29,7 +30,7 @@ APE is NOT an ape — it is the Finite APE Machine, the scheduler, the RTOS even
 
 **The ape.** SOCRATES explores problems through conversation. It asks questions, identifies ambiguities, maps the domain, challenges assumptions. It produces `diagnosis.md` — a rigorous paper with references that serves as the sole input for the planning phase. Like its namesake, it does not tell the human what the requirements are — it asks until the human discovers them.
 
-**Key artifact:** `docs/issues/<task>/analyze/diagnosis.md`
+**Key artifact:** `docs/cleanrooms/<task>/analyze/diagnosis.md`
 
 ---
 
@@ -43,7 +44,7 @@ APE is NOT an ape — it is the Finite APE Machine, the scheduler, the RTOS even
 
 **The ape.** DESCARTES takes `diagnosis.md` and designs an experiment. The plan is a hypothesis: "if we implement these phases in this order, we will solve the diagnosed problem." It decomposes complexity into a WBS with checkable phases, defines tests in pseudocode as verification criteria, and sequences by dependency. The plan must be detailed enough that EXECUTE is mechanical — following instructions, not inventing them. If EXECUTE detects a deviation, the system returns to ANALYZE — like falsifying a hypothesis in the scientific method. Like its namesake, DESCARTES does not build — it designs the experiment from which others build.
 
-**Key artifact:** `docs/issues/<task>/plan.md`
+**Key artifact:** `docs/cleanrooms/<task>/plan.md`
 
 ---
 

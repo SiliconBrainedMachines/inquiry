@@ -28,10 +28,10 @@ Tasks never reference each other. They only know about events.
 
 ### Signals
 
-A signal is emitted when a meaningful step completes:
+A signal is emitted when a meaningful step completes. In the current implementation, this routing is materialized through explicit transition events rather than a public `ape signal` command:
 
 ```bash
-ape signal <event-name>
+iq state transition --event <event-name>
 ```
 
 The emitter does not know who (if anyone) listens. It just signals.
@@ -53,8 +53,14 @@ signals:
     transition: PLAN → EXECUTE
     effects: [git_commit_plan]
   execution_approved:
-    transition: EXECUTE → EVOLUTION
-    effects: [git_commit, git_push, gh_pr_create]
+    transition: EXECUTE → END
+    effects: [git_commit_execution]
+  pr_ready:
+    transition: END → EVOLUTION
+    effects: [git_push, gh_pr_create]
+  pr_ready_no_evolution:
+    transition: END → IDLE
+    effects: [git_push, gh_pr_create]
   cycle_complete:
     transition: EVOLUTION → IDLE
     effects: [close_issue_if_applicable]
@@ -77,7 +83,7 @@ The scheduler only invokes READY agents. IDLE and WAITING agents are skipped —
 ```
 IDLE:
   APE uses triage skill → user defines problem
-  User: "ape issue start 42" → creates branch + folder
+  Issue-start protocol prepares branch + cleanroom folder
   Signal: issue_ready → transition to ANALYZE
 
 ANALYZE:
@@ -99,7 +105,13 @@ EXECUTE:
   BASHŌ implements phase by phase, commit per phase
   Final phase: product retrospective + validation report
   User approves → signal: execution_approved
-  Effects: git commit, git push, gh pr create → transition to EVOLUTION
+  Effects: git commit execution artifacts → transition to END
+
+END:
+  APE presents execution summary and waits for explicit authorization
+  User authorizes PR → signal: pr_ready
+  Effects: git push, gh pr create
+  If evolution disabled → pr_ready_no_evolution → transition to IDLE
 
 EVOLUTION:
   DARWIN invoked with full cycle artifacts
@@ -123,11 +135,11 @@ Sub-agent reaches COMPLETE
 
 The human's explicit approval is itself a signal — the highest-priority interrupt.
 
-**Exception:** EVOLUTION → IDLE is automatic (no human gate). DARWIN runs and completes. This can be disabled via `.inquiry/config.yaml` (`evolution.enabled: false`).
+**Exception:** EVOLUTION → IDLE is automatic (no human gate). DARWIN runs and completes. Evolution itself can be disabled via `.inquiry/config.yaml` (`evolution.enabled: false`), in which case END returns directly to IDLE.
 
 ## Relationship to Existing Specs
 
-The [orchestrator-spec](../../references/orchestrator-spec.md) §3.5 defines a precondition table where each agent checks conditions (e.g., "RED tests exist"). This is **polling** — the agent checks every tick if its condition is met.
+The [orchestrator-spec](orchestrator-spec.md) defines a precondition table where each agent checks conditions (e.g., "RED tests exist"). This is **polling** — the agent checks every tick if its condition is met.
 
 The signal model replaces polling with events. Instead of checking preconditions every tick, agents wait for signals. This is more efficient and more faithful to the RTOS analogy.
 

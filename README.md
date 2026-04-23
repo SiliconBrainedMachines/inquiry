@@ -4,11 +4,15 @@
 
 A methodology for AI-assisted software development that models coding agents as a cooperative finite state machine — **Analyze → Plan → Execute → End → [Evolution] → Idle** — where the value is in the process, not the model.
 
-**Status:** `v0.1.0` · 131 tests · 12 GitHub releases · Windows + Linux · Single-target MVP (Copilot)
+**Status:** `v0.1.3` · Windows + Linux · Single-target MVP (Copilot)
+
+This README is the public entry surface. For the repository's canonical documentation map, start at [`docs/index.md`](docs/index.md).
 
 ## What is Inquiry?
 
-Inquiry treats coding agents ("apes") as states of a finite state machine. Each state has one specialized agent in charge, a declarative transition contract, and pre/post-conditions enforced by the CLI. Intelligence emerges from orchestration and memory, not from any single agent's capability.
+Inquiry names the cycle-level process. APE names the orchestrating methodology that schedules that process. Finite APE Machine names the engineered finite-state system that makes the methodology operational through explicit states, transitions, and artifacts. This README summarizes that model; the canonical explanations live in the documentation set.
+
+Historical naming note: APE was the system's initial working name. The individual sub-agents still appear as apes in the lore and avatar language, but Inquiry is the current name of the system and its public identity.
 
 **Core ideas:**
 
@@ -77,18 +81,21 @@ EVOLUTION is opt-in (`evolution.enabled` in `.inquiry/config.yaml`) and one-shot
 - **CLI:** Dart, compiled to a single cross-platform binary, built on top of [`modular_cli_sdk`](https://github.com/siliconbrainedmachines/modular_cli_sdk)
 - **Modules:** `global` (init, doctor, version, upgrade, uninstall, tui), `target` (get, clean), `state` (transition)
 - **FSM:** declarative `transition_contract.yaml` parsed into `FsmContract` — every (state, event) pair is total (allowed or explicitly illegal)
-- **Targets:** Copilot only in v0.0.x per [ADR D20](docs/spec/target-specific-agents.md). Adapters for Claude/Codex/Crush/Gemini exist for cleanup but are deferred until MVP
-- **Memory:** `.inquiry/` (per-cycle runtime), `docs/issues/NNN-slug/` (per-cycle artifacts), `docs/spec/` (canonical specs)
+- **Targets:** Copilot only at present per [ADR D20](docs/spec/target-specific-agents.md). Adapters for Claude/Codex/Crush/Gemini exist for cleanup but are deferred until multi-target reactivation
+- **Memory:** `.inquiry/` (per-cycle runtime), `docs/cleanrooms/NNN-slug/` (per-cycle artifacts), `docs/spec/` (technical specifications)
 
 ## Documentation
 
-- **[`docs/architecture.md`](docs/architecture.md)** — how the CLI is built (repo layout, modules, data flows, dependencies)
-- **[`docs/roadmap.md`](docs/roadmap.md)** — where Inquiry is going next (near/mid/long-term, lore vs reality)
-- **[`docs/spec/`](docs/spec/index.md)** — canonical specifications (FSM, CLI, Memory as Code, orchestrator, target-specific agents)
-- **[`docs/research/ape_builds_ape/`](docs/research/ape_builds_ape/index.md)** — research papers and methodology (Inquiry building Inquiry — empirical bootstrap)
+- **[`docs/index.md`](docs/index.md)** — top-level navigation across the current documentation set
+- **[`docs/research/inquiry/index.md`](docs/research/inquiry/index.md)** — canonical philosophical home of Inquiry
+- **[`docs/architecture.md`](docs/architecture.md)** — canonical current explanation of APE as orchestrating methodology
+- **[`docs/spec/finite-ape-machine.md`](docs/spec/finite-ape-machine.md)** — canonical technical overview of the Finite APE Machine
+- **[`docs/thinking-tools.md`](docs/thinking-tools.md)** — canonical explanation of Thinking Tools in the current model
+- **[`docs/spec/index.md`](docs/spec/index.md)** — status-aware navigation across technical specifications
+- **[`docs/cleanrooms/`](docs/cleanrooms/)** — per-issue working artifacts (analysis, plan, metrics)
+- **[`docs/roadmap.md`](docs/roadmap.md)** — strategic direction and long-term theses
+- **[`docs/lore.md`](docs/lore.md)** — nomenclature, allegory, and historical context for the named agents
 - **[`docs/adr/`](docs/adr/)** — Architecture Decision Records
-- **[`docs/issues/`](docs/issues/)** — per-cycle work artifacts (analysis, plan, metrics)
-- **[`docs/lore.md`](docs/lore.md)** — the apes' nomenclature and historical vision
 
 ## Philosophy
 

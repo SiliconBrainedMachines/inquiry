@@ -9,7 +9,7 @@
 #   3. Extracts to $env:LOCALAPPDATA\inquiry\
 #   4. Adds inquiry\bin\ to the user PATH
 #   5. Creates `iq.cmd` batch shim
-#   6. Runs `inquiry target get`
+#   6. Runs `inquiry target get` for the active target (Copilot today)
 #   7. Verifies with `inquiry version`
 
 $ErrorActionPreference = 'Stop'
@@ -85,7 +85,7 @@ if ($userPath -notlike "*$binDir*") {
 
 # ─── Deploy and verify ───────────────────────────────────────────────────────
 
-Write-Host '>>> Deploying Inquiry to all targets...'
+Write-Host '>>> Deploying Inquiry to the active target...'
 & (Join-Path $binDir 'inquiry.exe') target get
 
 Write-Host '>>> Verifying installation...'
