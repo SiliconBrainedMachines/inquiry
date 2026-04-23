@@ -17,9 +17,9 @@ void main() {
     yamlVersion = pubspec['version'].toString();
 
     // site index.html badge
-    final indexFile = File('../../code/site/inquiry/index.html');
+    final indexFile = File('../../code/site/index.html');
     expect(indexFile.existsSync(), isTrue,
-        reason: 'code/site/inquiry/index.html must exist');
+        reason: 'code/site/index.html must exist');
     final html = indexFile.readAsStringSync();
     final match = RegExp(r'class="badge">v(\d+\.\d+\.\d+)').firstMatch(html);
     expect(match, isNotNull, reason: 'index.html must contain a version badge');
@@ -37,14 +37,14 @@ void main() {
     expect(webVersion, equals(inquiryVersion),
         reason:
             'index.html badge (v$webVersion) != version.dart ($inquiryVersion). '
-            'Fix: update <span class="badge"> in code/site/inquiry/index.html');
+            'Fix: update <span class="badge"> in code/site/index.html');
   });
 
   test('all three version sources are consistent', () {
     final sources = {
       'code/cli/pubspec.yaml': yamlVersion,
       'code/cli/lib/src/version.dart': inquiryVersion,
-      'code/site/inquiry/index.html badge': webVersion,
+      'code/site/index.html badge': webVersion,
     };
     final unique = sources.values.toSet();
     expect(unique.length, equals(1),
