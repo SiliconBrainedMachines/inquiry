@@ -1,8 +1,12 @@
 # Finite APE Machine Banner Specification
 
-Status: draft  
+Status: draft historical brand direction  
 Owner: brand / site / CLI  
 Last updated: 2026-04-19
+
+> Status note: This document preserves an earlier brand direction centered on the public lockup `Finite APE Machine`. It does not describe the current public-facing identity, which now ships as `Inquiry` across the site, README, CLI, and VS Code surfaces.
+>
+> Treat this file as a design archive and exploration document. If any part of it is revived, it must be reconciled with the current Inquiry identity and the repository's canonical doctrine in `docs/index.md`, `docs/architecture.md`, and `docs/spec/finite-ape-machine.md` before being treated as current brand guidance.
 
 ## Purpose
 

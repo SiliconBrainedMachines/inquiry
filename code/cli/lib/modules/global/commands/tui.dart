@@ -66,9 +66,9 @@ String _buildDiagram(String version) {
   return '''
 Inquiry v$version — powered by the Finite APE Machine
 
-       ╭──────────────────────────╮
-IDLE → │ Analyze → Plan → Execute │ → EVOLUTION
-       ╰──────────────────────────╯
+  ╭────────────────────────────────╮
+IDLE → │ Analyze → Plan → Execute → End │ → EVOLUTION
+  ╰────────────────────────────────╯
 
 
 Commands: init, doctor, version

@@ -1,6 +1,6 @@
 ---
 name: issue-end
-description: 'Protocol for ending an APE cycle. Use when: all plan.md checkboxes are complete, ready to release. Guides: version bump, changelog, commit, PR, EVOLUTION transition.'
+description: 'Protocol for ending an APE cycle. Use when: all plan.md checkboxes are complete, ready to release. Guides: version bump, changelog, END gate, PR, and EVOLUTION transition.'
 ---
 
 # issue-end — Cycle Completion Protocol
@@ -114,13 +114,27 @@ Commit message format: `vX.Y.Z: <issue-title-summary>`
 - `v0.0.9: fix version inconsistency + skill issue-end + TUI ape`
 - `v0.1.0: add authentication module`
 
-### Step 7: Push Branch
+### Step 7: Transition to END
+
+Update `.inquiry/state.yaml` (if using state tracking):
+
+```yaml
+phase: END
+issue: {issue-number}
+branch: {branch}
+version: X.Y.Z
+```
+
+Announce state change:
+> `[APE: END]`
+
+### Step 8: Push Branch
 
 ```bash
 git push -u origin {branch}
 ```
 
-### Step 8: Create Pull Request
+### Step 9: Create Pull Request
 
 ```bash
 gh pr create \
@@ -137,15 +151,16 @@ gh pr create \
 "
 ```
 
-**Important:** PR creation = APE cycle completion. The APE cycle ends here.
+**Important:** PR creation completes the explicit END gate.
 
+- If `evolution.enabled: true`, the cycle advances from END to EVOLUTION after PR creation.
+- If `evolution.enabled: false`, the cycle returns directly from END to IDLE after PR creation.
 - PR merge is an **external event** (happens later, possibly with CI checks)
-- DARWIN collects retrospective data from this cycle
-- Do not wait for PR merge to transition to EVOLUTION
+- Do not wait for PR merge to leave END
 
-### Step 9: Transition to EVOLUTION
+### Step 10: Transition to EVOLUTION or IDLE
 
-Update `.inquiry/state.yaml` (if using state tracking):
+If evolution is enabled, update `.inquiry/state.yaml` (if using state tracking):
 
 ```yaml
 phase: EVOLUTION
@@ -156,6 +171,8 @@ version: X.Y.Z
 
 Announce state change:
 > `[APE: EVOLUTION]`
+
+If evolution is disabled, update `.inquiry/state.yaml` directly to IDLE instead.
 
 ## After PR Merge
 
@@ -173,7 +190,8 @@ When the PR is merged:
 4. Update version files (pubspec.yaml + lib/src/version.dart)
 5. Update CHANGELOG.md
 6. Commit: git add -A && git commit -m "vX.Y.Z: ..."
-7. Push: git push -u origin {branch}
-8. Create PR: gh pr create --title "vX.Y.Z: ..."
-9. Transition to EVOLUTION
+7. Transition to END
+8. Push: git push -u origin {branch}
+9. Create PR: gh pr create --title "vX.Y.Z: ..."
+10. Transition to EVOLUTION or IDLE
 ```

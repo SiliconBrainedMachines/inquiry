@@ -1,5 +1,7 @@
 # Architecture
 
+> This document is the current canonical system-level explanation of APE as the orchestrating methodology.
+>
 > How APE orchestrates AI coding agents through a finite state machine.
 
 ## The system in one diagram
@@ -66,7 +68,7 @@
 │  .inquiry/state.yaml        ← current FSM state (IDLE, ANALYZE, etc.)   │
 │  .inquiry/config.yaml       ← cycle config (evolution.enabled, etc.)    │
 │  .inquiry/mutations.md      ← human notes for DARWIN                    │
-│  docs/issues/NNN-slug/  ← per-cycle artifacts (plan.md, metrics)    │
+│  docs/cleanrooms/NNN-slug/ ← per-cycle artifacts (analyze/, plan.md, metrics.yaml) │
 │  docs/spec/             ← canonical specifications                  │
 └─────────────────────────────────────────────────────────────────────┘
 ```

@@ -26,6 +26,7 @@ void main() {
       expect(output.diagram, contains('Analyze'));
       expect(output.diagram, contains('Plan'));
       expect(output.diagram, contains('Execute'));
+      expect(output.diagram, contains('End'));
       expect(output.diagram, contains('EVOLUTION'));
     });
 

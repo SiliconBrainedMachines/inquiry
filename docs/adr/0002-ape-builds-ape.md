@@ -6,6 +6,8 @@ Date: 2026-03-30
 
 Accepted
 
+> Historical naming note: this ADR preserves the original bootstrap thesis "APE Builds APE" because APE was the system's working name when the decision was made. Inquiry is the current public identity of the system.
+
 ## Context
 
 Finite APE Machine is a methodology framework for AI-assisted development. The framework itself must be developed. The question is whether to use the APE methodology to build APE, even though the tooling (CLI, agents, Memory as Code) does not yet exist.

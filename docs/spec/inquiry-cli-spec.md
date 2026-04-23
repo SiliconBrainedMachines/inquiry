@@ -1,5 +1,7 @@
 # Inquiry CLI/TUI — Technical Specification
 
+> Status note: This document is a mixed planning and design surface. It contains useful intent for the Inquiry CLI, but parts of its command inventory, workflow assumptions, and architectural language do not exactly match the currently implemented CLI. Treat it as a specification draft, not as the authoritative description of current behavior. For current supporting doctrine, see [../architecture.md](../architecture.md), [cli-as-api.md](cli-as-api.md), and [target-specific-agents.md](target-specific-agents.md).
+
 **Finite APE Machine — Command Line Interface & Terminal User Interface**
 
 Version: 0.2.0-spec

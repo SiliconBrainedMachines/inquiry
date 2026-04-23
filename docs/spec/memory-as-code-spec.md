@@ -1,5 +1,7 @@
 # Memory as Code
 
+> Status note: This document remains conceptually important but is partly historical and partly planned. It preserves an earlier agent roster and implementation assumptions, so it should not be treated as the current operational source of truth without qualification. For current surrounding doctrine, see [../architecture.md](../architecture.md), [cli-as-api.md](cli-as-api.md), and [index.md](index.md).
+
 **Finite APE Machine — Memory Architecture Specification**
 *"Documentation that doesn't compile is documentation that doesn't exist."*
 

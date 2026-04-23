@@ -18,7 +18,7 @@ AI coding tools scope their agent/skill discovery to **their own configuration d
 | GitHub Copilot | `~/.copilot/agents/`, `~/.copilot/skills/` | `~/.claude/`, `~/.codex/`, etc. |
 | Claude Code | `~/.claude/agents/`, `~/.claude/skills/` | `~/.copilot/`, `~/.codex/`, etc. |
 
-When `ape target get` deployed the same `ape.agent.md` to both `~/.copilot/` and `~/.claude/`, Copilot displayed the agent twice (once from each path it scans). The subsumption fix (D19) — skip Copilot deploy when Claude exists — eliminated the duplicate but made the agent invisible to Copilot entirely, since it only existed in `~/.claude/`.
+When `iq target get` deployed the same `inquiry.agent.md` to both `~/.copilot/` and `~/.claude/`, Copilot displayed the agent twice (once from each path it scans). The subsumption fix (D19) — skip Copilot deploy when Claude exists — eliminated the duplicate but made the agent invisible to Copilot entirely, since it only existed in `~/.claude/`.
 
 ### Root cause
 
@@ -28,7 +28,7 @@ Each tool only reads files from its own directory. Subsumption assumed tools sha
 
 ## 2. Correction: gentle-ai Pattern
 
-The initial adapter design referenced gentle-ai (see `docs/issues/003-ape-init-v2/analyze/referencia-gentle-ai.md`), which copies skills identically across 11 targets. The assumption was that agents could receive the same treatment.
+The initial adapter design referenced gentle-ai (see `docs/cleanrooms/003-ape-init-v2/analyze/referencia-gentle-ai.md`), which copies skills identically across 11 targets. The assumption was that agents could receive the same treatment.
 
 **This was incorrect.**
 
@@ -98,7 +98,7 @@ The prompt body (instructions, state machine, behavior rules) is the **shared co
 
 - Keep all adapter files, register only `CopilotAdapter` for deploy
 - Remove `subsumedBy` from `CopilotAdapter`
-- Deploy agent + skills to `~/.copilot/` only
+- Deploy `inquiry.agent.md` + skills to `~/.copilot/` only
 - `clean()` still operates on all 5 adapters (backward compat)
 - Validate that Copilot reads the agent and honors tool declarations
 
