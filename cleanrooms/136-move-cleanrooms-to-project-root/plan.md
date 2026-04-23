@@ -1,7 +1,7 @@
-# Plan — Issue #136: Move cleanrooms/ to project root
+﻿# Plan — Issue #136: Move cleanrooms/ to project root
 
 **Phase:** PLAN  
-**Issue:** #136 — `docs/cleanrooms/` → `cleanrooms/` at project root  
+**Issue:** #136 — `cleanrooms/` → `cleanrooms/` at project root  
 **Branch:** `136-move-cleanrooms-to-project-root`  
 **Diagnosis:** `cleanrooms/136-move-cleanrooms-to-project-root/analyze/diagnosis.md`
 
@@ -9,7 +9,7 @@
 
 ## Hypothesis
 
-If we delete `_detectDocsDirectory()` from `init.dart`, redirect cleanrooms creation to `$root/cleanrooms`, delete the docs-detection test group, update all path references in assets/docs/site, and add `!cleanrooms/` to `.gitignore`, then `git grep "docs/cleanrooms"` will return zero matches and the full test suite will pass.
+If we delete `_detectDocsDirectory()` from `init.dart`, redirect cleanrooms creation to `$root/cleanrooms`, delete the docs-detection test group, update all path references in assets/docs/site, and add `!cleanrooms/` to `.gitignore`, then `git grep "cleanrooms"` will return zero matches and the full test suite will pass.
 
 ---
 
@@ -17,20 +17,20 @@ If we delete `_detectDocsDirectory()` from `init.dart`, redirect cleanrooms crea
 
 **Entry criteria:** Branch `136-move-cleanrooms-to-project-root` is checked out.
 
-- [ ] Confirm `cleanrooms/` exists at project root and `docs/cleanrooms/` is gone:
+- [x] Confirm `cleanrooms/` exists at project root and `cleanrooms/` is gone:
   ```
   git ls-files cleanrooms/ | head -5
-  git ls-files docs/cleanrooms/ | head -5
+  git ls-files cleanrooms/ | head -5
   ```
   Expected: first command returns paths, second returns nothing.
-- [ ] Confirm git tracks the rename (not a delete+add):
+- [x] Confirm git tracks the rename (not a delete+add):
   ```
   git log --diff-filter=R --name-status --oneline | head -20
   ```
-  Expected: at least one `R` entry showing `docs/cleanrooms/... → cleanrooms/...`
+  Expected: at least one `R` entry showing `cleanrooms/... → cleanrooms/...`
 
 **Verification:** Both commands produce expected output.  
-**Risk:** If `docs/cleanrooms/` still appears in `git ls-files`, the rename was done by copy+delete, losing history. Do not proceed — revert and re-do with `git mv`.
+**Risk:** If `cleanrooms/` still appears in `git ls-files`, the rename was done by copy+delete, losing history. Do not proceed — revert and re-do with `git mv`.
 
 ---
 
@@ -38,7 +38,7 @@ If we delete `_detectDocsDirectory()` from `init.dart`, redirect cleanrooms crea
 
 **Entry criteria:** Phase 1 complete. Working tree is clean.
 
-- [ ] Append `!cleanrooms/` to root `.gitignore`:
+- [x] Append `!cleanrooms/` to root `.gitignore`:
   ```
   # Inquiry — cleanroom versioning opt-in (this repo tracks cleanrooms as research artifacts)
   !cleanrooms/
@@ -58,12 +58,12 @@ Expected: shows `+!cleanrooms/` in the diff.
 
 ### 3a — Delete `_detectDocsDirectory` and its call site
 
-- [ ] Delete the `// Step 1: Detect docs directory` comment and the line:
+- [x] Delete the `// Step 1: Detect docs directory` comment and the line:
   ```dart
   final docsDir = _detectDocsDirectory(root);
   ```
-- [ ] Update `// Step 2: Create {docs}/cleanrooms/ if missing` comment → `// Step 1: Create cleanrooms/ at project root if missing`
-- [ ] Change:
+- [x] Update `// Step 2: Create {docs}/cleanrooms/ if missing` comment → `// Step 1: Create cleanrooms/ at project root if missing`
+- [x] Change:
   ```dart
   final issuesDir = Directory('$docsDir/cleanrooms');
   ```
@@ -71,18 +71,18 @@ Expected: shows `+!cleanrooms/` in the diff.
   ```dart
   final issuesDir = Directory('$root/cleanrooms');
   ```
-- [ ] Renumber remaining `// Step N:` comments: old 3→2, 4→3, 5→4, 6→5, 7→6
-- [ ] Delete the entire `_detectDocsDirectory` method (including its doc comment)
-- [ ] Update the library-level doc comment: remove step 1, renumber steps, update cleanrooms path description
+- [x] Renumber remaining `// Step N:` comments: old 3→2, 4→3, 5→4, 6→5, 7→6
+- [x] Delete the entire `_detectDocsDirectory` method (including its doc comment)
+- [x] Update the library-level doc comment: remove step 1, renumber steps, update cleanrooms path description
 
 ### 3b — Verify
 
-- [ ] Run `dart analyze`:
+- [x] Run `dart analyze`:
   ```
   cd code/cli && dart analyze
   ```
   Expected: zero issues.
-- [ ] Confirm method is gone:
+- [x] Confirm method is gone:
   ```
   git grep "_detectDocsDirectory" code/cli/lib/
   ```
@@ -99,37 +99,37 @@ Expected: shows `+!cleanrooms/` in the diff.
 
 ### 4a — Delete "docs directory detection" group
 
-- [ ] In `code/cli/test/init_command_test.dart`, delete the entire `group('docs directory detection', () { … })` block including its separator comment.
+- [x] In `code/cli/test/init_command_test.dart`, delete the entire `group('docs directory detection', () { … })` block including its separator comment.
   - Removes 4 tests: `uses existing docs/`, `uses existing doc/`, `prefers docs/ when both exist`, `creates docs/ when neither exist`
 
 ### 4b — Update "cleanrooms/ directory" group
 
-- [ ] Test name: `'creates {docs}/cleanrooms/ if it does not exist'` → `'creates cleanrooms/ at root if it does not exist'`
-- [ ] Remove setup line `Directory('${tempDir.path}/docs').createSync();`
-- [ ] Change assertion: `Directory('${tempDir.path}/docs/cleanrooms').existsSync()` → `Directory('${tempDir.path}/cleanrooms').existsSync()`
-- [ ] Test name: `'skips {docs}/cleanrooms/ creation if already exists'` → `'skips cleanrooms/ creation if already exists'`
-- [ ] Change setup: `Directory('${tempDir.path}/docs/cleanrooms').createSync(recursive: true)` → `Directory('${tempDir.path}/cleanrooms').createSync(recursive: true)`
-- [ ] Change marker file path: `docs/cleanrooms/marker.md` → `cleanrooms/marker.md` (both create and assert)
+- [x] Test name: `'creates {docs}/cleanrooms/ if it does not exist'` → `'creates cleanrooms/ at root if it does not exist'`
+- [x] Remove setup line `Directory('${tempDir.path}/docs').createSync();`
+- [x] Change assertion: `Directory('${tempDir.path}/cleanrooms').existsSync()` → `Directory('${tempDir.path}/cleanrooms').existsSync()`
+- [x] Test name: `'skips {docs}/cleanrooms/ creation if already exists'` → `'skips cleanrooms/ creation if already exists'`
+- [x] Change setup: `Directory('${tempDir.path}/cleanrooms').createSync(recursive: true)` → `Directory('${tempDir.path}/cleanrooms').createSync(recursive: true)`
+- [x] Change marker file path: `cleanrooms/marker.md` → `cleanrooms/marker.md` (both create and assert)
 
 ### 4c — Update "idempotency" group
 
-- [ ] Change assertion: `Directory('${tempDir.path}/docs/cleanrooms').existsSync()` → `Directory('${tempDir.path}/cleanrooms').existsSync()`
+- [x] Change assertion: `Directory('${tempDir.path}/cleanrooms').existsSync()` → `Directory('${tempDir.path}/cleanrooms').existsSync()`
 
 ### 4d — Verify
 
-- [ ] Run `dart test`:
+- [x] Run `dart test`:
   ```
   cd code/cli && dart test
   ```
   Expected: all tests pass (GREEN).
-- [ ] Confirm docs-detection group is gone:
+- [x] Confirm docs-detection group is gone:
   ```
   git grep "docs directory detection" code/cli/test/
   ```
   Expected: no output.
-- [ ] Confirm no `docs/cleanrooms` in tests:
+- [x] Confirm no `cleanrooms` in tests:
   ```
-  git grep "docs/cleanrooms" code/cli/test/
+  git grep "cleanrooms" code/cli/test/
   ```
   Expected: no output.
 
@@ -143,24 +143,24 @@ Expected: shows `+!cleanrooms/` in the diff.
 
 ### 5a — `code/cli/assets/agents/inquiry.agent.md`
 
-- [ ] Global find-and-replace `docs/cleanrooms` → `cleanrooms` (≈11 occurrences). Confirm with grep before editing:
+- [x] Global find-and-replace `cleanrooms` → `cleanrooms` (≈11 occurrences). Confirm with grep before editing:
   ```
-  git grep -n "docs/cleanrooms" code/cli/assets/agents/inquiry.agent.md
+  git grep -n "cleanrooms" code/cli/assets/agents/inquiry.agent.md
   ```
 
 ### 5b — `code/cli/assets/skills/issue-start/SKILL.md`
 
-- [ ] Replace 3 occurrences of `docs/cleanrooms` → `cleanrooms`
+- [x] Replace 3 occurrences of `cleanrooms` → `cleanrooms`
 
 ### 5c — `code/cli/assets/skills/issue-end/SKILL.md`
 
-- [ ] Replace 2 occurrences of `docs/cleanrooms` → `cleanrooms`
+- [x] Replace 2 occurrences of `cleanrooms` → `cleanrooms`
 
 ### 5d — Verify
 
-- [ ] Confirm zero matches in source assets:
+- [x] Confirm zero matches in source assets:
   ```
-  git grep "docs/cleanrooms" code/cli/assets/
+  git grep "cleanrooms" code/cli/assets/
   ```
   Expected: no output.
 
@@ -170,22 +170,22 @@ Expected: shows `+!cleanrooms/` in the diff.
 
 **Entry criteria:** Phase 5 complete. Source assets clean.
 
-- [ ] Copy `inquiry.agent.md`:
+- [x] Copy `inquiry.agent.md`:
   ```
   Copy-Item code\cli\assets\agents\inquiry.agent.md code\cli\build\assets\agents\inquiry.agent.md
   ```
-- [ ] Copy `issue-start/SKILL.md`:
+- [x] Copy `issue-start/SKILL.md`:
   ```
   Copy-Item code\cli\assets\skills\issue-start\SKILL.md code\cli\build\assets\skills\issue-start\SKILL.md
   ```
-- [ ] Copy `issue-end/SKILL.md`:
+- [x] Copy `issue-end/SKILL.md`:
   ```
   Copy-Item code\cli\assets\skills\issue-end\SKILL.md code\cli\build\assets\skills\issue-end\SKILL.md
   ```
 
 **Verification:**
 ```
-git grep "docs/cleanrooms" code/cli/build/assets/
+git grep "cleanrooms" code/cli/build/assets/
 ```
 Expected: no output.
 
@@ -200,22 +200,22 @@ git ls-files code/cli/build/assets/agents/inquiry.agent.md
 
 **Entry criteria:** Phase 6 complete.
 
-- [ ] Run grep first to confirm occurrences before editing:
+- [x] Run grep first to confirm occurrences before editing:
   ```
-  git grep -n "docs/cleanrooms" README.md docs/
+  git grep -n "cleanrooms" README.md docs/
   ```
-- [ ] `README.md`: update link text and target (`docs/cleanrooms/` → `cleanrooms/`, all occurrences)
-- [ ] `docs/architecture.md`: update directory path label in ASCII diagram
-- [ ] `docs/lore.md`: update 2 path references
-- [ ] `docs/thinking-tools.md`: update bibliographic citation [1]
-- [ ] `docs/spec/finite-ape-machine.md`: update 4+ occurrences including citation [7]
-- [ ] `docs/spec/cli-as-api.md`: update planning route table
-- [ ] `docs/spec/agent-lifecycle.md`: update artifacts tree in ASCII diagram
-- [ ] `docs/spec/target-specific-agents.md`: update historical cross-reference
+- [x] `README.md`: update link text and target (`cleanrooms/` → `cleanrooms/`, all occurrences)
+- [x] `docs/architecture.md`: update directory path label in ASCII diagram
+- [x] `docs/lore.md`: update 2 path references
+- [x] `docs/thinking-tools.md`: update bibliographic citation [1]
+- [x] `docs/spec/finite-ape-machine.md`: update 4+ occurrences including citation [7]
+- [x] `docs/spec/cli-as-api.md`: update planning route table
+- [x] `docs/spec/agent-lifecycle.md`: update artifacts tree in ASCII diagram
+- [x] `docs/spec/target-specific-agents.md`: update historical cross-reference
 
 **Verification:**
 ```
-git grep "docs/cleanrooms" docs/ README.md
+git grep "cleanrooms" docs/ README.md
 ```
 Expected: no output.
 
@@ -225,17 +225,17 @@ Expected: no output.
 
 **Entry criteria:** Phase 7 complete.
 
-- [ ] Run grep first:
+- [x] Run grep first:
   ```
-  git grep -n "docs/cleanrooms" code/site/
+  git grep -n "cleanrooms" code/site/
   ```
-- [ ] `code/site/ape-builds-ape.html`: update 2 occurrences
-- [ ] `code/site/evolution.html`: update 4 occurrences (including HTML-encoded `&lt;issue&gt;` variants)
-- [ ] `code/site/methodology.html`: update 1 occurrence
+- [x] `code/site/ape-builds-ape.html`: update 2 occurrences
+- [x] `code/site/evolution.html`: update 4 occurrences (including HTML-encoded `&lt;issue&gt;` variants)
+- [x] `code/site/methodology.html`: update 1 occurrence
 
 **Verification:**
 ```
-git grep "docs/cleanrooms" code/site/
+git grep "cleanrooms" code/site/
 ```
 Expected: no output.
 
@@ -245,19 +245,19 @@ Expected: no output.
 
 **Entry criteria:** Phases 2–8 complete.
 
-- [ ] Run full workspace grep:
+- [x] Run full workspace grep:
   ```
-  git grep "docs/cleanrooms"
+  git grep "cleanrooms"
   ```
   Expected: **zero matches**.
-- [ ] If any match appears, fix it and re-run.
-- [ ] Spot-check new path appears where expected:
+- [x] If any match appears, fix it and re-run.
+- [x] Spot-check new path appears where expected:
   ```
   git grep "cleanrooms/" code/cli/assets/ docs/ README.md | Measure-Object -Line
   ```
   Expected: ≥ 20 lines.
 
-**Verification:** `git grep "docs/cleanrooms"` returns no output.
+**Verification:** `git grep "cleanrooms"` returns no output.
 
 ---
 
@@ -265,17 +265,17 @@ Expected: no output.
 
 **Entry criteria:** Phase 9 complete. Zero residual references.
 
-- [ ] CLI suite:
+- [x] CLI suite:
   ```
   cd code/cli && dart pub get && dart analyze && dart test
   ```
   Expected: all exit 0, zero failures.
-- [ ] VS Code unit tests:
+- [x] VS Code unit tests:
   ```
   cd code/vscode && npm run test:unit
   ```
   Expected: all pass.
-- [ ] VS Code integration tests:
+- [x] VS Code integration tests:
   ```
   cd code/vscode && npm run test:integration
   ```
@@ -289,9 +289,9 @@ Expected: no output.
 
 **Entry criteria:** Phase 10 complete. All tests GREEN.
 
-- [ ] Stage all changes: `git add -A`
-- [ ] Verify staging area: `git status` — only expected files
-- [ ] Commit:
+- [x] Stage all changes: `git add -A`
+- [x] Verify staging area: `git status` — only expected files
+- [x] Commit:
   ```
   git commit -m "refactor(#136): move cleanrooms/ to project root
 
@@ -299,10 +299,10 @@ Expected: no output.
   - init now creates cleanrooms/ at project root directly
   - Delete docs-detection test group from init_command_test.dart
   - Update cleanrooms/ assertions in remaining tests
-  - Replace docs/cleanrooms → cleanrooms in all assets, docs, and site HTML
+  - Replace cleanrooms → cleanrooms in all assets, docs, and site HTML
   - Add !cleanrooms/ to .gitignore"
   ```
-- [ ] Verify: `git show --stat HEAD`
+- [x] Verify: `git show --stat HEAD`
 
 **Verification:** `git log --oneline -1` shows the commit. `git show --stat HEAD` lists all expected files.
 
@@ -313,9 +313,9 @@ Expected: no output.
 | Risk | Severity | Mitigation |
 |------|----------|------------|
 | `dart analyze` flags residual issues after Phase 3 | HIGH | Verify immediately after Phase 3 before touching tests |
-| Tests reference `docs/cleanrooms` in non-obvious strings | MEDIUM | Run `git grep "docs/cleanrooms" code/cli/test/` as final check in Phase 4 |
+| Tests reference `cleanrooms` in non-obvious strings | MEDIUM | Run `git grep "cleanrooms" code/cli/test/` as final check in Phase 4 |
 | Build assets not tracked by git | MEDIUM | `git ls-files code/cli/build/assets/` before mirroring in Phase 6 |
-| HTML entities (`&lt;`, `&gt;`) mask occurrences in grep | LOW | Phase 8 prescribes grepping `code/site/` explicitly; HTML entities still contain `docs/cleanrooms` literal |
+| HTML entities (`&lt;`, `&gt;`) mask occurrences in grep | LOW | Phase 8 prescribes grepping `code/site/` explicitly; HTML entities still contain `cleanrooms` literal |
 | `docs/spec/` files have more occurrences than listed | LOW | Phase 7 prescribes running grep before editing — use actual output, not assumed line numbers |
 
 ---
@@ -328,10 +328,10 @@ Expected: no output.
 | 2 | Add `!cleanrooms/` to `.gitignore` | `git diff` shows the addition |
 | 3 | Delete `_detectDocsDirectory`, redirect path | `dart analyze` → 0 issues |
 | 4 | Delete docs-detection tests, update assertions | `dart test` → all GREEN |
-| 5 | Update source assets | `git grep "docs/cleanrooms" code/cli/assets/` → 0 |
-| 6 | Mirror to build assets | `git grep "docs/cleanrooms" code/cli/build/assets/` → 0 |
-| 7 | Update docs | `git grep "docs/cleanrooms" docs/ README.md` → 0 |
-| 8 | Update site HTML | `git grep "docs/cleanrooms" code/site/` → 0 |
-| 9 | Zero residual audit | `git grep "docs/cleanrooms"` → 0 (entire repo) |
+| 5 | Update source assets | `git grep "cleanrooms" code/cli/assets/` → 0 |
+| 6 | Mirror to build assets | `git grep "cleanrooms" code/cli/build/assets/` → 0 |
+| 7 | Update docs | `git grep "cleanrooms" docs/ README.md` → 0 |
+| 8 | Update site HTML | `git grep "cleanrooms" code/site/` → 0 |
+| 9 | Zero residual audit | `git grep "cleanrooms"` → 0 (entire repo) |
 | 10 | Full test suite | All commands exit 0 |
 | 11 | Single commit | `git show --stat HEAD` lists expected files |
