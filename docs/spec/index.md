@@ -1,32 +1,36 @@
 # Spec — Finite APE Machine
 
-Technical specifications and architectural references.
+Technical specifications and architectural references for the current Inquiry/APE system.
 
-## Core
+## Canonical Homes
 
-| Document | Description |
-|----------|-------------|
-| [finite-ape-machine.md](finite-ape-machine.md) | Project overview and foundational concepts |
-| [agent-lifecycle.md](agent-lifecycle.md) | Agent lifecycle and states (IDLE → ANALYZE → PLAN → EXECUTE) |
+Start here when you need the first authoritative explanation of a core concept.
 
-## Architecture
+| Concept | Canonical home | Notes |
+|---------|----------------|-------|
+| Inquiry | [../research/inquiry/index.md](../research/inquiry/index.md) | Philosophical and epistemic foundation of the Inquiry cycle |
+| APE | [../architecture.md](../architecture.md) | Current system-level explanation of APE as the orchestrating methodology |
+| Finite APE Machine | [finite-ape-machine.md](finite-ape-machine.md) | Primary technical overview of the engineered finite-state system |
+| Thinking Tools | [../thinking-tools.md](../thinking-tools.md) | Current canonical explainer; [../lore.md](../lore.md) remains the historical and nomenclature companion |
 
-| Document | Description |
-|----------|-------------|
-| [cooperative-multitasking-model.md](cooperative-multitasking-model.md) | Cooperative multitasking model — how agents yield and coordinate |
-| [signal-based-coordination.md](signal-based-coordination.md) | Signal-based coordination between agents |
-| [orchestrator-spec.md](orchestrator-spec.md) | Orchestrator technical specification |
-| [memory-as-code-spec.md](memory-as-code-spec.md) | Memory as code — structured documentation architecture |
+## Current Supporting Specs
 
-## CLI
+These documents support the current model and should be read as technical elaborations rather than co-equal concept homes.
 
 | Document | Description |
 |----------|-------------|
-| [inquiry-cli-spec.md](inquiry-cli-spec.md) | Inquiry CLI/TUI technical specification |
-| [cli-as-api.md](cli-as-api.md) | CLI as API principle — commands as programmatic interface |
+| [agent-lifecycle.md](agent-lifecycle.md) | Agent lifecycle and state responsibilities in the current model |
+| [cooperative-multitasking-model.md](cooperative-multitasking-model.md) | Two-level FSM and scheduler/task coordination model |
+| [signal-based-coordination.md](signal-based-coordination.md) | Signal/event model for coordination and transitions |
+| [cli-as-api.md](cli-as-api.md) | Boundary between skills, agent behavior, and CLI enforcement |
+| [target-specific-agents.md](target-specific-agents.md) | Per-target deployment strategy and current single-target decision |
 
-## Deployment
+## Mixed, Historical, or Planned Specs
 
-| Document | Description |
-|----------|-------------|
-| [target-specific-agents.md](target-specific-agents.md) | Target-specific agent files — per-tool deployment strategy |
+These documents remain relevant, but they should not be treated as the cleanest source of current doctrine without checking their status and scope.
+
+| Document | Status | Description |
+|----------|--------|-------------|
+| [orchestrator-spec.md](orchestrator-spec.md) | Historical | Expanded orchestrator architecture from an earlier multi-agent model |
+| [memory-as-code-spec.md](memory-as-code-spec.md) | Mixed | Memory architecture with still-useful concepts and legacy operational assumptions |
+| [inquiry-cli-spec.md](inquiry-cli-spec.md) | Mixed/planned | CLI/TUI direction with both current intent and planned surfaces |

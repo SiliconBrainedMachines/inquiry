@@ -1,5 +1,7 @@
 # Orchestrator — Technical Specification
 
+> Status note: This document is retained as a historical design record for an earlier expanded orchestrator model. It should not be read as the current canonical description of APE or the Finite APE Machine. For the current model, see [../architecture.md](../architecture.md), [finite-ape-machine.md](finite-ape-machine.md), [cooperative-multitasking-model.md](cooperative-multitasking-model.md), and [signal-based-coordination.md](signal-based-coordination.md).
+
 **Finite APE Machine — Cooperative Event Loop Orchestration**
 *"The Ghost in the Shell"*
 

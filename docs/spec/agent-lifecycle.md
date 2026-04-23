@@ -1,6 +1,6 @@
 ---
 id: agent-lifecycle
-title: "Agent lifecycle — five-state model and confirmed agent registry"
+title: "Agent lifecycle — six-state model and confirmed agent registry"
 date: 2026-04-17
 status: active
 tags: [agents, fsm, lifecycle, registry, socrates, descartes, basho, darwin]
@@ -11,10 +11,10 @@ author: socrates
 
 ## APE Cycle States (confirmed)
 
-The Finite APE Machine operates as a five-state FSM:
+The Finite APE Machine operates as a six-state FSM:
 
 ```
-IDLE → ANALYZE → PLAN → EXECUTE → EVOLUTION
+IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION
 ```
 
 | APE State | Function | Operator | Thinking Tool |
@@ -23,19 +23,22 @@ IDLE → ANALYZE → PLAN → EXECUTE → EVOLUTION
 | ANALYZE | Deep understanding via Socratic method | SOCRATES (sub-agent) | Mayéutica — draw truth through questions |
 | PLAN | Experimental design, WBS, test definition | DESCARTES (sub-agent) | Method — divide, order, verify, enumerate |
 | EXECUTE | Implementation under constraints | BASHŌ (sub-agent) | Techne + 用の美 (yō no bi) — functional beauty |
+| END | Explicit closure gate before evolution or return to idle | APE + human gate | Human judgment under explicit authorization |
 | EVOLUTION | Evaluate APE process, create improvement issues | DARWIN (sub-agent) | Natural selection — observe, compare, select |
 
 ### State descriptions
 
-**IDLE** — APE's default state. The user converses freely. APE uses the triage skill to evaluate whether the problem merits a formal cycle. If so, the skill guides infrastructure preparation: verify/create the GitHub issue (`gh`), create the branch and working directory (`ape issue start NNN`), and transition to ANALYZE. APE operates directly in this state — no sub-agent.
+**IDLE** — APE's default state. The user converses freely. APE uses the triage skill to evaluate whether the problem merits a formal cycle. If so, the protocol guides infrastructure preparation: verify or create the GitHub issue, create the branch and working directory, and transition to ANALYZE. APE operates directly in this state — no sub-agent.
 
 **ANALYZE** — SOCRATES conducts Socratic analysis. Explores the problem through questions, challenges assumptions, documents findings. Produces `diagnosis.md` — a rigorous technical document (paper-style, with references) that serves as the sole input for the planning phase. The user approves the diagnosis before transitioning.
 
 **PLAN** — DESCARTES applies the scientific method: the plan is an experimental design. Decomposes complexity into phases (WBS), defines tests in pseudocode, sequences by dependencies. Produces `plan.md` as an immutable checklist. The plan must be detailed enough that EXECUTE is mechanical — following instructions, not inventing them. The user approves the plan before transitioning.
 
-**EXECUTE** — BASHŌ implements the plan phase by phase, like a haiku master working within formal constraints (the plan's restrictions = the 5-7-5 form). Each phase produces a commit. The final phase includes product retrospective: an implementation report with validation instructions for the user. If a deviation is detected, returns to ANALYZE (like falsifying a hypothesis in the scientific method). The user approves execution (commit + push + PR) before transitioning.
+**EXECUTE** — BASHŌ implements the plan phase by phase, like a haiku master working within formal constraints (the plan's restrictions = the 5-7-5 form). Each phase produces a commit. The final phase includes product retrospective: an implementation report with validation instructions for the user. If a deviation is detected, returns to ANALYZE (like falsifying a hypothesis in the scientific method). The user approves the execution report before transitioning to END.
 
-**EVOLUTION** — DARWIN reads the complete cycle (diagnosis, plan, commits, deviations) and evaluates APE's own process. Searches for existing issues in `inquiry` repo (`gh issue list --search`), comments on matches or creates new issues. Automatic, no user approval required. Opt-out via `.inquiry/config.yaml` (`evolution.enabled: false`).
+**END** — APE presents the execution summary and waits for explicit authorization to create the PR and pass into EVOLUTION or return to IDLE if evolution is disabled. This keeps delivery and merge preparation as a distinct closure gate rather than an implicit side effect of EXECUTE.
+
+**EVOLUTION** — DARWIN reads the complete cycle (diagnosis, plan, commits, deviations) and evaluates APE's own process. Searches for existing issues in the Inquiry repository (`gh issue list --search`), comments on matches or creates new issues. Automatic, no user approval required. Opt-out via `.inquiry/config.yaml` (`evolution.enabled: false`).
 
 ## Agent Registry
 
@@ -106,7 +109,9 @@ All APE state transitions are mechanical, executed via skill → CLI chain:
 | IDLE → ANALYZE | `issue_ready` | Verify rama + carpeta exist |
 | ANALYZE → PLAN | `analysis_approved` | `git commit` analysis docs |
 | PLAN → EXECUTE | `plan_approved` | `git commit` plan.md |
-| EXECUTE → EVOLUTION | `execution_approved` | `git commit`, `git push`, `gh pr create` |
+| EXECUTE → END | `execution_approved` | `git commit` execution artifacts |
+| END → EVOLUTION | `pr_ready` | `git push`, `gh pr create` |
+| END → IDLE | `pr_ready_no_evolution` | `git push`, `gh pr create` |
 | EVOLUTION → IDLE | `cycle_complete` | Close issue if applicable |
 
 **Illegal transitions:**
@@ -114,6 +119,7 @@ All APE state transitions are mechanical, executed via skill → CLI chain:
 - IDLE → EXECUTE (no plan)
 - ANALYZE → EXECUTE (skipping plan)
 - EXECUTE → PLAN (must go through ANALYZE)
+- EXECUTE → EVOLUTION (must go through END)
 
 ### Transition ownership
 
@@ -123,7 +129,7 @@ All APE state transitions are mechanical, executed via skill → CLI chain:
 ## Artifacts per State
 
 ```
-docs/issues/NNN-<slug>/
+docs/cleanrooms/NNN-<slug>/
 ├── analyze/
 │   ├── index.md              ← navigation
 │   ├── *.md                  ← working documents (exploration, discards)
