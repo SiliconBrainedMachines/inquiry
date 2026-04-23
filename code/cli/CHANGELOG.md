@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.1.3]
+### Changed
+- **Historical naming boundary** (#134): `APE builds APE` is now preserved only as the historical bootstrap thesis and lore wording from the period when APE was the system's working name; Inquiry remains the current system identity across README, lore, and site bootstrap surfaces
+- **Live FSM contract** (#134): the CLI now treats `END` as an explicit runtime state between `EXECUTE` and `EVOLUTION`, with updated transition prompts, TUI output, and distributed FSM assets
+
+### Fixed
+- **issue-start skill path drift** (#134): deployed source and build assets now create `docs/cleanrooms/<NNN>-<slug>/analyze/` instead of the stale `docs/issues/` path
+- **Asset regression coverage** (#134): `assets_test.dart` now asserts the distributed `issue-start` skill uses `docs/cleanrooms/`
+- **FSM verification drift** (#134): transition tests now reuse the live contract asset and cover the `EXECUTE -> END -> EVOLUTION|IDLE` flow explicitly
+
 ## [0.1.2]
 ### Changed
 - **Identity unification** (#122): canonical title+subtitle `Inquiry — Analyze. Plan. Execute.` applied uniformly across README, CLI README, agent definition, and site
