@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:inquiry_cli/modules/ape/commands/transition.dart';
+import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -173,6 +174,23 @@ void main() {
     });
 
     group('error cases', () {
+      test('throws CommandException MISSING_EVENT when event flag is null', () async {
+        writeState(state: 'ANALYZE', issue: '145', apeName: 'socrates', apeState: 'clarification');
+
+        final cmd = ApeTransitionCommand(
+          ApeTransitionInput(event: null, workingDirectory: tmpDir.path),
+        );
+
+        expect(
+          () => cmd.execute(),
+          throwsA(
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('MISSING_EVENT'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.validationFailed)),
+          ),
+        );
+      });
+
       test('throws NO_ACTIVE_APE when no APE in state', () async {
         writeState(state: 'IDLE');
 
@@ -183,11 +201,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('NO_ACTIVE_APE'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('NO_ACTIVE_APE'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
           ),
         );
       });
@@ -207,11 +223,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('APE_COMPLETED'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_COMPLETED'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
           ),
         );
       });
@@ -231,11 +245,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('INVALID_APE_EVENT'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('INVALID_APE_EVENT'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.validationFailed)),
           ),
         );
       });
@@ -259,11 +271,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('APE_NOT_FOUND'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_NOT_FOUND'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.notFound)),
           ),
         );
       });

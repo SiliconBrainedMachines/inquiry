@@ -305,6 +305,48 @@ void main() {
         expect(content, contains('name: socrates'));
         // initialState is null when YAML not found — still writes the name
       });
+
+      test('preserves APE sub-state when same APE continues (EXECUTE→END)', () {
+        final apesDir = Directory('${tempDir.path}/assets/apes');
+        apesDir.createSync(recursive: true);
+        File('assets/apes/basho.yaml')
+            .copySync('${apesDir.path}/basho.yaml');
+
+        // basho is at _DONE in EXECUTE
+        File('${tempDir.path}/.inquiry/state.yaml')
+            .writeAsStringSync(
+              'state: EXECUTE\nissue: "145"\nape:\n  name: basho\n  state: _DONE\n',
+            );
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.updateState('END');
+
+        final content =
+            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        expect(content, contains('name: basho'));
+        expect(content, contains('state: _DONE'));
+      });
+
+      test('re-initializes APE when transitioning to state with different APE', () {
+        final apesDir = Directory('${tempDir.path}/assets/apes');
+        apesDir.createSync(recursive: true);
+        File('assets/apes/descartes.yaml')
+            .copySync('${apesDir.path}/descartes.yaml');
+
+        // socrates is active in ANALYZE, transitioning to PLAN activates descartes
+        File('${tempDir.path}/.inquiry/state.yaml')
+            .writeAsStringSync(
+              'state: ANALYZE\nissue: "145"\nape:\n  name: socrates\n  state: _DONE\n',
+            );
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.updateState('PLAN');
+
+        final content =
+            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        expect(content, contains('name: descartes'));
+        expect(content, contains('state: decomposition'));
+      });
     });
   });
 }

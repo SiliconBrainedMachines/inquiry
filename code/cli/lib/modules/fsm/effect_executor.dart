@@ -59,7 +59,11 @@ class EffectExecutor {
     final ape = _stateApes[newState];
     if (ape != null) {
       apeName = ape;
-      apeInitialState = _resolveInitialState(ape);
+      if (currentState.apeName == ape && currentState.apeState != null) {
+        apeInitialState = currentState.apeState;
+      } else {
+        apeInitialState = _resolveInitialState(ape);
+      }
     }
 
     final updated = InquiryState(

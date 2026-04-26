@@ -14,25 +14,21 @@ import '../inquiry_state.dart';
 // ─── Input ──────────────────────────────────────────────────────────────────
 
 class ApeTransitionInput extends Input {
-  final String event;
+  final String? event;
   final String workingDirectory;
 
   ApeTransitionInput({required this.event, required this.workingDirectory});
 
   factory ApeTransitionInput.fromCliRequest(CliRequest req) {
-    final event = req.flagString('event', aliases: const ['e']);
-    if (event == null || event.trim().isEmpty) {
-      throw ArgumentError('Usage: iq ape transition --event <event>');
-    }
     return ApeTransitionInput(
-      event: event,
+      event: req.flagString('event', aliases: const ['e']),
       workingDirectory: Directory.current.path,
     );
   }
 
   @override
   Map<String, dynamic> toJson() => {
-    'event': event,
+    if (event != null) 'event': event,
     'workingDirectory': workingDirectory,
   };
 }
@@ -77,26 +73,34 @@ class ApeTransitionCommand implements Command<ApeTransitionInput, ApeTransitionO
   ApeTransitionCommand(this.input, {Assets? assets}) : _assets = assets;
 
   @override
-  String? validate() {
-    if (input.event.trim().isEmpty) {
-      return 'Event is required. Usage: iq ape transition --event <event>';
-    }
-    return null;
-  }
+  String? validate() => null;
 
   @override
   Future<ApeTransitionOutput> execute() async {
+    if (input.event == null || input.event!.trim().isEmpty) {
+      throw CommandException(
+        code: 'MISSING_EVENT',
+        message: 'Missing required flag --event. Usage: iq ape transition --event <event>',
+        exitCode: ExitCode.validationFailed,
+      );
+    }
     final inquiryState = InquiryState.load(input.workingDirectory);
 
     if (inquiryState.apeName == null) {
-      throw StateError('NO_ACTIVE_APE: No APE is active in state ${inquiryState.state}');
+      throw CommandException(
+        code: 'NO_ACTIVE_APE',
+        message: 'No APE is active in state ${inquiryState.state}',
+        exitCode: ExitCode.conflict,
+      );
     }
 
     final currentApeState = inquiryState.apeState;
     if (currentApeState == '_DONE') {
-      throw StateError(
-        'APE_COMPLETED: "${inquiryState.apeName}" has already completed (_DONE). '
-        'Transition the main FSM to advance.',
+      throw CommandException(
+        code: 'APE_COMPLETED',
+        message: '"${inquiryState.apeName}" has already completed (_DONE). '
+            'Transition the main FSM to advance.',
+        exitCode: ExitCode.conflict,
       );
     }
 
@@ -104,8 +108,10 @@ class ApeTransitionCommand implements Command<ApeTransitionInput, ApeTransitionO
     final yamlPath = _resolveApePath(inquiryState.apeName!);
     final yamlFile = File(yamlPath);
     if (!yamlFile.existsSync()) {
-      throw StateError(
-        'APE_NOT_FOUND: No definition for "${inquiryState.apeName}" at $yamlPath',
+      throw CommandException(
+        code: 'APE_NOT_FOUND',
+        message: 'No definition for "${inquiryState.apeName}" at $yamlPath',
+        exitCode: ExitCode.notFound,
       );
     }
 
@@ -114,15 +120,17 @@ class ApeTransitionCommand implements Command<ApeTransitionInput, ApeTransitionO
     final stateObj = definition.findState(fromState);
 
     if (stateObj == null) {
-      throw StateError(
-        'INVALID_APE_STATE: "${inquiryState.apeName}" has no state "$fromState"',
+      throw CommandException(
+        code: 'INVALID_APE_STATE',
+        message: '"${inquiryState.apeName}" has no state "$fromState"',
+        exitCode: ExitCode.conflict,
       );
     }
 
     // Find matching transition
     ApeTransition? match;
     for (final t in stateObj.transitions) {
-      if (t.event == input.event) {
+      if (t.event == input.event!) {
         match = t;
         break;
       }
@@ -130,9 +138,11 @@ class ApeTransitionCommand implements Command<ApeTransitionInput, ApeTransitionO
 
     if (match == null) {
       final valid = stateObj.transitions.map((t) => t.event).join(', ');
-      throw StateError(
-        'INVALID_APE_EVENT: "${input.event}" is not valid from '
-        '"${inquiryState.apeName}:$fromState". Valid events: [$valid]',
+      throw CommandException(
+        code: 'INVALID_APE_EVENT',
+        message: '"${input.event}" is not valid from '
+            '"${inquiryState.apeName}:$fromState". Valid events: [$valid]',
+        exitCode: ExitCode.validationFailed,
       );
     }
 
@@ -143,7 +153,7 @@ class ApeTransitionCommand implements Command<ApeTransitionInput, ApeTransitionO
     return ApeTransitionOutput(
       apeName: inquiryState.apeName!,
       from: fromState,
-      event: input.event,
+      event: input.event!,
       to: match.to,
     );
   }
