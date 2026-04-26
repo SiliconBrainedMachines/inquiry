@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:inquiry_cli/modules/ape/commands/prompt.dart';
+import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -129,6 +130,42 @@ void main() {
       });
     });
 
+    group('MISSING_NAME', () {
+      test('throws CommandException when name flag is null', () async {
+        writeState('ANALYZE');
+        final cmd = ApePromptCommand(
+          ApePromptInput(name: null, workingDirectory: tmpDir.path),
+        );
+
+        expect(
+          () => cmd.execute(),
+          throwsA(
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('MISSING_NAME'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.validationFailed)),
+          ),
+        );
+      });
+    });
+
+    group('MISSING_NAME', () {
+      test('throws CommandException when name flag is null', () async {
+        writeState('ANALYZE');
+        final cmd = ApePromptCommand(
+          ApePromptInput(name: null, workingDirectory: tmpDir.path),
+        );
+
+        expect(
+          () => cmd.execute(),
+          throwsA(
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('MISSING_NAME'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.validationFailed)),
+          ),
+        );
+      });
+    });
+
     group('APE_NOT_FOUND', () {
       test('throws for nonexistent APE', () async {
         writeState('ANALYZE');
@@ -139,11 +176,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('APE_NOT_FOUND'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_NOT_FOUND'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.notFound)),
           ),
         );
       });
@@ -159,11 +194,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('APE_NOT_ACTIVE'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_NOT_ACTIVE'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
           ),
         );
       });
@@ -177,11 +210,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('APE_NOT_ACTIVE'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_NOT_ACTIVE'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
           ),
         );
       });
@@ -195,11 +226,9 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('APE_NOT_ACTIVE'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_NOT_ACTIVE'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
           ),
         );
       });
@@ -264,23 +293,20 @@ void main() {
         expect(
           () => cmd.execute(),
           throwsA(
-            isA<StateError>().having(
-              (e) => e.message,
-              'message',
-              contains('APE_NOT_ACTIVE'),
-            ),
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_NOT_ACTIVE'))
+                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
           ),
         );
       });
     });
 
     group('validate', () {
-      test('returns error for empty name', () {
+      test('returns null for empty name (validation moved to execute)', () {
         final cmd = ApePromptCommand(
           ApePromptInput(name: '', workingDirectory: tmpDir.path),
         );
-        expect(cmd.validate(), isNotNull);
-        expect(cmd.validate(), contains('required'));
+        expect(cmd.validate(), isNull);
       });
 
       test('returns null for valid name', () {
