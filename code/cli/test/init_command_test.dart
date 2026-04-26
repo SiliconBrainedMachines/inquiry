@@ -95,7 +95,7 @@ void main() {
     // ─── Step 4: .inquiry/state.yaml ──────────────────────────────────────
 
     group('.inquiry/state.yaml', () {
-      test('creates .inquiry/state.yaml with initial IDLE state', () async {
+      test('creates .inquiry/state.yaml with initial IDLE state and ape: null', () async {
         final command = InitCommand(InitInput(workingDirectory: tempDir.path));
         await command.execute();
 
@@ -105,6 +105,7 @@ void main() {
         final content = stateFile.readAsStringSync();
         expect(content, contains('state: IDLE'));
         expect(content, contains('issue: null'));
+        expect(content, contains('ape: null'));
       });
 
       test('skips .inquiry/state.yaml if already exists', () async {
