@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-import 'package:inquiry_cli/modules/state/commands/transition.dart';
+import 'package:inquiry_cli/modules/fsm/commands/transition.dart';
 
 void main() {
   group('state transition command', () {

@@ -10,7 +10,7 @@ import 'package:path/path.dart' as p;
 
 import 'assets.dart';
 import 'modules/global/global_builder.dart';
-import 'modules/state/state_builder.dart';
+import 'modules/fsm/fsm_builder.dart';
 import 'modules/target/target_builder.dart';
 import 'targets/all_adapters.dart';
 import 'targets/deployer.dart';
@@ -45,7 +45,7 @@ Future<int> runInquiry(List<String> args) async {
 
   cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
   cli.module('target', (m) => buildTargetModule(m, deployer: deployer, cleaner: cleaner));
-  cli.module('state', (m) => buildStateModule(m));
+  cli.module('fsm', (m) => buildFsmModule(m));
 
   return cli.run(args);
 }
