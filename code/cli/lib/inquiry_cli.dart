@@ -21,8 +21,10 @@ import 'targets/deployer.dart';
 Future<int> runInquiry(List<String> args) async {
   final cli = ModularCli();
 
+  final assetsRoot = p.dirname(p.dirname(Platform.resolvedExecutable));
+
   final deployer = TargetDeployer(
-    assets: Assets(root: p.dirname(p.dirname(Platform.resolvedExecutable))),
+    assets: Assets(root: assetsRoot),
     adapters: deployAdapters,
     homeDir:
         Platform.environment['USERPROFILE'] ??
@@ -31,7 +33,7 @@ Future<int> runInquiry(List<String> args) async {
   );
 
   final cleaner = TargetDeployer(
-    assets: Assets(root: p.dirname(p.dirname(Platform.resolvedExecutable))),
+    assets: Assets(root: assetsRoot),
     adapters: allAdapters,
     homeDir:
         Platform.environment['USERPROFILE'] ??
@@ -39,7 +41,9 @@ Future<int> runInquiry(List<String> args) async {
         '',
   );
 
-  cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner));
+  final assets = Assets(root: assetsRoot);
+
+  cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
   cli.module('target', (m) => buildTargetModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('state', (m) => buildStateModule(m));
 
