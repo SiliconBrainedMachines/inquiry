@@ -111,52 +111,29 @@ iq state transition ...                                → comando no reconocido
 
 ### 2.1 Definir Input/Output
 
-- [ ] **RED**: Escribir test para `FsmStateCommand` con `.inquiry/state.yaml` que contiene `state: ANALYZE, task: 145` → assert output JSON tiene campos `state`, `task`, `apes`, `transitions`, `instructions`.
-- [ ] **GREEN**: Crear `lib/modules/fsm/commands/state.dart` con `FsmStateInput`, `FsmStateOutput`, `FsmStateCommand`.
-
-**Test pseudocódigo:**
-```
-test('fsm state returns JSON with current state and valid transitions')
-  setup: crear tmpDir con .inquiry/state.yaml (state: ANALYZE, task: '145')
-         copiar transition_contract.yaml a assets/fsm/
-  result = FsmStateCommand(FsmStateInput(workingDirectory: tmpDir)).execute()
-  json = result.toJson()
-  expect json['state'] == 'ANALYZE'
-  expect json['task'] == '145'
-  expect json['transitions'] is List
-  expect json['transitions'].any((t) => t['event'] == 'complete_analysis')
-```
+- [x] **RED**: 14 tests escritos cubriendo JSON structure, transitions, APEs, instructions, missing workspace, toText().
+- [x] **GREEN**: Creado `lib/modules/fsm/commands/state.dart` con `FsmStateInput`, `FsmStateOutput`, `FsmStateCommand`.
 
 ### 2.2 Calcular transiciones válidas
 
-- [ ] **RED**: Test que verifica: en estado ANALYZE, `transitions` contiene `complete_analysis→PLAN` y `block→ANALYZE` pero NO `approve_plan`.
-- [ ] **GREEN**: Filtrar `contract.transitions` por `(currentState, *)` donde `allowed == true`.
+- [x] **RED**: Tests verifican ANALYZE→{complete_analysis, block} y IDLE→{start_analyze}.
+- [x] **GREEN**: Filtrar `contract.transitions` por `(currentState, *)` donde `allowed == true`.
 
 ### 2.3 Calcular APEs activos
 
-- [ ] **RED**: Test que verifica: en estado ANALYZE, `apes` contiene `{name: "socrates", tcb: "RUNNING"}`. En IDLE, `apes` está vacío.
-- [ ] **GREEN**: Mapeo de estado → sub-agentes activos. Codificado como constante (6 estados × N apes).
-
-**Tabla de mapeo estado→apes:**
-```
-IDLE       → []
-ANALYZE    → [socrates]
-PLAN       → [descartes]
-EXECUTE    → [basho]
-END        → [basho]
-EVOLUTION  → [darwin]
-```
+- [x] **RED**: Tests verifican ANALYZE→socrates, PLAN→descartes, EXECUTE→basho, EVOLUTION→darwin, IDLE→[].
+- [x] **GREEN**: Mapeo constante `_stateApes` con 6 estados.
 
 ### 2.4 Generar instructions inline
 
-- [ ] **RED**: Test que verifica: en ANALYZE, `instructions` contiene texto con referencia a `iq ape prompt socrates`.
-- [ ] **GREEN**: Map de estado → template de instructions (strings constantes, ~2-3 frases).
+- [x] **RED**: Tests verifican ANALYZE→contains('socrates'), IDLE→contains('start_analyze').
+- [x] **GREEN**: Mapeo constante `_stateInstructions` con 6 estados.
 
 ### 2.5 Registrar comando en el módulo
 
-- [ ] Registrar `FsmStateCommand` en `fsm_builder.dart` como subcomando `state`
-- [ ] Agregar flag `--json` (default true, para futuro soporte texto)
-- [ ] Test de integración: CLI parsea `iq fsm state --json` y retorna JSON válido
+- [x] Registrar `FsmStateCommand` en `fsm_builder.dart` como subcomando `state`
+- [ ] Agregar flag `--json` (default true, para futuro soporte texto) — **diferido**: toText() ya funciona
+- [ ] Verificar manualmente: `iq fsm state` retorna JSON válido
 
 **Riesgo**: El schema JSON podría no cubrir lo que el firmware necesita.
 **Mitigación**: El schema está definido en diagnosis §7.2. Si en Phase 6 el firmware necesita más, se itera.
