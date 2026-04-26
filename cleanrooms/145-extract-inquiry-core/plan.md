@@ -229,55 +229,38 @@ iq state transition ...                                → comando no reconocido
 
 ### 5.1 Definir Input/Output
 
-- [ ] **RED**: Test para `ApePromptCommand` con `name=socrates`, estado ANALYZE, sub-estado `clarification` → assert output contiene `base_prompt` + prompt de `clarification`.
-- [ ] **GREEN**: Crear `lib/modules/ape/commands/prompt.dart` con `ApePromptInput`, `ApePromptOutput`, `ApePromptCommand`.
-
-**Test pseudocódigo:**
-```
-test('ape prompt socrates returns assembled prompt for current sub-state')
-  setup: crear tmpDir con .inquiry/state.yaml (state: ANALYZE, ape_state: {socrates: clarification})
-         copiar assets/apes/socrates.yaml
-  result = ApePromptCommand(ApePromptInput(name: 'socrates', workingDirectory: tmpDir)).execute()
-  expect result.prompt contains 'SOCRATES'
-  expect result.prompt contains 'Clarification questions'
-```
+- [x] **RED**: 20 tests — prompt assembly, APE_NOT_FOUND, APE_NOT_ACTIVE, sub-state, validate, output format, regression.
+- [x] **GREEN**: `lib/modules/ape/commands/prompt.dart` con `ApePromptInput`, `ApePromptOutput`, `ApePromptCommand`.
 
 ### 5.2 Ensamblar prompt
 
-- [ ] **RED**: Test que verifica el ensamblaje: `base_prompt + "\n\n## Current Focus\n\n" + states[sub_state].prompt`.
-- [ ] **GREEN**: Leer YAML con `ApeDefinition`, leer sub-estado de `.inquiry/state.yaml`, concatenar.
+- [x] `ApeDefinition.assemblePrompt(stateName:)` concatena `base_prompt + state.prompt`.
+- [x] Sub-estado es opcional via `--state <sub_state>`. Sin él, retorna solo base_prompt.
 
 ### 5.3 Sub-agente no existe
 
-- [ ] **RED**: Test con `name=nonexistent` → assert error con código claro (`APE_NOT_FOUND`).
-- [ ] **GREEN**: Validación en comando.
+- [x] `APE_NOT_FOUND` con ruta del YAML faltante.
 
 ### 5.4 Sub-agente no activo en fase actual
 
-- [ ] **RED**: Test con `name=socrates` en estado `EXECUTE` (donde socrates es DORMANT) → assert error `APE_NOT_ACTIVE`.
-- [ ] **GREEN**: Consultar mapeo estado→apes (de Phase 2.3) para validar.
+- [x] `APE_NOT_ACTIVE` con nombre del estado actual y APEs activos.
 
 ### 5.5 Registrar módulo `ape`
 
-- [ ] Crear `lib/modules/ape/ape_builder.dart`
-- [ ] Registrar en `inquiry_cli.dart`: `cli.module('ape', (m) => buildApeModule(m))`
-- [ ] Test de integración: `iq ape prompt socrates` retorna prompt válido
+- [x] `lib/modules/ape/ape_builder.dart` creado
+- [x] Registrado en `inquiry_cli.dart`: `cli.module('ape', ...)`
+- [x] CLI: `iq ape prompt --name <name> [--state <sub_state>]`
 
 ### 5.6 Test de regresión vs. monolito
 
-- [ ] **RED**: Test que compara secciones clave del prompt generado contra el contenido del monolito original (snapshot test).
-- [ ] **GREEN**: Ajustar YAMLs si hay divergencias significativas.
+- [x] 4 tests de prompt fidelity: keywords de cada sub-agente verificados.
 
-**Test pseudocódigo:**
-```
-test('generated socrates prompt covers all key sections from monolith')
-  monolith = File('assets/agents/inquiry.agent.md').readAsStringSync()
-  prompt = ApePromptCommand(...socrates, ANALYZE, clarification...).execute().prompt
-  // Verificar que conceptos clave están presentes
-  expect prompt contains 'Socratic method'
-  expect prompt contains 'epistemic humility'
-  expect prompt contains 'Clarification'
-```
+### 5.7 Pruebas manuales
+
+- [x] `iq ape prompt --name basho` → prompt de BASHŌ completo (estado EXECUTE) ✓
+- [x] `iq ape prompt --name basho --state implement` → base + sub-estado ✓
+- [x] `iq ape prompt --name socrates` → `APE_NOT_ACTIVE` (EXECUTE, no socrates) ✓
+- [x] `iq ape prompt --name nonexistent` → `APE_NOT_FOUND` ✓
 
 **Riesgo**: Prompts modulares degradan comportamiento del LLM vs. monolito.
 **Mitigación**: Tests de regresión (5.6). Si la degradación es observable, se itera el YAML.
@@ -373,6 +356,14 @@ test('detectShell returns bash when SHELL=/bin/bash')
 
 **Riesgo**: La detección de shell puede fallar en entornos híbridos (WSL, Git Bash en Windows).
 **Mitigación**: Fallback a `powershell` en Windows, `bash` en todo lo demás. El usuario puede override en `.inquiry/config.yaml` (futuro, no en scope v0.2.0).
+
+---
+
+## Decisión: Dev container para e2e (Phase 8)
+
+> **Contexto**: Instalar y desplegar inquiry para pruebas reales daña el entorno de desarrollo actual.
+> **Decisión**: Phases 5-7 continúan en Windows compilando a `code/cli/bin/inquiry.exe` sin instalar. Phase 8 introduce `.devcontainer/devcontainer.json` con Dart SDK para ejecutar `install.sh → init → doctor → fsm state → ape prompt` en entorno desechable.
+> **Beneficio**: Valida `install.sh` (Linux), paridad con CI (GitHub Actions), entorno destruible.
 
 ---
 
