@@ -81,16 +81,16 @@ test('init creates cleanrooms at project root, not under docs/')
 **Dependencias**: Ninguna (puede ejecutarse en paralelo con Phase 0).
 **TDD**: Rename mecánico, tests existentes se actualizan.
 
-- [ ] Renombrar directorio `lib/modules/state/` → `lib/modules/fsm/`
-- [ ] Renombrar `state_builder.dart` → `fsm_builder.dart`
-- [ ] En `fsm_builder.dart`: cambiar nombre del módulo de `'state'` a `'fsm'`
-- [ ] En `inquiry_cli.dart`: cambiar `cli.module('state', ...)` → `cli.module('fsm', ...)`
-- [ ] Actualizar imports en todos los archivos afectados
-- [ ] Renombrar `state_transition_test.dart` → `fsm_transition_test.dart`
-- [ ] Renombrar `state_transition_integration_test.dart` → `fsm_transition_integration_test.dart`
-- [ ] Actualizar imports en tests
-- [ ] Ejecutar `dart analyze` — 0 errores
-- [ ] Ejecutar `dart test` — todos los tests pasan
+- [x] Renombrar directorio `lib/modules/state/` → `lib/modules/fsm/`
+- [x] Renombrar `state_builder.dart` → `fsm_builder.dart`
+- [x] En `fsm_builder.dart`: cambiar nombre del módulo de `'state'` a `'fsm'`
+- [x] En `inquiry_cli.dart`: cambiar `cli.module('state', ...)` → `cli.module('fsm', ...)`
+- [x] Actualizar imports en todos los archivos afectados
+- [x] Renombrar `state_transition_test.dart` → `fsm_transition_test.dart`
+- [x] Renombrar `state_transition_integration_test.dart` → `fsm_transition_integration_test.dart`
+- [x] Actualizar imports en tests
+- [x] Ejecutar `dart analyze` — 0 errores
+- [x] Ejecutar `dart test` — 161 tests pasan
 
 **Verificación:**
 ```

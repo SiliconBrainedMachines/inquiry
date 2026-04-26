@@ -2,7 +2,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
 import 'commands/transition.dart';
 
-void buildStateModule(ModuleBuilder m) {
+void buildFsmModule(ModuleBuilder m) {
   m.command<StateTransitionInput, StateTransitionOutput>(
     'transition',
     (req) => StateTransitionCommand(StateTransitionInput.fromCliRequest(req)),
