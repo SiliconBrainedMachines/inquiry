@@ -11,6 +11,7 @@ import 'package:path/path.dart' as p;
 import 'assets.dart';
 import 'modules/global/global_builder.dart';
 import 'modules/fsm/fsm_builder.dart';
+import 'modules/ape/ape_builder.dart';
 import 'modules/target/target_builder.dart';
 import 'targets/all_adapters.dart';
 import 'targets/deployer.dart';
@@ -46,6 +47,7 @@ Future<int> runInquiry(List<String> args) async {
   cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
   cli.module('target', (m) => buildTargetModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
+  cli.module('ape', (m) => buildApeModule(m, assets: assets));
 
   return cli.run(args);
 }
