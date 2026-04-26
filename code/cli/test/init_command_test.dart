@@ -26,6 +26,17 @@ void main() {
         expect(Directory('${tempDir.path}/cleanrooms').existsSync(), isTrue);
       });
 
+      test('creates cleanrooms/ at root, not under docs/', () async {
+        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
+        await command.execute();
+
+        expect(Directory('${tempDir.path}/cleanrooms').existsSync(), isTrue);
+        expect(
+          Directory('${tempDir.path}/docs/cleanrooms').existsSync(),
+          isFalse,
+        );
+      });
+
       test('skips cleanrooms/ creation at root if already exists', () async {
         Directory('${tempDir.path}/cleanrooms').createSync(recursive: true);
         // Put a marker file to verify directory is not recreated/destroyed
