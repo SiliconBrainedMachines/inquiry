@@ -14,7 +14,16 @@ The pattern was forming: **Analyze → Plan → Execute.**
 
 ## The Coding Manifesto
 
-**2026-03-10.** The first artifact: a coding manifesto in a personal `ai` repo ([`ccisnedev/ai@a60dee5`](https://github.com/ccisnedev/ai/commit/a60dee5)). A set of principles for how code should be written when collaborating with AI — clarity of intent, readable structure, explicit naming. Not a methodology yet. Just rules for the human side of the conversation.
+**2026-03-10.** The true origin. Before the methodology, before the agents, before the CLI — there was a manifesto. Commit [`a60dee5`](https://github.com/ccisnedev/ai/commit/a60dee5) in the `ai` repo created `coding-manifesto.md` with an epigraph that would define everything that came after:
+
+> *Haiku clarity. Katana precision.*
+> *Code that reveals its purpose.*
+
+The manifesto was a philosophical framework for code quality expressed through six lenses: code as music (rhythm, silence, inevitability), code as art (precision over abbreviation, visual structure as communication), code as technique (explicit contracts, earned abstractions, no speculative code), code as craft (nothing hidden, nothing unnamed), code as vocation (respect for the reader), and the discipline of comments (the composer's note to the performer).
+
+This was not a methodology yet — it was an aesthetic identity. But embedded in its rules were the principles that would later become the EXECUTE phase: constraint as revelation, minimal expression, functional beauty, the conviction that code should be readable as prose and structured as music. The manifesto's operational rules (R-INT, R-NOM, R-FUN, R-ORD, R-DOC, R-TEC) and its delivery checklist became the quality standard that every APE cycle would enforce at implementation time.
+
+The manifesto is the ancestor of BASHŌ. When the sub-agents were later named after philosophers, BASHŌ (Matsuo Bashō, the haiku master) was chosen precisely because the manifesto already spoke in haiku terms — clarity, precision, code that reveals its purpose. The thinking tool existed before the thinker had a name.
 
 ## The Inquiry repo is born
 
@@ -26,7 +35,7 @@ The pattern was forming: **Analyze → Plan → Execute.**
 
 ## APE v0.1.0 — the first prompt
 
-**2026-04-03.** The birth of APE as a concrete artifact. Commit [`ac2da79`](https://github.com/ccisnedev/ai/commit/ac2da79) in the `ai` repo created `agent-prompt.md` v0.1.0 — 112 lines that defined:
+**2026-04-03.** The birth of APE as a concrete artifact. Commit [`ac2da79`](https://github.com/ccisnedev/ai/commit/ac2da79) in the `ai` repo created `ape/agent-prompt.md` v0.1.0 — 112 lines that defined:
 
 - Three states: **ANALYZE**, **PLAN**, **EXECUTE**
 - All transitions require explicit user authorization
@@ -36,7 +45,17 @@ The pattern was forming: **Analyze → Plan → Execute.**
 
 This was the moment APE became operational. A human and an AI agent could now work together under a shared contract. The agent announced its state at every response: `[APE: ANALYZE]`, `[APE: PLAN]`, `[APE: EXECUTE]`.
 
+The `ape/` directory in the `ai` repo was the first version of Inquiry — before it had its own repository. Over the next twelve days it evolved through four versions: v0.1.0 (the state machine contract), improvements to plan structure and execution rules ([`925f134`](https://github.com/ccisnedev/ai/commit/925f134)), migration to VS Code custom agent format v0.3.0 ([`5f5d5ff`](https://github.com/ccisnedev/ai/commit/5f5d5ff)), and the introduction of `memory-read` and `memory-write` skills ([`8b65d80`](https://github.com/ccisnedev/ai/commit/8b65d80)). The redesign of ANALYZE as an orchestrator ([`16dbb6e`](https://github.com/ccisnedev/ai/commit/16dbb6e)) and the definition of SOCRATES as a sub-agent ([`73a4ead`](https://github.com/ccisnedev/ai/commit/73a4ead)) were the last commits to touch `ape/` in this repo — by then, the system had outgrown a prompt collection and needed its own home.
+
 The prompt lived in the `ai` repo and was deployed to VS Code via a symbolic link to `~/.copilot/`. A manual process — but it worked.
+
+## The Runbook — the proto-plan
+
+**2026-04-13.** Before the named agents, before the philosophical grounding, there was a simpler idea: a custom agent whose only job was to produce a plan. Commit [`58dfa5a`](https://github.com/ccisnedev/ai/commit/58dfa5a) added `runbook.agent.md` v0.1.0 to the `ai` repo — a VS Code custom agent that generated a file called a RUNBOOK: a structured TDD checklist with objective, scope, constraints, validation criteria, and an ordered execution plan with review gates.
+
+The runbook agent did not analyze. It did not implement. It only planned — and it forced the developer to articulate intent before writing code. The RUNBOOK was the "single source of truth": all context necessary to start or resume development in a fresh chat without prior conversation history. It even had its own finite state machine (`drafted → issued → ready`) tracked via YAML frontmatter.
+
+This was the ancestor of `plan.md`. The runbook proved the core thesis experimentally: when you force the AI to plan before coding, code quality improves immediately — not because the AI gets smarter, but because the human gets clearer.
 
 ## The Socratic revelation
 
