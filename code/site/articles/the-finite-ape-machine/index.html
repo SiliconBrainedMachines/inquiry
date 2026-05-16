@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Finite APE Machine — Inquiry</title>
+  <meta name="description" content="The origin of Analyze → Plan → Execute. Why methodology matters more than model in AI-assisted development.">
+  <meta name="author" content="Carlos Cisne">
+  <meta name="theme-color" content="#0d1117">
+
+  <meta property="og:title" content="The Finite APE Machine">
+  <meta property="og:description" content="The origin of Analyze → Plan → Execute. Why methodology matters more than model in AI-assisted development.">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://inquiry.ccisne.dev/articles/the-finite-ape-machine/">
+  <meta property="og:site_name" content="Inquiry">
+
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="The Finite APE Machine">
+  <meta name="twitter:description" content="The origin of Analyze → Plan → Execute. Why methodology matters more than model.">
+
+  <link rel="icon" type="image/svg+xml" href="../../img/favicon.svg">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="https://void.ccisne.dev/styles/base.css">
+  <link rel="stylesheet" href="https://void.ccisne.dev/styles/articles.css">
+</head>
+<body>
+
+<article class="article">
+  <header class="article-header">
+    <h1>The Finite APE Machine</h1>
+    <p class="subtitle">The origin of Analyze → Plan → Execute</p>
+    <div class="article-meta">
+      <time datetime="2026-05-13">May 13, 2026</time>
+      <span class="tag">origin</span>
+      <span class="tag">methodology</span>
+      <span class="tag">philosophy</span>
+    </div>
+  </header>
+
+  <div class="article-body">
+
+    <p>Late 2022. ChatGPT had just been released. Like millions of others, I started using AI for software development. The promise was immediate: describe what you want, get code back.</p>
+
+    <p>The reality was different.</p>
+
+    <p>The AI assumed things I hadn't said. It misinterpreted ambiguous requests. It produced plausible but wrong solutions with absolute confidence. And most of the time, the fault was mine — I expressed myself with the ambiguity natural to human language and expected the machine to read my intent. It didn't. It read my words.</p>
+
+    <p>The bottleneck was never the AI. The bottleneck was me.</p>
+
+    <h2>The Runbook</h2>
+
+    <p>My first attempt at solving this was instinctive, not theoretical. I created a custom agent — a system prompt — whose only job was to generate a file called <code>runbook.md</code>. Before writing any code, the agent would analyze what I wanted and produce a step-by-step plan: what to change, in what order, what tests to write, what to verify.</p>
+
+    <p>It was crude. No formal methodology. No philosophical foundation. Just a developer frustrated with AI that jumped straight to code and got it wrong, building a guardrail to force the machine to <em>think before acting</em>.</p>
+
+    <p>But it worked. The code quality improved immediately. Not because the AI got smarter — because <em>I</em> got clearer. The runbook forced me to articulate what I actually wanted before the AI touched anything. By the time it started coding, the problem was already solved. What remained was mechanical transcription.</p>
+
+    <p>I didn't realize it at the time, but that runbook was the ancestor of everything that came after.</p>
+
+    <h2>The Pattern</h2>
+
+    <p>Months of iteration revealed a structure hiding inside my workflow. Every successful cycle followed the same three phases:</p>
+
+    <ol>
+      <li><strong>Analyze</strong> — understand the problem before proposing solutions</li>
+      <li><strong>Plan</strong> — decompose the solution into ordered, verifiable steps</li>
+      <li><strong>Execute</strong> — implement against the plan, not against vague intent</li>
+    </ol>
+
+    <p>Every time I skipped analysis and jumped to planning, the plan was wrong. Every time I skipped planning and jumped to code, the code was wrong. The sequence was not a preference — it was a constraint. Violating it produced predictable failures.</p>
+
+    <p>This wasn't a new discovery. I was rediscovering what software engineering has known for decades under different names: spec-driven development, test-driven development, design-before-code. The difference was the context — I was applying it to <em>human-AI collaboration</em>, where the communication gap makes these disciplines not just useful but essential.</p>
+
+    <h2>Spec-Driven, Test-Driven</h2>
+
+    <p>The foundation crystallized around two established practices:</p>
+
+    <p><strong>Spec-driven development</strong> — write the specification before writing the code. In the AI context, this means the analysis phase produces a diagnosis that captures requirements, assumptions, edge cases, and constraints. By the time the AI sees the problem, ambiguity has been eliminated. The spec is the contract.</p>
+
+    <p><strong>Test-driven development</strong> — write the tests before writing the implementation. Tests are unambiguous. Tests don't drift. When you hand an AI a failing test and say "make this pass," the result is either correct or it isn't. No room for plausible-but-wrong. No room for creative interpretation.</p>
+
+    <blockquote>
+      <p>The most reliable way to get correct output from an AI is to give it a failing test. Tests are the only language where human intent and machine execution have zero ambiguity.</p>
+    </blockquote>
+
+    <p>Together, spec-driven and test-driven development gave me a methodology where the AI's tendency to hallucinate became irrelevant. By the time it writes code, the problem is defined, the plan is explicit, and the tests are waiting. The AI is no longer guessing — it's transcribing.</p>
+
+    <h2>The Sub-Agents</h2>
+
+    <p>The next leap was realizing that the methodology itself could be encoded as agents. Instead of one monolithic prompt that says "be careful and follow the process," what if each phase had its own specialized agent — one that <em>embodies</em> the method, not just follows instructions?</p>
+
+    <p>I looked for the best practitioners of each discipline. Not in tech. In human intellectual history.</p>
+
+    <ul>
+      <li><strong>SOCRATES</strong> for analysis — because the Socratic method (mayéutica) is 2,400 years of refined practice in drawing truth through questioning, not assertion</li>
+      <li><strong>DESCARTES</strong> for planning — because the Cartesian method (divide, order, verify, enumerate) is the most rigorous decomposition framework ever written</li>
+      <li><strong>BASHŌ</strong> for execution — because the Japanese concept of <em>yō no bi</em> (用の美, beauty in function) captures what great code feels like: minimal, purposeful, where constraint reveals elegance</li>
+    </ul>
+
+    <p>Each name identifies a thinking tool — a method of reasoning drawn from a specific philosopher, culture, and era. The diversity is intentional. The tools span 2,400 years, three cultures, and three disciplines. The thesis: <strong>the best methodology for building software already exists, scattered across human intellectual history. We just had to assemble it.</strong></p>
+
+    <p>Later, two more agents joined: <strong>DEWEY</strong> for issue triage (Deweyan problematization — turning an indeterminate situation into a well-formed problem), and <strong>DARWIN</strong> for evolution (natural selection applied to the methodology itself, so the system improves through its own operation).</p>
+
+    <h2>The Machine</h2>
+
+    <p>Agents with methods weren't enough. They needed structure — a system that enforces the sequence, prevents shortcuts, and makes every transition explicit.</p>
+
+    <p>That system is the <strong>Finite APE Machine</strong>: a finite-state machine with six states, deterministic transitions, and a contract that the AI cannot bypass.</p>
+
+    <pre><code>IDLE → ANALYZE → PLAN → EXECUTE → END → IDLE
+                                      ↘ EVOLUTION</code></pre>
+
+    <p>Every transition requires explicit authorization. Ambiguous approval is not authorization — "ok" and "sounds good" do not move the state machine. The agent proposes; the human disposes. This is not a UX choice. It is a trust boundary.</p>
+
+    <p>The CLI (<code>iq</code>) is the kernel. Agents are userspace. Just as a Linux process does not write to <code>/proc/</code>, agents do not mutate the FSM state directly. All state changes go through the CLI, which validates preconditions before every transition. If the agent hallucinates a state change, the CLI rejects it.</p>
+
+    <div class="callout">
+      <div class="callout-title">The banner phrase</div>
+      <p>Infinite monkeys produce noise. Finite APEs produce software.</p>
+      <p>The infinite monkey theorem says that random input eventually produces any text — given infinite time. Inquiry rejects randomness. A finite number of disciplined agents, following a structured method, produce working software in finite time. The constraint is the point. The method is the machine.</p>
+    </div>
+
+    <h2>From Runbook to Inquiry</h2>
+
+    <p>The distance from that first <code>runbook.md</code> to the Finite APE Machine is measured in months, not years. But the intellectual distance is vast. What started as a frustrated developer building a guardrail became a methodology grounded in pragmatist philosophy, epistemology, and the history of scientific inquiry.</p>
+
+    <p>Charles Sanders Peirce proved in 1878 that all structured investigation follows three modes of inference: abduction (hypothesis), deduction (experimental design), and induction (empirical test). The APE cycle maps exactly:</p>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Peirce's inquiry</th>
+          <th>APE phase</th>
+          <th>Agent</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Abduction — inference to the best explanation</td>
+          <td>ANALYZE</td>
+          <td>SOCRATES</td>
+        </tr>
+        <tr>
+          <td>Deduction — derive consequences from hypotheses</td>
+          <td>PLAN</td>
+          <td>DESCARTES</td>
+        </tr>
+        <tr>
+          <td>Induction — test consequences against reality</td>
+          <td>EXECUTE</td>
+          <td>BASHŌ</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p>The APE cycle wasn't just a workflow — it was an implementation of the oldest formal theory of structured investigation. That's when the project got its name: <strong>Inquiry</strong>.</p>
+
+    <p>John Dewey defined inquiry as <em>"the controlled transformation of an indeterminate situation into one that is so determinate as to convert the elements of the original situation into a unified whole."</em> A GitHub issue is an indeterminate situation. A merged pull request is a determinate unified whole. The APE cycle is the controlled transformation between them.</p>
+
+    <p>This is not a metaphor. It is an isomorphism.</p>
+
+    <h2>The Bet</h2>
+
+    <p>Inquiry makes a bet: <strong>methodology over model</strong>.</p>
+
+    <p>If the framework carries the weight — if analysis eliminates ambiguity, planning makes the solution explicit, and execution follows the spec — then the specific AI model matters less. A smaller or free model following a rigorous method should stay useful where a frontier model freestyling falls apart.</p>
+
+    <p>The unexpected result: I recognize the code the AI produces as my own. Not because I wrote it, but because I designed it. Every decision was made during analysis and planning. The AI implemented <em>my</em> design, following <em>my</em> conventions, under <em>my</em> constraints.</p>
+
+    <p>The methodology doesn't replace the engineer. It amplifies them.</p>
+
+    <p>And it started with a runbook.</p>
+
+  </div>
+
+  <footer class="article-footer">
+    <p><a href="https://inquiry.ccisne.dev">← inquiry.ccisne.dev</a> · <a href="https://github.com/ccisnedev/inquiry">GitHub</a></p>
+  </footer>
+</article>
+
+</body>
+</html>
