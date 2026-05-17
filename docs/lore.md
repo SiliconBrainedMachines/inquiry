@@ -103,9 +103,9 @@ mizu no oto          sound of water
 
 **The allegory.** Charles Darwin (1809–1882) did not invent evolution — he discovered its mechanism: natural selection. Organisms do not improve by design; they improve because variants that survive reproduce, and variants that fail do not. The insight is that *the system improves itself through its own operation*, without a designer directing the improvement.
 
-**The ape.** DARWIN is the only agent whose output targets APE itself. After each completed cycle, it reads the full artifacts (diagnosis.md, plan.md, commits, deviations), evaluates APE's process performance, and generates improvement proposals as GitHub issues. Before creating a new issue, DARWIN searches for existing ones (`gh issue list --repo finite_ape_machine --search "keyword"`) and comments on matches instead of duplicating. DARWIN is automatic and requires no user approval. It can be disabled via `.inquiry/config.yaml` (`evolution.enabled: false`). Like its namesake, DARWIN does not design improvements — it observes what worked, what failed, and what mutated, then *selects* the adaptations that make the system fitter.
+**The ape.** DARWIN is the only agent whose output targets APE itself. After each completed cycle, it reads the full artifacts (diagnosis.md, plan.md, commits, deviations), evaluates APE's process performance, and generates improvement proposals as GitHub issues. Before creating a new issue, DARWIN searches for existing ones (`gh issue list --repo ccisnedev/inquiry --search "keyword"`) and comments on matches instead of duplicating. DARWIN is automatic and requires no user approval. It can be disabled via `.inquiry/config.yaml` (`evolution.enabled: false`). Like its namesake, DARWIN does not design improvements — it observes what worked, what failed, and what mutated, then *selects* the adaptations that make the system fitter.
 
-**Key artifact:** Issues/comments in the `finite_ape_machine` repository
+**Key artifact:** Issues/comments in the Inquiry repository
 
 ---
 
@@ -181,7 +181,7 @@ mizu no oto          sound of water
 | SOCRATES | ANALYZE | Mayéutica | Greece, 470 BC | `diagnosis.md` |
 | DESCARTES | PLAN | Scientific Method | France, 1596 | `plan.md` |
 | BASHŌ | EXECUTE | Techne / 用の美 | Japan, 1644 | Code + commits |
-| DARWIN | EVOLUTION | Natural Selection | England, 1809 | Issues in APE repo |
+| DARWIN | EVOLUTION | Natural Selection | England, 1809 | Issues in Inquiry repo |
 
 ### Extended Lore (future)
 
