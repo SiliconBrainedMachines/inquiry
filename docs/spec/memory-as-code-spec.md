@@ -1,6 +1,6 @@
 # Memory as Code
 
-> **Status:** Partially implemented (v0.2.0). Per-cycle investigation material lives in `cleanrooms/<branch>/analyze/`. The `.inquiry/memory/` directory structure described below is reserved for future cross-cycle persistent memory (DARWIN reports, lessons learned). For current operational details, see the `doc-write` and `doc-read` skills.
+> **Status:** Mixed historical and planned design surface. Per-cycle investigation material lives in `cleanrooms/<branch>/analyze/`. The broader `.inquiry/memory/` directory structure, `iq memory *` command family, and BORGES-style validation described below remain future cross-cycle architecture rather than current deployed surfaces. For current operational details, see the `doc-write` and `doc-read` skills.
 
 **Finite APE Machine — Memory Architecture Specification**
 *"Documentation that doesn't compile is documentation that doesn't exist."*

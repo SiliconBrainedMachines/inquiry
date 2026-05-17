@@ -30,7 +30,7 @@ If evolution is disabled in `.inquiry/config.yaml`, the cycle returns directly f
 | IDLE | DEWEY | Triage, issue readiness, and explicit start handoff | `.inquiry/state.yaml` |
 | ANALYZE | SOCRATES | Clarify the problem and produce a rigorous diagnosis | `cleanrooms/<issue>/analyze/diagnosis.md` |
 | PLAN | DESCARTES | Design the execution sequence and verification strategy | `cleanrooms/<issue>/plan.md` |
-| EXECUTE | BASHO | Implement phase by phase under the plan's constraints | code + commits |
+| EXECUTE | BASHŌ | Implement phase by phase under the plan's constraints | code + commits |
 | END | APE + human gate | Create and merge the PR through an explicit closure gate | PR |
 | EVOLUTION | DARWIN | Propose improvements to the framework itself | issues/comments in the Inquiry repository |
 
@@ -47,7 +47,7 @@ The current system uses one primary sub-agent per active work phase:
 - DEWEY in IDLE
 - SOCRATES in ANALYZE
 - DESCARTES in PLAN
-- BASHO in EXECUTE
+- BASHŌ in EXECUTE
 - DARWIN in EVOLUTION
 
 APE still orchestrates every state boundary, and END remains the explicit APE + human closure gate. Earlier multi-agent rosters remain historically relevant, but they are not the active architectural model. Their documentary home is [../lore.md](../lore.md), not this specification. [4][6]
@@ -104,16 +104,16 @@ Earlier repository documents described a larger and more granular roster includi
 
 ## References
 
-[1] Finite APE Machine repository. "Inquiry as Epistemic Foundation of APE." `docs/research/inquiry/index.md`.
+[1] Inquiry repository. "Inquiry as Epistemic Foundation of APE." `docs/research/inquiry/index.md`.
 
-[2] Finite APE Machine repository. "Architecture." `docs/architecture.md`.
+[2] Inquiry repository. "Architecture." `docs/architecture.md`.
 
-[3] Finite APE Machine repository. "Signal-based coordination — RTOS event model for agent communication." `docs/spec/signal-based-coordination.md`.
+[3] Inquiry repository. "Signal-based coordination — RTOS event model for agent communication." `docs/spec/signal-based-coordination.md`.
 
-[4] Finite APE Machine repository. "Agent lifecycle — six-state model and confirmed agent registry." `docs/spec/agent-lifecycle.md`.
+[4] Inquiry repository. "Agent lifecycle — six-state model and confirmed agent registry." `docs/spec/agent-lifecycle.md`.
 
-[5] Finite APE Machine repository. "Cooperative multitasking model — two-level FSM architecture." `docs/spec/cooperative-multitasking-model.md`.
+[5] Inquiry repository. "Cooperative multitasking model — two-level FSM architecture." `docs/spec/cooperative-multitasking-model.md`.
 
-[6] Finite APE Machine repository. "The Apes — Lore." `docs/lore.md`.
+[6] Inquiry repository. "The Apes — Lore." `docs/lore.md`.
 
-[7] Finite APE Machine repository. "Diagnosis for issue #134: justified documentation status map and canonical-home recommendations." `cleanrooms/134-organize-core-documentation/analyze/diagnosis.md`.
+[7] Inquiry repository. "Diagnosis for issue #134: justified documentation status map and canonical-home recommendations." `cleanrooms/134-organize-core-documentation/analyze/diagnosis.md`.

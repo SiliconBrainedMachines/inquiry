@@ -3,17 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Methodology — Inquiry</title>
-  <meta name="description" content="How Inquiry works: a six-state operational model, a declarative transition contract, memory as code, and the antifragility thesis.">
+  <title>Thinking Tools & Methodology — Inquiry</title>
+  <meta name="description" content="How Inquiry turns thinking tools into operational method: a six-state cycle, declarative transition contract, memory as code, and risk-aware orchestration.">
   <meta name="theme-color" content="#0a0e1a">
 
-  <meta property="og:title" content="Methodology — Inquiry">
-  <meta property="og:description" content="A six-state operational model, a declarative transition contract, and memory as code.">
+  <meta property="og:title" content="Thinking Tools & Methodology — Inquiry">
+  <meta property="og:description" content="How Inquiry turns thinking tools into operational method through a six-state cycle, transition contract, and memory as code.">
   <meta property="og:type" content="article">
 
   <meta name="twitter:card" content="summary">
-  <meta name="twitter:title" content="Methodology — Inquiry">
-  <meta name="twitter:description" content="A six-state operational model, a declarative transition contract, and memory as code.">
+  <meta name="twitter:title" content="Thinking Tools & Methodology — Inquiry">
+  <meta name="twitter:description" content="How Inquiry turns thinking tools into operational method through a six-state cycle, transition contract, and memory as code.">
 
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
 
@@ -31,9 +31,9 @@
     </nav>
 
     <header class="page-hero">
-      <h1>Methodology over model.</h1>
+      <h1>Thinking tools made operational.</h1>
       <p class="page-subhead">
-        Inquiry treats your AI coding assistant as a finite state machine with a declarative transition contract. The CLI enforces pre- and post-conditions. Intelligence emerges from orchestration and memory — not from any single agent's capability.
+        Inquiry treats your AI coding assistant as a finite state machine with a declarative transition contract. The CLI enforces pre- and post-conditions. The point is not to deny model quality, but to make AI-assisted work legible through explicit thinking tools, orchestration, and memory.
       </p>
       <p class="page-subhead">
         This page is a public explainer. For the canonical documentation map, see <a href="https://github.com/ccisnedev/inquiry/blob/main/docs/index.md">docs/index.md</a>.
@@ -95,14 +95,14 @@
     <span class="key">prechecks</span>:
       - human_approval</pre>
       <p>
-        This is the core artifact. It's what makes Inquiry reproducible across models: every agent reads the same contract and can only produce the transitions it permits. If a future target (Claude, Codex, Gemini) processes a different prompt, the contract constrains the output shape identically.
+        This is the core artifact. It's what makes Inquiry portable across targets and tools: every agent reads the same contract and can only produce the transitions it permits. If a future target (Claude, Codex, Gemini) processes a different prompt, the contract constrains the output shape identically.
       </p>
     </section>
 
     <section aria-labelledby="memory-heading">
       <h2 id="memory-heading">Memory as code</h2>
       <p class="section-intro">
-        Project memory lives in two places, both markdown, both in git. No vector DB. No cloud dependency. The repository <em>is</em> the database.
+        Project memory lives in two places, both markdown, both in git. No vector DB. No hosted memory service. The repository <em>is</em> the database.
       </p>
       <div class="memory-cols">
         <div class="memory-col">
@@ -119,7 +119,7 @@
           <ul class="memory-list">
             <li>ADRs, specs, runbooks — whatever the project needs long-term</li>
             <li><code>cleanrooms/&lt;issue&gt;/</code> holds per-cycle analysis, plan, and metrics artifacts</li>
-            <li>Indexed by the agents via the <code>memory-read</code> skill</li>
+            <li>Indexed by the agents via the <code>doc-read</code> skill</li>
             <li><code>index.md</code> per directory acts as a primary index</li>
             <li>Frontmatter YAML acts as a schema (enforced by a future skill)</li>
           </ul>
@@ -141,15 +141,15 @@
     </section>
 
     <section aria-labelledby="why-heading">
-      <h2 id="why-heading">Why methodology beats model</h2>
+      <h2 id="why-heading">Why thinking tools matter</h2>
       <blockquote class="pull-quote">
-        If the framework carries the weight, the model gets lighter.
+        AI makes philosophical discipline operational again.
       </blockquote>
       <p>
-        Three scenarios, same conclusion. Cloud models get expensive? Inquiry works with local ones. Frontier models plateau? DARWIN becomes the only improvement mechanism left. Models keep improving? Inquiry amplifies the gains without rewriting the runbook. The framework benefits from disorder — antifragile across the AI market.
+        Inquiry is not trying to prove that a weaker local model can beat a frontier hosted one. The aim is stricter: make AI-assisted engineering legible, auditable, and portable by grounding it in explicit thinking tools. If providers change, prices move, or targets churn, the doctrine should survive because the discipline lives in the method, not in one vendor surface.
       </p>
       <p>
-        The thesis Inquiry exists to test: given an identical task, a smaller model running Inquiry outperforms a frontier model freestyling. The evidence lives in a <code>metrics.yaml</code> dataset that doesn't fully exist yet — the reproducibility score sits at 2/10 until 30 clean cycles and a multi-target test matrix land. See the historical bootstrap thesis, <a href="ape-builds-ape.html">APE builds APE →</a>.
+        The thesis Inquiry exists to test is philosophical and methodological: AI-assisted software work improves when questioning, decomposition, verification, and evolutionary learning are turned into operational method. The evidence lives in a <code>metrics.yaml</code> dataset that doesn't fully exist yet — the reproducibility score sits at 2/10 until 30 clean cycles and a multi-target test matrix land. See the historical bootstrap thesis, <a href="ape-builds-ape.html">APE builds APE →</a>.
       </p>
     </section>
 

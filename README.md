@@ -4,23 +4,25 @@
 
 A methodology for AI-assisted software development that models coding agents as a cooperative finite state machine — **Analyze → Plan → Execute → End → [Evolution] → Idle** — where the value is in the process, not the model.
 
-**Status:** `v0.3.1` · Windows + Linux · Single-target MVP (Copilot)
+**Status:** `v0.4.5` · Windows + Linux · Single-target MVP (Copilot)
 
 This README is the public entry surface. For the repository's canonical documentation map, start at [`docs/index.md`](docs/index.md).
+
+Inquiry now also carries its long-form book manuscript inside [`code/book/README.md`](code/book/README.md). The book is the canonical doctrinal treatment of the project; the runtime contract remains governed by the CLI assets, tests, and specifications in this repository.
 
 ## What is Inquiry?
 
 Inquiry is a structured methodology that turns AI coding assistants into disciplined engineering partners. Instead of letting an LLM freestream solutions, Inquiry forces a cycle: understand the problem first (Analyze), design the solution second (Plan), then implement mechanically (Execute). Each phase has constraints, artifacts, and a clear exit condition.
 
-The insight: **a smaller model following a rigorous process beats a frontier model freestyling.** Method is the durable asset; models are replaceable.
+The insight: **AI capability only becomes trustworthy when governed by rigorous thinking tools and explicit process.** The durable asset is the method that turns philosophical discipline into operational practice.
 
 ### Key principles
 
-- **Methodology over model** — the process produces quality, not the model's size or temperature
-- **Memory as Code** — project memory lives as version-controlled markdown, readable by both humans and AI. No vector DB, no cloud dependency
+- **Thinking tools before improvisation** — quality comes from disciplined inquiry, not from unstructured prompting
+- **Memory as Code** — project memory lives as version-controlled markdown, readable by both humans and AI. No vector DB, no hosted memory service
 - **Agents as FSM states** — each phase activates one specialized agent; transitions are declarative, total, and validated
 - **CLI carries methodology** — the CLI resolves paths, injects context, and enforces constraints; the AI focuses on reasoning
-- **Antifragile by design** — if models plateau, the methodology is the only improvement lever left; if models improve, the methodology amplifies gains
+- **Antifragile by design** — if tools change, the methodology remains legible and portable; if tools improve, the methodology amplifies gains
 
 ## The Inquiry cycle
 
@@ -92,8 +94,9 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 - **CLI:** Dart, single cross-platform binary, built on [`modular_cli_sdk`](https://github.com/ccisnedev/modular_cli_sdk)
 - **FSM:** declarative `transition_contract.yaml` — every (state, event) pair is total
 - **Context injection:** `iq ape prompt` assembles base prompt + sub-state + dynamic paths as fenced YAML
-- **Skills:** `doc-write`, `doc-read`, `issue-start`, `issue-end`, `inquiry-install` — protocols the AI follows
+- **Skills:** operational protocols such as `issue-create`, `issue-start`, `issue-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
 - **Memory:** `.inquiry/` (runtime state), `cleanrooms/` (per-cycle artifacts), `docs/spec/` (specifications)
+- **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
 - **Target:** Copilot only at present. Multi-target deferred until reactivation
 
 ## Documentation
@@ -101,11 +104,13 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 | Document | Purpose |
 |----------|---------|
 | [`docs/index.md`](docs/index.md) | Top-level navigation |
+| [`code/book/README.md`](code/book/README.md) | Canonical long-form book manuscript and editorial surface |
 | [`docs/architecture.md`](docs/architecture.md) | APE as orchestrating methodology |
 | [`docs/spec/finite-ape-machine.md`](docs/spec/finite-ape-machine.md) | Technical FSM specification |
 | [`docs/spec/memory-as-code-spec.md`](docs/spec/memory-as-code-spec.md) | Memory architecture (v0.2.0) |
 | [`docs/thinking-tools.md`](docs/thinking-tools.md) | Thinking Tools in the model |
-| [`docs/research/inquiry/index.md`](docs/research/inquiry/index.md) | Philosophical home |
+| [`docs/research/inquiry/index.md`](docs/research/inquiry/index.md) | Philosophical research base supporting the book and the methodology |
+| [`docs/research/book/index.md`](docs/research/book/index.md) | Imported working notes and support material from the book project |
 | [`docs/roadmap.md`](docs/roadmap.md) | Strategic direction |
 | [`docs/lore.md`](docs/lore.md) | Nomenclature and allegory |
 

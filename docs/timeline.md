@@ -31,7 +31,7 @@ The manifesto is the ancestor of BASHŌ. When the sub-agents were later named af
 
 ## The book begins
 
-**2026-03-31.** A parallel track started: a book. [`philo_sophia`](https://github.com/ccisnedev/philo_sophia) — working title *Philo SophIA* — was created to explore the philosophical foundations of human-AI communication. The core thesis: every failure mode of AI-assisted development maps to a philosophical problem that someone studied centuries ago. The tools to direct the most powerful thinking machine ever built are the oldest tools humanity has.
+**2026-03-31.** A book track started. It began as the external repo [`philo_sophia`](https://github.com/ccisnedev/philo_sophia) — working title *Philo SophIA* — to explore the philosophical foundations of human-AI communication. The core thesis was already the same: every failure mode of AI-assisted development maps to a philosophical problem that someone studied centuries ago. The tools to direct the most powerful thinking machine ever built are the oldest tools humanity has. That book source now lives inside Inquiry under [../code/book/README.md](../code/book/README.md).
 
 ## APE v0.1.0 — the first prompt
 
@@ -139,4 +139,4 @@ Inquiry is, at its core, a thinking tool. The oldest kind there is.
 
 ---
 
-*For the philosophical foundations, see [Philo SophIA](https://github.com/ccisnedev/philo_sophia). For the technical architecture, see [`docs/architecture.md`](architecture.md). For the lore, see [`docs/lore.md`](lore.md).*
+*For the long-form doctrinal treatment, see [../code/book/README.md](../code/book/README.md). For the supporting philosophical research, see [research/inquiry/index.md](research/inquiry/index.md). For the technical architecture, see [architecture.md](architecture.md). For the lore, see [lore.md](lore.md).*
