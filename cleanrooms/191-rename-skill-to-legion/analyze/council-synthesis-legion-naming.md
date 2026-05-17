@@ -119,13 +119,13 @@ Decisión de naming para promoción pública de la skill: ¿usar el nombre semá
 
 ## Disensos
 
-- **Technical Writer vs todos los demás:** El TW argumenta que las skills usan registro descriptivo y LEGION cruza fronteras. Contraargumento: LEGION es la primera skill *universal* — su naturaleza es diferente de `doc-read` o `issue-create`. La frontera de registro puede no aplicar uniformemente.
+- **Technical Writer vs todos los demás:** El TW argumenta que las skills usan registro descriptivo y LEGION cruza fronteras. Contraargumento: LEGION no es una private skill de Inquiry CLI — su naturaleza es diferente de `doc-read` o `issue-create`. La frontera de registro puede no aplicar uniformemente.
 
 ## Puntos ciegos
 
 1. **Dual naming burden.** Si LEGION es el nombre público pero `Invoke-ExpertCouncil` es el skill ID interno, hay un costo cognitivo: el usuario debe saber que son lo mismo. Mitigación: alias `/legion` → `Invoke-ExpertCouncil`.
 
-2. **Evolución del catálogo.** Si en el futuro hay más skills universales (una familia "LEGION"), ¿cada una tendrá nombre evocativo? Podría crear inconsistencia acumulativa. Pero es un problema futuro, no presente.
+2. **Evolución del catálogo.** Si en el futuro hay más skills como LEGION, ¿cada una tendrá nombre evocativo? Podría crear inconsistencia acumulativa. Pero es un problema futuro, no presente.
 
 ## Recomendación final
 

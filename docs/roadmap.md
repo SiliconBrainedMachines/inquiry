@@ -47,7 +47,7 @@ This section is intentionally selective. It groups the open issues that most cle
 - **#50** — Support dual-language configuration for user-facing outputs
 
 ### Product and platform surfaces
-- **#185** — Introduce an `iq skill` module for Inquiry-bound skill management instead of leaving skills as static deployed markdown only
+- **#185** — Introduce an `iq skill` module to manage Inquiry CLI private skills instead of leaving Inquiry-specific skills as static deployed markdown only
 - **#183** — Publish Inquiry CLI to WinGet
 - **#170** — Add `--version` / `-v` on bare `iq`
 - **#153** — Redesign the Inquiry website around the current product identity
@@ -124,8 +124,8 @@ The original [lore.md](lore.md) sketched 9+ apes. After two months of building A
 | **SUNZI** | Replaced | DESCARTES's Method is more explicit and testable than strategic prose |
 | **GATSBY** | Absorbed | Test pseudocode lives in `plan.md` written by DESCARTES |
 | **ADA** | Replaced | BASHŌ's techne replaces explicit TDD as a separate phase |
-| **DIJKSTRA** | Future skill | Quality-gate becomes a `pre-pr-review` skill inside END, not a separate agent |
-| **BORGES** | Future skill | Schema validation becomes `iq memory validate`, not a standalone ape |
+| **DIJKSTRA** | Future private skill | Quality-gate becomes a `pre-pr-review` skill inside END, not a separate agent |
+| **BORGES** | Future private skill | Schema validation becomes `iq memory validate`, not a standalone ape |
 | **HERMES** | Materialized | State transitions are now `iq fsm transition` (CLI command, not an agent) |
 
 The lesson: **the framework wants fewer, sharper agents, not more**. Each absorption was driven by a real cycle where two agents were doing what one could do better.

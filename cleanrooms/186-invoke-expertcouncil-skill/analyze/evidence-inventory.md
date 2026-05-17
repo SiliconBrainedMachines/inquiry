@@ -18,7 +18,7 @@ Full specification of the LEGION technique. Key sections relevant to SKILL.md au
 | Section | Content | Relevance to SKILL.md |
 |---------|---------|----------------------|
 | §1 Introducción | Problem statement, hypothesis, positioning | Context for `description` frontmatter |
-| §1.4 Universal vs inquiry-bound | Deployment taxonomy table | Determines WHERE the SKILL.md lives |
+| §1.4 Skill vs private skill | Deployment taxonomy table | Determines WHERE the SKILL.md lives |
 | §2 Fundamentos Teóricos | Condorcet, Page, MoE, MoP, PanelGPT | Background only — NOT in SKILL.md |
 | §3.1 Principio de diseño | Zero additional infrastructure | Constraint on SKILL.md content |
 | §3.2 Flujo operativo | 4-step protocol (Comprehension → Selection → Consultation → Synthesis) | **Core protocol for SKILL.md** |
@@ -70,7 +70,7 @@ All existing skills use exactly these two fields. No `tools`, `applyTo`, or othe
 
 ### 2.3 Key Observations
 
-1. **All existing skills are inquiry-bound.** They reference `iq` commands, `gh` CLI, cleanrooms, FSM state. None are universal.
+1. **All existing skills are private to Inquiry CLI.** They reference `iq` commands, `gh` CLI, cleanrooms, FSM state. None is standalone.
 2. **Skills use imperative language** addressed to the agent executing them.
 3. **Steps are numbered** and use code blocks for CLI commands.
 4. **No skill uses sub-agent invocation.** Invoke-ExpertCouncil would be the first.
@@ -85,13 +85,13 @@ All existing skills use exactly these two fields. No `tools`, `applyTo`, or othe
 - Idempotent: cleans before deploying (D18)
 - Target: `~/.copilot/skills/` (user-level, via `CopilotAdapter`)
 
-### 3.2 Universal skill deployment (intended)
+### 3.2 Standalone skill deployment (intended)
 
 - `legion.md` §4.1 says: "vive permanentemente en `.github/copilot/skills/Invoke-ExpertCouncil/SKILL.md`"
 - `.github/copilot/skills/` is project-level (repo-scoped), NOT user-level
 - "No se entrega via `iq skill get` ni `iq target get`; está siempre disponible"
-- **Gap:** No mechanism exists to deploy universal skills to project-level `.github/copilot/skills/`
-- Issue #185 covers `iq skill` module but for inquiry-bound skills
+- **Gap:** No mechanism exists to deploy standalone skills to project-level `.github/copilot/skills/`
+- Issue #185 covers `iq skill` module but for private skills
 
 ### 3.3 Contradiction
 
@@ -109,7 +109,7 @@ The SKILL.md must instruct the executing agent to invoke each expert as a sub-ag
 - **VS Code Copilot:** `@<agent-name>` syntax or agent tool
 - **Other runtimes:** May use different sub-agent mechanisms
 
-Since Invoke-ExpertCouncil is universal, the SKILL.md must describe the sub-agent pattern in runtime-agnostic terms, with the expectation that the agent will use whatever sub-agent mechanism is available.
+Since Invoke-ExpertCouncil is standalone, the SKILL.md must describe the sub-agent pattern in runtime-agnostic terms, with the expectation that the agent will use whatever sub-agent mechanism is available.
 
 ## 5. Scope Boundaries (from issue description)
 
@@ -118,7 +118,7 @@ Since Invoke-ExpertCouncil is universal, the SKILL.md must describe the sub-agen
 - The file must work as a standalone skill
 
 **OUT of scope for #186:**
-- Universal vs inquiry-bound infrastructure (#185)
+- Skill vs private-skill infrastructure (#185)
 - Formal YAML expert catalog (future)
 - Deployment mechanism to `.github/copilot/skills/`
 - CLI changes

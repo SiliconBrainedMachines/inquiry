@@ -9,9 +9,9 @@
 
 ## Abstract
 
-`legion` es una **skill universal** dentro del ecosistema Inquiry. Su mandato es convocar un consejo de expertos —personas con perspectivas cognitivas genuinamente distintas— para analizar un problema desde múltiples ángulos antes de sintetizar una conclusión. Cada experto es invocado como sub-agente independiente con su propio contexto, herramientas y skills, maximizando la independencia de perspectivas. El propio LLM es la función de gating que decide qué expertos convocar.
+`legion` es una **skill** dentro del ecosistema Inquiry. Su mandato es convocar un consejo de expertos —personas con perspectivas cognitivas genuinamente distintas— para analizar un problema desde múltiples ángulos antes de sintetizar una conclusión. Cada experto es invocado como sub-agente independiente con su propio contexto, herramientas y skills, maximizando la independencia de perspectivas. El propio LLM es la función de gating que decide qué expertos convocar.
 
-A diferencia de las skills inquiry-bound (`doc-read`, `issue-create`, etc.) que requieren el FSM y el CLI `iq` para funcionar, `legion` es **independiente de Inquiry**: su protocolo (selección de expertos → invocación de sub-agentes → síntesis → persistencia .md) funciona con cualquier agente, en cualquier contexto. Inquiry la enriquece con contexto de fase, pero no la requiere.
+A diferencia de las private skills de Inquiry CLI (`doc-read`, `issue-create`, etc.) que requieren el FSM y el CLI `iq` para funcionar, `legion` es **independiente de Inquiry**: su protocolo (selección de expertos → invocación de sub-agentes → síntesis → persistencia .md) funciona con cualquier agente, en cualquier contexto. Inquiry la enriquece con contexto de fase, pero no la requiere.
 
 LEGION es el nombre de la **técnica** que `legion` implementa. La decisión de implementarla como Skill (no como APE) fue tomada mediante un dictamen formal de consejo de expertos documentado en [`council_of_experts.md`](council_of_experts.md).
 
@@ -31,7 +31,7 @@ Esta hipótesis no requiere independencia estadística perfecta (mismo modelo, m
 
 ### 1.3 Posición en el Finite APE Machine
 
-`legion` es una **skill universal** — invocable por cualquier APE, por el usuario, o por cualquier agente fuera de Inquiry:
+`legion` es una **skill** — invocable por cualquier APE, por el usuario, o por cualquier agente fuera de Inquiry:
 
 - **SOCRATES** puede invocarla durante ANALYZE para obtener perspectivas múltiples
 - **DEWEY** puede usarla en IDLE para evaluar si un issue merece trabajo
@@ -42,16 +42,16 @@ Esta hipótesis no requiere independencia estadística perfecta (mismo modelo, m
 
 La Skill no modifica el FSM. No requiere transiciones nuevas. No tiene sub-estados gestionados por `iq`. Cuando se usa dentro de Inquiry, el APE activo simplemente la invoca como herramienta de pensamiento.
 
-### 1.4 Skill universal vs inquiry-bound
+### 1.4 Skill vs private skill
 
 `legion` inaugura una distinción arquitectónica en Inquiry:
 
 | Tipo | Registro | Entrega | Dependencia |
 |------|----------|---------|-------------|
-| **Universal** | Desplegada al target permanentemente (`.github/copilot/skills/`) | Siempre disponible | Ninguna — funciona con o sin Inquiry |
-| **Inquiry-bound** | NO en el target | Bajo demanda via `iq skill get <name>` | Requiere FSM, cleanrooms, CLI `iq` |
+| **Skill** | Desplegada al target permanentemente (`.github/copilot/skills/`) | Siempre disponible | Ninguna — funciona con o sin Inquiry |
+| **Private skill** | NO en el target | Bajo demanda via `iq skill get <name>` | Requiere FSM, cleanrooms, CLI `iq` |
 
-Las skills inquiry-bound (`doc-read`, `issue-create`, `issue-start`, `issue-end`) solo tienen sentido con el runtime de Inquiry activo. Registrarlas en el target contamina el namespace del agente con capacidades que no funcionan fuera de un ciclo APE.
+Las private skills de Inquiry CLI (`doc-read`, `issue-create`, `issue-start`, `issue-end`) solo tienen sentido con el runtime de Inquiry activo. Registrarlas en el target contamina el namespace del agente con capacidades que no funcionan fuera de un ciclo APE.
 
 `legion` en cambio vive permanentemente en el target porque es útil siempre, con o sin Inquiry. Ver issue [#185](https://github.com/ccisnedev/inquiry/issues/185) para el módulo `iq skill`.
 
@@ -142,7 +142,7 @@ PanelGPT modela discusiones en panel entre LLMs, emulando deliberación de exper
 
 **Cero infraestructura adicional.** LEGION usa exactamente lo que Inquiry ya tiene:
 
-- Una skill universal (`legion/SKILL.md`) desplegada al target
+- Una skill (`legion/SKILL.md`) desplegada al target
 - Un catálogo de personas (libre en v1, YAML formalizado en futuro)
 - El LLM como motor de razonamiento, routing, y síntesis
 - Sub-agentes como mecanismo de ejecución aislada
@@ -339,7 +339,7 @@ El costo de tokens no es un factor limitante — lo que limita es la diversidad 
 
 ### 4.1 Skill `legion`
 
-`legion` se despliega al target como skill universal — vive permanentemente en `.github/copilot/skills/legion/SKILL.md` (o el equivalente del target). No se entrega via `iq skill get` ni `iq target get`; está siempre disponible.
+`legion` se despliega al target como skill — vive permanentemente en `.github/copilot/skills/legion/SKILL.md` (o el equivalente del target). No se entrega via `iq skill get` ni `iq target get`; está siempre disponible.
 
 Dentro de Inquiry, puede ser invocada por cualquier APE en cualquier fase. Fuera de Inquiry, funciona con cualquier agente que soporte skills (GitHub Copilot, Cursor, Claude, etc.).
 
@@ -361,7 +361,7 @@ La técnica que implementa se llama LEGION — *"Mi nombre es LEGION, porque som
 |---------|--------------------------------------|
 | `iq fsm state` | Saber en qué fase está para adaptar perspectivas al contexto |
 | `iq ape state` | Conocer el sub-estado del APE que invoca al consejo |
-| `iq skill get <name>` | Obtener skills inquiry-bound complementarias (futuro, ver [#185](https://github.com/ccisnedev/inquiry/issues/185)) |
+| `iq skill get <name>` | Obtener private skills complementarias de Inquiry CLI (futuro, ver [#185](https://github.com/ccisnedev/inquiry/issues/185)) |
 
 Dentro de Inquiry, el consejo recibe el inquiry-context inyectado por el APE activo. Fuera de Inquiry, funciona sin estos comandos — el agente usa su contexto nativo. La persistencia del output usa el patrón `doc-write` cuando está disponible, o persistencia directa a `.md` en caso contrario.
 
@@ -379,7 +379,7 @@ La skill se llama `legion` — nombre unificado que refleja directamente la téc
 
 ## 6. Trabajo Futuro
 
-- **Módulo `iq skill`** ([#185](https://github.com/ccisnedev/inquiry/issues/185)): comandos `iq skill list` / `iq skill get` para entrega bajo demanda de skills inquiry-bound. Las skills universales como `legion` quedan fuera de este módulo — viven en el target.
+- **Módulo `iq skill`** ([#185](https://github.com/ccisnedev/inquiry/issues/185)): comandos `iq skill list` / `iq skill get` para entrega bajo demanda de private skills de Inquiry CLI. Skills como `legion` quedan fuera de este módulo — viven en el target.
 - **Catálogo YAML formalizado**: catálogo con categorías, clasificación por dominio, y selección asistida. Permite escalabilidad y consistencia entre invocaciones.
 - **Persistencia de sesiones**: guardar la síntesis como artefacto indexado en `cleanrooms/` para que otros APEs la consuman via `doc-read`.
 - **Modo interactivo**: permitir que el usuario interactúe con un experto específico después de la síntesis inicial, profundizando en su perspectiva.

@@ -864,7 +864,7 @@ This is the recovery mechanism described in the Memory as Code spec — normally
 │   └── darwin.md                   # DARWIN: evolutionary analysis
 │
 ├── skills/                         # Skills (tools available to apes)
-│   ├── _shared/                    # Universal skills (all apes inherit)
+│   ├── _shared/                    # Shared private skills (all apes inherit)
 │   │   ├── scribe.md              # BORGES protocol (documentation compiler)
 │   │   ├── memory.md              # Memory consultation protocol
 │   │   ├── contracts.md           # @contract reading/writing
