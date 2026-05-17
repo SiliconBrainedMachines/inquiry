@@ -44,13 +44,13 @@ IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION
 
 ### Confirmed Agents (live contract)
 
-| Agent | Namesake | State | Herramienta | Description |
-|-------|----------|-------|-------------|-------------|
+| Agent | Namesake | State | Thinking Tool | Description |
+|-------|----------|-------|---------------|-------------|
 | DEWEY | John Dewey (1859–1952) | IDLE | Problematization | Bounded issue triage, `issue-create` issue readiness, explicit-start gate inside IDLE |
-| SOCRATES | Sócrates (470–399 BC) | ANALYZE | Mayéutica | Conversational understanding, produces `diagnosis.md` |
-| DESCARTES | René Descartes (1596–1650) | PLAN | Método | Experimental design, WBS, test pseudocode |
+| SOCRATES | Socrates (470–399 BC) | ANALYZE | Mayeutics | Conversational understanding, produces `diagnosis.md` |
+| DESCARTES | René Descartes (1596–1650) | PLAN | Method | Experimental design, WBS, test pseudocode |
 | BASHŌ | Matsuo Bashō (1644–1694) | EXECUTE | Techne/用の美 | Implementation as functional art under constraints |
-| DARWIN | Charles Darwin (1809–1882) | EVOLUTION | Selección natural | Process evaluation, self-improvement issues |
+| DARWIN | Charles Darwin (1809–1882) | EVOLUTION | Natural selection | Process evaluation, self-improvement issues |
 
 ### APE (the scheduler)
 
@@ -69,7 +69,7 @@ The [lore](../lore.md) describes additional agents from the original vision. The
 | ADA | TDD implementation | Replaced by BASHŌ |
 | DIJKSTRA | Quality gate | Future — may be a skill within EXECUTE |
 | BORGES | Schema enforcement | Future — may be a CLI validation layer |
-| HERMES | State updates | Future — may be `ape state transition` command |
+| HERMES | State updates | Materialized — `iq fsm transition` command |
 
 ## Agent Scheduling Model
 

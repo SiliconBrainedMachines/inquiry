@@ -1,5 +1,7 @@
 # Finite APE Machine: Cooperative FSM Orchestration for AI-Assisted Software Engineering
 
+> Historical framing note: this paper draft preserves the bootstrap-era project name and runtime vocabulary. References to `ape_cli`, `.ape/`, v0.0.x metrics, or earlier agent-roster assumptions should be read as historical study context rather than current Inquiry doctrine.
+
 **Author:** C. Cisneros (ccisnedev)
 
 **Abstract.** We present the Finite APE Machine (APE), a methodology and framework for AI-assisted software development that models AI coding agents as cooperative finite state machines orchestrated by an event loop inspired by embedded systems architectures. APE introduces a structured cycle — Analyze, Plan, Execute + Learn — where specialized agents ("apes") operate as deterministic-in-specification automata with prompts as transition functions. The framework applies known techniques in a novel context, contributing six primary constructs: (1) prompts formalized as FSM transition functions δ; (2) a cooperative event loop orchestrator adapted from microcontroller scheduling; (3) Memory as Code, a persistent project memory system with database-inspired indexing over version-controlled markdown; (4) DARWIN, an evolutionary meta-agent that modifies other agents' transition functions across three learning levels — empirically validated with 9 generated evolution issues; (5) a semantic risk matrix addressing automation complacency through context-aware human gates; and (6) antifragile design across four AI market scenarios. Both the framework and this paper are under active construction — APE is being built using itself (v0.0.14, 131 tests, 69 issues/PRs), providing bootstrap validation through self-construction. We position APE within the existing literature on multi-agent systems, finite automata theory, control theory, and human-AI collaboration.
@@ -108,7 +110,7 @@ The methodology follows a four-phase cycle applied to every development task:
 - **DIJKSTRA** (quality gate) performs code review against specifications, conventions, and security criteria.
 - **BORGES** (documentation compiler) maintains documentation consistency, enforcing schema on all memory files.
 
-> **Note:** Both this paper and `ape_cli` are under active construction. The agent roster will evolve based on empirical evidence from the bootstrap process. See the public repository for current state: https://github.com/ccisnedev/finite_ape_machine
+> **Note:** Both this paper and `ape_cli` are under active construction. The agent roster will evolve based on empirical evidence from the bootstrap process. See the public repository for current state: https://github.com/ccisnedev/inquiry
 
 **Learn (DARWIN).** After task completion, the DARWIN meta-agent extracts lessons from the execution trace and updates the learning hierarchy (Section 6).
 
@@ -206,14 +208,14 @@ DARWIN operates across three levels with decreasing frequency and increasing sco
 
 ### 6.3 Empirical Evidence: DARWIN in Practice
 
-DARWIN is not aspirational — it is deployed and producing observable results. After completing APE cycle #51 ("Enforce non-execution guardrails in IDLE"), DARWIN generated issue [#54](https://github.com/ccisnedev/finite_ape_machine/issues/54): "APE Cycle #51 Evaluation: Process and Pattern Learnings." The issue contains:
+DARWIN is not aspirational — it is deployed and producing observable results. After completing APE cycle #51 ("Enforce non-execution guardrails in IDLE"), DARWIN generated issue [#54](https://github.com/ccisnedev/inquiry/issues/54): "APE Cycle #51 Evaluation: Process and Pattern Learnings." The issue contains:
 
 - A structured comparison of plan vs. execution (5 phases, 0 deviations)
 - Three reusable patterns extracted: (1) Precondition Validation > Tool Gating, (2) FSM Declarativo YAML > Code-Based FSM, (3) Fail-Closed Prompt Registry > Silent Fallback
 - An evaluation matrix of the APE process itself (ANALYZE sufficient? PLAN detailed? EXECUTE fluid?)
 - Actionable recommendations for future cycles
 
-As of v0.0.14, DARWIN has generated 9 issues labeled `evolution` (see [issue list](https://github.com/ccisnedev/finite_ape_machine/issues?q=label%3Aevolution)). Of these, #51 was closed (its recommendation adopted in a subsequent cycle), demonstrating the complete feedback loop: DARWIN observes → generates issue → maintainer triages → issue is addressed in a future APE cycle.
+As of v0.0.14, DARWIN has generated 9 issues labeled `evolution` (see [issue list](https://github.com/ccisnedev/inquiry/issues?q=label%3Aevolution)). Of these, #51 was closed (its recommendation adopted in a subsequent cycle), demonstrating the complete feedback loop: DARWIN observes → generates issue → maintainer triages → issue is addressed in a future APE cycle.
 
 Currently, DARWIN reads `.ape/mutations.md` (human observations written during the cycle) as additional input. Future versions will also feed automated metrics (test deltas, deviation counts) to enrich DARWIN's analysis.
 

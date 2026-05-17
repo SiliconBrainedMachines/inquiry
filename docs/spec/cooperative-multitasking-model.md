@@ -57,7 +57,7 @@ void ape_tick() {
 | DESCARTES | PLAN | Method (divide, order, verify, enumerate) | `plan.md` — WBS with checkboxes + test pseudocode |
 | BASHŌ | EXECUTE | Techne + 用の美 (functional beauty) | Code + commits per phase |
 | APE + human gate | END | Explicit closure discipline | PR creation and merge gate |
-| DARWIN | EVOLUTION | Natural selection (observe, compare, select) | Issues in APE repo (via `gh`) |
+| DARWIN | EVOLUTION | Natural selection (observe, compare, select) | Issues in the Inquiry repository (via `gh`) |
 
 ## DEWEY in IDLE (triage)
 

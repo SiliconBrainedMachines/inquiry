@@ -28,7 +28,7 @@ Tasks never reference each other. They only know about events.
 
 ### Signals
 
-A signal is emitted when a meaningful step completes. In the current implementation, this routing is materialized through explicit transition events rather than a public `ape signal` command:
+A signal is emitted when a meaningful step completes. In the current implementation, this routing is materialized through explicit transition events rather than a public `iq signal` command:
 
 ```bash
 iq fsm transition --event <event-name>
@@ -36,12 +36,12 @@ iq fsm transition --event <event-name>
 
 The emitter does not know who (if anyone) listens. It just signals.
 
-### Routing Table (embedded in ape.exe)
+### Routing Table (embedded in Inquiry CLI)
 
 The scheduler maintains a routing table that maps signals to state changes:
 
 ```yaml
-# Embedded in ape.exe, NOT in .inquiry/
+# Embedded in Inquiry CLI, NOT in .inquiry/
 signals:
   issue_ready:
     transition: IDLE → ANALYZE
@@ -116,7 +116,7 @@ END:
 EVOLUTION:
   DARWIN invoked with full cycle artifacts
   DARWIN evaluates APE process
-  DARWIN: gh issue list --repo inquiry --search "keyword"
+  DARWIN: gh issue list --repo ccisnedev/inquiry --search "keyword"
   DARWIN: creates/comments on issues
   Automatic → signal: cycle_complete → transition to IDLE
 ```
@@ -147,4 +147,4 @@ The signal model replaces polling with events. Instead of checking preconditions
 
 1. **Signal persistence.** If a signal fires while no agent is waiting on it, is it lost? In RTOS, event flags persist until cleared. Should `.inquiry/state.yaml` record pending signals?
 2. **Error signals.** What happens when BASHŌ emits `execute-blocked` instead of completing? The routing table needs error paths that return to ANALYZE.
-3. **Human signals.** Beyond approval, what other signals can the human emit? `ape abort`, `ape retry`, `ape skip`?
+3. **Human signals.** Beyond approval, what other `iq`-level abort, retry, or skip surfaces should eventually exist?

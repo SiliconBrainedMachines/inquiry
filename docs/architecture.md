@@ -28,7 +28,7 @@
 │  │  state.yaml  │    │                                          │   │
 │  │  config.yaml │    │  iq target get → copies to ~/.copilot/   │   │
 │  │  mutations.md│    │    agents/inquiry.agent.md               │   │
-│  └──────────────┘    │    skills/{issue-start,issue-end,...}    │   │
+│  └──────────────┘    │    skills/{issue-create,issue-start,...} │   │
 │                      └──────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
                                    │
@@ -51,10 +51,12 @@
 │  │    EVOLUTION→ DARWIN    (mutations, produces issues)          │  │
 │  │                                                               │  │
 │  │  Invokes skills as needed:                                    │  │
-│  │    issue-start  → IDLE → ANALYZE protocol                     │  │
-│  │    issue-end    → EXECUTE → END → IDLE protocol               │  │
+│  │    issue-create → IDLE create-or-confirm issue                │  │
+│  │    issue-start  → explicit handoff into ANALYZE               │  │
+│  │    issue-end    → EXECUTE / END completion protocol           │  │
 │  │    doc-read     → structured doc retrieval                    │  │
 │  │    doc-write    → structured doc creation                     │  │
+│  │    direct-use   → research / legion / kritik                  │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 │  The agent has NO knowledge of other states' agents.                │
@@ -134,20 +136,31 @@ DEWEY determines whether the situation is ready to become or select a GitHub iss
 
 The agent **never decides** state transitions on its own. Transitions are authorized by:
 1. The human (explicitly)
-2. A skill protocol (issue-start, issue-end)
+2. A skill protocol (`issue-create`, `issue-start`, `issue-end`)
 3. The CLI contract (prechecks must pass)
 
 ## Skills as protocols
 
-Skills are **step-by-step protocols** invoked by the agent at specific moments:
+Skills are **step-by-step protocols** invoked by the agent at specific moments. In the current repository they fall into two groups.
+
+### Operational skills
 
 | Skill | When | Does |
 |---|---|---|
+| `issue-create` | IDLE triage needs to create or confirm the operative GitHub issue | Deterministic issue selection/creation during bounded triage |
 | `issue-start` | Human says "start working on issue #N" | Creates branch, reads issue, transitions IDLE → ANALYZE |
 | `issue-end` | All plan checkboxes complete | Pushes, creates PR, merges, transitions → END → IDLE |
 | `doc-read` | Agent needs project context | Index scan → filter → partial read → full read |
 | `doc-write` | Agent produces documentation | YAML frontmatter, one topic per doc, index maintenance |
 | `inquiry-install` | First-time setup | Bootstraps `.inquiry/` workspace structure |
+
+### Direct-use skills
+
+| Skill | When | Does |
+|---|---|---|
+| `research` | A staged web investigation is required | Gathers web evidence into one durable markdown report with references |
+| `legion` | Multiple isolated expert viewpoints are needed | Runs a council of sub-agents and persists a synthesized dictamen |
+| `kritik` | A bounded-corpus claim audit is required | Audits whether conclusions are licensed by evidence, warrant, and counterevidence |
 
 Skills are **shared across targets** (same SKILL.md for Copilot, Claude, etc.). The agent file is **target-specific** (prompt format differs per tool).
 
@@ -160,21 +173,25 @@ iq target get
     ├── Cleans ~/.copilot/{agents,skills}/  (idempotent reset)
     ├── Copies inquiry.agent.md → ~/.copilot/agents/
     └── Copies skills/ → ~/.copilot/skills/
+         ├── issue-create/SKILL.md
          ├── issue-start/SKILL.md
          ├── issue-end/SKILL.md
          ├── doc-read/SKILL.md
          ├── doc-write/SKILL.md
-         └── inquiry-install/SKILL.md
+         ├── inquiry-install/SKILL.md
+         ├── legion/SKILL.md
+         ├── research/SKILL.md
+         └── kritik/SKILL.md
 ```
 
-Only **Copilot** is active in v0.0.x ([ADR D20](spec/target-specific-agents.md)). Adapters for Claude, Codex, Crush, and Gemini exist but are deferred — they only participate in `iq target clean` (removes orphaned files from previous multi-target deploys).
+Only **Copilot** is currently active ([ADR D20](spec/target-specific-agents.md)). Adapters for Claude, Codex, Crush, and Gemini exist but are deferred — they only participate in `iq target clean` (removes orphaned files from previous multi-target deploys).
 
 ## Cycle lifecycle
 
 A complete APE cycle from issue to merge:
 
 ```
-1. Human and DEWEY clarify/select the GitHub issue in IDLE
+1. Human and DEWEY clarify/select the GitHub issue in IDLE, using `issue-create` when the issue must be created or confirmed
 2. Human invokes issue-start skill
 3. CLI: IDLE → ANALYZE (start_analyze event)
 4. Agent (SOCRATES): asks clarifying questions, produces diagnosis.md
