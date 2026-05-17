@@ -20,7 +20,7 @@ We present the Finite APE Machine (APE) — a framework built on the premise tha
 
 1. **Agents as automata.** Each agent is a finite state machine (FSM) [9] with a prompt as its transition function δ(state, context) → new_state + output. The orchestrator observes only atomic state transitions, never internal reasoning.
 
-2. **Methodology over model.** The value resides in the process structure — the APE cycle, contracts, memory system, and evolutionary learning — not in any specific model's capability. A 7B parameter local model following APE's structured runbook can produce verifiable software that a frontier model "vibe coding" cannot guarantee.
+2. **Methodology as applied philosophy.** The value resides in the process structure — the APE cycle, the thinking tools, the contracts, the memory system, and the evolutionary learning loop — not in raw model capability alone. Model quality matters, but disciplined questioning, decomposition, verification, and selection are what make AI-assisted work legible and trustworthy.
 
 3. **Antifragile design.** Following Taleb [10], the framework is designed to benefit from disorder in the AI market: model capability regression, cost increases, provider failures, or capability plateaus all activate different strengths of the methodology.
 
@@ -252,13 +252,13 @@ Following the microcontroller analogy, human interaction is modeled as an interr
 
 Taleb [10] defines antifragility as a property of systems that gain from disorder. APE is designed to be antifragile across four identified AI market scenarios:
 
-**Scenario A — Bubble bursts.** Cloud inference becomes prohibitively expensive as venture subsidies end. APE's local-first architecture (no cloud dependencies for memory, CLI runs offline) and model-agnostic agent prompts ensure the framework functions with open-source local models. A 7B model cannot "vibe code" a payment system, but it can follow a structured runbook with RED→GREEN verification at each phase.
+**Scenario A — Bubble bursts.** Cloud inference becomes prohibitively expensive as venture subsidies end. Because APE keeps memory, artifacts, and operational contract in the repository and CLI rather than in vendor-hosted chat state, the framework can be retargeted across whatever hosted tools remain accessible. The resilience comes from doctrine and process portability, not from any single provider.
 
 **Scenario B — Technology advances.** Models become more capable and cheaper. APE's structured methodology *amplifies* rather than *limits* increased capability — more capable models handle larger phases, subtler analysis, and deeper pattern recognition through DARWIN.
 
 **Scenario C — LLM reasoning plateaus.** The current capability ceiling is reached. The only path to improvement becomes the software wrapping the model: APE's methodology, orchestration, and DARWIN's evolutionary learning provide continuous improvement when the underlying model cannot improve.
 
-**Scenario D — Coexistence.** Frontier cloud models for high-risk tasks, local models for mechanical tasks. The risk matrix can determine not just gate intensity but *which model* each ape uses, enabling cost optimization through intelligent model routing.
+**Scenario D — Coexistence.** Multiple hosted providers coexist with different cost, latency, and reliability profiles. The risk matrix can determine not just gate intensity but *which target or service* each ape uses, enabling cost and risk routing without changing the underlying doctrine.
 
 Under all four scenarios, APE's value proposition strengthens or remains stable. This is antifragility by design — the framework does not merely survive market volatility; it benefits from it.
 
@@ -280,7 +280,7 @@ We identify six primary contributions — applications of known techniques in a 
 
 5. **Semantic risk matrix.** A context-aware human gate system that classifies actions by impact × domain to determine approval authority, directly addressing the documented problem of automation complacency [7, 8] by ensuring that human attention is reserved for decisions requiring engineering judgment.
 
-6. **Antifragile framework design.** A deliberate architectural strategy that ensures the framework benefits from AI market disorder across four identified scenarios (§8), achieved through local-first design, model-agnostic prompts, and methodology-over-model prioritization.
+6. **Antifragile framework design.** A deliberate architectural strategy that ensures the framework benefits from AI market disorder across four identified scenarios (§8), achieved through repository-owned memory, target-portable operational contracts, and philosophical-methodological prioritization.
 
 ### Derived properties
 
@@ -300,7 +300,7 @@ The following emerge from the primary contributions but are not independent inno
 
 We present APE as a formal framework and defer empirical validation to the implementation phase, noting that the framework is currently being developed using its own methodology (APE builds APE) as initial validation. This paper establishes the theoretical foundations and architectural design; a companion paper will report empirical results from controlled experiments comparing APE-structured development against unstructured AI-assisted development.
 
-The Finite APE Machine demonstrates that the missing element in AI-assisted software development is not more capable models but more structured methodology. By applying well-understood concepts from automata theory, embedded systems, control theory, and database design to the novel domain of LLM agent orchestration, APE provides a framework where *the whole exceeds the sum of its parts* — emergent intelligent behavior from the coordination of simple, constrained agents.
+The Finite APE Machine demonstrates that the missing element in AI-assisted software development is not merely more capable models, but a philosophical and methodological discipline adequate to working with them. By applying well-understood concepts from automata theory, embedded systems, control theory, and database design to the novel domain of LLM agent orchestration, APE provides a framework where *the whole exceeds the sum of its parts* — emergent intelligent behavior from the coordination of simple, constrained agents.
 
 Future work includes: empirical validation through the aforementioned companion study; extension of the DARWIN learning mechanism to cross-user pattern sharing; formal verification of orchestrator properties (liveness, safety, fairness); and implementation of model-routing optimization for Scenario D (cost-aware per-ape model assignment).
 

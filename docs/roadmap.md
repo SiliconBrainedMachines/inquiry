@@ -90,14 +90,14 @@ The deferred half of [ADR D20](spec/target-specific-agents.md). Adapters already
 3. Comparative metrics on top of the foundation already landed in #72
 
 ### Antifragility validation harness
-A test rig that runs N identical APE cycles against M targets (Copilot, Crush, local Gemma) and aggregates `metrics.yaml` to test how far explicit thinking tools and process discipline remain decisive across different model tiers.
+A test rig that runs N identical APE cycles against M targets (Copilot, Crush, Claude Code, and similar hosted surfaces) and aggregates `metrics.yaml` to test how well the same philosophical-methodological discipline survives tool changes and operational constraints.
 
 ## Long-term (v1.0+)
 
 Theses that take the project beyond a CLI tool.
 
-### Local-first APE
-A reference deployment running entirely on local models (Gemma, Qwen, etc.) with no cloud dependency. This is the hardest test of thesis #1: whether disciplined thinking tools can make weaker models substantially more usable and trustworthy than raw capability alone would suggest.
+### Philosophical and Methodological Consolidation
+A mature statement of Inquiry as a doctrine for AI-assisted software work: sharpen the canonical role of Thinking Tools, clarify the Inquiry / APE / Finite APE Machine distinction, and make the philosophical lineage legible enough that the method survives changes in targets, vendors, and surrounding tooling.
 
 ### Bootstrap-validation paper
 Publish the empirical paper on APE-builds-APE. Requires the existing metrics foundation from #72 plus at least 30 cycles of clean comparative data. Plan: [research/ape_builds_ape/bootstrap-validation.md](research/ape_builds_ape/bootstrap-validation.md).
