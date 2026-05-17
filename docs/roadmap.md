@@ -10,9 +10,9 @@ This roadmap is **descriptive, not prescriptive**: it reflects the open issues c
 
 ## Vision
 
-APE aims to be a **methodology that survives any AI market scenario**. Three theses guide every decision:
+APE aims to be a **methodology for working with AI through explicit thinking tools**, robust across changing AI market conditions. Three theses guide every decision:
 
-1. **Methodology > model.** A small local model following a structured runbook should outperform a frontier model freestyling. If true, APE generalizes.
+1. **Thinking tools make AI usable.** Model quality matters, but raw capability does not solve the core bottleneck by itself. Inquiry's wager is that AI gives renewed practical force to more than 2,500 years of philosophical labor: disciplined questioning, decomposition, inference, verification, and selection become operational tools for software work.
 2. **Memory as code.** Project knowledge belongs in the repo, version-controlled, queryable by any agent — not in a cloud-hosted vector DB.
 3. **Antifragility.** Each cycle should leave APE measurably better. DARWIN turns operational friction into improvements to the framework itself.
 
@@ -90,14 +90,14 @@ The deferred half of [ADR D20](spec/target-specific-agents.md). Adapters already
 3. Comparative metrics on top of the foundation already landed in #72
 
 ### Antifragility validation harness
-A test rig that runs N identical APE cycles against M targets (Copilot, Crush, local Gemma) and aggregates `metrics.yaml` to validate or refute the **methodology > model** thesis.
+A test rig that runs N identical APE cycles against M targets (Copilot, Crush, local Gemma) and aggregates `metrics.yaml` to test how far explicit thinking tools and process discipline remain decisive across different model tiers.
 
 ## Long-term (v1.0+)
 
 Theses that take the project beyond a CLI tool.
 
 ### Local-first APE
-A reference deployment running entirely on local models (Gemma, Qwen, etc.) with no cloud dependency. This is the hardest test of thesis #1: if APE makes a 7B local model competitive with a frontier cloud model on real cycles, the framework's value is proven.
+A reference deployment running entirely on local models (Gemma, Qwen, etc.) with no cloud dependency. This is the hardest test of thesis #1: whether disciplined thinking tools can make weaker models substantially more usable and trustworthy than raw capability alone would suggest.
 
 ### Bootstrap-validation paper
 Publish the empirical paper on APE-builds-APE. Requires the existing metrics foundation from #72 plus at least 30 cycles of clean comparative data. Plan: [research/ape_builds_ape/bootstrap-validation.md](research/ape_builds_ape/bootstrap-validation.md).
