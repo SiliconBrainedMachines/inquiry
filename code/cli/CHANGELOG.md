@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.5]
+### Added
+- **Standalone `kritik` skill**: new direct-use SKILL.md for evidential licensing audits over a bounded corpus, with exact evidence spans, explicit warrants, counterevidence search, graded verdicts, and one durable markdown report
+
+### Changed
+- **Naming decision**: the epistemic-audit proposal now adopts `kritik` as the canonical skill name, with evidence audit and epistemic audit retained only as explanatory glosses
+
+### Fixed
+- **Skill inventory tests**: doctor and asset coverage now include the full distributed skill roster, including `research` and `kritik`, so release validation matches deployed assets
+
 ## [0.4.4]
 ### Added
 - **Standalone `research` skill**: new direct-use SKILL.md for staged web investigation with a single durable paper-style markdown report and BibTeX-compatible references (#193)
@@ -191,7 +201,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - **EVOLUTION infrastructure** (#68): `.ape/config.yaml` + `.ape/mutations.md` lifecycle
   - `ape init` creates `.ape/config.yaml` with `evolution.enabled: false` default
   - `ape init` creates `.ape/mutations.md` with header template for DARWIN
-  - Both files are idempotent (never overwritten if already present)
+  - Both files are idempotent (never overwritten if files already exist)
   - `reset_mutations` effect declared in IDLE→ANALYZE and EVOLUTION→IDLE transitions
   - DARWIN prompt updated to include `mutations.md` as input
 
@@ -211,6 +221,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - Precondition validation gates: issue_selected, feature_branch_selected checks before irreversible actions
 - Fail-closed prompt fragment registry: Explicit error on missing prompt_fragment_id or referenced fragments
 - Full-cycle integration tests: Incident replay prevention, full FSM cycle validation (IDLE→ANALYZE→PLAN→EXECUTE→EVOLUTION→IDLE)
+
 ### Changed
 - IDLE state now supports exploration without issue context, but blocks commitment actions until preconditions validated
 - State transitions now use declarative operation definitions (precheck, effects, commit_policy) instead of agent reasoning
@@ -223,12 +234,14 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - `ci.yml` — CI workflow with `ubuntu-latest` + `windows-latest` matrix
 - `ape doctor` now checks VS Code Copilot extension (`code --list-extensions`)
 - OS tabs (Windows/Linux) on landing page
+
 ### Changed
 - FSM rewrite: 6-state model with END state, optional EVOLUTION, retrospective.md, git conventions
 - `release.yml` restructured to 3-job pattern: check-version → create-release → build (matrix)
 - `ape upgrade` refactored to use PlatformOps (cross-platform archive extraction)
 - `ape uninstall` refactored to use PlatformOps (cross-platform env vars and deletion)
 - Windows Defender workaround in release.yml now conditional (`if: runner.os == 'Windows'`)
+
 ### Fixed
 - `ape init` `_relative()` now uses `p.relative()` instead of fragile `replaceFirst`
 - Uninstall tests no longer corrupt `dart.exe` (FakePlatformOps injection)
@@ -238,8 +251,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 - TUI shows diagram only in text mode (no "version:", "diagram:" field labels)
 - Doctor shows formatted checkmarks in text mode (✓/✗) like `flutter doctor`
 - Upgrade shows cleaner status message with checkmark
+
 ### Changed
 - Deps: modular_cli_sdk ^0.2.1 (adds `Output.toText()` for custom text formatting)
+
 ### Added
 - `Output.toText()` implementations for TuiOutput, DoctorOutput, UpgradeOutput
 - 5 new tests for toText() behavior
@@ -248,8 +263,10 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 ### Added
 - `ape` TUI — displays FSM diagram when invoked without arguments
 - Skill `issue-end` — 9-step protocol for completing APE cycles (EXECUTE → EVOLUTION)
+
 ### Fixed
 - Version inconsistency: unified to single source of truth in `lib/src/version.dart`
+
 ### Changed
 - `ape doctor` now imports shared version constant
 - `ape version` now imports shared version constant

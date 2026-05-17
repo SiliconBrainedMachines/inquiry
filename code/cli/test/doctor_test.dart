@@ -99,7 +99,9 @@ void main() {
       'doc-read',
       'doc-write',
       'inquiry-install',
+      'kritik',
       'legion',
+      'research',
       'issue-create',
       'issue-start',
       'issue-end',
@@ -315,7 +317,7 @@ void main() {
 
         final text = output.toText()!;
         expect(text, contains('Checking targets...'));
-        expect(text, contains('✓ copilot: agent + 7 skills deployed'));
+        expect(text, contains('✓ copilot: agent + 9 skills deployed'));
         expect(text, contains('All checks passed.'));
       });
 
@@ -375,7 +377,9 @@ void main() {
           'doc-read',
           'doc-write',
           'inquiry-install',
+          'kritik',
           'legion',
+          'research',
           'issue-start',
           'issue-end',
         ]) {
@@ -405,14 +409,14 @@ void main() {
           targetName: 'copilot',
           agentExists: true,
           missingSkills: ['doc-read'],
-          totalSkills: 7,
+          totalSkills: 9,
         );
 
         final json = check.toJson();
         expect(json['targetName'], 'copilot');
         expect(json['agentExists'], true);
         expect(json['missingSkills'], ['doc-read']);
-        expect(json['totalSkills'], 7);
+        expect(json['totalSkills'], 9);
       });
 
       test('TargetCheck.passed is true when agent exists and no missing skills', () {
@@ -420,7 +424,7 @@ void main() {
           targetName: 'copilot',
           agentExists: true,
           missingSkills: [],
-          totalSkills: 7,
+          totalSkills: 9,
         );
         expect(passing.passed, isTrue);
 
