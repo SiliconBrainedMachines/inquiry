@@ -25,7 +25,7 @@ Create a new standalone skill named `research` with an explicit staged web-inves
 - [x] D2 (producer-consumer isolation) is explicitly preserved by contract and verification gates.
 - [x] D3 (single paper-style markdown artifact) is explicitly reflected in output/schema checks.
 - [x] D4 (BibTeX-compatible references in report) is explicitly reflected in citation checks.
-- [x] D5 (universal skill intent) is acknowledged while v1 execution scope remains direct user invocation only.
+- [x] D5 (skill intent beyond Inquiry private use) is acknowledged while v1 execution scope remains direct user invocation only.
 - [x] D6 (orthogonal to `legion`) is explicitly preserved; no "LEGION-plus-web" framing or coupling tasks.
 
 ## Ordering Contract

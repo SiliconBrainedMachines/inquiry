@@ -14,7 +14,7 @@ issue: [193]
 
 Issue #193 is not primarily a scraping problem. It is a context-isolation problem.
 
-The repository already contains the root complaint: when APE or SOCRATES performs external investigation directly, the active phase context gets polluted with raw search material and loses analytical sharpness. The missing capability is a reusable producer of documented research that can be invoked before analysis or planning consumes that material. The proper object to introduce is therefore a skill, not a new phase agent: a universal deep-research protocol that gathers external evidence and returns a paper-style artifact with verifiable citations.
+The repository already contains the root complaint: when APE or SOCRATES performs external investigation directly, the active phase context gets polluted with raw search material and loses analytical sharpness. The missing capability is a reusable producer of documented research that can be invoked before analysis or planning consumes that material. The proper object to introduce is therefore a skill, not a new phase agent: a standalone deep-research protocol that gathers external evidence and returns a paper-style artifact with verifiable citations.
 
 The core architectural decision is to separate producer and consumer:
 
@@ -37,7 +37,7 @@ The user request in #193 is therefore aligned with an existing architectural nee
 
 **Decision:** The new capability should be modeled as a skill.
 
-**Justification:** The current architecture distinguishes phase-bound thinking tools from reusable protocols. `legion` is the direct precedent: it is a universal skill because it can be invoked by any phase or by the user outside the FSM. The same reasoning applies here. Deep research is a trans-phase capability, not a new epistemological phase with its own warrant. It may be used by SOCRATES during ANALYZE, by DESCARTES during PLAN, by DARWIN during EVOLUTION, or directly by the user. That ubiquity is the signature of a skill rather than an APE.
+**Justification:** The current architecture distinguishes phase-bound thinking tools from reusable protocols. `legion` is the direct precedent: it is a skill rather than a private Inquiry skill because it can be invoked by any phase or by the user outside the FSM. The same reasoning applies here. Deep research is a trans-phase capability, not a new epistemological phase with its own warrant. It may be used by SOCRATES during ANALYZE, by DESCARTES during PLAN, by DARWIN during EVOLUTION, or directly by the user. That ubiquity is the signature of a skill rather than an APE.
 
 **References:** [docs/thinking-tools.md](../../../docs/thinking-tools.md), [docs/research/legion.md](../../../docs/research/legion.md), [docs/research/council_of_experts.md](../../../docs/research/council_of_experts.md)
 
@@ -69,11 +69,11 @@ This does **not** mean the report must become a separate `.bib` bundle in v1. Th
 
 **References:** [docs/research/inquiry/bibliography.md](../../../docs/research/inquiry/bibliography.md), [docs/research/ape_builds_ape/ape-paper.md](../../../docs/research/ape_builds_ape/ape-paper.md)
 
-### D5: The skill must be universal in function, even when invoked inside Inquiry
+### D5: The skill must remain usable outside Inquiry, even when invoked inside it
 
-**Decision:** The skill should be treated as universal in behavior and intent.
+**Decision:** The skill should be treated as standalone in behavior and intent, not as a private Inquiry wrapper.
 
-**Justification:** The strongest precedent is `legion`: the skill remains useful with or without Inquiry. Deep research has the same profile. If it only works when `.inquiry/` or cleanroom-specific state is present, it is not actually solving the broader research problem; it is creating an Inquiry-bound wrapper. The protocol must remain intelligible and useful outside the FSM, even if Inquiry enriches it with context when present.
+**Justification:** The strongest precedent is `legion`: the skill remains useful with or without Inquiry. Deep research has the same profile. If it only works when `.inquiry/` or cleanroom-specific state is present, it is not actually solving the broader research problem; it is creating a private Inquiry wrapper. The protocol must remain intelligible and useful outside the FSM, even if Inquiry enriches it with context when present.
 
 **References:** [docs/research/legion.md](../../../docs/research/legion.md), [docs/architecture.md](../../../docs/architecture.md)
 
@@ -101,7 +101,7 @@ This does **not** mean the report must become a separate `.bib` bundle in v1. Th
 
 | # | Risk | Severity | Why it matters |
 |---|------|----------|----------------|
-| R1 | The skill becomes an Inquiry-bound wrapper with hidden runtime assumptions | High | That would violate the universal-skill precedent established by `legion` |
+| R1 | The skill becomes a private Inquiry wrapper with hidden runtime assumptions | High | That would violate the standalone-skill precedent established by `legion` |
 | R2 | The report preserves too much raw web material and simply relocates context pollution | High | Then SOCRATES still inherits noise, just later |
 | R3 | Citation format remains ambiguous across invocations | High | Downstream consumers cannot rely on the artifact contract |
 | R4 | The skill is framed as a LEGION variant instead of a separate evidence protocol | Medium | The resulting design would mix expert synthesis and research gathering unnecessarily |
@@ -113,7 +113,7 @@ This does **not** mean the report must become a separate `.bib` bundle in v1. Th
 
 1. Define the problem as context-isolation for external research.
 2. Establish that the new capability is a skill, not an APE.
-3. Establish that the skill is universal in intent and usable beyond a single phase.
+3. Establish that the skill is not a private Inquiry skill and remains usable beyond a single phase.
 4. Establish that the output contract is one paper-style markdown artifact.
 5. Establish that v1 uses BibTeX-compatible references embedded in the report.
 6. Clarify that the skill is orthogonal to `legion`.
@@ -136,7 +136,7 @@ This does **not** mean the report must become a separate `.bib` bundle in v1. Th
 | Q3 | What is the primary output? | One paper-style markdown report |
 | Q4 | What citation standard anchors v1? | BibTeX-compatible bibliography entries inside the report |
 | Q5 | Is this an extension of LEGION? | No; it is orthogonal and potentially composable |
-| Q6 | Should it only work inside Inquiry? | No; it should remain universal in function |
+| Q6 | Should it only work inside Inquiry? | No; it should remain usable outside Inquiry and beyond a single phase |
 
 ## 6. Questions Deferred to PLAN
 

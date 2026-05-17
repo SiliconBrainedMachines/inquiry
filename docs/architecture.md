@@ -56,7 +56,7 @@
 │  │    issue-end    → EXECUTE / END completion protocol           │  │
 │  │    doc-read     → structured doc retrieval                    │  │
 │  │    doc-write    → structured doc creation                     │  │
-│  │    direct-use   → research / legion / kritik                  │  │
+│  │    skills       → research / legion / kritik                  │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
 │  The agent has NO knowledge of other states' agents.                │
@@ -143,7 +143,7 @@ The agent **never decides** state transitions on its own. Transitions are author
 
 Skills are **step-by-step protocols** invoked by the agent at specific moments. In the current repository they fall into two groups.
 
-### Operational skills
+### Private skills
 
 | Skill | When | Does |
 |---|---|---|
@@ -154,7 +154,7 @@ Skills are **step-by-step protocols** invoked by the agent at specific moments. 
 | `doc-write` | Agent produces documentation | YAML frontmatter, one topic per doc, index maintenance |
 | `inquiry-install` | First-time setup | Bootstraps `.inquiry/` workspace structure |
 
-### Direct-use skills
+### Skills
 
 | Skill | When | Does |
 |---|---|---|
@@ -162,7 +162,9 @@ Skills are **step-by-step protocols** invoked by the agent at specific moments. 
 | `legion` | Multiple isolated expert viewpoints are needed | Runs a council of sub-agents and persists a synthesized dictamen |
 | `kritik` | A bounded-corpus claim audit is required | Audits whether conclusions are licensed by evidence, warrant, and counterevidence |
 
-Skills are **shared across targets** (same SKILL.md for Copilot, Claude, etc.). The agent file is **target-specific** (prompt format differs per tool).
+Private skills are tied to Inquiry CLI concepts and only make sense inside the Inquiry runtime. Skills such as `research`, `legion`, and `kritik` are reusable protocols that can be invoked from any phase or directly by the user.
+
+SKILL.md files are **shared across targets** (same SKILL.md for Copilot, Claude, etc.). The agent file is **target-specific** (prompt format differs per tool).
 
 ## Deployment model
 

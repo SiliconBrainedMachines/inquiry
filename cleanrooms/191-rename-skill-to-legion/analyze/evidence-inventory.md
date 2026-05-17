@@ -30,7 +30,7 @@ tags: [evidence, inventory, rename, legion]
 | File | Line | Content |
 |------|------|---------|
 | `code/cli/CHANGELOG.md` | 9 | `added \`Invoke-ExpertCouncil\` to hardcoded skill lists` |
-| `code/cli/CHANGELOG.md` | 17 | `**Invoke-ExpertCouncil skill**: new universal SKILL.md implementing the LEGION technique` |
+| `code/cli/CHANGELOG.md` | 17 | `**Invoke-ExpertCouncil skill**: new standalone SKILL.md implementing the LEGION technique` |
 
 **Action:** Update to reference new name `legion`. The CHANGELOG records what happened — entries should describe the rename.
 
