@@ -1,6 +1,6 @@
 # Analyze Phase - Index
 
-**Issue:** #186 - feat: Invoke-ExpertCouncil SKILL.md — first universal skill (LEGION technique)
+**Issue:** #186 - feat: Invoke-ExpertCouncil SKILL.md — first standalone skill (LEGION technique)
 **Branch:** 186-invoke-expertcouncil-skill
 **Phase:** ANALYZE
 **Status:** In progress

@@ -22,7 +22,7 @@ The current model uses Thinking Tools through five active operators and one orch
 | IDLE | DEWEY | Deweyan problematization | Bounded issue triage, issue selection, and readiness for explicit handoff |
 | ANALYZE | SOCRATES | Mayeutics / Socratic method | Clarifies the problem through structured questioning |
 | PLAN | DESCARTES | The Method | Divides, orders, verifies, and enumerates work |
-| EXECUTE | BASHO | Techne + yō no bi | Implements under constraints with emphasis on functional elegance |
+| EXECUTE | BASHŌ | Techne + yō no bi | Implements under constraints with emphasis on functional elegance |
 | EVOLUTION | DARWIN | Natural selection | Compares outcomes and proposes fitter process mutations |
 
 APE remains the scheduler and closure gate. DEWEY does not prepare branches or perform downstream phases; `issue-start` owns the explicit handoff into ANALYZE.
@@ -55,14 +55,14 @@ The project's broader lore includes additional named figures such as MARCOPOLO, 
 
 ## References
 
-[1] Finite APE Machine repository. "Taxonomy and scope clarification for issue #134." `cleanrooms/134-organize-core-documentation/analyze/taxonomy-and-scope-clarification.md`.
+[1] Inquiry repository. "Taxonomy and scope clarification for issue #134." `cleanrooms/134-organize-core-documentation/analyze/taxonomy-and-scope-clarification.md`.
 
-[2] Finite APE Machine repository. "Architecture." `docs/architecture.md`.
+[2] Inquiry repository. "Architecture." `docs/architecture.md`.
 
-[3] Finite APE Machine repository. "Agent lifecycle — six-state model and confirmed agent registry." `docs/spec/agent-lifecycle.md`.
+[3] Inquiry repository. "Agent lifecycle — six-state model and confirmed agent registry." `docs/spec/agent-lifecycle.md`.
 
-[4] Finite APE Machine repository. "The Apes — Lore." `docs/lore.md`.
+[4] Inquiry repository. "The Apes — Lore." `docs/lore.md`.
 
-[5] Finite APE Machine repository. "Inquiry as Epistemic Foundation of APE." `docs/research/inquiry/index.md`.
+[5] Inquiry repository. "Inquiry as Epistemic Foundation of APE." `docs/research/inquiry/index.md`.
 
-[6] Finite APE Machine repository. "Cooperative multitasking model — two-level FSM architecture." `docs/spec/cooperative-multitasking-model.md`; "Signal-based coordination — RTOS event model for agent communication." `docs/spec/signal-based-coordination.md`.
+[6] Inquiry repository. "Cooperative multitasking model — two-level FSM architecture." `docs/spec/cooperative-multitasking-model.md`; "Signal-based coordination — RTOS event model for agent communication." `docs/spec/signal-based-coordination.md`.

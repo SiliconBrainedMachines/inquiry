@@ -1,0 +1,48 @@
+name: Book CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'code/book/**'
+      - '.github/workflows/book.yml'
+  pull_request:
+    paths:
+      - 'code/book/**'
+      - '.github/workflows/book.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build-book:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        lang: [en, es, de]
+    defaults:
+      run:
+        working-directory: code/book
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Typst
+        uses: typst-community/setup-typst@v4
+
+      - name: Install Pandoc
+        uses: pandoc/actions/setup@v1
+
+      - name: Build draft PDF (${{ matrix.lang }})
+        run: make draft LANG=${{ matrix.lang }}
+
+      - name: Build EPUB (${{ matrix.lang }})
+        run: make dist/critique-of-pure-abduction-${{ matrix.lang }}.epub LANG=${{ matrix.lang }}
+
+      - name: Upload artifacts (${{ matrix.lang }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: book-${{ matrix.lang }}
+          path: |
+            code/book/dist/draft-${{ matrix.lang }}.pdf
+            code/book/dist/critique-of-pure-abduction-${{ matrix.lang }}.epub

@@ -1,0 +1,16 @@
+---
+title: "Kritik der reinen Abduktion"
+author: "ccisnerdev"
+lang: de
+date: 2026
+rights: "Copyright 2026 ccisnerdev. Alle Rechte vorbehalten."
+description: >
+  Eine panoramische Erkundung der künstlichen Intelligenz durch die
+  Linse von 2.500 Jahren Philosophie. Von Thales bis GPT.
+# cover-image: covers/ebook-cover.jpg  # TODO: Cover vor der Veröffentlichung hinzufügen
+css: templates/epub.css
+toc: true
+toc-depth: 2
+split-level: 1
+reference-section-title: "Referenzen"
+---

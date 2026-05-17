@@ -12,7 +12,7 @@ author: socrates
 ## The Duality
 
 ```
-Skill (memory-write)        →  Tells the agent WHEN and HOW to write
+Skill (doc-write)           →  Tells the agent WHEN and HOW to write
 CLI (`iq` command surface)  →  Does the actual work with validation
 ```
 
@@ -42,7 +42,7 @@ This is critical for trust: the human understands exactly what the tool does bec
 APE follows existing standards:
 
 - **ADRs**: Michael Nygard format (already in `docs/adr/`)
-- **Analysis docs**: Markdown with YAML frontmatter (memory-write schema)
+- **Analysis docs**: Markdown with YAML frontmatter (doc-write conventions)
 - **Plans**: Markdown with checklists
 - **Code docs**: Standard language conventions
 
@@ -54,16 +54,17 @@ The current Inquiry CLI already enforces the runtime FSM and deployment operatio
 
 ## Mapping: Skill → Command
 
-| Skill | CLI Command | Writes to | APE State |
-|-------|-------------|-----------|-----------|
-| triage | `gh issue list`, `issue-create`, explicit-start `issue-start` handoff | `issue_selected_or_created` in TRIAGE, then `feature_branch_selected` on explicit start | IDLE |
-| memory-write | `iq memory write` (planned) | `docs/` (persistent) | ANALYZE |
-| memory-read | `iq memory read` (planned) | stdout (query) | ANALYZE |
+| Skill | CLI Command | Primary surface | APE State |
+|-------|-------------|-----------------|-----------|
+| issue-create | `gh issue list`, `gh issue view`, `gh issue create` (via skill protocol) | GitHub issue tracker during bounded IDLE triage | IDLE |
+| issue-start | `git` workflow + `iq fsm transition --event start_analyze` | Branch preparation, cleanroom scaffolding, and `.inquiry/state.yaml` handoff | IDLE |
+| doc-write | `iq memory write` (planned) | `docs/` and other validated documentation surfaces | ANALYZE |
+| doc-read | `iq memory query` (planned) | stdout query results and targeted repository reads | ANALYZE |
 | planning | (via DESCARTES sub-agent) | `cleanrooms/{task}/plan.md` | PLAN |
 | tdd | (domain skill for BASHŌ) | Source code + tests | EXECUTE |
 | api-design | (domain skill for BASHŌ) | Source code | EXECUTE |
 | db-as-code | (domain skill for BASHŌ) | Migration files | EXECUTE |
-| evolution | `gh issue list`, `gh issue create`, `gh issue comment` | Issues in APE repo | EVOLUTION |
+| evolution | `gh issue list`, `gh issue create`, `gh issue comment` | Issues in the Inquiry repository | EVOLUTION |
 | transition | `iq fsm transition --event <e>` | `.inquiry/state.yaml` | Any |
 | (future) status | `iq status` | stdout (derived from docs/) | Any |
 
