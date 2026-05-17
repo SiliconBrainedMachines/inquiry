@@ -116,6 +116,13 @@ void main() {
       expect(content, isNotEmpty);
     });
 
+    test('reads skills/kritik/SKILL.md', () {
+      final content = assets.loadString('skills/kritik/SKILL.md');
+      expect(content, contains('kritik'));
+      expect(content, contains('bounded corpus'));
+      expect(content, isNotEmpty);
+    });
+
     test('standard APE identity assets do not own runtime contract markers', () {
       final disallowedMarkers = {
         'socrates': ['output_dir', 'confirmed_doc', 'index_file', 'doc-write'],
@@ -154,6 +161,7 @@ void main() {
           'doc-read',
           'doc-write',
           'inquiry-install',
+          'kritik',
           'legion',
           'research',
           'issue-create',
