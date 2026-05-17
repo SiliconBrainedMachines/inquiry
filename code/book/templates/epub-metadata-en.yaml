@@ -1,0 +1,17 @@
+---
+title: "Philo SophIA"
+subtitle: "The Thinking Tools Humanity Built"
+author: "ccisnerdev"
+lang: en
+date: 2026
+rights: "Copyright 2026 ccisnerdev. All rights reserved."
+description: >
+  A panoramic exploration of artificial intelligence through the
+  lens of 2,500 years of philosophy. From Thales to GPT.
+# cover-image: covers/ebook-cover.jpg  # TODO: add cover before publishing
+css: templates/epub.css
+toc: true
+toc-depth: 2
+split-level: 1
+reference-section-title: "References"
+---

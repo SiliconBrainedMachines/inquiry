@@ -8,6 +8,8 @@ A methodology for AI-assisted software development that models coding agents as 
 
 This README is the public entry surface. For the repository's canonical documentation map, start at [`docs/index.md`](docs/index.md).
 
+Inquiry now also carries its long-form book manuscript inside [`code/book/README.md`](code/book/README.md). The book is the canonical doctrinal treatment of the project; the runtime contract remains governed by the CLI assets, tests, and specifications in this repository.
+
 ## What is Inquiry?
 
 Inquiry is a structured methodology that turns AI coding assistants into disciplined engineering partners. Instead of letting an LLM freestream solutions, Inquiry forces a cycle: understand the problem first (Analyze), design the solution second (Plan), then implement mechanically (Execute). Each phase has constraints, artifacts, and a clear exit condition.
@@ -94,6 +96,7 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 - **Context injection:** `iq ape prompt` assembles base prompt + sub-state + dynamic paths as fenced YAML
 - **Skills:** operational protocols such as `issue-create`, `issue-start`, `issue-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
 - **Memory:** `.inquiry/` (runtime state), `cleanrooms/` (per-cycle artifacts), `docs/spec/` (specifications)
+- **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
 - **Target:** Copilot only at present. Multi-target deferred until reactivation
 
 ## Documentation
@@ -101,11 +104,13 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 | Document | Purpose |
 |----------|---------|
 | [`docs/index.md`](docs/index.md) | Top-level navigation |
+| [`code/book/README.md`](code/book/README.md) | Canonical long-form book manuscript and editorial surface |
 | [`docs/architecture.md`](docs/architecture.md) | APE as orchestrating methodology |
 | [`docs/spec/finite-ape-machine.md`](docs/spec/finite-ape-machine.md) | Technical FSM specification |
 | [`docs/spec/memory-as-code-spec.md`](docs/spec/memory-as-code-spec.md) | Memory architecture (v0.2.0) |
 | [`docs/thinking-tools.md`](docs/thinking-tools.md) | Thinking Tools in the model |
-| [`docs/research/inquiry/index.md`](docs/research/inquiry/index.md) | Philosophical home |
+| [`docs/research/inquiry/index.md`](docs/research/inquiry/index.md) | Philosophical research base supporting the book and the methodology |
+| [`docs/research/book/index.md`](docs/research/book/index.md) | Imported working notes and support material from the book project |
 | [`docs/roadmap.md`](docs/roadmap.md) | Strategic direction |
 | [`docs/lore.md`](docs/lore.md) | Nomenclature and allegory |
 

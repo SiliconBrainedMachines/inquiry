@@ -1,0 +1,52 @@
+# Bibliography — Philo SophIA
+# Format: Hayagriva (native Typst support)
+# Add entries as chapters are written
+
+aristotle-organon:
+  type: book
+  title: "The Organon"
+  author: Aristotle
+  date: -350
+  note: "Collected works on logic"
+
+aristotle-sophistical-refutations:
+  type: book
+  title: "Sophistical Refutations"
+  author: Aristotle
+  date: -350
+  note: "On fallacies and their detection"
+
+wittgenstein-1953:
+  type: book
+  title: "Philosophical Investigations"
+  author: "Wittgenstein, Ludwig"
+  date: 1953
+  publisher: Blackwell
+  translator: "Anscombe, G. E. M."
+
+peirce-1903:
+  type: article
+  title: "Pragmatism as a Principle and Method of Right Thinking"
+  author: "Peirce, Charles Sanders"
+  date: 1903
+  note: "Harvard Lectures on Pragmatism"
+
+frankfurt-2005:
+  type: book
+  title: "On Bullshit"
+  author: "Frankfurt, Harry G."
+  date: 2005
+  publisher: Princeton University Press
+  isbn: 978-0-691-12294-6
+
+searle-1980:
+  type: article
+  title: "Minds, Brains, and Programs"
+  author: "Searle, John R."
+  date: 1980
+  parent:
+    type: periodical
+    title: "Behavioral and Brain Sciences"
+  volume: 3
+  issue: 3
+  page-range: 417-457
