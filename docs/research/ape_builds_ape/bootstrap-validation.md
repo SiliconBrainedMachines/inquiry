@@ -1,5 +1,7 @@
 para # Bootstrap Validation: APE Builds APE
 
+> Historical framing note: this document records the bootstrap study using the project's earlier APE/Finite APE Machine vocabulary. References to `ape_cli`, `.ape/`, `docs/issues/`, and v0.0.x describe the study snapshot and are not the current Inquiry runtime surface.
+
 ## Title (working)
 
 Finite APE Machine in Practice: Bootstrap Validation through Self-Construction

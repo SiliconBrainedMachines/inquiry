@@ -1,5 +1,7 @@
 # Deep Research: Flutter/Dart VS Code Extension (Dart-Code)
 
+> Status note: this document is external reference research used while exploring the Inquiry VS Code extension. It does not describe current Inquiry extension behavior and should be read as background material, not as an implementation contract.
+
 > Análisis de la extensión **Dart-Code v3.134** para construir la extensión APE VS Code.
 > Repo: `https://github.com/Dart-Code/Dart-Code`
 > Lenguaje: TypeScript (~96%), empaquetado con webpack.

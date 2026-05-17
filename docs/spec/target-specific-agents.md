@@ -1,6 +1,6 @@
 # Target-Specific Agent Files
 
-**Finite APE Machine — Architectural Reference**
+**Inquiry — Architectural Reference**
 
 Date: April 16, 2026
 Status: Active

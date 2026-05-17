@@ -4,7 +4,7 @@
 
 A methodology for AI-assisted software development that models coding agents as a cooperative finite state machine — **Analyze → Plan → Execute → End → [Evolution] → Idle** — where the value is in the process, not the model.
 
-**Status:** `v0.3.1` · Windows + Linux · Single-target MVP (Copilot)
+**Status:** `v0.4.5` · Windows + Linux · Single-target MVP (Copilot)
 
 This README is the public entry surface. For the repository's canonical documentation map, start at [`docs/index.md`](docs/index.md).
 
@@ -92,7 +92,7 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 - **CLI:** Dart, single cross-platform binary, built on [`modular_cli_sdk`](https://github.com/ccisnedev/modular_cli_sdk)
 - **FSM:** declarative `transition_contract.yaml` — every (state, event) pair is total
 - **Context injection:** `iq ape prompt` assembles base prompt + sub-state + dynamic paths as fenced YAML
-- **Skills:** `doc-write`, `doc-read`, `issue-start`, `issue-end`, `inquiry-install` — protocols the AI follows
+- **Skills:** operational protocols such as `issue-create`, `issue-start`, `issue-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
 - **Memory:** `.inquiry/` (runtime state), `cleanrooms/` (per-cycle artifacts), `docs/spec/` (specifications)
 - **Target:** Copilot only at present. Multi-target deferred until reactivation
 
