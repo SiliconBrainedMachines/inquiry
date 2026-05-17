@@ -1,4 +1,4 @@
-# Wisdom — From φιλοσοφία to Philo SophIA
+# Wisdom — Toward a Critique of Pure Abduction
 
 We have intelligence. Do we have wisdom? Can the machine?
 
