@@ -1,6 +1,4 @@
-# Philo SophIA {.unnumbered}
-
-## The Thinking Tools Humanity Built {.unnumbered}
+# Critique of Pure Abduction {.unnumbered}
 
 *From Thales to GPT*
 

@@ -1,4 +1,4 @@
-# Sabiduría — De φιλοσοφία a Philo SophIA
+# Sabiduría — Hacia una crítica de la abducción pura
 
 Tenemos inteligencia. ¿Tenemos sabiduría? ¿Puede la máquina?
 

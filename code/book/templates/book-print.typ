@@ -11,7 +11,7 @@
     if page-num > 1 {
       set text(size: 9pt, style: "italic")
       if calc.rem(page-num, 2) == 0 {
-        [Philo SophIA]
+        [Critique of Pure Abduction]
       } else {
         // Chapter title would go here via state
       }

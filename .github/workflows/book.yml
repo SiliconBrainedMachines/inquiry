@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        lang: [en, es]
+        lang: [en, es, de]
     defaults:
       run:
         working-directory: code/book
@@ -37,7 +37,7 @@ jobs:
         run: make draft LANG=${{ matrix.lang }}
 
       - name: Build EPUB (${{ matrix.lang }})
-        run: make dist/philo-sophia-${{ matrix.lang }}.epub LANG=${{ matrix.lang }}
+        run: make dist/critique-of-pure-abduction-${{ matrix.lang }}.epub LANG=${{ matrix.lang }}
 
       - name: Upload artifacts (${{ matrix.lang }})
         uses: actions/upload-artifact@v4
@@ -45,4 +45,4 @@ jobs:
           name: book-${{ matrix.lang }}
           path: |
             code/book/dist/draft-${{ matrix.lang }}.pdf
-            code/book/dist/philo-sophia-${{ matrix.lang }}.epub
+            code/book/dist/critique-of-pure-abduction-${{ matrix.lang }}.epub

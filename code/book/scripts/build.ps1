@@ -2,14 +2,25 @@ param(
     [ValidateSet('draft', 'pdf', 'epub', 'all')]
     [string]$Format = 'all',
 
-    [ValidateSet('en', 'es')]
-    [string]$Lang = 'en'
+    [ValidateSet('en', 'es', 'de', 'all')]
+    [string]$Lang = 'all'
 )
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
+$supportedLanguages = @('en', 'es', 'de')
+
+if ($Lang -eq 'all') {
+    foreach ($language in $supportedLanguages) {
+        Write-Host "==> Compilando $language ($Format)"
+        & $PSCommandPath -Format $Format -Lang $language
+    }
+    return
+}
+
 $bookRoot = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
+$bookSlug = 'critique-of-pure-abduction'
 $buildDir = Join-Path $bookRoot 'build'
 $distDir = Join-Path $bookRoot 'dist'
 $srcDir = Join-Path $bookRoot (Join-Path 'src' $Lang)
@@ -73,12 +84,12 @@ try {
             Write-Host "Draft generado: $draftOut"
         }
         'pdf' {
-            $pdfOut = Join-Path $distDir "philo-sophia-$Lang.pdf"
+            $pdfOut = Join-Path $distDir "$bookSlug-$Lang.pdf"
             Invoke-TypstCompile -OutputPath $pdfOut
             Write-Host "PDF generado: $pdfOut"
         }
         'epub' {
-            $epubOut = Join-Path $distDir "philo-sophia-$Lang.epub"
+            $epubOut = Join-Path $distDir "$bookSlug-$Lang.epub"
             & pandoc @srcFiles "--metadata-file=$epubMetaPath" "--css=$epubCssPath" --toc --toc-depth=2 --split-level=1 -o $epubOut
             if ($LASTEXITCODE -ne 0) {
                 throw 'pandoc fallo al generar el EPUB.'
@@ -86,8 +97,8 @@ try {
             Write-Host "EPUB generado: $epubOut"
         }
         'all' {
-            $pdfOut = Join-Path $distDir "philo-sophia-$Lang.pdf"
-            $epubOut = Join-Path $distDir "philo-sophia-$Lang.epub"
+            $pdfOut = Join-Path $distDir "$bookSlug-$Lang.pdf"
+            $epubOut = Join-Path $distDir "$bookSlug-$Lang.epub"
 
             if (Get-Command typst -ErrorAction SilentlyContinue) {
                 Invoke-TypstCompile -OutputPath $pdfOut
