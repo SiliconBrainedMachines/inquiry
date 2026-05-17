@@ -35,7 +35,7 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 
 ## [0.4.1]
 ### Added
-- **Invoke-ExpertCouncil skill**: new universal SKILL.md implementing the LEGION technique — council of experts via independent sub-agents with isolated context, structured dictamen output, and synthesis persistence as `.md` (#186)
+- **Invoke-ExpertCouncil skill**: new standalone SKILL.md implementing the LEGION technique — council of experts via independent sub-agents with isolated context, structured dictamen output, and synthesis persistence as `.md` (#186)
 
 ## [0.4.0]
 ### Changed

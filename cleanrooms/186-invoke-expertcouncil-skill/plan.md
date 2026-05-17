@@ -23,7 +23,7 @@ This plan implements all decisions from [diagnosis.md](analyze/diagnosis.md) (D1
 
 **Entry criteria:**
 - diagnosis.md approved
-- Confirmed findings F1 (frontmatter convention) and F2 (first universal skill) reviewed
+- Confirmed findings F1 (frontmatter convention) and F2 (first standalone skill) reviewed
 
 **Steps:**
 

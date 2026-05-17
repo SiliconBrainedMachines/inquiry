@@ -11,7 +11,7 @@ author: socrates
 
 ## 1. Problem Defined
 
-Create the `Invoke-ExpertCouncil` SKILL.md — the first universal skill in Inquiry. This skill implements the LEGION technique: council of experts via prompt personas with sub-agent invocation. The SKILL.md must encode a complete, self-contained protocol that an AI agent can follow to convoke a council, invoke each expert as an independent sub-agent, and synthesize their outputs into a structured dictamen persisted as `.md`.
+Create the `Invoke-ExpertCouncil` SKILL.md — the first standalone skill in Inquiry. This skill implements the LEGION technique: council of experts via prompt personas with sub-agent invocation. The SKILL.md must encode a complete, self-contained protocol that an AI agent can follow to convoke a council, invoke each expert as an independent sub-agent, and synthesize their outputs into a structured dictamen persisted as `.md`.
 
 ## 2. Decisions Taken
 
@@ -29,7 +29,7 @@ Create the `Invoke-ExpertCouncil` SKILL.md — the first universal skill in Inqu
 
 ### D3: The SKILL.md must work without Inquiry
 
-**Justification:** Universal skill definition from `legion.md` §1.4. The protocol cannot reference `iq` commands, FSM state, or cleanrooms as requirements. It may mention Inquiry-specific enhancements as optional context but must function with any agent that supports skills and sub-agent invocation.
+**Justification:** Skill vs private-skill definition from `legion.md` §1.4. The protocol cannot reference `iq` commands, FSM state, or cleanrooms as requirements. It may mention Inquiry-specific enhancements as optional context but must function with any agent that supports skills and sub-agent invocation.
 
 **Reference:** [`legion.md`](../../../docs/research/legion.md) §1.4, §4.1
 
@@ -94,8 +94,8 @@ Create the `Invoke-ExpertCouncil` SKILL.md — the first universal skill in Inqu
    - Persistence instructions (output → `.md`)
 
 2. **File location:** `code/cli/assets/skills/Invoke-ExpertCouncil/SKILL.md`
-   - This places it alongside existing inquiry-bound skills for now
-   - When #185 establishes the universal/inquiry-bound infrastructure, it may move
+   - This places it alongside existing private skills for now
+   - When #185 establishes the skill/private-skill infrastructure, it may move
 
 ### OUT of scope
 

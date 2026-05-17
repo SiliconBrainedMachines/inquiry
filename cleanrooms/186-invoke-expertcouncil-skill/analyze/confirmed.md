@@ -18,9 +18,9 @@ All 6 existing skills (`doc-read`, `doc-write`, `issue-create`, `issue-start`, `
 
 **Source:** `code/cli/assets/skills/*/SKILL.md`
 
-## F2: Existing skills are all inquiry-bound — CONFIRMED
+## F2: Existing skills are all private to Inquiry CLI — CONFIRMED
 
-Every skill in `code/cli/assets/skills/` references Inquiry-specific concepts (`iq` commands, `gh` CLI, cleanrooms, FSM phases, `inquiry-context` blocks). None is designed to work outside the Inquiry runtime. Invoke-ExpertCouncil would be the first universal skill.
+Every skill in `code/cli/assets/skills/` references Inquiry-specific concepts (`iq` commands, `gh` CLI, cleanrooms, FSM phases, `inquiry-context` blocks). None is designed to work outside the Inquiry runtime. Invoke-ExpertCouncil would be the first standalone skill.
 
 **Source:** All 6 SKILL.md files in `code/cli/assets/skills/`
 
@@ -30,7 +30,7 @@ The deployer in `code/cli/lib/targets/deployer.dart` copies from `code/cli/asset
 
 **Source:** `code/cli/lib/targets/deployer.dart`, `code/cli/lib/targets/copilot_adapter.dart`
 
-## F4: Deployment path for universal skills is unresolved — CONFIRMED
+## F4: Deployment path for standalone skills is unresolved — CONFIRMED
 
 `legion.md` §4.1 states the skill lives in `.github/copilot/skills/` (project-level) and "no se entrega via `iq target get`". The council doc (Expert 5) mentions `iq target get`. No mechanism currently exists to deploy to `.github/copilot/skills/`. This is out of scope for #186 (covered by #185).
 

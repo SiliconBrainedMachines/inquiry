@@ -1,0 +1,27 @@
+# Prologue {.unnumbered}
+
+In my younger and more vulnerable years, a philosophy professor gave us a lecture I never quite forgot. It was a prep course for the university admission exam — one of those marathon tests where they cram everything that's supposed to matter. He was explaining whether a name carries the essence of what it names, or whether it's just a sound we agreed upon. I remember thinking: *this is the most useless question anyone has ever asked.*
+
+I don't blame the professor. Philosophy wasn't taught as something alive — it was taught as history. As a museum tour. Here are the ancient Greeks, look how they spent their time thinking, how noble, how quaint, given that they lived in such a savage and backward age. At least they tried. The condescension was quiet but total: we'd moved past all that. We had science now. We had engineering.
+
+I became an engineer. I built systems that did exactly what I told them — because I'd learned the formal languages we invented to give machines *orders*: assembler, C, and their descendants. And for a time, it was enough.
+
+Then came what may be the biggest leap for humanity since the domestication of fire.
+
+For half a century, linguistics had rested on a bold assumption: language is innate. Noam Chomsky had argued that the human brain comes equipped with a Language Acquisition Device — a built-in architecture without which no amount of exposure could produce grammar. Language wasn't learned the way you learn to ride a bicycle. It was activated, the way eyes activate when light arrives. If Chomsky was right, a machine could never learn language. It would need to be born with the right *architecture*.
+
+Chomsky was right about one thing: language needs the right architecture. He meant the one we're born with. But nothing in his thesis, as far as anyone could see, spoke against the possibility of *building* one.
+
+It took decades of stubborn research to forge an architecture capable enough — the Transformer. We fed it the words of the world, and language sprang forth. Not a formal language with rigid syntax and a compiler to enforce it — but *language.* The kind with ambiguity, context, implication, and silence. The kind that humans use to mean more than they say and say more than they know.
+
+And then, almost overnight, you could simply talk to it. No compiler, no syntax, no manual — just the *language* you've spoken since childhood. The machine that once required formal orders now understood desires. You could ask it anything and it would answer with the confidence of someone who had read everything ever written. The promise was vertigo: the entire reach of human knowledge, closer than it had ever been to a single mind. Now everything is possible.
+
+The machine understands your words. Whether it understands your *meaning* is another matter. Hallucination. Drift. Plausible nonsense delivered with absolute confidence. Solutions came quickly — prompt templates, improved chat interfaces, coding agents, retrieval systems, more powerful models, every workaround an industry can invent. Some work. Many help. But the failures never change in kind. The reason is structural. The machine does not think — it *abduces*. It infers the most probable continuation from incomplete information. Not deduction, which guarantees truth. Not induction, which approximates it. Abduction: inference to the best guess — fast, fluent, plausible, and structurally indifferent to whether the guess is true. In 2024, a team of researchers proved it mathematically: an architecture built on next-token prediction cannot fully eliminate confabulation. Xu, Z., Jain, S., & Kankanhalli, M. (2024). "Hallucination is Inevitable: An Innate Limitation of Large Language Models."
+
+Like any engineer these days, I work with the machine. Analyze the problem, plan a solution, execute. And to sharpen that first step — *analysis* — I looked for a more rigorous method of questioning. The one I found was twenty-five centuries old: *Socratic method.* If this tool worked, were there others? I began to study — philosophy on one side, the machine's failures on the other.
+
+Every failure I cataloged mapped to a philosophical problem that someone had studied centuries before me. Ambiguity? Wittgenstein had spent his entire career on exactly this — that meaning isn't in the word but in its use. Overconfident falsehoods? Frankfurt had a name for it. Invalid inference dressed as logic? Aristotle had written an entire book about it — *Sophistical Refutations* — in the fourth century BC. The machine wasn't failing in new ways. It was failing in the oldest ways. And the tools to address those failures weren't in any prompting guide. They were in philosophy. Not the museum tour I remembered — but a living tradition of engineers of thought who had built, tested, and refined, across twenty-five centuries, the very tools I now needed.
+
+This book is the record of those tools. Every chapter begins where I began — with a real failure — and ends where the philosophers ended: with a tool for thinking clearly. A machine that processes language can only be as clear as the thinking that directs it.
+
+The tools you need to direct the most powerful thinking machine ever built are not new. They are the oldest tools humanity has. And they were waiting — in a classroom you may have walked through at sixteen, while a professor explained something that sounded, at the time, like the most useless question anyone had ever asked.

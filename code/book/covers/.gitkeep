@@ -1,0 +1,5 @@
+# Placeholder — cover images directory
+# Required files:
+#   ebook-cover.jpg       2560×1600px, 300 DPI, RGB, JPEG
+#   paperback-cover.pdf   Calculated dimensions (see book-pipeline-spec.md)
+#   hardcover-cover.pdf   Calculated dimensions (see book-pipeline-spec.md)

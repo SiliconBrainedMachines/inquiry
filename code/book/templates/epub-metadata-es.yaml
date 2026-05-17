@@ -1,0 +1,16 @@
+---
+title: "Crítica de la abducción pura"
+author: "ccisnerdev"
+lang: es
+date: 2026
+rights: "Copyright 2026 ccisnerdev. Todos los derechos reservados."
+description: >
+  Una exploración panorámica de la inteligencia artificial a través del
+  lente de 2,500 años de filosofía. De Tales a GPT.
+# cover-image: covers/ebook-cover.jpg  # TODO: agregar portada antes de publicar
+css: templates/epub.css
+toc: true
+toc-depth: 2
+split-level: 1
+reference-section-title: "Referencias"
+---

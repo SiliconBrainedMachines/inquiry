@@ -4,7 +4,7 @@
 
 This research documents the philosophical foundations that underpin the APE methodology, tracing the concept of **inquiry** from Aristotle through Peirce and Dewey to its application in structured software development.
 
-This directory is the canonical philosophical home of **Inquiry** in the repository. For the current system-level explanation of APE as an orchestrating methodology, see [../../architecture.md](../../architecture.md).
+This directory is the philosophical research base of **Inquiry** in the repository. It supports the integrated book manuscript in [../../../code/book/README.md](../../../code/book/README.md) and the methodology documentation across the rest of the repo. For the current system-level explanation of APE as an orchestrating methodology, see [../../architecture.md](../../architecture.md).
 
 APE's FSM (IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION) is not an arbitrary process — it is a formal instantiation of the **pragmatic theory of inquiry** as developed by Charles Sanders Peirce and John Dewey.
 

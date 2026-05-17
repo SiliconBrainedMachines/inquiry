@@ -73,7 +73,7 @@ When DARWIN (EVOLUTION) is activated:
 
 **Where to record:** `.ape/mutations.md` during the cycle → DARWIN processes it → generates improvement issue.
 
-**Implication:** High frequency of this failure mode justifies implementing GATSBY (dedicated quality gate agent). Currently DESCARTES handles this role — if model quality decreases (e.g., free/local model), GATSBY becomes necessary.
+**Implication:** High frequency of this failure mode justifies implementing GATSBY (dedicated quality gate agent). Currently DESCARTES handles this role — if output quality or prompt compliance degrades in lower-trust tool configurations, GATSBY becomes necessary.
 
 ### 6.2 LLM refuses to follow δ (prompt non-compliance)
 
@@ -85,15 +85,15 @@ When DARWIN (EVOLUTION) is activated:
 
 **Where to record:** `metrics.yaml` field `delta_failures` with count and brief description.
 
-## 7. Antifragility Validation Plan
+## 7. Cross-Target Validation Plan
 
-To validate Scenario A (model degradation / cost), test APE with:
+To validate robustness under different access and cost conditions, test APE with:
 
-| Configuration | Model | Cost | Access |
+| Configuration | Runtime | Cost | Access |
 |---|---|---|---|
-| Baseline | GitHub Copilot (Claude/GPT) | Subscription | IDE extension |
+| Baseline | GitHub Copilot | Subscription | IDE extension |
 | Cloud free | Crush + free cloud model | $0 | Open source agent + API |
-| Local | gemma4 (or similar) | $0 | Local hardware |
+| Alternate hosted | Second hosted target/runtime | Variable | Hosted service |
 
 **What to measure across configurations:**
 - δ failure rate (prompt compliance)
