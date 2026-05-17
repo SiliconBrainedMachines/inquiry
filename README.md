@@ -12,15 +12,15 @@ This README is the public entry surface. For the repository's canonical document
 
 Inquiry is a structured methodology that turns AI coding assistants into disciplined engineering partners. Instead of letting an LLM freestream solutions, Inquiry forces a cycle: understand the problem first (Analyze), design the solution second (Plan), then implement mechanically (Execute). Each phase has constraints, artifacts, and a clear exit condition.
 
-The insight: **a smaller model following a rigorous process beats a frontier model freestyling.** Method is the durable asset; models are replaceable.
+The insight: **AI capability only becomes trustworthy when governed by rigorous thinking tools and explicit process.** The durable asset is the method that turns philosophical discipline into operational practice.
 
 ### Key principles
 
-- **Methodology over model** — the process produces quality, not the model's size or temperature
-- **Memory as Code** — project memory lives as version-controlled markdown, readable by both humans and AI. No vector DB, no cloud dependency
+- **Thinking tools before improvisation** — quality comes from disciplined inquiry, not from unstructured prompting
+- **Memory as Code** — project memory lives as version-controlled markdown, readable by both humans and AI. No vector DB, no hosted memory service
 - **Agents as FSM states** — each phase activates one specialized agent; transitions are declarative, total, and validated
 - **CLI carries methodology** — the CLI resolves paths, injects context, and enforces constraints; the AI focuses on reasoning
-- **Antifragile by design** — if models plateau, the methodology is the only improvement lever left; if models improve, the methodology amplifies gains
+- **Antifragile by design** — if tools change, the methodology remains legible and portable; if tools improve, the methodology amplifies gains
 
 ## The Inquiry cycle
 

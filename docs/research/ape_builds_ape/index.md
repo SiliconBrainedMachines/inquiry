@@ -18,4 +18,4 @@ Research artifacts for the bootstrap study historically titled "Finite APE Machi
 
 - **Paper:** Under active construction (pre-borrador). Current review score: 4/10.
 - **CLI snapshot studied here:** v0.0.14, 131 tests, 12 GitHub releases.
-- **Next milestone:** Figures/diagrams, antifragility testing (Crush + gemma4).
+- **Next milestone:** Figures/diagrams, antifragility testing across hosted targets.
