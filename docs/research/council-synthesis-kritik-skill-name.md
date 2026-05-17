@@ -75,7 +75,7 @@ La decisión no es sobre implementación. Es sobre naming: si `kritik` nombra bi
 
 - **Second-order warrant structure.** Like `legion`, Kritik is epistemologically second-order. Abduction, deduction, and induction produce knowledge directly; Kritik audits whether those outputs meet their own evidentiary standards.
 
-- **Naming convention risk.** Existing skills tend to use operational names (`legion`, `research`, `doc-read`, `issue-start`). APEs carry stronger philosophical identity. `kritik` risks sounding like a thinking tool with autonomous warrant rather than a universal auditing capability.
+- **Naming convention risk.** Existing skills tend to use operational names (`legion`, `research`, `doc-read`, `issue-start`). APEs carry stronger philosophical identity. `kritik` risks sounding like a thinking tool with autonomous warrant rather than a skill-level auditing capability.
 
 - **Confusion surface.** A reader may infer from the name that Kritik is an APE-like method rather than a composable skill.
 
@@ -85,11 +85,11 @@ La decisión no es sobre implementación. Es sobre naming: si `kritik` nombra bi
 
 - **Skill-function ambiguity.** The word does not tell the reader whether Kritik audits other reasoning or introduces a new reasoning method.
 
-- **Precedent for philosophical skill naming.** Accepting `kritik` as a skill name could blur the visible boundary between universal capabilities and philosophical methods.
+- **Precedent for philosophical skill naming.** Accepting `kritik` as a skill name could blur the visible boundary between skills and philosophical methods.
 
 #### Recommendation
 
-The expert judges the name **conceptually precise but architecturally risky**. If retained, the SKILL.md should open by saying explicitly that `kritik` is a universal auditing skill, not an APE and not a first-order thinking method. If Inquiry treats names as architectural signals, this caveat matters.
+The expert judges the name **conceptually precise but architecturally risky**. If retained, the SKILL.md should open by saying explicitly that `kritik` is an auditing skill, not an APE and not a first-order thinking method. If Inquiry treats names as architectural signals, this caveat matters.
 
 #### Confidence
 **Medium** — The concern is not immediate breakage but future confusion if naming conventions are treated as part of the architecture's public grammar.
@@ -194,7 +194,7 @@ Use `kritik`, but pair it with explicit methodological framing in every report: 
 
 - The name requires a **canonical one-line gloss** everywhere it appears. There is broad agreement that the skill should always be introduced with an operational definition.
 
-- The name works best if Inquiry explicitly states that `kritik` is **a universal skill, not an APE** and not a first-order thinking method with autonomous warrant.
+- The name works best if Inquiry explicitly states that `kritik` is **a skill, not an APE** and not a first-order thinking method with autonomous warrant.
 
 ## Dissents
 
@@ -218,7 +218,7 @@ The decisive reason is that the name fits the method. The proposed skill is not 
 
 However, this approval is conditional on four constraints.
 
-1. The skill must be documented from the first line as a **universal auditing skill**, not an APE and not a first-order thinking tradition.
+1. The skill must be documented from the first line as an **auditing skill**, not an APE and not a first-order thinking tradition.
 2. Every public surface should include a one-line gloss, for example: **Kritik audits whether a conclusion is actually authorized by the available evidence, sources, warrant, and limits of inference.**
 3. Every report produced by the skill should foreground **bounded corpus, proof standard, graded verdicts, and limitations**, so the name does not inflate the apparent authority of the output.
 4. The eventual SKILL.md should show **concrete examples before abstraction**, to prevent the name from sounding ornamental or inaccessible.
