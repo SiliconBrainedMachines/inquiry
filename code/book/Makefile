@@ -1,5 +1,5 @@
 # ─── Configuration ────────────────────────────────────
-BOOK_SLUG    := philo-sophia
+BOOK_SLUG    := critique-of-pure-abduction
 LANG         ?= en
 VERSION      ?= 0.0.1
 TRIM_WIDTH   := 6

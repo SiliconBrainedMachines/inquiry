@@ -1,6 +1,4 @@
-# Philo SophIA {.unnumbered}
-
-## Las Herramientas del Pensamiento que la Humanidad Construyó {.unnumbered}
+# Crítica de la abducción pura {.unnumbered}
 
 *De Tales a GPT*
 
