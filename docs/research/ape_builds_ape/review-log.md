@@ -32,7 +32,7 @@ Objetivo: rastrear evolución de calidad del paper a través de revisiones suces
 5. **Abstract** — escribir al final cuando paper esté completo. [NOTA: no tocar abstract hasta entonces]
 6. **Figuras necesarias** — architecture diagram, tick cycle sequence diagram, FSM diagram.
 7. **Experimental methodology needed** — cada issue atendida con APE es un experimento. Falta definir qué documentar y cómo.
-8. **Antifragility testing plan** — probar con: (a) Crush + modelo cloud gratuito, (b) modelo local (gemma4). Validar accesibilidad.
+8. **Antifragility testing plan** — probar con: (a) Crush + modelo cloud gratuito, (b) un segundo target o servicio hospedado. Validar accesibilidad.
 
 ### Open questions for next revision
 
@@ -48,8 +48,8 @@ Objetivo: rastrear evolución de calidad del paper a través de revisiones suces
 - [ ] Crear figuras: architecture, tick cycle, FSM states
 - [x] Eliminar 2 de 3 apariciones de "infinite monkeys" (§10 reescrito con tesis)
 - [x] Documentar failure modes con ejemplos concretos
-- [ ] Probar APE con Crush + cloud model gratuito (Scenario A validation)
-- [ ] Probar APE con modelo local gemma4 (Scenario A validation)
+- [ ] Probar APE con Crush + cloud model gratuito (cross-target validation)
+- [ ] Probar APE con un segundo target o servicio hospedado (cross-target validation)
 - [x] Nota: paper y ape_cli ambos en construcción (§3.2)
 - [x] Nota: roster actual = 4 apes, 7 es diseño aspiracional (§3.2)
 
