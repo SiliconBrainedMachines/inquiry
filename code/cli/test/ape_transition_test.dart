@@ -45,6 +45,35 @@ void main() {
         .writeAsStringSync(buf.toString());
   }
 
+  void setupGitRepoWithFeatureCommit() {
+    void git(List<String> args) {
+      final result = Process.runSync(
+        'git',
+        args,
+        workingDirectory: tmpDir.path,
+      );
+      if (result.exitCode != 0) {
+        fail(
+          'git ${args.join(' ')} failed: ${result.stderr}\n${result.stdout}',
+        );
+      }
+    }
+
+    git(['init']);
+    git(['config', 'user.email', 'test@test.com']);
+    git(['config', 'user.name', 'Test User']);
+
+    final trackedFile = File(p.join(tmpDir.path, 'README.md'));
+    trackedFile.writeAsStringSync('# Test repo\n');
+    git(['add', '.']);
+    git(['commit', '-m', 'init']);
+
+    git(['checkout', '-b', '145-test-branch']);
+    trackedFile.writeAsStringSync('# Test repo\nfeature change\n');
+    git(['add', 'README.md']);
+    git(['commit', '-m', 'phase commit']);
+  }
+
   group('ApeTransitionCommand', () {
     group('successful transitions', () {
       test('socrates clarification --next--> assumptions', () async {
@@ -120,6 +149,33 @@ void main() {
 
         expect(result.from, equals('test'));
         expect(result.to, equals('implement'));
+      });
+
+      test('basho commit --next_phase--> implement preserves outer FSM state', () async {
+        setupGitRepoWithFeatureCommit();
+        writeState(
+          state: 'EXECUTE',
+          issue: '145',
+          apeName: 'basho',
+          apeState: 'commit',
+        );
+
+        final cmd = ApeTransitionCommand(
+          ApeTransitionInput(event: 'next_phase', workingDirectory: tmpDir.path),
+        );
+        final result = await cmd.execute();
+
+        expect(result.from, equals('commit'));
+        expect(result.to, equals('implement'));
+
+        final content = File(p.join(tmpDir.path, '.inquiry', 'state.yaml'))
+            .readAsStringSync();
+        expect(content, contains('state: EXECUTE'));
+        expect(content, contains('issue: "145"'));
+        expect(content, contains('name: basho'));
+        expect(content, contains('state: implement'));
+        expect(content, isNot(contains('issue: null')));
+        expect(content, isNot(contains('state: IDLE')));
       });
 
       test('dewey confirm --complete--> evaluate_scope', () async {
