@@ -41,36 +41,38 @@ Reduce legion wall-clock latency in GitHub Copilot environments by closing the d
 ## Phase 1 - Audit Current Default Invocation Path
 
 ### Entry Criteria
-- [ ] [cleanrooms/198-perflegion-invoke-subagents-in-parallel-for-faster/analyze/diagnosis.md](cleanrooms/198-perflegion-invoke-subagents-in-parallel-for-faster/analyze/diagnosis.md) is approved and accepted as source of truth.
-- [ ] The target surface is still legion's default invocation path in the VS Code / Copilot runtime.
-- [ ] Relevant legion skill and target-specific invocation files are available for inspection.
+- [x] [cleanrooms/198-perflegion-invoke-subagents-in-parallel-for-faster/analyze/diagnosis.md](cleanrooms/198-perflegion-invoke-subagents-in-parallel-for-faster/analyze/diagnosis.md) is approved and accepted as source of truth.
+- [x] The target surface is still legion's default invocation path in the VS Code / Copilot runtime.
+- [x] Relevant legion skill and target-specific invocation files are available for inspection.
 
 ### Steps
-- [ ] Re-read [code/cli/assets/skills/legion/SKILL.md](code/cli/assets/skills/legion/SKILL.md) with focus on the consultation step and any wording that implies dispatch shape.
-- [ ] Trace the concrete target path that executes legion from the VS Code / Copilot environment.
-- [ ] Determine whether the current path explicitly uses a parallel-capable route, leaves routing implicit, or forces sequential launch.
-- [ ] Identify any existing capability-detection or feature-gating logic relevant to parallel fan-out.
-- [ ] Record the observed classification before changing any code.
+- [x] Re-read [code/cli/assets/skills/legion/SKILL.md](code/cli/assets/skills/legion/SKILL.md) with focus on the consultation step and any wording that implies dispatch shape.
+- [x] Trace the concrete target path that executes legion from the VS Code / Copilot environment.
+- [x] Determine whether the current path explicitly uses a parallel-capable route, leaves routing implicit, or forces sequential launch.
+- [x] Identify any existing capability-detection or feature-gating logic relevant to parallel fan-out.
+- [x] Record the observed classification before changing any code.
 
 ### Verification
-- [ ] The current default invocation path is classified as one of: `parallel-first`, `sequential-first`, or `implicit/unclear`.
-- [ ] The audit identifies the exact decision point where routing behavior is determined.
-- [ ] Any existing gate or fallback logic is documented and attributable to a concrete file/symbol.
+- [x] The current default invocation path is classified as one of: `parallel-first`, `sequential-first`, or `implicit/unclear`.
+- [x] The audit identifies the exact decision point where routing behavior is determined.
+- [x] Any existing gate or fallback logic is documented and attributable to a concrete file/symbol.
 
 ### Pseudotests
-- [ ] PseudoTest P1.1: "Given the current legion entry path, I can name the file and branch point that decides parallel vs sequential dispatch."
+- [x] PseudoTest P1.1: "Given the current legion entry path, I can name the file and branch point that decides parallel vs sequential dispatch."
 - [ ] PseudoTest P1.2: "If the path is already parallel-first, no execution phase is opened for routing changes."
-- [ ] PseudoTest P1.3: "If the path is implicit or sequential-first, the missing routing decision is explicit enough to repair in one bounded slice."
+- [x] PseudoTest P1.3: "If the path is implicit or sequential-first, the missing routing decision is explicit enough to repair in one bounded slice."
 
 ### Risk Notes
-- [ ] Risk: The audit mistakes skill prose for actual runtime behavior.
-- [ ] Mitigation: Require a traced code path, not only documentation wording.
-- [ ] Risk: Feature gates are profile-specific and appear absent when only hidden.
-- [ ] Mitigation: Treat ambiguity as degraded/unsupported until proven otherwise.
+- [x] Risk: The audit mistakes skill prose for actual runtime behavior.
+- [x] Mitigation: Require a traced code path, not only documentation wording.
+- [x] Risk: Feature gates are profile-specific and appear absent when only hidden.
+- [x] Mitigation: Treat ambiguity as degraded/unsupported until proven otherwise.
 
 ### Dependencies
-- [ ] Depends on diagnosis decisions D1 and D2.
-- [ ] Must complete before any behavior specification or routing change is attempted.
+- [x] Depends on diagnosis decisions D1 and D2.
+- [x] Must complete before any behavior specification or routing change is attempted.
+
+Execution note (2026-05-18): Phase 1 audited the active legion path at [code/cli/assets/skills/legion/SKILL.md](code/cli/assets/skills/legion/SKILL.md) Step 3 and classified the default dispatch as `implicit/unclear`, not `parallel-first`. The decision point is the consultation instruction to invoke each expert as a separate independent sub-agent without an explicit temporal dispatch mode. The degraded sequential fallback is documented in the same step, so the remaining gap is the missing explicit default-routing rule. As a result, Phase 3 remains required and cannot be skipped.
 
 ## Phase 2 - Specify Parallel-First Behavior
 
