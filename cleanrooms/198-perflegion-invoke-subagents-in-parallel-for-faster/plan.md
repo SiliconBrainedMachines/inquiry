@@ -192,7 +192,7 @@ Execution note (2026-05-18): Phase 4 aligned the adjacent documentation with the
 - [x] Compare a parallel-capable run against a degraded or forced-sequential baseline when the environment allows it.
 - [x] Confirm no regressions in existing legion use cases that depend on expert isolation or synthesis completeness.
 - [x] Calculate the required version bump from the final verified change set once validation is green.
-- [ ] Present the proposed version bump to the user and obtain confirmation before editing versioned artifacts.
+- [x] Present the proposed version bump to the user and obtain confirmation before editing versioned artifacts.
 - [x] Record closure evidence in the cleanroom artifacts as needed by EXECUTE.
 
 ### Verification
@@ -201,7 +201,7 @@ Execution note (2026-05-18): Phase 4 aligned the adjacent documentation with the
 - [x] Parallel-capable validation demonstrates a meaningful reduction in wall-clock time relative to sequential baseline when measured in the available environment.
 - [x] Degraded fallback remains functional and correctly labeled.
 - [x] The required version bump is computed from the final verified change set.
-- [ ] User confirmation is obtained before any version bump artifacts are changed.
+- [x] User confirmation is obtained before any version bump artifacts are changed.
 
 ### Pseudotests
 - [x] PseudoTest P5.1: "Focused legion routing tests pass after the final edit set."
@@ -224,8 +224,8 @@ Execution note (2026-05-18): Final focused validation passed in [code/cli/test/a
 - [x] Run the full project test suite required by the repository for this change set.
 - [x] Confirm the final validation includes all existing tests, not only legion-specific checks.
 - [x] Confirm the final evidence supports D1 through D4 simultaneously: proven capability premise, repaired routing gap, preserved invariants, and reduced latency in capable environments.
-- [ ] Confirm every completed phase ended with its own commit before closure work continues.
-- [ ] Confirm the proposed version bump has been calculated and explicitly confirmed by the user before it is applied.
+- [x] Confirm every completed phase ended with its own commit before closure work continues.
+- [x] Confirm the proposed version bump has been calculated and explicitly confirmed by the user before it is applied.
 
 ## Completion Criteria
 - [ ] Every phase includes Entry Criteria, Steps, Verification, Pseudotests, Risk Notes, and Dependencies.
