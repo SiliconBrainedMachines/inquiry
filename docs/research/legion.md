@@ -11,6 +11,8 @@
 
 `legion` es una **skill** dentro del ecosistema Inquiry. Su mandato es convocar un consejo de expertos —personas con perspectivas cognitivas genuinamente distintas— para analizar un problema desde múltiples ángulos antes de sintetizar una conclusión. Cada experto es invocado como sub-agente independiente con su propio contexto, herramientas y skills, maximizando la independencia de perspectivas. El propio LLM es la función de gating que decide qué expertos convocar.
 
+Cuando el runtime soporta sub-agentes paralelos con contexto aislado, `legion` opera en modo **parallel-first**: convoca a los expertos en paralelo y solo sintetiza cuando todos terminan. Si esa capacidad es ausente o ambigua, `legion` entra en **modo secuencial degradado** con aviso explícito al usuario.
+
 A diferencia de las private skills de Inquiry CLI (`doc-read`, `issue-create`, etc.) que requieren el FSM y el CLI `iq` para funcionar, `legion` es **independiente de Inquiry**: su protocolo (selección de expertos → invocación de sub-agentes → síntesis → persistencia .md) funciona con cualquier agente, en cualquier contexto. Inquiry la enriquece con contexto de fase, pero no la requiere.
 
 LEGION es el nombre de la **técnica** que `legion` implementa. La decisión de implementarla como Skill (no como APE) fue tomada mediante un dictamen formal de consejo de expertos documentado en [`council_of_experts.md`](council_of_experts.md).
@@ -209,7 +211,22 @@ Este es un principio de diseño fundamental: **cada experto del consejo es invoc
 
 La síntesis es el único punto donde las perspectivas convergen — y es responsabilidad del agente orquestador, no de los expertos individuales.
 
-### 3.4 Catálogo de personas
+### 3.4 Contrato de dispatch
+
+El contrato operativo actual de `legion` es:
+
+- **Parallel-first:** si el runtime soporta sub-agentes paralelos aislados, todos los expertos deben lanzarse en paralelo.
+- **Fallback degradado:** si la capacidad paralela es ausente o ambigua, `legion` degrada explícitamente a ejecución secuencial con reseteo de contexto entre expertos.
+- **Fan-in obligatorio:** la síntesis no comienza hasta que todos los expertos hayan terminado, sin importar el modo de dispatch.
+
+Implicaciones de latencia:
+
+- En modo paralelo, la latencia total se aproxima a la duración del experto más lento más el costo de síntesis.
+- En modo degradado, la latencia total se aproxima a la suma de las duraciones individuales más el costo de síntesis.
+
+La independencia de contexto y la completitud de la síntesis no cambian entre modos; cambia la forma de orquestación y, por tanto, el costo temporal.
+
+### 3.5 Catálogo de personas
 
 Para v1, la skill LEGION opera en **modo libre**: el agente selecciona libremente las características de cada experto según las necesidades de la situación. No hay catálogo fijo — el prompt de la skill instruye al agente a elegir perspectivas que maximicen distancia cognitiva para el problema específico.
 
@@ -287,7 +304,7 @@ personas_de_referencia:
 
 El catálogo es extensible. El usuario puede definir personas adicionales según su dominio.
 
-### 3.5 Protocolo de síntesis y persistencia
+### 3.6 Protocolo de síntesis y persistencia
 
 El output de la síntesis se persiste como archivo `.md` en el directorio apropiado del ciclo activo (típicamente `cleanrooms/<branch>/analyze/`). La persistencia sigue el principio **Memory as Code** de Inquiry: el análisis no depende de la ventana de contexto del agente, sino de los archivos markdown que son versionables, legibles por humanos y por agentes, y sobreviven a resets de sesión.
 
