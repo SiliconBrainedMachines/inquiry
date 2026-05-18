@@ -77,35 +77,37 @@ Execution note (2026-05-18): Phase 1 audited the active legion path at [code/cli
 ## Phase 2 - Specify Parallel-First Behavior
 
 ### Entry Criteria
-- [ ] Phase 1 is complete and the current behavior is classified.
-- [ ] The routing decision point and fallback conditions are understood well enough to specify without guessing.
+- [x] Phase 1 is complete and the current behavior is classified.
+- [x] The routing decision point and fallback conditions are understood well enough to specify without guessing.
 
 ### Steps
-- [ ] Define the expected default behavior: launch all experts concurrently when the runtime supports isolated parallel subagents.
-- [ ] Define the degraded fallback trigger: lack of parallel capability or ambiguous capability detection.
-- [ ] Define user-visible degraded behavior language so fallback is transparent rather than silent.
-- [ ] Define the invariants shared by both paths: expert isolation, synthesis after all expert results, and no sequential role-play in one shared context.
-- [ ] Capture the routing rule in implementation-oriented pseudocode before any edit is made.
+- [x] Define the expected default behavior: launch all experts concurrently when the runtime supports isolated parallel subagents.
+- [x] Define the degraded fallback trigger: lack of parallel capability or ambiguous capability detection.
+- [x] Define user-visible degraded behavior language so fallback is transparent rather than silent.
+- [x] Define the invariants shared by both paths: expert isolation, synthesis after all expert results, and no sequential role-play in one shared context.
+- [x] Capture the routing rule in implementation-oriented pseudocode before any edit is made.
 
 ### Verification
-- [ ] The specification distinguishes default parallel behavior from degraded sequential fallback.
-- [ ] The specification preserves diagnosis constraints D3 and D4.
-- [ ] The specification makes ambiguous capability detection fail safe to degraded mode.
+- [x] The specification distinguishes default parallel behavior from degraded sequential fallback.
+- [x] The specification preserves diagnosis constraints D3 and D4.
+- [x] The specification makes ambiguous capability detection fail safe to degraded mode.
 
 ### Pseudotests
-- [ ] PseudoTest P2.1: "If capability detection returns parallel, all experts are launched concurrently in isolated contexts."
-- [ ] PseudoTest P2.2: "If capability detection returns degraded or unknown, experts run sequentially with explicit degraded labeling."
-- [ ] PseudoTest P2.3: "Synthesis waits for all expert outputs regardless of dispatch mode."
+- [x] PseudoTest P2.1: "If capability detection returns parallel, all experts are launched concurrently in isolated contexts."
+- [x] PseudoTest P2.2: "If capability detection returns degraded or unknown, experts run sequentially with explicit degraded labeling."
+- [x] PseudoTest P2.3: "Synthesis waits for all expert outputs regardless of dispatch mode."
 
 ### Risk Notes
-- [ ] Risk: A vague specification reopens design choices during EXECUTE.
-- [ ] Mitigation: Require explicit routing conditions and fallback wording before code changes.
-- [ ] Risk: Sequential fallback weakens user expectations if described unclearly.
-- [ ] Mitigation: Make degraded status explicit in both docs and runtime messaging.
+- [x] Risk: A vague specification reopens design choices during EXECUTE.
+- [x] Mitigation: Require explicit routing conditions and fallback wording before code changes.
+- [x] Risk: Sequential fallback weakens user expectations if described unclearly.
+- [x] Mitigation: Make degraded status explicit in both docs and runtime messaging.
 
 ### Dependencies
-- [ ] Depends on Phase 1 routing classification.
-- [ ] Must complete before tests or implementation are written.
+- [x] Depends on Phase 1 routing classification.
+- [x] Must complete before tests or implementation are written.
+
+Execution note (2026-05-18): Phase 2 specification was captured in [cleanrooms/198-perflegion-invoke-subagents-in-parallel-for-faster/spec-phase-2.md](cleanrooms/198-perflegion-invoke-subagents-in-parallel-for-faster/spec-phase-2.md). The specification makes the missing default-routing rule explicit: `parallel-first` when isolated parallel subagents are available, degraded sequential fallback when capability is absent or ambiguous, explicit degraded-mode user messaging, shared isolation and synthesis invariants, and fail-safe pseudocode for capability detection. This locks the design surface and confirms that Phase 3 remains required.
 
 ## Phase 3 - Implement Routing And Tests
 
