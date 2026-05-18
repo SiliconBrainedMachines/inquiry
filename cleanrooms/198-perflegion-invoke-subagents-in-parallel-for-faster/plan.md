@@ -183,45 +183,47 @@ Execution note (2026-05-18): Phase 4 aligned the adjacent documentation with the
 ## Phase 5 - Full Validation And Benchmark Gate
 
 ### Entry Criteria
-- [ ] All earlier phases are complete.
-- [ ] The final diff is limited to legion routing, directly related tests, and aligned documentation.
+- [x] All earlier phases are complete.
+- [x] The final diff is limited to legion routing, directly related tests, and aligned documentation.
 
 ### Steps
-- [ ] Run the narrow legion-focused validation used during implementation one final time.
-- [ ] Run the full project validation gate required by PLAN constraints.
-- [ ] Compare a parallel-capable run against a degraded or forced-sequential baseline when the environment allows it.
-- [ ] Confirm no regressions in existing legion use cases that depend on expert isolation or synthesis completeness.
-- [ ] Calculate the required version bump from the final verified change set once validation is green.
+- [x] Run the narrow legion-focused validation used during implementation one final time.
+- [x] Run the full project validation gate required by PLAN constraints.
+- [x] Compare a parallel-capable run against a degraded or forced-sequential baseline when the environment allows it.
+- [x] Confirm no regressions in existing legion use cases that depend on expert isolation or synthesis completeness.
+- [x] Calculate the required version bump from the final verified change set once validation is green.
 - [ ] Present the proposed version bump to the user and obtain confirmation before editing versioned artifacts.
-- [ ] Record closure evidence in the cleanroom artifacts as needed by EXECUTE.
+- [x] Record closure evidence in the cleanroom artifacts as needed by EXECUTE.
 
 ### Verification
-- [ ] The first verification in this phase is the narrow legion slice, followed by broader gates.
-- [ ] The full project test suite passes.
-- [ ] Parallel-capable validation demonstrates a meaningful reduction in wall-clock time relative to sequential baseline when measured in the available environment.
-- [ ] Degraded fallback remains functional and correctly labeled.
-- [ ] The required version bump is computed from the final verified change set.
+- [x] The first verification in this phase is the narrow legion slice, followed by broader gates.
+- [x] The full project test suite passes.
+- [x] Parallel-capable validation demonstrates a meaningful reduction in wall-clock time relative to sequential baseline when measured in the available environment.
+- [x] Degraded fallback remains functional and correctly labeled.
+- [x] The required version bump is computed from the final verified change set.
 - [ ] User confirmation is obtained before any version bump artifacts are changed.
 
 ### Pseudotests
-- [ ] PseudoTest P5.1: "Focused legion routing tests pass after the final edit set."
-- [ ] PseudoTest P5.2: "The full repository test suite passes with no new regressions."
-- [ ] PseudoTest P5.3: "Measured wall-clock for a multi-expert run improves materially on the verified parallel-capable route."
+- [x] PseudoTest P5.1: "Focused legion routing tests pass after the final edit set."
+- [x] PseudoTest P5.2: "The full repository test suite passes with no new regressions."
+- [x] PseudoTest P5.3: "Measured wall-clock for a multi-expert run improves materially on the verified parallel-capable route."
 
 ### Risk Notes
-- [ ] Risk: Full-suite failures unrelated to legion obscure closure.
-- [ ] Mitigation: Keep the narrow validation evidence and diff audit available before running the broad gate.
-- [ ] Risk: Benchmark noise makes exact multipliers unreliable.
-- [ ] Mitigation: Treat performance as directional evidence with documented environment context, not as an exact invariant.
+- [x] Risk: Full-suite failures unrelated to legion obscure closure.
+- [x] Mitigation: Keep the narrow validation evidence and diff audit available before running the broad gate.
+- [x] Risk: Benchmark noise makes exact multipliers unreliable.
+- [x] Mitigation: Treat performance as directional evidence with documented environment context, not as an exact invariant.
 
 ### Dependencies
-- [ ] Depends on all prior phases.
-- [ ] Is the mandatory terminal gate before the issue can be considered execution-ready and closure-ready.
+- [x] Depends on all prior phases.
+- [x] Is the mandatory terminal gate before the issue can be considered execution-ready and closure-ready.
+
+Execution note (2026-05-18): Final focused validation passed in [code/cli/test/assets_test.dart](code/cli/test/assets_test.dart) with the full asset suite green (14 tests). The required repository-wide gate also passed on Windows: `dart pub get`, `dart analyze`, `dart test`, `dart compile exe bin/main.dart -o build/inquiry.exe`, `npm run test:unit`, and `npm run test:integration`. Additional cross-platform confirmation requested by the user also passed on WSL Ubuntu from a native Linux clone of the current `HEAD`: `code/cli` `dart test` (332 passing), plus `code/vscode` `npm run test:unit` (64 passing) and `npm run test:integration` (12 passing). Runtime timing evidence from the Copilot debug logs showed the five `VPAR-*` probes starting within a 13 ms spread (`1779144298323` to `1779144298336`) and completing in a 5.013 s wall-clock window (`1779144298323` to `1779144303336`), while the five `VSEQ-*` probes were launched across a 32.763 s spread (`1779144309848` to `1779144342611`) and took 35.420 s end to end (`1779144309848` to `1779144345268`). In the available environment this is directional evidence of about 7.1x lower wall-clock latency, or an 85.8% reduction, for the parallel-first route. The validated legion asset contract still requires isolated experts, explicit degraded fallback, and fan-in before synthesis. The proposed release increment from the verified change set is a patch bump from `0.4.5` to `0.4.6`, now approved by the user before any versioned artifact is edited.
 
 ## Final Verification Gate
-- [ ] Run the full project test suite required by the repository for this change set.
-- [ ] Confirm the final validation includes all existing tests, not only legion-specific checks.
-- [ ] Confirm the final evidence supports D1 through D4 simultaneously: proven capability premise, repaired routing gap, preserved invariants, and reduced latency in capable environments.
+- [x] Run the full project test suite required by the repository for this change set.
+- [x] Confirm the final validation includes all existing tests, not only legion-specific checks.
+- [x] Confirm the final evidence supports D1 through D4 simultaneously: proven capability premise, repaired routing gap, preserved invariants, and reduced latency in capable environments.
 - [ ] Confirm every completed phase ended with its own commit before closure work continues.
 - [ ] Confirm the proposed version bump has been calculated and explicitly confirmed by the user before it is applied.
 
