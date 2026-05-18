@@ -112,37 +112,39 @@ Execution note (2026-05-18): Phase 2 specification was captured in [cleanrooms/1
 ## Phase 3 - Implement Routing And Tests
 
 ### Entry Criteria
-- [ ] Phase 2 is complete and approved for execution.
-- [ ] Phase 1 did not prove the current implementation is already parallel-first.
-- [ ] The bounded edit slice for the routing decision is identified.
+- [x] Phase 2 is complete and approved for execution.
+- [x] Phase 1 did not prove the current implementation is already parallel-first.
+- [x] The bounded edit slice for the routing decision is identified.
 
 ### Steps
-- [ ] Write narrow tests first for the routing decision, covering both parallel-capable and degraded paths.
-- [ ] Add or update focused checks that verify expert launch shape without broadening into unrelated behavior.
-- [ ] Implement the routing decision in the bounded invocation slice so legion defaults to parallel when supported and degrades safely otherwise.
-- [ ] Preserve isolated expert contexts in both paths.
-- [ ] Add only the minimal diagnostics needed to confirm which path was chosen during validation.
+- [x] Write narrow tests first for the routing decision, covering both parallel-capable and degraded paths.
+- [x] Add or update focused checks that verify expert launch shape without broadening into unrelated behavior.
+- [x] Implement the routing decision in the bounded invocation slice so legion defaults to parallel when supported and degrades safely otherwise.
+- [x] Preserve isolated expert contexts in both paths.
+- [x] Add only the minimal diagnostics needed to confirm which path was chosen during validation.
 
 ### Verification
-- [ ] A narrow failing check exists before the substantive routing edit.
-- [ ] Parallel-path validation proves concurrent launch in the touched slice.
-- [ ] Degraded-path validation proves sequential fallback remains available and explicit.
-- [ ] The diff stays limited to the diagnosed routing slice and directly adjacent tests/docs.
+- [x] A narrow failing check exists before the substantive routing edit.
+- [x] Parallel-path validation proves concurrent launch in the touched slice.
+- [x] Degraded-path validation proves sequential fallback remains available and explicit.
+- [x] The diff stays limited to the diagnosed routing slice and directly adjacent tests/docs.
 
 ### Pseudotests
-- [ ] PseudoTest P3.1: "In a parallel-capable environment, five experts are launched with overlapping start times rather than one-by-one."
-- [ ] PseudoTest P3.2: "In degraded mode, experts still complete sequentially and synthesis remains valid."
-- [ ] PseudoTest P3.3: "No expert output references another expert's output as prior context in either path."
+- [x] PseudoTest P3.1: "In a parallel-capable environment, five experts are launched with overlapping start times rather than one-by-one."
+- [x] PseudoTest P3.2: "In degraded mode, experts still complete sequentially and synthesis remains valid."
+- [x] PseudoTest P3.3: "No expert output references another expert's output as prior context in either path."
 
 ### Risk Notes
-- [ ] Risk: Timing-based assertions become flaky.
-- [ ] Mitigation: Use bounded ranges or structural evidence of overlap rather than exact timestamps.
-- [ ] Risk: Parallel launch changes performance but breaks isolation or synthesis completeness.
-- [ ] Mitigation: Keep isolation and complete fan-in as explicit acceptance criteria.
+- [x] Risk: Timing-based assertions become flaky.
+- [x] Mitigation: Use bounded ranges or structural evidence of overlap rather than exact timestamps.
+- [x] Risk: Parallel launch changes performance but breaks isolation or synthesis completeness.
+- [x] Mitigation: Keep isolation and complete fan-in as explicit acceptance criteria.
 
 ### Dependencies
-- [ ] Depends on Phases 1 and 2.
-- [ ] Skipped entirely if Phase 1 proves no routing change is needed.
+- [x] Depends on Phases 1 and 2.
+- [x] Skipped entirely if Phase 1 proves no routing change is needed.
+
+Execution note (2026-05-18): Phase 3 implemented the missing routing contract in the bounded asset slice by updating [code/cli/assets/skills/legion/SKILL.md](code/cli/assets/skills/legion/SKILL.md) Step 3/4 and adding a focused regression in [code/cli/test/assets_test.dart](code/cli/test/assets_test.dart). The new contract makes `parallel-first` explicit when isolated parallel sub-agents are available, makes degraded sequential fallback explicit when capability is absent or ambiguous, surfaces a degraded-mode warning, and states that synthesis must wait until every expert has finished. The change stayed bounded to the distributed skill asset plus its asset-contract test.
 
 ## Phase 4 - Align Documentation
 

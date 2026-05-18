@@ -45,6 +45,8 @@ See **Reference Personas** below for guidance on cognitive styles.
 
 Invoke each expert as a **separate, independent sub-agent** with its own isolated context.
 
+**Parallel-first is the default when the runtime supports isolated parallel sub-agent invocation.** Launch all selected experts concurrently in separate isolated contexts whenever that capability is available.
+
 Each expert receives:
 - A persona prompt defining their identity, perspective, and cognitive style
 - The problem statement (as comprehended in Step 1)
@@ -63,9 +65,17 @@ The entire value of the council depends on isolated invocation.
 
 **Fallback for runtimes without sub-agent support:** If your runtime does not support sub-agent invocation, you may fall back to sequential prompting with explicit context resets between experts. Be aware that this is a **degraded mode** — context isolation cannot be fully guaranteed, and anchoring effects will reduce the diversity of perspectives.
 
+If parallel capability is absent or ambiguous, explicitly degrade to sequential mode and tell the user.
+
+Use this language when degraded mode is active:
+
+> Warning: legion running in degraded sequential mode because parallel subagents are unavailable.
+
 ### Step 4: Synthesis
 
 After all experts have produced their dictamens, synthesize the results:
+
+Do not begin synthesis until every expert has finished.
 
 1. Read all expert dictamens.
 2. Identify **consensuses** — points where multiple experts independently agree.
