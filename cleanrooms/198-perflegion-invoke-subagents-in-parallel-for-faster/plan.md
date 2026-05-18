@@ -149,34 +149,36 @@ Execution note (2026-05-18): Phase 3 implemented the missing routing contract in
 ## Phase 4 - Align Documentation
 
 ### Entry Criteria
-- [ ] Phase 3 is green, or Phase 1 proved documentation-only drift.
-- [ ] The final intended behavior is now concrete enough to document accurately.
+- [x] Phase 3 is green, or Phase 1 proved documentation-only drift.
+- [x] The final intended behavior is now concrete enough to document accurately.
 
 ### Steps
-- [ ] Update [code/cli/assets/skills/legion/SKILL.md](code/cli/assets/skills/legion/SKILL.md) so the consultation step reflects the verified dispatch model.
-- [ ] Update any adjacent docs that currently imply obsolete sequential-only behavior or otherwise contradict diagnosis.md.
-- [ ] Document degraded sequential fallback as a supported but lower-capability path.
-- [ ] Document performance implications carefully without overstating support outside verified runtimes.
+- [x] Update [code/cli/assets/skills/legion/SKILL.md](code/cli/assets/skills/legion/SKILL.md) so the consultation step reflects the verified dispatch model.
+- [x] Update any adjacent docs that currently imply obsolete sequential-only behavior or otherwise contradict diagnosis.md.
+- [x] Document degraded sequential fallback as a supported but lower-capability path.
+- [x] Document performance implications carefully without overstating support outside verified runtimes.
 
 ### Verification
-- [ ] Legion documentation matches the audited and implemented runtime behavior.
-- [ ] No remaining doc claims contradict the verified parallel capability or the preserved degraded fallback.
-- [ ] Performance claims stay bounded to verified evidence.
+- [x] Legion documentation matches the audited and implemented runtime behavior.
+- [x] No remaining doc claims contradict the verified parallel capability or the preserved degraded fallback.
+- [x] Performance claims stay bounded to verified evidence.
 
 ### Pseudotests
-- [ ] PseudoTest P4.1: "A reader of SKILL.md can tell when legion runs parallel-first and when it degrades."
-- [ ] PseudoTest P4.2: "No referenced document still claims the runtime is strictly sequential where current evidence disproves that."
-- [ ] PseudoTest P4.3: "Documentation still preserves legion's identity as a skill using isolated experts, not sequential role-play."
+- [x] PseudoTest P4.1: "A reader of SKILL.md can tell when legion runs parallel-first and when it degrades."
+- [x] PseudoTest P4.2: "No referenced document still claims the runtime is strictly sequential where current evidence disproves that."
+- [x] PseudoTest P4.3: "Documentation still preserves legion's identity as a skill using isolated experts, not sequential role-play."
 
 ### Risk Notes
-- [ ] Risk: Documentation drifts into promises the runtime cannot make everywhere.
-- [ ] Mitigation: Tie claims to capability detection and degraded fallback language.
-- [ ] Risk: Historical docs are silently left contradictory.
-- [ ] Mitigation: Audit and patch only the docs that materially shape user expectations or future maintenance.
+- [x] Risk: Documentation drifts into promises the runtime cannot make everywhere.
+- [x] Mitigation: Tie claims to capability detection and degraded fallback language.
+- [x] Risk: Historical docs are silently left contradictory.
+- [x] Mitigation: Audit and patch only the docs that materially shape user expectations or future maintenance.
 
 ### Dependencies
-- [ ] Depends on verified behavior from Phase 1 and, if needed, Phase 3.
-- [ ] Must complete before final closure validation.
+- [x] Depends on verified behavior from Phase 1 and, if needed, Phase 3.
+- [x] Must complete before final closure validation.
+
+Execution note (2026-05-18): Phase 4 aligned the adjacent documentation with the verified routing contract. [docs/research/legion.md](docs/research/legion.md) now states the `parallel-first` dispatch rule, the degraded sequential fallback, the fan-in requirement before synthesis, and the latency implications of each mode. [docs/research/council_of_experts.md](docs/research/council_of_experts.md) retains its historical dictamen but now annotates the old sequential-runtime claim as superseded by the empirical evidence gathered in issue #198.
 
 ## Phase 5 - Full Validation And Benchmark Gate
 
