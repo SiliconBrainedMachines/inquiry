@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.4.6]
+### Changed
+- **Legion routing contract**: the deployed `legion` skill is now explicitly `parallel-first` when isolated parallel sub-agents are available, degrades explicitly to sequential mode when capability is absent or ambiguous, and requires complete fan-in before synthesis (#198)
+
+### Added
+- **Legion asset regression coverage**: `assets_test.dart` now asserts the deployed skill text includes the parallel default, degraded fallback trigger, degraded warning, and synthesis wait condition (#198)
+
+### Fixed
+- **Routing documentation alignment**: legion research docs now match the verified Copilot runtime behavior and mark the old sequential-only runtime claim as superseded (#198)
+
 ## [0.4.5]
 ### Added
 - **Standalone `kritik` skill**: new direct-use SKILL.md for evidential licensing audits over a bounded corpus, with exact evidence spans, explicit warrants, counterevidence search, graded verdicts, and one durable markdown report

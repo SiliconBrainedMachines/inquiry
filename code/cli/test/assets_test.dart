@@ -123,6 +123,33 @@ void main() {
       expect(content, isNotEmpty);
     });
 
+    test('reads skills/legion/SKILL.md with explicit routing contract', () {
+      final content = assets.loadString('skills/legion/SKILL.md');
+      expect(
+        content,
+        contains(
+          'Parallel-first is the default when the runtime supports isolated parallel sub-agent invocation.',
+        ),
+      );
+      expect(
+        content,
+        contains(
+          'If parallel capability is absent or ambiguous, explicitly degrade to sequential mode and tell the user.',
+        ),
+      );
+      expect(
+        content,
+        contains(
+          'Warning: legion running in degraded sequential mode because parallel subagents are unavailable.',
+        ),
+      );
+      expect(
+        content,
+        contains('Do not begin synthesis until every expert has finished.'),
+      );
+      expect(content, isNotEmpty);
+    });
+
     test('standard APE identity assets do not own runtime contract markers', () {
       final disallowedMarkers = {
         'socrates': ['output_dir', 'confirmed_doc', 'index_file', 'doc-write'],

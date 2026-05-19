@@ -6,6 +6,8 @@
 > **Convocado por:** LEGION Protocol (draft invocation)  
 > **Problema:** Determinar si LEGION debe implementarse como Skill (protocolo invocable) o como APE (entidad autónoma con identidad y sub-estados) dentro del Finite APE Machine de Inquiry.
 
+> **Editorial note (2026-05-18):** El hallazgo del Experto 4 sobre ejecución "estrictamente secuencial" quedó superado por la evidencia empírica del issue #198, que confirmó fan-out paralelo real de sub-agentes en la ruta probada de GitHub Copilot. Debe leerse como observación histórica sobre el path draft usado el 2026-05-12, no como contrato vigente de routing.
+
 ---
 
 ## Expertos convocados
@@ -94,7 +96,7 @@
 
 **Hallazgos:**
 
-1. **Fan-out/fan-in es un espejismo parcial.** La ejecución es estrictamente secuencial en el runtime actual. LEGION implementa role-switching con acumulación de outputs, no ejecución paralela real.
+1. **Fan-out/fan-in era un espejismo parcial en el path observado en esta investigación.** La invocación draft evaluada aquí se comportaba como ejecución secuencial con acumulación de outputs, no como ejecución paralela real. Esta observación quedó posteriormente acotada por evidencia nueva: el soporte paralelo existe en la ruta probada de GitHub Copilot, por lo que el contrato correcto es parallel-first cuando la capacidad está disponible y fallback secuencial degradado cuando no lo está.
 
 2. **Sub-agentes reales (`runSubagent`) entregan aislamiento genuino.** Cada experto arranca con contexto limpio. Los outputs son genuinamente independientes. Esta opción preserva la base teórica (errores no correlacionados).
 
