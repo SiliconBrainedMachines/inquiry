@@ -1,7 +1,9 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
+import 'package:inquiry_cli/assets.dart';
 import 'package:inquiry_cli/modules/global/commands/init.dart';
 
 void main() {
@@ -238,6 +240,93 @@ void main() {
         final command = InitCommand(InitInput(workingDirectory: tempDir.path));
         final output = await command.execute();
         expect(output.exitCode, 0);
+      });
+    });
+
+    // ─── Step 7: .github/agents/inquiry.agent.md ──────────────────────
+
+    group('Step 7: repo-scoped agent deploy', () {
+      late Directory assetsRoot;
+
+      setUp(() {
+        // Minimal assets tree with an agent file
+        assetsRoot = Directory.systemTemp.createTempSync('inquiry_assets_test_');
+        final agentDir = Directory(p.join(assetsRoot.path, 'assets', 'agents'));
+        agentDir.createSync(recursive: true);
+        File(p.join(agentDir.path, 'inquiry.agent.md'))
+            .writeAsStringSync('---\nname: inquiry\n---\nTest agent content.');
+      });
+
+      tearDown(() {
+        if (assetsRoot.existsSync()) assetsRoot.deleteSync(recursive: true);
+      });
+
+      test('writes inquiry.agent.md to .github/agents/ when assets provided',
+          () async {
+        final assets = Assets(root: assetsRoot.path);
+        final command = InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: assets,
+        );
+        await command.execute();
+
+        final agentFile = File(
+          p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+        );
+        expect(agentFile.existsSync(), isTrue);
+        expect(agentFile.readAsStringSync(), contains('Test agent content.'));
+      });
+
+      test('creates .github/agents/ directory if missing', () async {
+        final assets = Assets(root: assetsRoot.path);
+        final command = InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: assets,
+        );
+        await command.execute();
+
+        expect(
+          Directory(p.join(tempDir.path, '.github', 'agents')).existsSync(),
+          isTrue,
+        );
+      });
+
+      test('overwrites existing inquiry.agent.md on re-init (idempotent)',
+          () async {
+        // Write stale content first
+        final agentDir = Directory(
+          p.join(tempDir.path, '.github', 'agents'),
+        )..createSync(recursive: true);
+        File(p.join(agentDir.path, 'inquiry.agent.md'))
+            .writeAsStringSync('stale content');
+
+        final assets = Assets(root: assetsRoot.path);
+        final command = InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: assets,
+        );
+        await command.execute();
+
+        final content = File(
+          p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+        ).readAsStringSync();
+        expect(content, contains('Test agent content.'));
+        expect(content, isNot(contains('stale content')));
+      });
+
+      test('skips agent deploy silently when assets is null', () async {
+        final command = InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          // no assets param
+        );
+        await command.execute();
+
+        expect(
+          File(
+            p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+          ).existsSync(),
+          isFalse,
+        );
       });
     });
   });
