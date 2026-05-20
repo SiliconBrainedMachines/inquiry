@@ -1,8 +1,8 @@
 import 'claude_adapter.dart';
 import 'codex_adapter.dart';
 import 'copilot_adapter.dart';
-import 'crush_adapter.dart';
 import 'gemini_adapter.dart';
+import 'opencode_adapter.dart';
 import 'target_adapter.dart';
 
 /// All known adapters — used by [TargetDeployer.clean] for backward
@@ -11,7 +11,7 @@ final List<TargetAdapter> allAdapters = [
   CopilotAdapter(),
   ClaudeAdapter(),
   CodexAdapter(),
-  CrushAdapter(),
+  OpenCodeAdapter(),
   GeminiAdapter(),
 ];
 

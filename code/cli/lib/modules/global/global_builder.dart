@@ -22,7 +22,7 @@ void buildGlobalModule(
 
   m.command<InitInput, InitOutput>(
     'init',
-    (req) => InitCommand(InitInput.fromCliRequest(req)),
+    (req) => InitCommand(InitInput.fromCliRequest(req), assets: assets),
     description: 'Initialize a new .inquiry/ workspace',
   );
 

@@ -5,7 +5,7 @@ import 'package:path/path.dart' as p;
 import '../assets.dart';
 import 'target_adapter.dart';
 
-/// Orchestrates deploying assets (skills + agents) to target tool directories.
+/// Orchestrates deploying skills to target tool directories.
 class TargetDeployer {
   final Assets assets;
   final List<TargetAdapter> adapters;
@@ -17,16 +17,22 @@ class TargetDeployer {
     required this.homeDir,
   });
 
-  /// Deploys all assets to every adapter directory.
+  /// Deploys skills exclusively to the named adapter, cleaning all adapters first.
   ///
-  /// Idempotent: cleans all adapters before deploying (D18).
-  void deploy() {
-    clean();
-
-    for (final adapter in adapters) {
-      _deploySkills(adapter);
-      _deployAgents(adapter);
+  /// Only one target is active at a time — all other adapter directories are
+  /// cleaned before deploying to the selected one.
+  ///
+  /// Throws [ArgumentError] if [targetName] is not in [adapters].
+  void deployExclusive(String targetName) {
+    final validNames = adapters.map((a) => a.name).toSet();
+    if (!validNames.contains(targetName)) {
+      throw ArgumentError(
+        'Unknown target: "$targetName". Valid targets: ${validNames.join(", ")}',
+      );
     }
+    clean();
+    final selected = adapters.firstWhere((a) => a.name == targetName);
+    _deploySkills(selected);
   }
 
   /// Removes all deployed files from **all** adapter directories.
@@ -44,21 +50,6 @@ class TargetDeployer {
     for (final skillName in skillNames) {
       final content = assets.loadString('skills/$skillName/SKILL.md');
       final targetFile = File(p.join(targetSkillsDir, skillName, 'SKILL.md'));
-      targetFile.parent.createSync(recursive: true);
-      targetFile.writeAsStringSync(content);
-    }
-  }
-
-  void _deployAgents(TargetAdapter adapter) {
-    final agentsDir = Directory(assets.path('agents'));
-    if (!agentsDir.existsSync()) return;
-
-    final targetAgentDir = adapter.agentDirectory(homeDir);
-
-    for (final entity in agentsDir.listSync().whereType<File>()) {
-      final fileName = p.basename(entity.path);
-      final content = entity.readAsStringSync();
-      final targetFile = File(p.join(targetAgentDir, fileName));
       targetFile.parent.createSync(recursive: true);
       targetFile.writeAsStringSync(content);
     }
