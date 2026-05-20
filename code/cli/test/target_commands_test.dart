@@ -144,5 +144,35 @@ void main() {
 
       expect(output.exitCode, ExitCode.ok);
     });
+
+    test('removes .github/agents/inquiry.agent.md from repo', () async {
+      final agentFile = File(
+        p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+      );
+      agentFile.parent.createSync(recursive: true);
+      agentFile.writeAsStringSync('# APE Agent');
+
+      final command = TargetCleanCommand(
+        TargetCleanInput(),
+        deployer: deployer,
+        workingDirectory: tempDir.path,
+      );
+
+      await command.execute();
+
+      expect(agentFile.existsSync(), isFalse,
+          reason: 'iq target clean must remove repo-scoped agent');
+    });
+
+    test('does not fail if .github/agents/inquiry.agent.md does not exist',
+        () async {
+      final command = TargetCleanCommand(
+        TargetCleanInput(),
+        deployer: deployer,
+        workingDirectory: tempDir.path,
+      );
+
+      await expectLater(command.execute(), completes);
+    });
   });
 }
