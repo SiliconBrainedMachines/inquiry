@@ -78,11 +78,20 @@ void main() {
       };
     }
 
+    // Constants for test paths
+    const workingDir = '/repo/current';
+    const homeDir = '/home/testuser';
+
     /// Creates a mock FS where .inquiry/ exists and all targets are deployed.
-    MockFileSystemOps allPassFs(String home, List<String> skills) {
+    /// Agent is at the repo-scoped path (E3 contract).
+    MockFileSystemOps allPassFs(String wd, String home, List<String> skills) {
       final fs = MockFileSystemOps()..setHome(home);
       fs.setDirectoryExists('.inquiry', true);
-      fs.setFileExists(p.join(home, '.copilot', 'agents', 'inquiry.agent.md'), true);
+      // NEW: agent is repo-scoped in .github/agents/
+      fs.setFileExists(
+        p.join(wd, '.github', 'agents', 'inquiry.agent.md'),
+        true,
+      );
       for (final skill in skills) {
         fs.setFileExists(
           p.join(home, '.copilot', 'skills', skill, 'SKILL.md'),
@@ -154,13 +163,16 @@ void main() {
       String version = '0.0.9',
       MockFileSystemOps? fs,
       Assets? assets,
+      String? wd,
     }) {
+      final resolvedWd = wd ?? workingDir;
       return DoctorCommand(
         DoctorInput(),
         runProcess: runProcess ?? fakeRunner(),
         inquiryVersionOverride: version,
-        fileSystemOps: fs ?? allPassFs('/home/testuser', testSkills),
+        fileSystemOps: fs ?? allPassFs(resolvedWd, homeDir, testSkills),
         assets: assets ?? testAssets,
+        workingDirectory: resolvedWd,
         versionChecker: ({required String currentVersion}) async =>
             const VersionCheckResult(updateAvailable: false),
       );
@@ -322,7 +334,7 @@ void main() {
       });
 
       test('Scenario B: nothing deployed → exit 1', () async {
-        final fs = MockFileSystemOps()..setHome('/home/testuser');
+        final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
         // Agent and skills do NOT exist
 
@@ -338,12 +350,12 @@ void main() {
         final text = output.toText()!;
         expect(text, contains('✗ copilot: agent not deployed'));
         expect(text, contains('✗ copilot: missing skills:'));
-        expect(text, contains("Run 'inquiry target get' to deploy"));
+        expect(text, contains("Run 'inquiry init' to deploy agent"));
         expect(text, contains('Some checks failed.'));
       });
 
       test('Scenario C: no .inquiry/ directory → exit 1', () async {
-        final fs = MockFileSystemOps()..setHome('/home/testuser');
+        final fs = MockFileSystemOps()..setHome(homeDir);
         // .inquiry does NOT exist, targets do NOT exist
 
         final cmd = makeCmd(fs: fs);
@@ -362,14 +374,15 @@ void main() {
         expect(text, contains('✗ inquiry init'));
         expect(text, contains("Run 'inquiry init' to initialize"));
         expect(text, contains('✗ copilot: agent not deployed'));
-        expect(text, contains("Run 'inquiry target get' to deploy"));
+        expect(text, contains("Run 'inquiry init' to deploy agent"));
       });
 
       test('Scenario D: partial deployment → exit 1', () async {
-        final fs = MockFileSystemOps()..setHome('/home/testuser');
+        final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
+        // Agent in NEW repo-scoped path
         fs.setFileExists(
-          p.join('/home/testuser', '.copilot', 'agents', 'inquiry.agent.md'),
+          p.join(workingDir, '.github', 'agents', 'inquiry.agent.md'),
           true,
         );
         // Deploy everything except issue-create.
@@ -384,7 +397,7 @@ void main() {
           'issue-end',
         ]) {
           fs.setFileExists(
-            p.join('/home/testuser', '.copilot', 'skills', skill, 'SKILL.md'),
+            p.join(homeDir, '.copilot', 'skills', skill, 'SKILL.md'),
             true,
           );
         }
@@ -401,7 +414,7 @@ void main() {
         final text = output.toText()!;
         expect(text, contains('✓ copilot: agent deployed'));
         expect(text, contains('✗ copilot: missing skills: issue-create'));
-        expect(text, contains("Run 'inquiry target get' to deploy"));
+        expect(text, contains("Run 'inquiry target get' to deploy skills"));
       });
 
       test('TargetCheck.toJson() includes all fields', () {
@@ -449,8 +462,77 @@ void main() {
         expect(json['remediation'], "Run 'ape init' to initialize");
       });
 
+      // ─── E3: repo-scoped agent tests ───────────────────────────────────────
+
+      test('doctor passes when inquiry.agent.md is in .github/agents/', () async {
+        final fs = allPassFs(workingDir, homeDir, testSkills);
+        final cmd = makeCmd(fs: fs);
+
+        final output = await cmd.execute();
+
+        expect(output.targetChecks.first.agentExists, isTrue);
+        expect(output.passed, isTrue);
+      });
+
+      test('doctor fails when inquiry.agent.md is NOT in .github/agents/', () async {
+        final fs = MockFileSystemOps()..setHome(homeDir);
+        fs.setDirectoryExists('.inquiry', true);
+        // Agent absent — no file set
+
+        final cmd = makeCmd(fs: fs);
+        final output = await cmd.execute();
+
+        expect(output.targetChecks.first.agentExists, isFalse);
+        expect(output.passed, isFalse);
+      });
+
+      test('doctor ignores agent at old path ~/.copilot/agents/', () async {
+        final fs = MockFileSystemOps()..setHome(homeDir);
+        fs.setDirectoryExists('.inquiry', true);
+        // Agent at OLD global path (pre-0.5.0)
+        fs.setFileExists(
+          p.join(homeDir, '.copilot', 'agents', 'inquiry.agent.md'),
+          true,
+        );
+        // NOT in new repo-scoped path
+
+        final cmd = makeCmd(fs: fs);
+        final output = await cmd.execute();
+
+        expect(output.targetChecks.first.agentExists, isFalse,
+            reason: 'Old global path is no longer valid — must run iq init');
+      });
+
+      test('doctor remediation suggests "inquiry init" when agent is missing', () async {
+        final fs = MockFileSystemOps()..setHome(homeDir);
+        fs.setDirectoryExists('.inquiry', true);
+        // No agent, no skills
+
+        final cmd = makeCmd(fs: fs);
+        final output = await cmd.execute();
+        final text = output.toText()!;
+
+        expect(text, contains("'inquiry init'"),
+            reason: 'Remediation must suggest iq init, not iq target get');
+        expect(text, isNot(contains("'inquiry target get'")));
+      });
+
+      test('agentExists is adapter-independent — it is repo-scoped', () async {
+        // Agent in repo, skills in copilot adapter
+        final fs = allPassFs(workingDir, homeDir, testSkills);
+        final cmd = makeCmd(fs: fs);
+
+        final output = await cmd.execute();
+
+        // All targetChecks must have the same agentExists value
+        final allAgentExists =
+            output.targetChecks.map((c) => c.agentExists).toSet();
+        expect(allAgentExists, equals({true}),
+            reason: 'agentExists is repo-scoped — same for all adapters');
+      });
+
       test('no assets available → targets still checked, 0 skills expected', () async {
-        final fs = allPassFs('/home/testuser', []);
+        final fs = allPassFs(workingDir, homeDir, []);
         // Assets with empty skills dir
         final emptyTempDir = Directory.systemTemp.createTempSync('empty_assets_');
         Directory(p.join(emptyTempDir.path, 'assets', 'skills')).createSync(recursive: true);
