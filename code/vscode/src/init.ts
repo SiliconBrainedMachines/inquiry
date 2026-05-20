@@ -42,7 +42,6 @@ export async function inquiryInit(
   const terminal = createTerminal('Inquiry Init');
   terminal.show();
   terminal.sendText(shellExec(binaryPath(), ['init']));
-  terminal.sendText(shellExec(binaryPath(), ['target', 'get']));
 
   // Copilot reads agent/skill files on activation; prompt reload so it picks them up.
   const action = await showInformationMessage(
