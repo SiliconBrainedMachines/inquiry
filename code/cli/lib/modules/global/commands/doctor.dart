@@ -145,6 +145,7 @@ class DoctorOutput extends Output {
         } else {
           if (!tc.agentExists) {
             buffer.writeln('  ✗ ${tc.targetName}: agent not deployed');
+            buffer.writeln("    → Run 'inquiry init' to deploy agent");
           } else {
             buffer.writeln('  ✓ ${tc.targetName}: agent deployed');
           }
@@ -153,8 +154,13 @@ class DoctorOutput extends Output {
               '  ✗ ${tc.targetName}: missing skills: '
               '${tc.missingSkills.join(', ')}',
             );
+            // Only suggest target get when agent is already deployed
+            if (tc.agentExists) {
+              buffer.writeln(
+                "    → Run 'inquiry target get' to deploy skills",
+              );
+            }
           }
-          buffer.writeln("    → Run 'inquiry target get' to deploy");
         }
       }
     }
@@ -198,6 +204,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   final FileSystemOps _fileSystem;
   final Assets? _assets;
   final List<TargetAdapter> _activeAdapters;
+  final String _workingDirectory;
   final Future<VersionCheckResult> Function({required String currentVersion})?
       _versionChecker;
 
@@ -211,12 +218,14 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     FileSystemOps? fileSystemOps,
     Assets? assets,
     List<TargetAdapter>? activeAdapters,
+    String? workingDirectory,
     Future<VersionCheckResult> Function({required String currentVersion})?
         versionChecker,
   }) : _runProcess = runProcess ?? Process.run,
        _fileSystem = fileSystemOps ?? RealFileSystemOps(),
        _assets = assets,
        _activeAdapters = activeAdapters ?? [CopilotAdapter()],
+       _workingDirectory = workingDirectory ?? Directory.current.path,
        _versionChecker = versionChecker,
        inquiryVersion = inquiryVersionOverride ?? version_lib.inquiryVersion;
 
@@ -340,16 +349,26 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     }
   }
 
+  /// Verifies that the repo-scoped agent exists at .github/agents/.
+  bool _verifyRepoAgent() {
+    final agentPath = p.join(
+      _workingDirectory,
+      '.github',
+      'agents',
+      'inquiry.agent.md',
+    );
+    return _fileSystem.fileExists(agentPath);
+  }
+
   /// Verifies a single target adapter's deployment.
   TargetCheck _verifyTarget(TargetAdapter adapter) {
     final homeDir = _fileSystem.homeDirectory();
     final expectedSkills = _getExpectedSkills();
 
-    // Check agent
-    final agentPath = p.join(adapter.agentDirectory(homeDir), 'inquiry.agent.md');
-    final agentExists = _fileSystem.fileExists(agentPath);
+    // Agent is repo-scoped — independent of which adapter is active
+    final agentExists = _verifyRepoAgent();
 
-    // Check skills
+    // Check skills — adapter-scoped
     final missingSkills = <String>[];
     for (final skill in expectedSkills) {
       final skillPath = p.join(

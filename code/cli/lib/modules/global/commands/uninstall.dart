@@ -51,30 +51,43 @@ class UninstallCommand implements Command<UninstallInput, UninstallOutput> {
   final UninstallInput input;
   final TargetDeployer deployer;
   final PlatformOps platformOps;
+  final String _workingDirectory;
 
   UninstallCommand(
     this.input, {
     required this.deployer,
     PlatformOps? platformOps,
-  }) : platformOps = platformOps ?? PlatformOps.current();
+    String? workingDirectory,
+  }) : platformOps = platformOps ?? PlatformOps.current(),
+       _workingDirectory = workingDirectory ?? Directory.current.path;
 
   @override
   String? validate() => null;
 
   @override
   Future<UninstallOutput> execute() async {
-    // 1. Clean all targets
+    // 1. Clean all targets (adapter paths + old global agent paths)
     deployer.clean();
 
-    // 2. Remove ape\bin\ from user PATH (via PlatformOps)
+    // 2. Clean repo-scoped agent
+    _cleanRepoScopedAgent();
+
+    // 3. Remove ape\bin\ from user PATH (via PlatformOps)
     _removeFromPath(p.join(input.installDir, 'bin'));
 
-    // 3. Spawn background process to delete install directory
+    // 4. Spawn background process to delete install directory
     await platformOps.scheduleDeletion(input.installDir);
 
     return UninstallOutput(
       message: 'Inquiry uninstalled. Restart your terminal to apply PATH changes.',
     );
+  }
+
+  void _cleanRepoScopedAgent() {
+    final agentFile = File(
+      p.join(_workingDirectory, '.github', 'agents', 'inquiry.agent.md'),
+    );
+    if (agentFile.existsSync()) agentFile.deleteSync();
   }
 
   void _removeFromPath(String binDir) {
