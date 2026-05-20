@@ -59,7 +59,7 @@ void main() {
 
   group('UninstallCommand', () {
     test('cleans deployed targets', () async {
-      deployer.deploy();
+      deployer.deployExclusive('fake');
 
       expect(
         File(
