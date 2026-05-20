@@ -59,7 +59,7 @@ void main() {
 
   group('UninstallCommand', () {
     test('cleans deployed targets', () async {
-      deployer.deploy();
+      deployer.deployExclusive('fake');
 
       expect(
         File(
@@ -158,6 +158,39 @@ void main() {
       await command.execute();
 
       expect(ops.calls, contains('scheduleDeletion(${tempDir.path})'));
+    });
+
+    test('removes .github/agents/inquiry.agent.md from working directory',
+        () async {
+      final agentFile = File(
+        p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+      );
+      agentFile.parent.createSync(recursive: true);
+      agentFile.writeAsStringSync('# APE Agent');
+
+      final command = UninstallCommand(
+        UninstallInput(installDir: tempDir.path),
+        deployer: deployer,
+        workingDirectory: tempDir.path,
+        platformOps: FakePlatformOps(),
+      );
+
+      await command.execute();
+
+      expect(agentFile.existsSync(), isFalse,
+          reason: 'iq uninstall must remove repo-scoped agent');
+    });
+
+    test('does not fail if .github/agents/inquiry.agent.md does not exist',
+        () async {
+      final command = UninstallCommand(
+        UninstallInput(installDir: tempDir.path),
+        deployer: deployer,
+        workingDirectory: tempDir.path,
+        platformOps: FakePlatformOps(),
+      );
+
+      await expectLater(command.execute(), completes);
     });
   });
 }

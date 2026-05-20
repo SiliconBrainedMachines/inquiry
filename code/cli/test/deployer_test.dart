@@ -67,8 +67,9 @@ void main() {
   });
 
   group('TargetDeployer', () {
-    test('deploy copies skills to each adapter skillsDirectory', () {
-      deployer.deploy();
+    test('deployExclusive copies skills to selected adapter skillsDirectory',
+        () {
+      deployer.deployExclusive('fake');
 
       final skillFile = File(
         p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
@@ -83,19 +84,18 @@ void main() {
       expect(skillFile2.readAsStringSync(), '# Doc Write');
     });
 
-    test('deploy copies agent to each adapter agentDirectory', () {
-      deployer.deploy();
+    test('deployExclusive does NOT copy agent to adapter agentDirectory', () {
+      deployer.deployExclusive('fake');
 
       final agentFile = File(
         p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'),
       );
-      expect(agentFile.existsSync(), isTrue);
-      expect(agentFile.readAsStringSync(), '# APE Agent');
+      expect(agentFile.existsSync(), isFalse);
     });
 
-    test('deploy is idempotent — second run produces same result', () {
-      deployer.deploy();
-      deployer.deploy();
+    test('deployExclusive is idempotent — second run produces same result', () {
+      deployer.deployExclusive('fake');
+      deployer.deployExclusive('fake');
 
       final skillFile = File(
         p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
@@ -104,8 +104,8 @@ void main() {
       expect(skillFile.readAsStringSync(), '# Doc Read');
     });
 
-    test('deploy cleans before deploying (D18)', () {
-      deployer.deploy();
+    test('deployExclusive cleans before deploying', () {
+      deployer.deployExclusive('fake');
 
       // Create an extra file that shouldn't survive redeploy
       final extraFile = File(
@@ -114,13 +114,13 @@ void main() {
       extraFile.parent.createSync(recursive: true);
       extraFile.writeAsStringSync('# Stale');
 
-      deployer.deploy();
+      deployer.deployExclusive('fake');
 
       expect(extraFile.existsSync(), isFalse);
     });
 
     test('clean removes deployed files from all adapters', () {
-      deployer.deploy();
+      deployer.deployExclusive('fake');
       deployer.clean();
 
       final skillsDir = Directory(p.join(homeDir.path, '.fake', 'skills'));
@@ -133,20 +133,19 @@ void main() {
       expect(() => deployer.clean(), returnsNormally);
     });
 
-    test('deploy works with all 5 real adapters', () {
+    test('deployExclusive can target either of two adapters', () {
       final allDeployer = TargetDeployer(
         assets: assets,
         adapters: [
           FakeAdapter(),
-          // Use a second fake with different name to verify multi-adapter
           _SecondFakeAdapter(),
         ],
         homeDir: homeDir.path,
       );
 
-      allDeployer.deploy();
+      allDeployer.deployExclusive('fake');
 
-      // Verify both adapters received files
+      // Only 'fake' received skills
       expect(
         File(
           p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
@@ -154,10 +153,106 @@ void main() {
         isTrue,
       );
       expect(
+        Directory(p.join(homeDir.path, '.fake2', 'skills')).existsSync(),
+        isFalse,
+      );
+
+      // Switch to fake2
+      allDeployer.deployExclusive('fake2');
+
+      // fake2 now has skills; fake is cleaned
+      expect(
         File(
           p.join(homeDir.path, '.fake2', 'skills', 'doc-read', 'SKILL.md'),
         ).existsSync(),
         isTrue,
+      );
+      expect(
+        Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+        isFalse,
+      );
+    });
+  });
+
+  // ─── deployExclusive() ────────────────────────────────────────────────────
+
+  group('deployExclusive()', () {
+    late TargetDeployer multiDeployer;
+    late _SecondFakeAdapter adapter2;
+
+    setUp(() {
+      adapter2 = _SecondFakeAdapter();
+      multiDeployer = TargetDeployer(
+        assets: assets,
+        adapters: [adapter, adapter2],
+        homeDir: homeDir.path,
+      );
+    });
+
+    test('deploys skills to the selected adapter only', () {
+      multiDeployer.deployExclusive('fake');
+
+      expect(
+        File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
+            .existsSync(),
+        isTrue,
+      );
+      expect(
+        Directory(p.join(homeDir.path, '.fake2', 'skills')).existsSync(),
+        isFalse,
+      );
+    });
+
+    test('does NOT write agent to adapter agentDirectory', () {
+      multiDeployer.deployExclusive('fake');
+
+      expect(
+        File(p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'))
+            .existsSync(),
+        isFalse,
+      );
+    });
+
+    test('cleans all adapters before deploying to selected', () {
+      // Pre-populate both adapters
+      for (final a in [adapter, adapter2]) {
+        final stale = File(
+          p.join(a.skillsDirectory(homeDir.path), 'stale', 'SKILL.md'),
+        );
+        stale.parent.createSync(recursive: true);
+        stale.writeAsStringSync('stale');
+      }
+
+      multiDeployer.deployExclusive('fake');
+
+      // Stale files cleaned from BOTH adapters
+      expect(
+        File(p.join(homeDir.path, '.fake', 'skills', 'stale', 'SKILL.md'))
+            .existsSync(),
+        isFalse,
+      );
+      expect(
+        File(p.join(homeDir.path, '.fake2', 'skills', 'stale', 'SKILL.md'))
+            .existsSync(),
+        isFalse,
+      );
+    });
+
+    test('is idempotent — second call to same target produces same result', () {
+      multiDeployer.deployExclusive('fake');
+      multiDeployer.deployExclusive('fake');
+
+      expect(
+        File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
+            .existsSync(),
+        isTrue,
+      );
+    });
+
+    test('throws ArgumentError for unknown target name', () {
+      expect(
+        () => multiDeployer.deployExclusive('vscode'),
+        throwsA(isA<ArgumentError>()),
       );
     });
   });

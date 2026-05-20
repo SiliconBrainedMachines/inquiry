@@ -58,8 +58,11 @@ void main() {
   });
 
   group('ape target get', () {
-    test('exits 0 and deploys files to all targets', () async {
-      final command = TargetGetCommand(TargetGetInput(), deployer: deployer);
+    test('exits 0 and deploys skills (not agent) to selected target', () async {
+      final command = TargetGetCommand(
+        TargetGetInput(target: 'fake'),
+        deployer: deployer,
+      );
 
       final output = await command.execute();
 
@@ -70,16 +73,40 @@ void main() {
         ).existsSync(),
         isTrue,
       );
+      // agent deploy is repo-scoped via iq init — NOT via target get
       expect(
         File(
           p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'),
         ).existsSync(),
-        isTrue,
+        isFalse,
       );
     });
 
+    test('TargetGetInput defaults target to copilot', () {
+      expect(TargetGetInput().target, equals('copilot'));
+    });
+
+    test('validate() returns error for unknown target', () {
+      final command = TargetGetCommand(
+        TargetGetInput(target: 'vscode'),
+        deployer: deployer,
+      );
+      expect(command.validate(), isNotNull);
+    });
+
+    test('validate() returns null for valid target', () {
+      final command = TargetGetCommand(
+        TargetGetInput(target: 'fake'),
+        deployer: deployer,
+      );
+      expect(command.validate(), isNull);
+    });
+
     test('exits 0 on idempotent re-run', () async {
-      final command = TargetGetCommand(TargetGetInput(), deployer: deployer);
+      final command = TargetGetCommand(
+        TargetGetInput(target: 'fake'),
+        deployer: deployer,
+      );
 
       await command.execute();
       final output = await command.execute();
@@ -90,8 +117,8 @@ void main() {
 
   group('ape target clean', () {
     test('exits 0 and removes deployed files', () async {
-      // Deploy first
-      deployer.deploy();
+      // Deploy first using deployExclusive
+      deployer.deployExclusive('fake');
 
       final command = TargetCleanCommand(
         TargetCleanInput(),
@@ -116,6 +143,36 @@ void main() {
       final output = await command.execute();
 
       expect(output.exitCode, ExitCode.ok);
+    });
+
+    test('removes .github/agents/inquiry.agent.md from repo', () async {
+      final agentFile = File(
+        p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+      );
+      agentFile.parent.createSync(recursive: true);
+      agentFile.writeAsStringSync('# APE Agent');
+
+      final command = TargetCleanCommand(
+        TargetCleanInput(),
+        deployer: deployer,
+        workingDirectory: tempDir.path,
+      );
+
+      await command.execute();
+
+      expect(agentFile.existsSync(), isFalse,
+          reason: 'iq target clean must remove repo-scoped agent');
+    });
+
+    test('does not fail if .github/agents/inquiry.agent.md does not exist',
+        () async {
+      final command = TargetCleanCommand(
+        TargetCleanInput(),
+        deployer: deployer,
+        workingDirectory: tempDir.path,
+      );
+
+      await expectLater(command.execute(), completes);
     });
   });
 }
