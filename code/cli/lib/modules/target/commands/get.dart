@@ -1,6 +1,8 @@
-/// `ape target get` — deploys APE agents and skills to all targets.
+/// `ape target get` — deploys Inquiry skills to the specified target.
 ///
-/// Idempotent: cleans existing files before deploying (D18).
+/// Only one target is active at a time. Cleans all adapter directories
+/// before deploying to the selected target. Agent deploy is repo-scoped
+/// via `iq init`, not duplicated here.
 library;
 
 import 'package:cli_router/cli_router.dart';
@@ -11,12 +13,15 @@ import '../../../targets/deployer.dart';
 // ─── Input ──────────────────────────────────────────────────────────────────
 
 class TargetGetInput extends Input {
-  TargetGetInput();
+  final String target;
 
-  factory TargetGetInput.fromCliRequest(CliRequest req) => TargetGetInput();
+  TargetGetInput({this.target = 'copilot'});
+
+  factory TargetGetInput.fromCliRequest(CliRequest req) =>
+      TargetGetInput(target: req.flagString('target') ?? 'copilot');
 
   @override
-  Map<String, dynamic> toJson() => {};
+  Map<String, dynamic> toJson() => {'target': target};
 }
 
 // ─── Output ─────────────────────────────────────────────────────────────────
@@ -43,11 +48,20 @@ class TargetGetCommand implements Command<TargetGetInput, TargetGetOutput> {
   TargetGetCommand(this.input, {required this.deployer});
 
   @override
-  String? validate() => null;
+  String? validate() {
+    final validNames = deployer.adapters.map((a) => a.name).toSet();
+    if (!validNames.contains(input.target)) {
+      return 'Unknown target: "${input.target}". '
+          'Valid targets: ${validNames.join(", ")}';
+    }
+    return null;
+  }
 
   @override
   Future<TargetGetOutput> execute() async {
-    deployer.deploy();
-    return TargetGetOutput(message: 'Inquiry deployed to GitHub Copilot');
+    deployer.deployExclusive(input.target);
+    return TargetGetOutput(
+      message: 'Inquiry skills deployed to ${input.target}',
+    );
   }
 }
