@@ -13,9 +13,9 @@ void buildTargetModule(
     'get',
     (req) => TargetGetCommand(
       TargetGetInput.fromCliRequest(req),
-      deployer: deployer,
+      deployer: cleaner,
     ),
-    description: 'Deploy Inquiry agents and skills to Copilot',
+    description: 'Deploy Inquiry skills to the specified target (default: copilot)',
   );
 
   m.command<TargetCleanInput, TargetCleanOutput>(
