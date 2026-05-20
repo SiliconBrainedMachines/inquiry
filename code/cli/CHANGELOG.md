@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.0]
+### Breaking changes
+- `iq init` now deploys `inquiry.agent.md` to `.github/agents/` (repo-scoped, not global).
+- `iq target get` no longer deploys the agent — only skills to the specified target.
+- `iq doctor` verifies `.github/agents/inquiry.agent.md` (repo-scoped path).
+- `iq uninstall` and `iq target clean` now also remove `.github/agents/inquiry.agent.md`.
+
+### Added
+- `iq target get --target=[copilot|claude|codex|opencode|gemini]` for exclusive single-target deploy.
+- Only one target active at a time — switching targets cleans the previous ones automatically.
+- OpenCode adapter: deploys skills to `~/.config/opencode/skills/`.
+
+### Upgrade path
+1. `iq uninstall`
+2. Install 0.5.0
+3. `iq init` (in each repo that uses Inquiry)
+4. `iq target get` (to deploy skills to your preferred target)
+
 ## [0.4.6]
 ### Changed
 - **Legion routing contract**: the deployed `legion` skill is now explicitly `parallel-first` when isolated parallel sub-agents are available, degrades explicitly to sequential mode when capability is absent or ambiguous, and requires complete fan-in before synthesis (#198)
