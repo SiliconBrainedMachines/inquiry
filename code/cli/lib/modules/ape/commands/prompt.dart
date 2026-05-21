@@ -15,6 +15,7 @@ import '../../../assets.dart';
 import '../../../fsm_contract.dart';
 import '../../../src/git_utils.dart';
 import '../ape_definition.dart';
+import '../instruction_prompt_loader.dart';
 import '../inquiry_state.dart';
 import '../operational_contract.dart';
 
@@ -143,6 +144,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       workingDirectory: input.workingDirectory,
       assets: _assets,
     ).load(currentState);
+    final transitionInstructions = _resolveTransitionInstructions(inquiry);
     final context = _resolveContext(
       input.name!,
       resolvedSubState,
@@ -153,6 +155,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     final definition = ApeDefinition.parse(yamlFile.readAsStringSync());
     final prompt = definition.assemblePrompt(
       stateName: resolvedSubState,
+      transitionInstructions: transitionInstructions,
       operationalContract: operationalContract.render(),
       context: context,
     );
@@ -163,6 +166,38 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       subState: resolvedSubState,
       prompt: prompt,
     );
+  }
+
+  String? _resolveTransitionInstructions(InquiryState inquiry) {
+    final promptFragmentId = inquiry.promptFragmentId;
+    if (promptFragmentId == null || promptFragmentId.trim().isEmpty) {
+      return null;
+    }
+
+    final contractPath = _assets != null
+        ? _assets.path('fsm/transition_contract.yaml')
+        : p.join(
+            input.workingDirectory,
+            'assets',
+            'fsm',
+            'transition_contract.yaml',
+          );
+    final contract = parseFsmContract(File(contractPath).readAsStringSync());
+    final fragment = contract.promptFragments[promptFragmentId];
+    if (fragment == null) {
+      throw CommandException(
+        code: 'PROMPT_FRAGMENT_NOT_FOUND',
+        message: 'No prompt fragment found for "$promptFragmentId"',
+        exitCode: ExitCode.notFound,
+      );
+    }
+    if (fragment.instructions.isEmpty) {
+      return null;
+    }
+
+    final assets = _assets ?? Assets(root: input.workingDirectory);
+    final loader = InstructionPromptLoader(assets: assets);
+    return loader.loadMany(fragment.instructions);
   }
 
   /// Resolves dynamic context paths per APE and FSM state.

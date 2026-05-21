@@ -22,12 +22,17 @@ void main() {
             .writeAsStringSync('state: IDLE\nissue: null\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
-        executor.updateState('ANALYZE', issue: '145');
+        executor.updateState(
+          'ANALYZE',
+          issue: '145',
+          promptFragmentId: 'idle_to_analyze',
+        );
 
         final content =
             File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
         expect(content, contains('state: ANALYZE'));
         expect(content, contains('issue: "145"'));
+        expect(content, contains('prompt_fragment_id: idle_to_analyze'));
       });
 
       test('preserves issue when not provided', () {
@@ -35,12 +40,13 @@ void main() {
             .writeAsStringSync('state: ANALYZE\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
-        executor.updateState('PLAN');
+        executor.updateState('PLAN', promptFragmentId: 'analyze_to_plan');
 
         final content =
             File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
         expect(content, contains('state: PLAN'));
         expect(content, contains('issue: "145"'));
+        expect(content, contains('prompt_fragment_id: analyze_to_plan'));
       });
 
       test('clears issue when transitioning to IDLE', () {
@@ -54,6 +60,7 @@ void main() {
             File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
         expect(content, contains('state: IDLE'));
         expect(content, contains('issue: null'));
+        expect(content, contains('prompt_fragment_id: null'));
       });
     });
 
@@ -171,6 +178,7 @@ void main() {
           effects: ['reset_mutations', 'snapshot_metrics'],
           newState: 'ANALYZE',
           issue: '145',
+          promptFragmentId: 'idle_to_analyze',
         );
 
         expect(executed, containsAll(['update_state', 'reset_mutations', 'snapshot_metrics']));
@@ -179,6 +187,7 @@ void main() {
         final stateContent =
             File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
         expect(stateContent, contains('state: ANALYZE'));
+        expect(stateContent, contains('prompt_fragment_id: idle_to_analyze'));
 
         // Mutations reset
         final mutContent =

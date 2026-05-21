@@ -151,7 +151,7 @@ void main() {
 
     final fragment = contract.promptFragments['idle_to_analyze']!;
     expect(fragment.role, 'SOCRATES');
-    expect(fragment.skill, 'doc-read');
+    expect(fragment.instructions, ['doc-read']);
     expect(fragment.template, 'analyze.clarification');
   });
 
@@ -189,8 +189,52 @@ void main() {
     expect(contract.promptFragments.keys, contains('plan_to_execute'));
     final fragment = contract.promptFragments['plan_to_execute']!;
     expect(fragment.role, 'BASHO');
-    expect(fragment.skill, 'issue-start');
+    expect(fragment.instructions, ['issue-start']);
     expect(fragment.template, 'execute.phase');
+  });
+
+  test('prompt fragments are limited to transition-owned runtime protocols', () {
+    final runtimeProtocols = contract.promptFragments.values
+        .expand((fragment) => fragment.instructions)
+        .toSet();
+
+    expect(
+      runtimeProtocols,
+      equals({'doc-read', 'doc-write', 'issue-start', 'issue-end'}),
+    );
+    expect(runtimeProtocols, isNot(contains('issue-create')));
+    expect(runtimeProtocols, isNot(contains('inquiry-install')));
+  });
+
+  test('prompt fragment instructions preserve declared order', () {
+    final yaml = '''
+metadata:
+  version: "1.0.0"
+  description: "valid"
+states: [IDLE]
+events: [start_analyze]
+transitions:
+  - from: IDLE
+    event: start_analyze
+    to: IDLE
+    allowed: true
+    operations:
+      prechecks: []
+      effects: [noop]
+      artifacts: []
+      commit_policy: none
+      prompt_fragment_id: idle_to_analyze
+prompt_fragments:
+  idle_to_analyze:
+    role: SOCRATES
+    instructions: [doc-read, doc-write]
+    template: "analyze.clarification"
+''';
+
+    final parsed = parseFsmContract(yaml);
+    final fragment = parsed.promptFragments['idle_to_analyze']!;
+
+    expect(fragment.instructions, ['doc-read', 'doc-write']);
   });
 
   test('fails closed when allowed transition misses prompt fragment', () {
@@ -214,7 +258,7 @@ transitions:
 prompt_fragments:
   idle_to_analyze:
     role: SOCRATES
-    skill: doc-read
+    instructions: [doc-read]
     template: "analyze.clarification"
 ''';
 
