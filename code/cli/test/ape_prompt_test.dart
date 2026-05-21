@@ -28,27 +28,52 @@ void main() {
       File('assets/fsm/states/$name.yaml')
           .copySync(p.join(statesDir.path, '$name.yaml'));
     }
+
+    final fsmDir = Directory(p.join(tmpDir.path, 'assets', 'fsm'));
+    fsmDir.createSync(recursive: true);
+    File('assets/fsm/transition_contract.yaml').copySync(
+      p.join(fsmDir.path, 'transition_contract.yaml'),
+    );
+
+    final instructionsDir = Directory(
+      p.join(tmpDir.path, 'assets', 'instructions'),
+    );
+    instructionsDir.createSync(recursive: true);
+    for (final name in ['doc-read', 'doc-write', 'issue-create', 'issue-end', 'issue-start']) {
+      File('assets/instructions/$name.md')
+          .copySync(p.join(instructionsDir.path, '$name.md'));
+    }
   });
 
   tearDown(() {
     tmpDir.deleteSync(recursive: true);
   });
 
-  void writeState(String state, {String? issue}) {
+  void writeState(String state, {String? issue, String? promptFragmentId}) {
     File(p.join(tmpDir.path, '.inquiry', 'state.yaml')).writeAsStringSync(
       'state: $state\n'
       'issue: ${issue ?? 'null'}\n',
+      mode: FileMode.write,
     );
+
+    if (promptFragmentId != null) {
+      File(p.join(tmpDir.path, '.inquiry', 'state.yaml')).writeAsStringSync(
+        'prompt_fragment_id: $promptFragmentId\n',
+        mode: FileMode.append,
+      );
+    }
   }
 
   void writeStateWithApe(String state, {
     String? issue,
+    String? promptFragmentId,
     required String apeName,
     required String apeState,
   }) {
     File(p.join(tmpDir.path, '.inquiry', 'state.yaml')).writeAsStringSync(
       'state: $state\n'
       'issue: ${issue != null ? '"$issue"' : 'null'}\n'
+      '${promptFragmentId != null ? 'prompt_fragment_id: $promptFragmentId\n' : ''}'
       'ape:\n'
       '  name: $apeName\n'
       '  state: $apeState\n',
@@ -98,6 +123,48 @@ void main() {
         expect(result.fsmState, equals('PLAN'));
         expect(result.prompt, contains('DESCARTES'));
         expect(result.prompt, contains('scientific method'));
+      });
+
+      test('injects transition-owned instruction summary when prompt_fragment_id exists', () async {
+        writeState('PLAN', issue: '145', promptFragmentId: 'analyze_to_plan');
+
+        final cmd = ApePromptCommand(
+          ApePromptInput(
+            name: 'descartes',
+            subState: 'decomposition',
+            workingDirectory: tmpDir.path,
+          ),
+        );
+        final result = await cmd.execute();
+
+        final stateIndex = result.prompt.indexOf('FOCUS: Division.');
+        final instructionIndex = result.prompt.indexOf(
+          'Write inside the CLI-created template and keep frontmatter unchanged.',
+        );
+        final contractIndex = result.prompt.indexOf('## Phase-Owned Operational Contract');
+
+        expect(instructionIndex, greaterThan(stateIndex));
+        expect(contractIndex, greaterThan(instructionIndex));
+      });
+
+      test('does not inject transition-owned summary when prompt_fragment_id is absent', () async {
+        writeState('PLAN', issue: '145');
+
+        final cmd = ApePromptCommand(
+          ApePromptInput(
+            name: 'descartes',
+            subState: 'decomposition',
+            workingDirectory: tmpDir.path,
+          ),
+        );
+        final result = await cmd.execute();
+
+        expect(
+          result.prompt,
+          isNot(contains(
+            'Write inside the CLI-created template and keep frontmatter unchanged.',
+          )),
+        );
       });
 
       test('basho in EXECUTE returns base prompt', () async {

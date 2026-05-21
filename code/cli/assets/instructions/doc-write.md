@@ -5,6 +5,14 @@ description: 'Protocol for writing investigation material. Use when: documenting
 
 # doc-write — Investigation Documentation Writing Protocol
 
+## Prompt Summary
+
+Write inside the CLI-created template and keep frontmatter unchanged.
+Store documents in output_dir.
+Update index_file after every write.
+Keep one topic per document.
+Use confirmed_doc for confirmed findings when it applies.
+
 ## When to Use
 
 - When recording confirmed findings during analysis
