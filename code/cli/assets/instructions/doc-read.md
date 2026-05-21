@@ -5,6 +5,14 @@ description: 'Protocol for reading investigation material. Use when: consulting 
 
 # doc-read — Investigation Documentation Reading Protocol
 
+## Prompt Summary
+
+Read index_file first from inquiry-context.
+Use the index to filter candidate documents.
+If needed read frontmatter before a full document read.
+Stop as soon as you have enough evidence.
+Never scan a directory file by file.
+
 ## When to Use
 
 - Before writing new documentation (to avoid duplicates)

@@ -81,34 +81,34 @@ void main() {
       expect(content, isNotEmpty);
     });
 
-    test('reads skills/doc-read/SKILL.md', () {
-      final content = assets.loadString('skills/doc-read/SKILL.md');
+    test('reads instructions/doc-read.md', () {
+      final content = assets.loadString('instructions/doc-read.md');
       expect(content, contains('doc-read'));
       expect(content, isNotEmpty);
     });
 
-    test('reads skills/doc-write/SKILL.md', () {
-      final content = assets.loadString('skills/doc-write/SKILL.md');
+    test('reads instructions/doc-write.md', () {
+      final content = assets.loadString('instructions/doc-write.md');
       expect(content, contains('doc-write'));
       expect(content, isNotEmpty);
     });
 
-    test('reads skills/issue-end/SKILL.md', () {
-      final content = assets.loadString('skills/issue-end/SKILL.md');
+    test('reads instructions/issue-end.md', () {
+      final content = assets.loadString('instructions/issue-end.md');
       expect(content, contains('issue-end'));
       expect(content, contains('EXECUTE'));
       expect(content, isNotEmpty);
     });
 
-    test('reads skills/issue-create/SKILL.md for TRIAGE issue creation', () {
-      final content = assets.loadString('skills/issue-create/SKILL.md');
+    test('reads instructions/issue-create.md for TRIAGE issue creation', () {
+      final content = assets.loadString('instructions/issue-create.md');
       expect(content, contains('issue-create'));
       expect(content, contains('TRIAGE'));
       expect(content, isNotEmpty);
     });
 
-    test('reads skills/issue-start/SKILL.md as operational handoff only', () {
-      final content = assets.loadString('skills/issue-start/SKILL.md');
+    test('reads instructions/issue-start.md as operational handoff only', () {
+      final content = assets.loadString('instructions/issue-start.md');
       expect(content, contains('issue already exists'));
       expect(content, contains('start_analyze'));
       expect(content, contains('cleanrooms/<NNN>-<slug>/analyze/'));
@@ -180,20 +180,29 @@ void main() {
       }
     });
 
+    test('instructions asset inventory contains the private runtime docs', () {
+      final instructionFiles = [
+        'instructions/doc-read.md',
+        'instructions/doc-write.md',
+        'instructions/issue-create.md',
+        'instructions/issue-end.md',
+        'instructions/issue-start.md',
+      ];
+
+      for (final file in instructionFiles) {
+        final content = assets.loadString(file);
+        expect(content, isNotEmpty, reason: '$file should exist and be readable');
+      }
+    });
+
     test('listDirectory skills returns all skill directories', () {
       final dirs = assets.listDirectory('skills');
       expect(
         dirs,
         unorderedEquals([
-          'doc-read',
-          'doc-write',
-          'inquiry-install',
           'kritik',
           'legion',
           'research',
-          'issue-create',
-          'issue-end',
-          'issue-start',
         ]),
       );
     });

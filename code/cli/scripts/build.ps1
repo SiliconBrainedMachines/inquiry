@@ -4,9 +4,12 @@
 #   build/
 #     bin/inquiry.exe
 #     assets/
-#       agents/inquiry.agent.md
-#       skills/doc-read/SKILL.md
-#       skills/doc-write/SKILL.md
+#       agents/
+#       apes/
+#       archive/
+#       fsm/
+#       instructions/
+#       skills/
 
 $ErrorActionPreference = 'Stop'
 
