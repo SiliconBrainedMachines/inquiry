@@ -3,7 +3,7 @@
 **Issue:** #185 - feat: iq skill module — inquiry-bound skill delivery
 **Branch:** 185-feat-iq-skill-module-inquiry-bound-skill-delivery
 **Phase:** ANALYZE
-**Status:** In progress
+**Status:** Complete
 
 ---
 
@@ -11,4 +11,5 @@
 
 | # | File | Title | Status | Tags |
 |---|------|-------|--------|------|
-| 1 | diagnosis.md | Diagnosis of private instructions versus universal skills | active | analysis, instructions, skills, fsm, prompts |
+| 1 | confirmed.md | Confirmed findings | active | findings, confirmed |
+| 2 | diagnosis.md | Diagnosis of private instructions versus universal skills | active | analysis, instructions, skills, fsm, prompts |

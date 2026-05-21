@@ -47,12 +47,14 @@ class EffectExecutor {
   ///
   /// If the new state has an associated APE, loads its YAML to find `initial_state`
   /// and writes `ape: {name, state}`. Otherwise clears the `ape:` field.
-  void updateState(String newState, {String? issue}) {
+  void updateState(String newState, {String? issue, String? promptFragmentId}) {
     final currentState = InquiryState.load(workingDirectory);
     String? resolvedIssue = issue;
+    String? resolvedPromptFragmentId = promptFragmentId;
 
     if (newState == 'IDLE') {
       resolvedIssue = null;
+      resolvedPromptFragmentId = null;
     } else {
       resolvedIssue ??= currentState.issue;
     }
@@ -73,6 +75,7 @@ class EffectExecutor {
     final updated = InquiryState(
       state: newState,
       issue: resolvedIssue,
+      promptFragmentId: resolvedPromptFragmentId,
       apeName: apeName,
       apeState: apeInitialState,
     );
@@ -210,11 +213,16 @@ class EffectExecutor {
     required List<String> effects,
     required String newState,
     String? issue,
+    String? promptFragmentId,
   }) {
     final executed = <String>[];
 
     // Always update state on valid transition
-    updateState(newState, issue: issue);
+    updateState(
+      newState,
+      issue: issue,
+      promptFragmentId: promptFragmentId,
+    );
     executed.add('update_state');
 
     for (final effect in effects) {

@@ -5,6 +5,14 @@ description: 'Protocol for ending an APE cycle. Use when: all plan.md checkboxes
 
 # issue-end — Cycle Completion Protocol
 
+## Prompt Summary
+
+Only run in EXECUTE after all plan checkboxes and tests are complete.
+Choose the version bump and update every version file.
+Update CHANGELOG from the completed plan phases.
+Commit the release changes.
+Push the branch and create the pull request.
+
 ## When to Use
 
 - When the scheduler APE is in EXECUTE state

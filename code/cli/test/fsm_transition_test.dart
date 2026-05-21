@@ -63,6 +63,7 @@ void main() {
       expect(output.nextState, 'PLAN');
       expect(output.promptFragmentId, 'analyze_to_plan');
       expect(output.requiredRole, 'DESCARTES');
+      expect(output.requiredInstructions, ['doc-write']);
       expect(_commitCount(tempDir.path), commitsBefore + 1);
 
       // Verify state.yaml was actually updated
@@ -70,6 +71,7 @@ void main() {
         p.join(tempDir.path, '.inquiry', 'state.yaml'),
       ).readAsStringSync();
       expect(stateContent, contains('state: PLAN'));
+      expect(stateContent, contains('prompt_fragment_id: analyze_to_plan'));
     });
 
     test('fails closed when ANALYZE -> PLAN cannot create boundary commit',
@@ -192,6 +194,7 @@ void main() {
       expect(output.exitCode, 0);
       expect(output.nextState, 'ANALYZE');
       expect(output.promptFragmentId, 'idle_to_analyze');
+      expect(output.requiredInstructions, ['doc-read']);
     });
 
     test('blocks commitment transition on main branch', () async {
@@ -233,12 +236,14 @@ void main() {
       expect(output.allowed, isTrue);
       expect(output.nextState, 'EXECUTE');
       expect(output.promptFragmentId, 'plan_to_execute');
+      expect(output.requiredInstructions, ['issue-start']);
       expect(_commitCount(tempDir.path), commitsBefore + 1);
 
       final stateContent = File(
         p.join(tempDir.path, '.inquiry', 'state.yaml'),
       ).readAsStringSync();
       expect(stateContent, contains('state: EXECUTE'));
+      expect(stateContent, contains('prompt_fragment_id: plan_to_execute'));
     });
 
     test('fails closed when PLAN -> EXECUTE cannot create boundary commit',
@@ -292,6 +297,7 @@ void main() {
       expect(output.nextState, 'END');
       expect(output.promptFragmentId, 'execute_to_end');
       expect(output.requiredRole, 'APE');
+      expect(output.requiredInstructions, ['issue-end']);
     });
 
     test('allows END to create PR and enter EVOLUTION', () async {
@@ -310,6 +316,7 @@ void main() {
       expect(output.nextState, 'EVOLUTION');
       expect(output.promptFragmentId, 'end_to_evolution');
       expect(output.requiredRole, 'DARWIN');
+      expect(output.requiredInstructions, ['issue-end']);
     });
 
     test('persists --issue flag in state.yaml on transition', () async {
@@ -336,6 +343,7 @@ void main() {
         p.join(tempDir.path, '.inquiry', 'state.yaml'),
       ).readAsStringSync();
       expect(stateContent, contains('issue: "31"'));
+      expect(stateContent, contains('prompt_fragment_id: idle_to_analyze'));
     });
 
     test('preserves existing issue when --issue not provided', () async {
@@ -364,6 +372,7 @@ void main() {
         p.join(tempDir.path, '.inquiry', 'state.yaml'),
       ).readAsStringSync();
       expect(stateContent, contains('issue: "31"'));
+      expect(stateContent, contains('prompt_fragment_id: analyze_to_plan'));
     });
   });
 }
