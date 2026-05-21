@@ -51,13 +51,16 @@ class ApeDefinition {
 
   /// Assemble the full prompt for a given sub-state.
   ///
-  /// Returns APE identity, then an optional operational-contract layer,
-  /// then an optional inquiry-context block.
+  /// Returns APE identity, then optional transition-owned instructions,
+  /// then an optional operational-contract layer, then an optional
+  /// inquiry-context block.
   /// If [stateName] is null, returns only the base prompt.
+  /// If [transitionInstructions] is provided, appends them after the state prompt.
   /// If [operationalContract] is provided, appends it after the APE identity.
   /// If [context] is provided, appends a fenced YAML inquiry-context block.
   String assemblePrompt({
     String? stateName,
+    String? transitionInstructions,
     String? operationalContract,
     Map<String, String>? context,
   }) {
@@ -69,6 +72,10 @@ class ApeDefinition {
         orElse: () => throw ArgumentError('Unknown state: $stateName for APE $name'),
       );
       buffer.write('\n\n${state.prompt}');
+    }
+
+    if (transitionInstructions != null && transitionInstructions.trim().isNotEmpty) {
+      buffer.write('\n\n## Transition-Owned Instructions\n$transitionInstructions');
     }
 
     if (operationalContract != null && operationalContract.trim().isNotEmpty) {
