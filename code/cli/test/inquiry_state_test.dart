@@ -38,6 +38,7 @@ void main() {
       File('${tmpDir.path}/.inquiry/state.yaml').writeAsStringSync(
         'state: ANALYZE\n'
         'issue: "145"\n'
+        'prompt_fragment_id: analyze_continue\n'
         'ape:\n'
         '  name: socrates\n'
         '  state: clarification\n',
@@ -46,6 +47,7 @@ void main() {
       final state = InquiryState.load(tmpDir.path);
       expect(state.state, equals('ANALYZE'));
       expect(state.issue, equals('145'));
+      expect(state.promptFragmentId, equals('analyze_continue'));
       expect(state.apeName, equals('socrates'));
       expect(state.apeState, equals('clarification'));
     });
@@ -73,6 +75,7 @@ void main() {
       final state = InquiryState.load(tmpDir.path);
       expect(state.state, equals('PLAN'));
       expect(state.issue, equals('42'));
+      expect(state.promptFragmentId, isNull);
       expect(state.apeName, isNull);
       expect(state.apeState, isNull);
     });
@@ -83,6 +86,7 @@ void main() {
       const state = InquiryState(
         state: 'ANALYZE',
         issue: '145',
+        promptFragmentId: 'analyze_continue',
         apeName: 'socrates',
         apeState: 'clarification',
       );
@@ -92,6 +96,7 @@ void main() {
           File('${tmpDir.path}/.inquiry/state.yaml').readAsStringSync();
       expect(content, contains('state: ANALYZE'));
       expect(content, contains('issue: "145"'));
+      expect(content, contains('prompt_fragment_id: analyze_continue'));
       expect(content, contains('ape:'));
       expect(content, contains('  name: socrates'));
       expect(content, contains('  state: clarification'));
@@ -112,6 +117,7 @@ void main() {
       const original = InquiryState(
         state: 'EXECUTE',
         issue: '200',
+        promptFragmentId: 'plan_to_execute',
         apeName: 'basho',
         apeState: 'implement',
       );
@@ -120,6 +126,7 @@ void main() {
       final loaded = InquiryState.load(tmpDir.path);
       expect(loaded.state, equals('EXECUTE'));
       expect(loaded.issue, equals('200'));
+      expect(loaded.promptFragmentId, equals('plan_to_execute'));
       expect(loaded.apeName, equals('basho'));
       expect(loaded.apeState, equals('implement'));
     });
@@ -130,6 +137,7 @@ void main() {
       const original = InquiryState(
         state: 'ANALYZE',
         issue: '145',
+        promptFragmentId: 'analyze_continue',
         apeName: 'socrates',
         apeState: 'clarification',
       );
@@ -137,6 +145,7 @@ void main() {
 
       expect(copy.state, equals('PLAN'));
       expect(copy.issue, equals('145'));
+      expect(copy.promptFragmentId, equals('analyze_continue'));
       expect(copy.apeName, equals('socrates'));
       expect(copy.apeState, equals('clarification'));
     });
@@ -145,12 +154,14 @@ void main() {
       const original = InquiryState(
         state: 'ANALYZE',
         issue: '145',
+        promptFragmentId: 'analyze_continue',
         apeName: 'socrates',
         apeState: 'clarification',
       );
       final copy = original.copyWith(apeState: 'assumptions');
 
       expect(copy.apeState, equals('assumptions'));
+      expect(copy.promptFragmentId, equals('analyze_continue'));
       expect(copy.apeName, equals('socrates'));
     });
 
@@ -158,6 +169,7 @@ void main() {
       const original = InquiryState(
         state: 'ANALYZE',
         issue: '145',
+        promptFragmentId: 'analyze_continue',
         apeName: 'socrates',
         apeState: 'clarification',
       );
@@ -165,6 +177,7 @@ void main() {
 
       expect(copy.state, equals('ANALYZE'));
       expect(copy.issue, equals('145'));
+      expect(copy.promptFragmentId, equals('analyze_continue'));
       expect(copy.apeName, isNull);
       expect(copy.apeState, isNull);
     });

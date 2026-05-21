@@ -5,6 +5,15 @@ description: 'Protocol for starting work on an existing GitHub issue. Verifies t
 
 # issue-start - Operational Start Protocol
 
+## Prompt Summary
+
+Run iq doctor first and stop on any failed check.
+Verify the issue already exists with gh issue view.
+Create branch NNN-slug and cleanrooms/NNN-slug/analyze.
+Create analyze/index.md for the cleanroom.
+Transition with iq fsm transition --event start_analyze --issue NNN.
+Confirm iq fsm state reports ANALYZE for that issue.
+
 ## When to Use
 
 - When the scheduler APE is in IDLE/DONE

@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.1]
+### Added
+- **Prompt-ready transition instruction summaries**: transition-owned private instruction assets now expose compact runtime summaries for `doc-read`, `doc-write`, `issue-start`, and `issue-end`, so prompt assembly consumes deterministic text instead of raw Markdown (#185)
+
+### Changed
+- **FSM prompt fragment contract**: `prompt_fragments` now uses ordered `instructions: [...]` lists, persists `prompt_fragment_id` across transitions, and injects the owning transition summaries into `iq ape prompt` between the state prompt and operational contract (#185)
+
+### Fixed
+- **Private instruction boundary**: runtime validation now enforces that transition-owned private protocols resolve from `assets/instructions` while universal thinking tools remain the only assets distributed under `assets/skills` (#185)
+
 ## [0.5.0]
 ### Breaking changes
 - `iq init` now deploys `inquiry.agent.md` to `.github/agents/` (repo-scoped, not global).

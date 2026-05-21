@@ -102,6 +102,31 @@ void main() {
         expect(prompt, contains('Clarification questions'));
       });
 
+      test('inserts transition instructions before the operational contract', () {
+        final def = ApeDefinition.parse(
+          File('assets/apes/descartes.yaml').readAsStringSync(),
+        );
+        final prompt = def.assemblePrompt(
+          stateName: 'decomposition',
+          transitionInstructions:
+              'Write inside the CLI-created template and keep frontmatter unchanged.',
+          operationalContract: '## Phase-Owned Operational Contract\nPlan details.',
+          context: {'plan_file': 'cleanrooms/145-test/plan.md'},
+        );
+
+        final stateIndex = prompt.indexOf('FOCUS: Division.');
+        final instructionIndex = prompt.indexOf(
+          'Write inside the CLI-created template and keep frontmatter unchanged.',
+        );
+        final contractIndex = prompt.indexOf('## Phase-Owned Operational Contract');
+        final contextIndex = prompt.indexOf('# --- inquiry-context ---');
+
+        expect(stateIndex, greaterThanOrEqualTo(0));
+        expect(instructionIndex, greaterThan(stateIndex));
+        expect(contractIndex, greaterThan(instructionIndex));
+        expect(contextIndex, greaterThan(contractIndex));
+      });
+
       test('throws for unknown state', () {
         final def = ApeDefinition.parse(
           File('assets/apes/socrates.yaml').readAsStringSync(),
