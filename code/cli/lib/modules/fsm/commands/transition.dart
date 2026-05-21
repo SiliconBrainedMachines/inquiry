@@ -79,7 +79,7 @@ class StateTransitionOutput extends Output {
   final List<String> operationsExecuted;
   final String? promptFragmentId;
   final String? requiredRole;
-  final String? requiredSkill;
+  final List<String>? requiredInstructions;
   final String message;
   final int code;
 
@@ -91,7 +91,7 @@ class StateTransitionOutput extends Output {
     required this.operationsExecuted,
     required this.promptFragmentId,
     required this.requiredRole,
-    required this.requiredSkill,
+    required this.requiredInstructions,
     required this.message,
     required this.code,
   });
@@ -105,7 +105,7 @@ class StateTransitionOutput extends Output {
     'operations_executed': operationsExecuted,
     'prompt_fragment_id': promptFragmentId,
     'required_role': requiredRole,
-    'required_skill': requiredSkill,
+    'required_instructions': requiredInstructions,
     'message': message,
   };
 
@@ -168,7 +168,7 @@ class StateTransitionCommand
         operationsExecuted: const ['validate_transition'],
         promptFragmentId: null,
         requiredRole: null,
-        requiredSkill: null,
+        requiredInstructions: null,
         message: transition.reason ?? 'Illegal transition',
         code: ExitCode.invalidUsage,
       );
@@ -191,7 +191,7 @@ class StateTransitionCommand
         operationsExecuted: const ['validate_transition', 'validate_prechecks'],
         promptFragmentId: null,
         requiredRole: null,
-        requiredSkill: null,
+        requiredInstructions: null,
         message: precheckResult,
         code: ExitCode.validationFailed,
       );
@@ -212,7 +212,7 @@ class StateTransitionCommand
         operationsExecuted: const ['validate_transition', 'validate_prechecks'],
         promptFragmentId: null,
         requiredRole: null,
-        requiredSkill: null,
+        requiredInstructions: null,
         message: boundaryCommitResult.errorMessage!,
         code: ExitCode.genericError,
       );
@@ -229,6 +229,7 @@ class StateTransitionCommand
       effects: operations?.effects ?? const <String>[],
       newState: transition.to?.value ?? current.value,
       issue: input.issue,
+      promptFragmentId: promptId,
     );
 
     return StateTransitionOutput(
@@ -244,7 +245,7 @@ class StateTransitionCommand
       ],
       promptFragmentId: promptId,
       requiredRole: prompt?.role,
-      requiredSkill: prompt?.skill,
+      requiredInstructions: prompt?.instructions,
       message:
           'Transition ${current.value} --${event.value}--> ${transition.to?.value}',
       code: ExitCode.ok,
