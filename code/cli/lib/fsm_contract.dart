@@ -87,12 +87,12 @@ class PreconditionsContract {
 class PromptFragmentContract {
   final String role;
   final String template;
-  final String skill;
+  final List<String> instructions;
 
   const PromptFragmentContract({
     required this.role,
     required this.template,
-    required this.skill,
+    required this.instructions,
   });
 }
 
@@ -229,7 +229,11 @@ FsmContract parseFsmContract(String yamlContent) {
     parsedPromptFragments[key] = PromptFragmentContract(
       role: value['role'] as String,
       template: value['template'] as String,
-      skill: (value['skill'] as String?) ?? 'none',
+      instructions:
+          (value['instructions'] as YamlList?)
+              ?.cast<String>()
+              .toList(growable: false) ??
+          const <String>[],
     );
   }
 
