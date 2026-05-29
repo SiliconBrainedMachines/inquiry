@@ -2,6 +2,8 @@
 
 > Status note: This roadmap is a strategic and partially historical planning document. It preserves backlog framing from earlier releases and should not be used as the authoritative description of the current operational model. For the current canonical explanation, see [architecture.md](architecture.md), [spec/finite-ape-machine.md](spec/finite-ape-machine.md), and [thinking-tools.md](thinking-tools.md).
 
+> Version note: the live CLI source currently tracks `0.5.1` in [../code/cli/pubspec.yaml](../code/cli/pubspec.yaml). Public-facing version markers elsewhere in the repository may lag until the next coordinated release pass.
+
 > Where APE is going next. For where APE is today, see [../README.md](../README.md).
 
 > Live roster note: DEWEY now owns bounded IDLE triage in the current contract; `issue-start` remains the explicit handoff into ANALYZE.
@@ -18,6 +20,8 @@ APE aims to be a **methodology for working with AI through explicit thinking too
 
 The end-state is an **APE that builds APE**: a self-improving framework where every cycle generates evidence (in `metrics.yaml`, in evolution issues, in mutations.md) that feeds the next cycle.
 
+Recent research in [research/harness_engineering.md](research/harness_engineering.md) and [research/agent_engineering_taxonomy.md](research/agent_engineering_taxonomy.md) sharpens how this vision should be read: Inquiry is not only a methodology and not only a prompt packager. It is already becoming a **repository-local outer harness** for coding agents. The next frontier is therefore not just “more CLI features,” but the completion of that harness through better sensors, clearer context policy, stronger evals, and more explicit task environments.
+
 ## Historical planning snapshot (v0.0.14)
 
 - 5-state FSM with declarative transition contract (IDLE / ANALYZE / PLAN / EXECUTE / EVOLUTION)
@@ -27,7 +31,39 @@ The end-state is an **APE that builds APE**: a self-improving framework where ev
 - 131 tests, cross-platform (Windows + Linux), 12 GitHub releases
 - Empirical bootstrap underway: APE is being built using APE (see [bootstrap-validation](research/ape_builds_ape/bootstrap-validation.md))
 
-## Current frontier (post-v0.4.5)
+## Current runtime snapshot (v0.5.1)
+
+The current CLI surface is still intentionally small. The live source tree exposes four active modules:
+
+- **global** — bare `iq`, `init`, `version`, `doctor`, `upgrade`, `uninstall`
+- **target** — `get`, `clean`
+- **fsm** — `state`, `transition`
+- **ape** — `prompt`, `state`, `transition`
+
+The deployed runtime still centers on a single active host target, Copilot, with deferred adapters for other hosts retained in the codebase but not yet reactivated in `iq target get`.
+
+The current persisted control surface is also concrete and live, not aspirational:
+
+- `.inquiry/state.yaml`
+- `.inquiry/config.yaml`
+- `.inquiry/mutations.md`
+- `.inquiry/metrics.yaml`
+- `cleanrooms/<issue>/...` as per-cycle artifact space
+
+This matters because it marks the real baseline: Inquiry is already operating as a small but substantive harness, not merely as a conceptual FSM described in prose.
+
+## Strategic reading of the current frontier
+
+Read through the current harness taxonomy, Inquiry's unfinished work clusters into four gaps:
+
+1. **Sensor depth** — the methodology is explicit, but the catalog of local, CI, continuous, and runtime sensors is still thinner than the control model wants.
+2. **Context policy** — Memory as Code is real, but progressive disclosure, compaction, and retrieval policy are still more implicit than formal.
+3. **Eval discipline** — the project has gates and metrics, but not yet a full eval-engineering layer that systematically turns recurring failures into reusable benchmarks and graders.
+4. **Task environments** — Inquiry already assembles prompts and paths, but it still has room to become more contract-first about bounded task inputs, outputs, and validation surfaces.
+
+This section is strategic framing, not a substitute for the issue tracker. The issue-backed frontier remains below.
+
+## Current frontier (post-v0.5.1)
 
 This section is intentionally selective. It groups the open issues that most clearly define the next iterations of Inquiry; it is not a full dump of every issue in the tracker.
 
@@ -73,6 +109,8 @@ Several roadmap items from the early v0.0.x planning era are no longer near-term
 ## Mid-term (v0.1.x → v0.5.0)
 
 Larger features that require infrastructure from the near-term to land first. Not yet split into discrete issues.
+
+Viewed through the harness framing above, these mid-term items are best understood as **harness completion work**: first-class memory tooling, first-class task orchestration, target reactivation, and comparative validation across hosts.
 
 ### `iq memory` CLI
 First-class commands for the Memory-as-Code spec:
