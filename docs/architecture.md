@@ -4,6 +4,8 @@
 >
 > How APE orchestrates AI coding agents through a finite state machine.
 
+Inquiry is best read here as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work.
+
 ## The system in one diagram
 
 ```
@@ -115,6 +117,17 @@ Each allowed transition carries:
 
 The CLI enforces this via `iq fsm transition --event <e>`: reads `.inquiry/state.yaml`, looks up `(current_state, event)` in the contract, validates prechecks, applies effects, writes new state.
 
+## Inquiry as outer harness
+
+Viewed through the current research taxonomy, Inquiry spans all four agent-engineering layers but concentrates its force in **Harness Engineering**:
+
+- **Prompt Engineering**: APE identities, state prompts, and skill protocols shape how the operator is instructed.
+- **Context Engineering**: `iq ape prompt`, `inquiry-context`, `.inquiry/`, and `cleanrooms/` control what the operator sees and what survives across turns.
+- **Eval Engineering**: PR gates, transition prechecks, state-owned artifact expectations, and cycle metrics provide partial but real evaluation structure.
+- **Harness Engineering**: the CLI, FSM, deployer, state files, skills, and human authorization rules form the actual control system around the host agent.
+
+That distinction matters because it clarifies what Inquiry already is and what still remains incomplete. Inquiry is no longer just a methodology described in markdown or a pack of prompts deployed into Copilot. It already functions as a repository-local harness. The unfinished work is to deepen that harness with stronger sensors, more explicit context policy, and more formal eval-backed evolution.
+
 ## Agent architecture
 
 There is **one agent file** (`inquiry.agent.md`) that acts as orchestrator. It is NOT 4 separate agents — it is one prompt that **behaves differently depending on FSM state**:
@@ -212,6 +225,7 @@ A complete APE cycle from issue to merge:
 
 | Decision | Choice | Why |
 |---|---|---|
+| **Inquiry is an outer harness** | The host tool provides base model/runtime behavior; Inquiry adds repository-local control, memory, and gates | Keeps the system inspectable, portable, and methodology-first instead of vendor-first |
 | **One agent, many behaviors** | Single inquiry.agent.md, state-driven | Simpler deployment, no inter-agent coordination needed |
 | **Total FSM** | Every (state,event) explicit | No undefined behavior, contract is auditable |
 | **CLI enforces, agent proposes** | Transitions go through CLI | Agent can't corrupt state; human is gate |
