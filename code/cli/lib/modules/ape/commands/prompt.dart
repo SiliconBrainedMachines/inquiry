@@ -236,7 +236,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
         return {
           'output_dir': analyzeDir,
           'index_file': '${analyzeDir}index.md',
-          'confirmed_doc': '${analyzeDir}confirmed.md',
+          'confirmations_doc': '${analyzeDir}confirmations.md',
           'doc_protocol': 'doc-write',
         };
       case 'descartes':

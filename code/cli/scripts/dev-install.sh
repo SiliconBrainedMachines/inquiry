@@ -8,6 +8,7 @@
 #   1. Runs build.sh (compile + package assets)
 #   2. Copies build/ → ~/.inquiry/ (same layout as install.sh)
 #   3. Creates symlinks in ~/.local/bin (inquiry + iq)
+#   4. Verifies with iq version
 #
 # Requires: Dart SDK in PATH.
 
@@ -54,7 +55,14 @@ fi
 # ─── Verify ───────────────────────────────────────────────────────────────────
 
 echo ">>> Verifying..."
-"$BIN_DIR/inquiry" version
+if ! command -v iq >/dev/null 2>&1; then
+  echo "iq not found on PATH after install" >&2
+  exit 1
+fi
+
+IQ_PATH="$(command -v iq)"
+echo "    iq -> $IQ_PATH"
+iq version
 
 echo ""
 echo ">>> Installed from source successfully!"

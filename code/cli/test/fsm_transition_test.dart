@@ -44,6 +44,8 @@ void main() {
       const branch = '51-idle-execution-guardrails';
       _initGitRepo(tempDir.path, branch: branch);
       _writeState(tempDir.path, 'ANALYZE', issue: '51');
+      _writeAnalyzeIndex(tempDir.path, branch);
+      _writeConfirmations(tempDir.path, branch);
       _writeDiagnosis(tempDir.path, branch, 'diagnosis draft');
       final commitsBefore = _commitCount(tempDir.path);
 
@@ -74,22 +76,48 @@ void main() {
       expect(stateContent, contains('prompt_fragment_id: analyze_to_plan'));
     });
 
+    test('fails precheck when ANALYZE corpus lacks confirmations and index',
+        () async {
+      const branch = '51-idle-execution-guardrails';
+      _initGitRepo(tempDir.path, branch: branch);
+      _writeState(tempDir.path, 'ANALYZE', issue: '51');
+      _writeDiagnosis(tempDir.path, branch, 'diagnosis draft');
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'complete_analysis',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(output.message, contains('ERROR_PRECONDITION'));
+    });
+
     test('fails closed when ANALYZE -> PLAN cannot create boundary commit',
         () async {
       const branch = '51-idle-execution-guardrails';
-      final diagnosisPath = p.posix.join(
-        'cleanrooms',
-        branch,
-        'analyze',
-        'diagnosis.md',
-      );
 
       _initGitRepo(tempDir.path, branch: branch);
+      _writeAnalyzeIndex(tempDir.path, branch);
+      _writeConfirmations(tempDir.path, branch);
       _writeDiagnosis(tempDir.path, branch, 'diagnosis already committed');
-      _git(tempDir.path, ['add', '--', diagnosisPath]);
       _git(
         tempDir.path,
-        ['commit', '-m', 'analysis ready', '--only', '--', diagnosisPath],
+        ['add', '--', p.posix.join('cleanrooms', branch, 'analyze')],
+      );
+      _git(
+        tempDir.path,
+        [
+          'commit',
+          '-m',
+          'analysis ready',
+          '--only',
+          '--',
+          p.posix.join('cleanrooms', branch, 'analyze'),
+        ],
       );
       _writeState(tempDir.path, 'ANALYZE', issue: '51');
       final commitsBefore = _commitCount(tempDir.path);
@@ -368,6 +396,8 @@ void main() {
       const branch = '31-fix-phase-not-saved';
       _initGitRepo(tempDir.path, branch: branch);
       _writeState(tempDir.path, 'ANALYZE', issue: '31');
+      _writeAnalyzeIndex(tempDir.path, branch);
+      _writeConfirmations(tempDir.path, branch);
       _writeDiagnosis(tempDir.path, branch, 'updated diagnosis');
 
       final input = StateTransitionInput(
@@ -401,6 +431,22 @@ void _writeDiagnosis(String root, String branch, String content) {
   );
   file.createSync(recursive: true);
   file.writeAsStringSync(content);
+}
+
+void _writeAnalyzeIndex(String root, String branch) {
+  final file = File(
+    p.join(root, 'cleanrooms', branch, 'analyze', 'index.md'),
+  );
+  file.createSync(recursive: true);
+  file.writeAsStringSync('# Analyze Phase — Index\n');
+}
+
+void _writeConfirmations(String root, String branch) {
+  final file = File(
+    p.join(root, 'cleanrooms', branch, 'analyze', 'confirmations.md'),
+  );
+  file.createSync(recursive: true);
+  file.writeAsStringSync('# Confirmations\n');
 }
 
 void _writePlan(String root, String branch, String content) {
