@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.3]
+### Changed
+- **ANALYZE contract ownership**: ANALYZE now owns visibility, participation, required artifacts, and completion proof through the FSM state contract instead of leaking those responsibilities into SOCRATES or generic scheduler assumptions (#180)
+- **Runtime installation verification**: `dev-install.ps1` and `dev-install.sh` now verify the `iq` command exposed on PATH instead of only invoking the installed binary directly
+
+### Fixed
+- **ANALYZE runtime alignment**: firmware, prompt assembly, analyze bootstrap, and the private write protocol now agree on visible ANALYZE interaction and `confirmations.md` / `confirmations_doc` as the canonical living analysis artifact (#180)
+- **APE prompt ownership boundaries**: SOCRATES, DEWEY, DESCARTES, and BASHO now keep methodological identity while dropping the clearest repository-procedure and phase-policy leakage that belongs to the host phase contract (#180)
+
 ## [0.5.2]
 ### Changed
 - **EXECUTE startup boundary**: `plan_to_execute` and `execute_continue` no longer inject `issue-start`; the startup protocol remains scoped to the explicit IDLE/DONE handoff into ANALYZE (#181)
