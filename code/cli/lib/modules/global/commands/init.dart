@@ -1,13 +1,13 @@
 /// `inquiry init` — initializes Inquiry in the working directory.
 ///
-/// Seven idempotent steps:
+/// Idempotent steps:
 /// 1. Create cleanrooms/ at project root if missing
-/// 2. Add .inquiry/ to .gitignore
-/// 3. Create .inquiry/state.yaml with IDLE state
-/// 4. Create .inquiry/config.yaml with defaults
-/// 5. Create .inquiry/mutations.md with header template
-/// 6. Deploy inquiry.agent.md to active target
-/// 7. Deploy inquiry.agent.md to .github/agents/ (repo-scoped)
+/// 2. Add .inquiry/ and cleanrooms/**/.iq.state.yaml to .gitignore
+/// 3. Create .inquiry/config.yaml with defaults (project-scoped)
+/// 4. Deploy inquiry.agent.md to .github/agents/ (repo-scoped)
+///
+/// Cycle runtime (`.iq.state.yaml`, `mutations.md`) is materialized per cycle
+/// under `cleanrooms/<branch>/` by the FSM, not scaffolded at init.
 library;
 
 import 'dart:io';
@@ -79,21 +79,13 @@ class InitCommand implements Command<InitInput, InitOutput> {
       steps.add('Created ${_relative(root, issuesDir.path)}');
     }
 
-    // Step 2: Add .inquiry/ to .gitignore
+    // Step 2: Add .inquiry/ and cycle-local state to .gitignore
     _ensureGitignore(root, steps);
 
-    // Step 3: Create .inquiry/state.yaml with IDLE state
-    _ensureStateYaml(root, steps);
-
-    // Step 4: Create .inquiry/config.yaml with defaults
+    // Step 3: Create .inquiry/config.yaml with defaults (project-scoped)
     _ensureConfigYaml(root, steps);
 
-    // Step 5: Create .inquiry/mutations.md with header template
-    _ensureMutationsMd(root, steps);
-
-    // Step 6: (legacy — agent deploy moved to step 7)
-
-    // Step 7: Deploy inquiry.agent.md to .github/agents/ (repo-scoped)
+    // Step 4: Deploy inquiry.agent.md to .github/agents/ (repo-scoped)
     if (assets != null) {
       _deployAgent(root, assets!, steps);
     }
@@ -110,53 +102,46 @@ class InitCommand implements Command<InitInput, InitOutput> {
 
   void _deployAgent(String root, Assets assets, List<String> steps) {
     final content = assets.loadString('agents/inquiry.agent.md');
-    final agentFile = File(p.join(root, '.github', 'agents', 'inquiry.agent.md'));
+    final agentFile = File(
+      p.join(root, '.github', 'agents', 'inquiry.agent.md'),
+    );
     agentFile.parent.createSync(recursive: true);
     agentFile.writeAsStringSync(content);
     steps.add('Deployed inquiry.agent.md to .github/agents/');
   }
 
-  /// Ensures `.inquiry/` is in `.gitignore`.
+  /// Ensures `.inquiry/` and cycle-local state are in `.gitignore`.
   void _ensureGitignore(String root, List<String> steps) {
+    const entries = <String>['.inquiry/', 'cleanrooms/**/.iq.state.yaml'];
     final gitignore = File('$root/.gitignore');
 
-    if (gitignore.existsSync()) {
-      final content = gitignore.readAsStringSync();
-      if (!content.contains('.inquiry/')) {
-        gitignore.writeAsStringSync(
-          '$content\n# Inquiry — local cycle state\n.inquiry/\n',
-        );
-        steps.add('Added .inquiry/ to .gitignore');
-      }
-    } else {
+    if (!gitignore.existsSync()) {
       gitignore.writeAsStringSync(
-        '# Inquiry — local cycle state\n.inquiry/\n',
+        '# Inquiry — local cycle state\n'
+        '.inquiry/\n'
+        'cleanrooms/**/.iq.state.yaml\n',
       );
-      steps.add('Created .gitignore with .inquiry/');
+      steps.add('Created .gitignore with Inquiry entries');
+      return;
     }
-  }
 
-  /// Ensures `.inquiry/state.yaml` exists with IDLE state.
-  void _ensureStateYaml(String root, List<String> steps) {
-    final inquiryDir = Directory('$root/.inquiry');
-    final stateFile = File('$root/.inquiry/state.yaml');
+    var content = gitignore.readAsStringSync();
+    final missing = entries.where((e) => !content.contains(e)).toList();
+    if (missing.isEmpty) return;
 
-    if (!stateFile.existsSync()) {
-      if (!inquiryDir.existsSync()) inquiryDir.createSync();
-      stateFile.writeAsStringSync(
-        'state: IDLE\n'
-        'issue: null\n'
-        'ape: null\n',
-      );
-      steps.add('Created .inquiry/state.yaml');
-    }
+    if (!content.endsWith('\n')) content = '$content\n';
+    content = '$content# Inquiry — local cycle state\n${missing.join('\n')}\n';
+    gitignore.writeAsStringSync(content);
+    steps.add('Added Inquiry entries to .gitignore');
   }
 
   /// Ensures `.inquiry/config.yaml` exists with default configuration.
   void _ensureConfigYaml(String root, List<String> steps) {
+    final configDir = Directory('$root/.inquiry');
     final configFile = File('$root/.inquiry/config.yaml');
 
     if (!configFile.existsSync()) {
+      if (!configDir.existsSync()) configDir.createSync(recursive: true);
       configFile.writeAsStringSync(
         'evolution:\n'
         '  enabled: false\n',
@@ -165,21 +150,5 @@ class InitCommand implements Command<InitInput, InitOutput> {
     }
   }
 
-  /// Ensures `.inquiry/mutations.md` exists with header template.
-  void _ensureMutationsMd(String root, List<String> steps) {
-    final mutationsFile = File('$root/.inquiry/mutations.md');
-
-    if (!mutationsFile.existsSync()) {
-      mutationsFile.writeAsStringSync(
-        '# Mutations\n'
-        '\n'
-        'Notes for DARWIN. Write observations about the current cycle here.\n'
-        'This file is read during EVOLUTION and cleared afterwards.\n',
-      );
-      steps.add('Created .inquiry/mutations.md');
-    }
-  }
-
-  String _relative(String root, String path) =>
-      p.relative(path, from: root);
+  String _relative(String root, String path) => p.relative(path, from: root);
 }
