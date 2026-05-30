@@ -55,7 +55,8 @@ class EffectExecutor {
     'EVOLUTION': 'darwin',
   };
 
-  /// Update `.inquiry/state.yaml` with [newState], including APE auto-activation.
+  /// Update the cycle-local `.iq.state.yaml` with [newState], including APE
+  /// auto-activation.
   ///
   /// If the new state has an associated APE, loads its YAML to find `initial_state`
   /// and writes `ape: {name, state}`. Otherwise clears the `ape:` field.
