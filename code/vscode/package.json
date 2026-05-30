@@ -19,6 +19,7 @@
   },
   "main": "./out/extension.js",
   "activationEvents": [
+    "workspaceContains:cleanrooms/",
     "workspaceContains:.inquiry/"
   ],
   "contributes": {
