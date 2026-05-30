@@ -80,6 +80,8 @@ void main() {
         expect(json['transitions'], isList);
         expect(json['apes'], isList);
         expect(json['instructions'], isA<String>());
+        expect(json['operational_contract']['required_artifacts'], isList);
+        expect(json['operational_contract']['interaction'], isA<Map>());
       });
 
       test('returns operational contract sourced from state assets', () async {
@@ -247,6 +249,17 @@ void main() {
 
         expect(result.toJson()['instructions'], contains('Investigate'));
         expect(result.toJson()['instructions'], contains('diagnosis.md'));
+        expect(
+          result.toJson()['operational_contract']['required_artifacts'],
+          containsAll(['index.md', 'confirmations.md', 'diagnosis.md']),
+        );
+        expect(
+          result.toJson()['operational_contract']['interaction'],
+          equals({
+            'mode': 'visible_iterative_dialogue',
+            'user_participation_required': true,
+          }),
+        );
       });
 
       test('IDLE instructions describe TRIAGE issue creation and DONE handoff', () async {
