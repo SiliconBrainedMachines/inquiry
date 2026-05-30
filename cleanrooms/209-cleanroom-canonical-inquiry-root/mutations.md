@@ -205,3 +205,54 @@ hypothesis ledger (H1–H7) as evidence accumulates.
   but no new production consumer in this issue requires redesign before closing
   the canonical cleanroom-root refactor.
 - **U3 DECIDED** (deferred by design; revisit only when metrics stop being speculative).
+
+### Final QA — gate before END
+
+- Full CLI suite: **399 green** after the final release edits (`dart test`).
+- VS Code extension suite: **74 unit green** + **13 integration green**.
+- Static checks:
+  - `dart analyze`: clean.
+  - `dart format --set-exit-if-changed lib/modules/fsm/effect_executor.dart lib/src/version.dart`:
+    clean (0 changed).
+  - `version_sync_test.dart`: **3 green** after bumping the mandatory version triad to `0.6.0`.
+- Packaged manual smoke (`code/cli/scripts/build.ps1` + `build/bin/inquiry.exe`):
+  - fresh temp repo: `init` succeeded; `fsm state` resolved `State: IDLE`.
+  - cycle start on branch `209-smoke`: `fsm transition --event start_analyze --issue 209`
+    succeeded; `cleanrooms/209-smoke/.iq.state.yaml` created; `.inquiry/state.yaml`
+    remained absent.
+  - resolution from repo root and `cleanrooms/209-smoke/analyze/`: same `ANALYZE`
+    state / issue output.
+  - `main` with historical cleanrooms present: derived `IDLE`.
+- Repo-wide reader check:
+  - no `.inquiry/state.yaml` matches remain in production code under `code/cli/lib/`
+    or `code/vscode/src/`.
+  - remaining `.inquiry/` surfaces in production are intentional: project-scoped
+    `config.yaml`, explicit deferred metrics files, and the no-cycle mutations fallback.
+- Release notes / public surface:
+  - version bumped to **0.6.0** in `pubspec.yaml`, `version.dart`, and the site badge.
+  - `CHANGELOG.md` updated for #209.
+  - site copy for `iq init` corrected: it no longer claims repo-level state/mutations scaffolding.
+
+### Final review — H1 to H7, U1 to U3
+
+- **H1 CONFIRMED** — `cycle_context_test.dart` (+7) held behavior steady while the full suite
+  stayed green at Phase 1 (**386**).
+- **H2 CONFIRMED** — cycle-local `.iq.state.yaml` and derived IDLE were locked by the
+  Phase 2 state/transition test repairs; full suite green at **393**.
+- **H3 CONFIRMED** — the IDLE→ANALYZE integration bootstrap materialized the full cycle
+  (`analyze/index.md`, `confirmations.md`, `issue.md`, active `.iq.state.yaml`) and the
+  suite stayed green at **397**.
+- **H4 CONFIRMED** — mutations moved cycle-local while `config.yaml` stayed project-scoped;
+  `iq init` was later aligned to that same split; CLI and extension both validated the model.
+- **H5 CONFIRMED** — `active` / `completed` / `blocked` lifecycle was locked by
+  `inquiry_state_test.dart` + `effect_executor_test.dart`; `load()` derives IDLE for the
+  terminal statuses and the full suite reached **400 green** in Phase 5.
+- **H6 CONFIRMED** — no-cycle and malformed/missing-state edges safely degrade to IDLE;
+  this was exercised in the Phase 2 state-loading tests and re-confirmed in the packaged
+  manual smoke on `main` with historical cleanrooms.
+- **H7 CONFIRMED** — the extension now resolves the same cycle-local state path as the CLI;
+  Phase 7 closed with **74 unit green** + **13 integration green**.
+- **U1 DECIDED** — `.inquiry/config.yaml` remains project-scoped.
+- **U2 DECIDED** — status ownership is centralized: non-IDLE `update_state` writes `active`,
+  `update_state('IDLE')` writes `completed`, pause effects write `blocked`.
+- **U3 DECIDED** — metrics are deferred by design; no relocation or redesign in #209.
