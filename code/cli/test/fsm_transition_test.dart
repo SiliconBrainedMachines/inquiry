@@ -107,11 +107,23 @@ void main() {
       );
 
       _initGitRepo(tempDir.path, branch: branch);
+      _writeAnalyzeIndex(tempDir.path, branch);
+      _writeConfirmations(tempDir.path, branch);
       _writeDiagnosis(tempDir.path, branch, 'diagnosis already committed');
-      _git(tempDir.path, ['add', '--', diagnosisPath]);
       _git(
         tempDir.path,
-        ['commit', '-m', 'analysis ready', '--only', '--', diagnosisPath],
+        ['add', '--', p.posix.join('cleanrooms', branch, 'analyze')],
+      );
+      _git(
+        tempDir.path,
+        [
+          'commit',
+          '-m',
+          'analysis ready',
+          '--only',
+          '--',
+          p.posix.join('cleanrooms', branch, 'analyze'),
+        ],
       );
       _writeState(tempDir.path, 'ANALYZE', issue: '51');
       final commitsBefore = _commitCount(tempDir.path);
@@ -390,6 +402,8 @@ void main() {
       const branch = '31-fix-phase-not-saved';
       _initGitRepo(tempDir.path, branch: branch);
       _writeState(tempDir.path, 'ANALYZE', issue: '31');
+      _writeAnalyzeIndex(tempDir.path, branch);
+      _writeConfirmations(tempDir.path, branch);
       _writeDiagnosis(tempDir.path, branch, 'updated diagnosis');
 
       final input = StateTransitionInput(
