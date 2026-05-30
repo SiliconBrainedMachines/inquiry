@@ -1,5 +1,7 @@
 import 'dart:io';
 
+import 'package:path/path.dart' as p;
+
 /// Returns the current git branch name for [workingDirectory].
 ///
 /// Returns an empty string if git is unavailable or not in a repository.
@@ -29,7 +31,7 @@ String? getProjectRoot(String workingDirectory) {
     ], workingDirectory: workingDirectory);
     if (result.exitCode != 0) return null;
     final out = (result.stdout as String).trim();
-    return out.isEmpty ? null : out;
+    return out.isEmpty ? null : p.normalize(out);
   } catch (_) {
     return null;
   }
