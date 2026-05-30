@@ -308,11 +308,33 @@ assert packaged ape prompt for the active ANALYZE and PLAN APEs succeeds on the 
 
 **Risk note:** The PLAN contract requires final full-suite verification. Without it, the cycle could ship a clean local slice that destabilizes adjacent CLI behavior.
 
-- [ ] Run the focused Dart test bundle for the issue-180 surfaces one final time after all source and packaged edits are settled.
-- [ ] Run `dart analyze` for `code/cli`.
-- [ ] Run the complete existing Dart test suite for `code/cli`.
-- [ ] Run the existing VS Code extension test surfaces if the touched assets or docs materially affect them; if not, record the reason they are outside the changed slice.
-- [ ] Record execution readiness in the plan: what passed, what was not run, and whether any deviation remains.
+- [x] Run the focused Dart test bundle for the issue-180 surfaces one final time after all source and packaged edits are settled.
+- [x] Run `dart analyze` for `code/cli`.
+- [x] Run the complete existing Dart test suite for `code/cli`.
+- [x] Run the existing VS Code extension test surfaces if the touched assets or docs materially affect them; if not, record the reason they are outside the changed slice.
+- [x] Record execution readiness in the plan: what passed, what was not run, and whether any deviation remains.
+
+**QA result:** PASS
+
+Final verification executed after Phases 2-5 settled:
+
+- Focused issue-180 Dart bundle: `firmware_agent_test.dart`, `fsm_contract_test.dart`, `fsm_state_test.dart`, `fsm_transition_test.dart`, `effect_executor_test.dart`, `ape_prompt_test.dart`, `ape_definition_test.dart`, `assets_test.dart`
+- `dart analyze` in `code/cli`
+- full `dart test` suite in `code/cli`
+
+Observed results:
+
+- focused bundle: 178 passed, 0 failed;
+- `dart analyze`: clean after one local fixture cleanup (`unused_local_variable` in `fsm_transition_test.dart`);
+- full CLI suite: 386 passed, 0 failed.
+
+VS Code extension tests were not run. Reason: the modified slice is confined to `code/cli` source assets, CLI prompt assembly/runtime behavior, and CLI tests; no files under `code/vscode/` or extension-specific execution surfaces were changed.
+
+Execution readiness for #180:
+
+- no known deviation remains open in the repaired issue-180 slice;
+- the phase-owned ANALYZE contract, boundary gate, runtime surfaces, bounded APE hygiene, write protocol, and packaged surface all agree on `confirmations.md` and visible ANALYZE interaction;
+- the CLI is ready for the next formal boundary in the FSM.
 
 **Verification / test definition:**
 ```text
