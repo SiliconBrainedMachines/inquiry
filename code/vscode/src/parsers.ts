@@ -13,6 +13,12 @@ export function parseState(content: string): ApeState {
     if (!doc?.state || typeof doc.state !== 'string') {
       return { ...DEFAULT_STATE };
     }
+    // A completed or blocked cycle is no longer active: the FSM derives IDLE
+    // (IDLE is never persisted). Mirror the CLI's InquiryState.load().
+    const status = doc.status;
+    if (status === 'completed' || status === 'blocked') {
+      return { ...DEFAULT_STATE };
+    }
     return {
       phase: doc.state,
       task: String(doc.issue ?? ''),

@@ -25,11 +25,23 @@ const cliEffects = {
   'open_analysis_context',
 };
 
+/// Resolves the body of a GitHub issue for the `issue.md` mirror.
+///
+/// Returns `null` when the body cannot be fetched (best-effort; non-fatal).
+typedef IssueBodyProvider =
+    String? Function(String issue, String workingDirectory);
+
 class EffectExecutor {
   final String workingDirectory;
   final Assets? _assets;
+  final IssueBodyProvider _issueBodyProvider;
 
-  EffectExecutor({required this.workingDirectory, Assets? assets}) : _assets = assets;
+  EffectExecutor({
+    required this.workingDirectory,
+    Assets? assets,
+    IssueBodyProvider? issueBodyProvider,
+  }) : _assets = assets,
+       _issueBodyProvider = issueBodyProvider ?? _defaultIssueBodyProvider;
 
   String get _inquiryDir => p.join(workingDirectory, '.inquiry');
 
@@ -43,21 +55,21 @@ class EffectExecutor {
     'EVOLUTION': 'darwin',
   };
 
-  /// Update `.inquiry/state.yaml` with [newState], including APE auto-activation.
+  /// Update the cycle-local `.iq.state.yaml` with [newState], including APE
+  /// auto-activation.
   ///
   /// If the new state has an associated APE, loads its YAML to find `initial_state`
   /// and writes `ape: {name, state}`. Otherwise clears the `ape:` field.
   void updateState(String newState, {String? issue, String? promptFragmentId}) {
+    if (newState == 'IDLE') {
+      _markCompleted();
+      return;
+    }
+
     final currentState = InquiryState.load(workingDirectory);
     String? resolvedIssue = issue;
     String? resolvedPromptFragmentId = promptFragmentId;
-
-    if (newState == 'IDLE') {
-      resolvedIssue = null;
-      resolvedPromptFragmentId = null;
-    } else {
-      resolvedIssue ??= currentState.issue;
-    }
+    resolvedIssue ??= currentState.issue;
 
     // Auto-activate APE
     String? apeName;
@@ -66,7 +78,8 @@ class EffectExecutor {
     if (ape != null) {
       apeName = ape;
       if (currentState.apeName == ape && currentState.apeState != null) {
-        if (currentState.state == newState && currentState.apeState == '_DONE') {
+        if (currentState.state == newState &&
+            currentState.apeState == '_DONE') {
           apeInitialState = _resolveInitialState(ape);
         } else {
           apeInitialState = currentState.apeState;
@@ -82,8 +95,32 @@ class EffectExecutor {
       promptFragmentId: resolvedPromptFragmentId,
       apeName: apeName,
       apeState: apeInitialState,
+      version: currentState.version,
+      status: 'active',
+      createdAt: currentState.createdAt,
     );
     updated.save(workingDirectory);
+  }
+
+  /// Mark the active cycle as `completed` (IDLE is derived, never persisted).
+  void _markCompleted() => _markStatus('completed');
+
+  /// Mark the active cycle as `blocked` (IDLE is derived, never persisted).
+  void _markBlocked() => _markStatus('blocked');
+
+  /// Centralized terminal-status write for the active cycle.
+  ///
+  /// IDLE is never persisted: the cycle file keeps its last phase but records
+  /// [status] (`completed` or `blocked`) so `load()` derives IDLE. Clears any
+  /// active APE sub-state. No-op when already at [status].
+  void _markStatus(String status) {
+    final path = InquiryState.stateFileFor(workingDirectory);
+    if (path == null) return;
+    if (!File(path).existsSync()) return;
+    final raw = InquiryState.loadFrom(path);
+    if (raw.status == status) return;
+    final marked = raw.copyWith(status: status, clearApe: true);
+    marked.saveTo(path);
   }
 
   /// Create `cleanrooms/<branch>/analyze/index.md` and `confirmations.md` for ANALYZE phase.
@@ -92,7 +129,12 @@ class EffectExecutor {
     if (branch.isEmpty) return;
 
     final issue = InquiryState.load(workingDirectory).issue ?? '';
-    final cleanroomDir = p.join(workingDirectory, 'cleanrooms', branch, 'analyze');
+    final cleanroomDir = p.join(
+      workingDirectory,
+      'cleanrooms',
+      branch,
+      'analyze',
+    );
     final dir = Directory(cleanroomDir);
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
@@ -137,21 +179,99 @@ class EffectExecutor {
         '> Format: ## F<N>: <title> — CONFIRMED|REVISED|INVALIDATED\n',
       );
     }
+
+    _writeIssueMirror(branch, issue, today);
+  }
+
+  /// Best-effort `cleanrooms/<branch>/issue.md` mirror of the GitHub issue.
+  ///
+  /// Idempotent: never clobbers an existing mirror. A failed/empty body fetch
+  /// is non-fatal — the mirror is still written with the available metadata.
+  void _writeIssueMirror(String branch, String issue, String today) {
+    final issueFile = File(
+      p.join(workingDirectory, 'cleanrooms', branch, 'issue.md'),
+    );
+    if (issueFile.existsSync()) return;
+
+    String? body;
+    if (issue.isNotEmpty) {
+      try {
+        body = _issueBodyProvider(issue, workingDirectory);
+      } catch (_) {
+        body = null;
+      }
+    }
+
+    final issueRef = issue.isNotEmpty ? '#$issue' : '(unassigned)';
+    final buffer = StringBuffer()
+      ..write('---\n')
+      ..write('id: issue\n')
+      ..write('issue: "$issue"\n')
+      ..write('branch: $branch\n')
+      ..write('date: $today\n')
+      ..write('---\n')
+      ..write('\n')
+      ..write('# Issue $issueRef\n')
+      ..write('\n');
+    if (body != null && body.trim().isNotEmpty) {
+      buffer.write(body.trim());
+      buffer.write('\n');
+    } else {
+      buffer.write('> Issue body unavailable (fetched best-effort).\n');
+    }
+
+    issueFile.parent.createSync(recursive: true);
+    issueFile.writeAsStringSync(buffer.toString());
+  }
+
+  static String? _defaultIssueBodyProvider(
+    String issue,
+    String workingDirectory,
+  ) {
+    try {
+      final result = Process.runSync('gh', [
+        'issue',
+        'view',
+        issue,
+        '--json',
+        'body',
+        '-q',
+        '.body',
+      ], workingDirectory: workingDirectory);
+      if (result.exitCode != 0) return null;
+      final body = result.stdout.toString().trim();
+      return body.isEmpty ? null : body;
+    } catch (_) {
+      return null;
+    }
   }
 
   String _getCurrentBranch() {
     return getCurrentBranch(workingDirectory);
   }
 
-  /// Reset `.inquiry/mutations.md` to empty template.
+  /// Reset the cycle-local `cleanrooms/<branch>/mutations.md` to empty template.
   void resetMutations() {
-    final file = File(p.join(_inquiryDir, 'mutations.md'));
+    final file = File(_mutationsPath());
+    file.parent.createSync(recursive: true);
     file.writeAsStringSync(
       '# Mutations\n'
       '\n'
       'Notes for DARWIN. Write observations about the current cycle here.\n'
       'This file is read during EVOLUTION and cleared afterwards.\n',
     );
+  }
+
+  /// Resolve the cycle-local `mutations.md` path.
+  ///
+  /// Falls back to repo-level `.inquiry/mutations.md` only when no cycle
+  /// resolves (derived IDLE / not a git repo).
+  String _mutationsPath() {
+    final branch = _getCurrentBranch();
+    if (branch.isEmpty) {
+      return p.join(_inquiryDir, 'mutations.md');
+    }
+    return p.join(workingDirectory, 'cleanrooms', branch, 'mutations.md');
   }
 
   /// Resolve the initial_state for an APE by loading its YAML definition.
@@ -172,8 +292,10 @@ class EffectExecutor {
   void snapshotMetrics() {
     final current = InquiryState.load(workingDirectory);
 
-    final issueLine =
-        current.issue != null ? 'issue: "${current.issue}"' : 'issue: null';
+    final issueLine = current.issue != null
+        ? 'issue: "${current.issue}"'
+        : 'issue: null';
+    Directory(_inquiryDir).createSync(recursive: true);
     final snapshot = File(p.join(_inquiryDir, 'metrics_snapshot.yaml'));
     snapshot.writeAsStringSync(
       'snapshot_at: "${DateTime.now().toUtc().toIso8601String()}"\n'
@@ -191,12 +313,14 @@ class EffectExecutor {
   void collectMetrics() {
     final current = InquiryState.load(workingDirectory);
 
-    final issueLine =
-        current.issue != null ? 'issue: "${current.issue}"' : 'issue: null';
+    final issueLine = current.issue != null
+        ? 'issue: "${current.issue}"'
+        : 'issue: null';
     final entry =
         '  - $issueLine\n'
         '    completed_at: "${DateTime.now().toUtc().toIso8601String()}"\n';
 
+    Directory(_inquiryDir).createSync(recursive: true);
     final metricsFile = File(p.join(_inquiryDir, 'metrics.yaml'));
     if (metricsFile.existsSync()) {
       metricsFile.writeAsStringSync(entry, mode: FileMode.append);
@@ -221,11 +345,7 @@ class EffectExecutor {
     final executed = <String>[];
 
     // Always update state on valid transition
-    updateState(
-      newState,
-      issue: issue,
-      promptFragmentId: promptFragmentId,
-    );
+    updateState(newState, issue: issue, promptFragmentId: promptFragmentId);
     executed.add('update_state');
 
     for (final effect in effects) {
@@ -244,6 +364,10 @@ class EffectExecutor {
           executed.add(effect);
         case 'collect_metrics':
           collectMetrics();
+          executed.add(effect);
+        case 'pause_analysis':
+        case 'pause_plan':
+          _markBlocked();
           executed.add(effect);
         // Skill-side effects — not executed by CLI
         default:

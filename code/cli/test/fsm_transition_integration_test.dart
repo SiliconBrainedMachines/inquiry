@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
+import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:inquiry_cli/modules/fsm/commands/transition.dart';
 
 void main() {
@@ -22,55 +23,101 @@ void main() {
       }
     });
 
-    test('incident replay is prevented: IDLE cannot go_execute directly', () async {
-      _writeState(tempDir.path, 'IDLE');
+    test(
+      'incident replay is prevented: IDLE cannot go_execute directly',
+      () async {
+        _writeState(tempDir.path, 'IDLE');
 
-      final command = StateTransitionCommand(
-        StateTransitionInput(
-          currentState: null,
-          event: 'go_execute',
-          workingDirectory: tempDir.path,
-        ),
-        branchProvider: (_) async => 'main',
-      );
+        final command = StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'go_execute',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => 'main',
+        );
 
-      final output = await command.execute();
-      expect(output.allowed, isFalse);
-      expect(output.exitCode, 64);
-    });
+        final output = await command.execute();
+        expect(output.allowed, isFalse);
+        expect(output.exitCode, 64);
+      },
+    );
 
-    test('IDLE leaves only after the explicit-start handoff is prepared',
-        () async {
-      _writeState(tempDir.path, 'IDLE', issue: '51');
+    test(
+      'IDLE leaves only after the explicit-start handoff is prepared',
+      () async {
+        _writeState(tempDir.path, 'IDLE', issue: '51');
 
-      final blocked = await StateTransitionCommand(
+        final blocked = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'start_analyze',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => 'main',
+        ).execute();
+
+        expect(blocked.allowed, isFalse);
+        expect(blocked.nextState, isNull);
+        expect(
+          File(
+            p.join(
+              tempDir.path,
+              'cleanrooms',
+              '51-idle-execution-guardrails',
+              kStateFileName,
+            ),
+          ).readAsStringSync(),
+          contains('state: IDLE'),
+        );
+
+        final allowed = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'start_analyze',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => '51-idle-execution-guardrails',
+        ).execute();
+
+        expect(allowed.allowed, isTrue);
+        expect(allowed.nextState, 'ANALYZE');
+        expect(allowed.promptFragmentId, 'idle_to_analyze');
+      },
+    );
+
+    test('IDLE→ANALYZE bootstraps the full cycle', () async {
+      const branch = '51-idle-execution-guardrails';
+
+      final output = await StateTransitionCommand(
         StateTransitionInput(
           currentState: null,
           event: 'start_analyze',
           workingDirectory: tempDir.path,
         ),
-        branchProvider: (_) async => 'main',
+        branchProvider: (_) async => branch,
       ).execute();
 
-      expect(blocked.allowed, isFalse);
-      expect(blocked.nextState, isNull);
+      expect(output.allowed, isTrue);
+      expect(output.nextState, 'ANALYZE');
+
+      final cycleDir = p.join(tempDir.path, 'cleanrooms', branch);
       expect(
-        File(p.join(tempDir.path, '.inquiry', 'state.yaml')).readAsStringSync(),
-        contains('state: IDLE'),
+        File(p.join(cycleDir, 'analyze', 'index.md')).existsSync(),
+        isTrue,
       );
+      expect(
+        File(p.join(cycleDir, 'analyze', 'confirmations.md')).existsSync(),
+        isTrue,
+      );
+      expect(File(p.join(cycleDir, 'issue.md')).existsSync(), isTrue);
 
-      final allowed = await StateTransitionCommand(
-        StateTransitionInput(
-          currentState: null,
-          event: 'start_analyze',
-          workingDirectory: tempDir.path,
-        ),
-        branchProvider: (_) async => '51-idle-execution-guardrails',
-      ).execute();
+      final state = InquiryState.loadFrom(p.join(cycleDir, kStateFileName));
+      expect(state.state, 'ANALYZE');
+      expect(state.status, 'active');
 
-      expect(allowed.allowed, isTrue);
-      expect(allowed.nextState, 'ANALYZE');
-      expect(allowed.promptFragmentId, 'idle_to_analyze');
+      // The freshly created cycle resolves as active (not derived IDLE).
+      expect(InquiryState.load(tempDir.path).state, 'ANALYZE');
     });
 
     test('full cycle uses transition command on each step', () async {
@@ -134,22 +181,28 @@ void main() {
 }
 
 void _writeState(String root, String state, {String? issue}) {
-  final file = File(p.join(root, '.inquiry', 'state.yaml'));
+  final r = Process.runSync('git', [
+    'rev-parse',
+    '--abbrev-ref',
+    'HEAD',
+  ], workingDirectory: root);
+  final branch = r.exitCode == 0 ? r.stdout.toString().trim() : '';
+  if (branch.isEmpty || branch == 'HEAD') return;
+  final file = File(p.join(root, 'cleanrooms', branch, kStateFileName));
   file.createSync(recursive: true);
   final issueLine = issue != null ? 'issue: "$issue"' : 'issue: null';
-  file.writeAsStringSync('state: $state\n$issueLine\n');
+  file.writeAsStringSync(
+    'version: 1\nstate: $state\n$issueLine\nstatus: active\n',
+  );
 }
 
 void _copyContractFromWorkspace(String root) {
   final source = File(
-    p.join(
-      Directory.current.path,
-      'assets',
-      'fsm',
-      'transition_contract.yaml',
-    ),
+    p.join(Directory.current.path, 'assets', 'fsm', 'transition_contract.yaml'),
   );
-  final destination = File(p.join(root, 'assets', 'fsm', 'transition_contract.yaml'));
+  final destination = File(
+    p.join(root, 'assets', 'fsm', 'transition_contract.yaml'),
+  );
   destination.createSync(recursive: true);
   destination.writeAsStringSync(source.readAsStringSync());
 }
