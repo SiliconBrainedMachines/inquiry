@@ -137,12 +137,29 @@ assert at least one guard distinguishes hidden universal dispatch from ANALYZE-v
 
 **Risk note:** D1 and D4 require the repair to be phase-owned, not SOCRATES-owned. If this phase only rewrites SOCRATES or firmware wording, the architectural defect remains.
 
-- [ ] Extend `code/cli/lib/modules/ape/operational_contract.dart` and any dependent state serialization surfaces only as much as needed to expose the ANALYZE-specific metadata required by the fix.
-- [ ] Rewrite `code/cli/assets/fsm/states/analyze.yaml` so ANALYZE becomes methodology-agnostic and explicitly owns user participation, visible interaction, analyze corpus expectations, and completion prerequisites.
-- [ ] Update `code/cli/assets/fsm/transition_contract.yaml` and `code/cli/lib/modules/fsm/commands/transition.dart` so ANALYZE -> PLAN no longer reduces completion to `diagnosis_exists` alone.
-- [ ] Update `code/cli/lib/modules/fsm/commands/state.dart` if needed so the runtime exposes the new operational contract data required by firmware behavior.
-- [ ] Keep the implementation minimal: solve the ANALYZE slice without forcing a full declarative redesign of every other state in the same phase.
-- [ ] Re-run the focused contract and transition guard set immediately after the source edits.
+- [x] Extend `code/cli/lib/modules/ape/operational_contract.dart` and any dependent state serialization surfaces only as much as needed to expose the ANALYZE-specific metadata required by the fix.
+- [x] Rewrite `code/cli/assets/fsm/states/analyze.yaml` so ANALYZE becomes methodology-agnostic and explicitly owns user participation, visible interaction, analyze corpus expectations, and completion prerequisites.
+- [x] Update `code/cli/assets/fsm/transition_contract.yaml` and `code/cli/lib/modules/fsm/commands/transition.dart` so ANALYZE -> PLAN no longer reduces completion to `diagnosis_exists` alone.
+- [x] Update `code/cli/lib/modules/fsm/commands/state.dart` if needed so the runtime exposes the new operational contract data required by firmware behavior.
+- [x] Keep the implementation minimal: solve the ANALYZE slice without forcing a full declarative redesign of every other state in the same phase.
+- [x] Re-run the focused contract and transition guard set immediately after the source edits.
+
+**QA result:** PASS
+
+Focused bundle executed after the minimal contract implementation:
+
+- `fsm_contract_test.dart`
+- `fsm_state_test.dart`
+- `fsm_transition_test.dart`
+
+Observed result after one local fixture repair pass: 59 passed, 0 failed.
+
+What is now green in the issue-180 slice:
+
+- ANALYZE exposes `required_artifacts` and `interaction` through the operational contract surface;
+- `analyze.yaml` now carries a methodology-agnostic phase contract with explicit participation and visibility requirements;
+- the ANALYZE -> PLAN boundary no longer reduces completion to `diagnosis_exists` alone and now requires `index.md` and `confirmations.md`;
+- the transition validator now fails closed when the analysis corpus is structurally incomplete.
 
 **Verification / test definition:**
 ```text
