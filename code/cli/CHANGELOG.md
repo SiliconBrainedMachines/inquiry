@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.2]
+### Fixed
+- **PLAN-owned constructor enumeration**: when a plan phase changes a shared interface or type shape, the PLAN contract now requires enumerating construction sites and naming the search strategy used to find them; this fix lives in PLAN, not in DESCARTES (#139)
+
 ## [0.6.1]
 ### Fixed
 - **Windows cycle-root normalization**: `git rev-parse --show-toplevel` paths are now normalized before Inquiry composes cycle-local paths, preventing Windows-only failures in `InquiryState.stateFileFor` and unblocking the Windows release build
