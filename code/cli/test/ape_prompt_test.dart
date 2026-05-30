@@ -1095,9 +1095,12 @@ void main() {
           );
           expect(
             result.prompt,
-            contains('mutations_file: .inquiry/mutations.md'),
+            contains('mutations_file: cleanrooms/152-test-branch/mutations.md'),
           );
-          expect(result.prompt, contains('state_file: .inquiry/state.yaml'));
+          expect(
+            result.prompt,
+            contains('state_file: cleanrooms/152-test-branch/.iq.state.yaml'),
+          );
           expect(
             result.prompt,
             contains('metrics_snapshot_file: .inquiry/metrics_snapshot.yaml'),

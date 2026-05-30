@@ -16,14 +16,23 @@ hypothesis ledger (H1–H7) as evidence accumulates.
 | H1 | Centralized resolution is behavior-preserving | CONFIRMED | Phase 1: +7 resolver tests green, existing suite unchanged (386 total) |
 | H2 | State can be cycle-local with IDLE derived | CONFIRMED | Phase 2: state at `cleanrooms/<branch>/.iq.state.yaml`, IDLE derived from `status: completed`/no-cycle, never persisted; full suite green (393) |
 | H3 | IDLE→ANALYZE is a sufficient bootstrap | CONFIRMED | Phase 3: transition materializes analyze/index.md + confirmations.md + issue.md mirror + `.iq.state.yaml` (status active, state ANALYZE); freshly created cycle resolves as active; suite green (397) |
-| H4 | Cycle runtime and CLI config separate cleanly | PENDING | Phase 4 |
+| H4 | Cycle runtime and CLI config separate cleanly | CONFIRMED | Phase 4: cycle-scoped `mutations.md` moves to `cleanrooms/<branch>/`; project-scoped `config.yaml` stays at `.inquiry/` (U1); CLI + VS Code extension both resolve cycle-local mutations; metrics writers made dir-self-sufficient; CLI suite green (397) + extension unit suite green (69) |
 | H5 | status lifecycle expressible without persisting IDLE | PENDING | Phase 5 |
 | H6 | Discovery degrades safely at the edges | CONFIRMED | Phase 2: no-cycle (non-git / detached HEAD) resolves to derived IDLE without error; load returns IDLE on missing/malformed state |
 | H7 | Extension can follow CLI resolution | PENDING | Phase 7 |
 
 ## Decisions
 
-- U1 (config.yaml location): PENDING — Phase 4.
+- U1 (config.yaml location): **DECIDED — option (b): keep `.inquiry/config.yaml`
+  at `project_root`.** Rationale: `config.yaml` holds *project-scoped* settings
+  (the `evolution.enabled` toggle), not cycle runtime, so leaving it at repo-level
+  `.inquiry/` does **not** violate H4 ("nothing *cycle-scoped* lives at repo-level
+  `.inquiry/`"). Experiment outcome: enumerating the three consumers —
+  CLI `_readEvolutionEnabled` (`state.dart`), `init` (`init.dart`), VS Code
+  `toggleEvolution` (`commands.ts`) — they all already resolve `.inquiry/config.yaml`;
+  keeping that path yields **zero special cases** and the fewest moving parts, which
+  is the deciding criterion. `inquiryCliRoot` remains `project_root`; only
+  *cycle-scoped* `mutations.md` moves to `cleanrooms/<branch>/`.
 - U2 (status ownership): PENDING — Phase 5.
 - U3 (metrics action): PENDING — Phase 8.
 
@@ -77,3 +86,31 @@ hypothesis ledger (H1–H7) as evidence accumulates.
   no-clobber) + 1 `fsm_transition_integration_test` end-to-end bootstrap. Full suite:
   **397 green**. `dart analyze` clean.
 - **H3 CONFIRMED**.
+
+### Phase 4 — Separate cycle mutations (cycle-local) from config (CLI root)
+
+- `lib/modules/fsm/effect_executor.dart`:
+  - `resetMutations()` now writes to `_mutationsPath()` instead of `.inquiry/mutations.md`.
+  - New `_mutationsPath()`: `cleanrooms/<branch>/mutations.md` when on a born branch,
+    else falls back to `.inquiry/mutations.md` (no-cycle edge).
+  - **Regression fix**: `resetMutations` previously created `.inquiry/` as a side effect that
+    `snapshotMetrics`/`collectMetrics` implicitly relied on. With mutations now cycle-local,
+    both metrics writers `createSync(recursive: true)` their `.inquiry/` dir before writing.
+    (Metrics *location* unchanged — Phase 8 territory; this only restores the dir guarantee.)
+- `lib/modules/ape/commands/prompt.dart`: darwin runtime context `mutations_file` →
+  `cleanrooms/<branch>/mutations.md`, `state_file` → `cleanrooms/<branch>/.iq.state.yaml`.
+  `metrics_*` paths stay `.inquiry/...` (Phase 8).
+- VS Code extension (per user requirement — the add-mutation command must target the
+  cycle-local ledger):
+  - New `code/vscode/src/cycle.ts`: `resolveBranch(workspaceFolder)` (git
+    `rev-parse --abbrev-ref HEAD`; null on no-repo / `HEAD` / slashed branch) and
+    `resolveMutationsDir(workspaceFolder)` → `cleanrooms/<branch>` or `.inquiry` fallback.
+  - `extension.ts`: `inquiry.addMutation` now resolves `resolveMutationsDir(workspaceFolder)`
+    at invocation time instead of the fixed `.inquiry` path. `toggleEvolution` still targets
+    `.inquiry/config.yaml` (U1).
+  - `commands.ts`: `addMutation` `mkdirSync(recursive)` before append (robust when the
+    cycle dir is resolved fresh).
+  - Tests: new `test/unit/cycle.test.ts` (5 cases, real git repos). Extension unit suite: **69 green**.
+- Tests: `effect_executor_test` reset_mutations/executeAll repointed cycle-local;
+  `ape_prompt_test` darwin assertions repointed. CLI suite: **397 green**. `dart analyze` clean.
+- **H4 CONFIRMED**.

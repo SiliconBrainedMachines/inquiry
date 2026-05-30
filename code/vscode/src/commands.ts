@@ -33,6 +33,7 @@ export async function addMutation(apeFolderPath: string): Promise<void> {
 
   const mutationsPath = path.join(apeFolderPath, 'mutations.md');
   const entry = formatMutation(text, true);
+  fs.mkdirSync(apeFolderPath, { recursive: true });
   fs.appendFileSync(mutationsPath, entry, 'utf-8');
   vscode.window.showInformationMessage('Inquiry: Mutation note added');
 }
