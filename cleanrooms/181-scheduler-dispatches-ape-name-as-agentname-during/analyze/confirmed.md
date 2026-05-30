@@ -47,21 +47,41 @@ Evidence:
 - The plan defines Phase 0 as a baseline-freeze step with no prior implementation work in [cleanrooms/181-scheduler-dispatches-ape-name-as-agentname-during/plan.md](cleanrooms/181-scheduler-dispatches-ape-name-as-agentname-during/plan.md#L31).
 - Repository QA notes preserve the runtime distinction that made the contract divergence operationally relevant in /memories/repo/release-qa.md.
 
-## F5: Fresh QA supports the local decoupled rule only when workspace state is controlled — REVISED
+## F5: QA is admissible only from clean `.inquiry` or an explicit diagnostic override — REVISED
 
-The reopened repository state is not one of total uncertainty, but the fresh compiled build no longer yields a single unconditional result. The current working tree still passes the narrow firmware contract gate, and a fresh packaged build completes successfully. The same packaged binary also assembles the SOCRATES prompt when invoked from the repo root or when given an explicit valid APE state. However, invoking that same binary from `code/cli` against the local `code/cli/.inquiry/state.yaml` fails with `Unknown state: _DONE for APE socrates`. Fresh QA therefore supports the decoupled dispatch rule only after separating dispatch-contract evidence from workspace-state sensitivity.
-
-Evidence:
-- `dart test test/firmware_agent_test.dart` passes from `code/cli`, showing that the current working-tree firmware contract satisfies the local regression guard.
-- A fresh packaged build completes via [code/cli/scripts/build.ps1](code/cli/scripts/build.ps1), regenerating `code/cli/build/bin/inquiry.exe` and the paired `code/cli/build/assets` tree.
-- The packaged binary fails from `code/cli` because [code/cli/.inquiry/state.yaml](code/cli/.inquiry/state.yaml) currently sets `ape.state: _DONE`, and [code/cli/assets/apes/socrates.yaml](code/cli/assets/apes/socrates.yaml) does not define `_DONE` as an invocable prompt state.
-- The same packaged binary succeeds when invoked from the repo root, where [.inquiry/state.yaml](.inquiry/state.yaml) currently sets `ape.state: meta_reflection`, and also succeeds from `code/cli` when passed an explicit valid SOCRATES state.
-
-## F6: Different stakeholders can read the same QA evidence in contradictory ways unless the workspace precondition is named — CONFIRMED
-
-The fresh build evidence is perspectival. A runtime critic can look at the `Unknown state: _DONE` crash and conclude the packaged binary is broken. A dispatch-contract reviewer can look at the successful root-level or explicit-state prompt assembly and conclude the generic/current dispatch repair is locally coherent. A plan owner has to hold both facts at once: the decoupled dispatch wording is locally coherent, but the compiled-build smoke is environment-sensitive and therefore cannot be cited loosely as unconditional proof.
+The fresh compiled build no longer yields admissible QA evidence when it is run against ambient workspace state. In the current repository, both the repo-root `.inquiry/state.yaml` and `code/cli/.inquiry/state.yaml` now persist `ape.state: _DONE`, so an uncontrolled packaged run can fail before it tells us anything useful about dispatch. For issue #181, clean QA must therefore start from a clean `.inquiry` trace. An explicit `--state` override remains useful, but only as a bounded diagnostic probe rather than as a substitute for a clean runtime baseline.
 
 Evidence:
-- [code/cli/.inquiry/state.yaml](code/cli/.inquiry/state.yaml) and [.inquiry/state.yaml](.inquiry/state.yaml) currently encode different APE sub-states for the same issue slice.
-- [code/cli/lib/modules/ape/ape_definition.dart](code/cli/lib/modules/ape/ape_definition.dart) throws on unknown state names during prompt assembly, so the QA outcome depends on which persisted workspace state the binary reads.
+- [.inquiry/state.yaml](.inquiry/state.yaml) currently records `state: ANALYZE` with `ape.state: _DONE`.
+- [code/cli/.inquiry/state.yaml](code/cli/.inquiry/state.yaml) currently records `state: ANALYZE` with `ape.state: _DONE`.
+- [code/cli/assets/apes/socrates.yaml](code/cli/assets/apes/socrates.yaml) does not define `_DONE` as an invocable prompt state.
+- [code/cli/lib/modules/ape/ape_definition.dart](code/cli/lib/modules/ape/ape_definition.dart#L72) throws on unknown state names during prompt assembly.
+
+## F6: Ambient workspace runs and clean QA runs are different evidence classes — REVISED
+
+The narrow firmware gate and a fresh packaged build still matter, but they do not by themselves establish a clean QA trace. The current working tree can be locally coherent while ambient packaged runs remain contaminated by stale `.inquiry` state. For this issue, ambient runs are diagnostic controls only; the admissible QA claim starts after `.inquiry` is clean.
+
+Evidence:
+- [code/cli/test/firmware_agent_test.dart](code/cli/test/firmware_agent_test.dart#L36) still encodes the local regression guard.
+- [code/cli/scripts/build.ps1](code/cli/scripts/build.ps1) still regenerates the packaged binary and paired `build/assets` tree.
+- [.inquiry/state.yaml](.inquiry/state.yaml) and [code/cli/.inquiry/state.yaml](code/cli/.inquiry/state.yaml) currently retain stale APE state that can change the meaning of a packaged run.
 - The repository QA notes in /memories/repo/release-qa.md already require explicit control of the packaged binary path and runtime environment during build smoke.
+
+## F7: EXECUTE inherited `issue-start` and explicitly reopened ANALYZE — CONFIRMED
+
+The jump from EXECUTE back to ANALYZE was not spontaneous FSM behavior. It was an explicit transition made possible by the current transition-owned prompt wiring. `plan_to_execute` and `execute_continue` both inject `issue-start` into BASHO's prompt surface, and `issue-start` literally instructs the scheduler to run `iq fsm transition --event start_analyze --issue NNN` even though that protocol is documented for IDLE-to-ANALYZE startup. During this session, the BASHO implement turn followed that instruction and explicitly reopened ANALYZE.
+
+Evidence:
+- [code/cli/assets/fsm/transition_contract.yaml](code/cli/assets/fsm/transition_contract.yaml#L476) assigns `instructions: [issue-start]` to `plan_to_execute`.
+- [code/cli/assets/fsm/transition_contract.yaml](code/cli/assets/fsm/transition_contract.yaml#L488) assigns `instructions: [issue-start]` to `execute_continue`.
+- [code/cli/assets/instructions/issue-start.md](code/cli/assets/instructions/issue-start.md#L14) instructs `iq fsm transition --event start_analyze --issue NNN`.
+- [code/cli/assets/instructions/issue-start.md](code/cli/assets/instructions/issue-start.md#L19) and [code/cli/assets/instructions/issue-start.md](code/cli/assets/instructions/issue-start.md#L22) scope that protocol to IDLE/DONE startup before IDLE-to-ANALYZE.
+
+## F8: Continuing ANALYZE preserves `_DONE` and can strand SOCRATES prompt assembly — CONFIRMED
+
+Reopening ANALYZE is currently not enough to make SOCRATES runnable again. When the FSM continues within the same top-level state/APE pairing, the state update logic preserves the existing APE sub-state instead of restoring the APE's initial state. If that preserved sub-state is `_DONE`, `iq ape prompt --name socrates` fails immediately, because `_DONE` is a sentinel transition target rather than a prompt-bearing SOCRATES state.
+
+Evidence:
+- [code/cli/lib/modules/fsm/effect_executor.dart](code/cli/lib/modules/fsm/effect_executor.dart#L68) and [code/cli/lib/modules/fsm/effect_executor.dart](code/cli/lib/modules/fsm/effect_executor.dart#L69) preserve the current APE state when the same APE remains active.
+- [code/cli/lib/modules/ape/ape_definition.dart](code/cli/lib/modules/ape/ape_definition.dart#L72) throws on unknown state names during prompt assembly.
+- [.inquiry/state.yaml](.inquiry/state.yaml) and [code/cli/.inquiry/state.yaml](code/cli/.inquiry/state.yaml) currently remain in `ape.state: _DONE` after continuing ANALYZE.
