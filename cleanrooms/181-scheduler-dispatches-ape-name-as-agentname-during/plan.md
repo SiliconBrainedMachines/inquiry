@@ -1,262 +1,301 @@
 ---
 id: plan
-title: "Plan - Scheduler dispatch contract audit"
-date: 2026-05-29
+title: "Plan - Scheduler dispatch and control contract alignment"
+date: 2026-05-30
 status: active
-tags: [plan, scheduler, dispatch, firmware]
+tags: [plan, scheduler, dispatch, control, qa]
 author: DESCARTES
 ---
 
-# Plan - Scheduler dispatch contract audit (#181)
+# Plan - Scheduler dispatch and control contract alignment (#181)
 
-**Hypothesis:** If execution first treats the rejected Phase 0 deviation as a hard boundary between committed-baseline proof and candidate working-tree repair, then locks the decoupled dispatch rule into the committed regression guard using the exact firmware contract strings already evidenced in the local guard, then aligns source and packaged firmware assets to those same strings, then repeats packaged QA under explicit state control plus an explicitly identified host-side dispatch smoke, then synchronizes release metadata under the repository's version-sync guard, and only then runs the full project test suite, issue #181 can be resolved without mistaking local coherence for committed proof.
+**Hypothesis:** If EXECUTE first re-establishes the clean committed baseline and a clean `.inquiry` QA harness, then locks executable regression guards for both dispatch semantics and EXECUTE control leakage, then aligns the source instruction/code surfaces and packaged mirrors to those guards, then replays packaged and host-side QA from a fresh `.inquiry` trace, then synchronizes release metadata, and only then runs the full project suites, issue #181 can be resolved without confusing working-tree coherence, ambient state, and committed proof.
 
 **Falsification:** Stop execution, annotate a deviation, and return to ANALYZE if any phase shows one of these conditions:
-- the committed baseline cannot be described separately from the working-tree repair;
-- the committed regression guard still cannot express the decoupled rule clearly enough to distinguish RED from GREEN;
-- packaged/runtime behavior under an explicit valid APE state still depends on `agentName = ape.name`;
-- workspace-sensitive QA cannot be made reproducible by fixing binary path, working directory, and explicit `--state` input;
+- the committed baseline still cannot be described separately from candidate working-tree repair;
+- a clean `.inquiry` QA harness cannot be named and reproduced;
+- the regression guards cannot distinguish named dispatch from generic/current dispatch, or cannot distinguish IDLE startup from EXECUTE continuation;
+- EXECUTE prompt surfaces still inherit `issue-start`, or same-APE continuation still leaves the active APE stranded at `_DONE` when the plan expects a runnable prompt state;
+- the packaged build and source surfaces still drift after rebuild;
+- the host-side named-failure versus generic-success smoke cannot be replayed from clean packaged input;
 - the final full-project verification fails for regressions introduced by the issue-181 slice.
 
 **Diagnosis anchors:**
 - Decision 1: separate committed baseline evidence from working-tree repair evidence.
-- Decision 2: treat source/build contract drift as the live problem under analysis.
-- Decision 3: treat the decoupled regression rule as provisional until it exists in the committed test baseline.
-- Decision 4: distinguish local coherence from committed-baseline proof.
-- Decision 5: reframe the issue from "already resolved runtime behavior" to alignment of contract and evidence surfaces.
+- Decision 2: treat clean `.inquiry` as a mandatory QA precondition.
+- Decision 3: treat source/build contract drift as the live problem under analysis.
+- Decision 4: treat EXECUTE-to-ANALYZE reentry as explicit control-plane leakage, not autonomous FSM behavior.
+- Decision 5: treat the decoupled regression rule as provisional until it exists in the committed test baseline.
+- Decision 6: distinguish local coherence from committed-baseline proof.
+- Decision 7: reframe the issue from "already resolved runtime behavior" to alignment of dispatch contract, transition contract, and clean-QA evidence surfaces.
 
 **Adjacent evidence anchors:**
-- Confirmed finding F4: the rejected Phase 0 EXECUTE result is a planning constraint about baseline integrity, not a procedural footnote.
-- Confirmed finding F5: fresh packaged QA only counts as local support when binary path, working directory, and explicit valid `--state` are controlled.
-- Confirmed finding F6: the same packaged QA evidence can look like success or failure unless workspace-local state is named explicitly.
-- `code/cli/test/firmware_agent_test.dart` already names the exact issue-181 contract strings to preserve: `generic/current sub-agent path`, omit `agentName`, `independent of APE identity`, and Do NOT set `agentName` from `ape.name`.
-- `code/cli/assets/apes/socrates.yaml` and `code/cli/assets/apes/descartes.yaml` provide the explicit valid packaged-QA controls `clarification` and `decomposition`, so Phase 4 does not invent runtime states.
-- `code/cli/test/version_sync_test.dart` is the repository's targeted release-metadata guard for Phase 5.
-- `cleanrooms/181-scheduler-dispatches-ape-name-as-agentname-during/phase-0-contract-baseline.md` remains the authoritative deviation record for committed-vs-working-tree contamination.
+- Confirmed finding F4: the rejected Phase 0 EXECUTE result is a baseline-integrity constraint, not a footnote.
+- Confirmed finding F5: admissible QA for this issue must start from clean `.inquiry`.
+- Confirmed finding F6: ambient workspace runs and clean QA runs are different evidence classes.
+- Confirmed finding F7: `plan_to_execute` and `execute_continue` currently inherit `issue-start`.
+- Confirmed finding F8: continuing ANALYZE can preserve `_DONE` and strand SOCRATES prompt assembly.
+- `code/cli/test/firmware_agent_test.dart` already names the exact dispatch-contract literals the repair must preserve.
+- `code/cli/test/fsm_contract_test.dart`, `code/cli/test/fsm_transition_test.dart`, `code/cli/test/instruction_prompt_loader_test.dart`, `code/cli/test/assets_test.dart`, and `code/cli/test/effect_executor_test.dart` are the nearby executable gates for the control-plane slice.
+- `/memories/repo/release-qa.md` already records the named-dispatch failure versus generic-dispatch success distinction and the clean `.inquiry` QA rule.
 
-**Ordering rule for this cycle:** Remove ambiguity before repairing behavior: baseline boundary -> regression guard -> source contract -> packaged mirror -> controlled packaged QA -> release metadata -> full project verification. Do not widen validation while a cheaper predecessor phase can still falsify the diagnosis.
+**Ordering rule for this cycle:** baseline boundary and clean-QA harness -> dispatch regression guard -> control-plane and state-reset guards -> source dispatch contract -> source control contract -> packaged rebuild and mirror check -> clean packaged and host-side QA -> release metadata -> full project verification.
 
-**Phase-close rule for this cycle:** A phase closes only when its deliverable is recorded, its verification block has a clear pass/fail result, and no unchecked ambiguity remains inside that phase's scope. If verification contradicts the diagnosis anchor that phase depends on, append a deviation note and stop instead of continuing.
+**Phase-close rule for this cycle:** A phase closes only when its deliverable is recorded, its verification block has a clear pass/fail result, and no ambiguity remains inside that phase's scope. If verification contradicts the diagnosis anchor the phase depends on, append a deviation note and stop.
 
-**Approval immutability rule for this cycle:** Once the user approves this plan, phase order, phase titles, dependencies, and test definitions stay fixed. During EXECUTE, only checkboxes and explicit deviation annotations may change.
+**Approval immutability rule for this cycle:** Once the user approves this plan, phase order, phase titles, dependencies, and verification definitions stay fixed. During EXECUTE, only checkboxes, pass/fail notes, and explicit deviation annotations may change.
 
-**Verification rule for this cycle:** Every phase names the concrete checks to run and the pass/fail signal that decides whether execution may continue. The final executable verification step for the whole plan is the full project test suite across every existing test surface in this repository.
+**Verification rule for this cycle:** Every phase names the concrete checks to run and the pass/fail signal that decides whether execution may continue. The final executable verification step for the whole plan is the complete existing project test surface, not a narrower slice.
 
 ---
 
-## Phase 0: Re-establish the committed baseline boundary
+## Phase 0: Re-establish the committed baseline and clean-QA boundary
 
-**Entry criteria:** Approved diagnosis exists at `cleanrooms/181-scheduler-dispatches-ape-name-as-agentname-during/analyze/diagnosis.md`; `cleanrooms/181-scheduler-dispatches-ape-name-as-agentname-during/phase-0-contract-baseline.md` exists; execution has not yet treated the current working tree as committed proof.
+**Entry criteria:** Approved diagnosis exists at `cleanrooms/181-scheduler-dispatches-ape-name-as-agentname-during/analyze/diagnosis.md`; `cleanrooms/181-scheduler-dispatches-ape-name-as-agentname-during/phase-0-contract-baseline.md` exists; execution has not yet treated the current working tree or ambient `.inquiry` state as proof.
 
 **Dependencies:** None.
 
-**Risk note:** Diagnosis decisions 1, 4, and 5 make the baseline boundary a first-class deliverable. If committed files and local repairs are read as one surface, every later GREEN result becomes ambiguous.
+**Risk note:** Diagnosis decisions 1, 2, and 6 make this phase mandatory. If committed files, working-tree repair, and ambient workspace state are read as one surface, every later GREEN result becomes ambiguous.
 
-- [ ] Read the committed `HEAD` version of `code/cli/assets/agents/inquiry.agent.md` separately from the working-tree file.
-- [ ] Read the committed `HEAD` version of `code/cli/build/assets/agents/inquiry.agent.md` separately from the working-tree file.
-- [ ] Read the committed `HEAD` version of `code/cli/test/firmware_agent_test.dart` separately from the working-tree file.
-- [ ] Record every issue-181-relevant committed-vs-working-tree difference as baseline evidence, using `phase-0-contract-baseline.md` as the authoritative deviation anchor.
-- [ ] Record the rejected Phase 0 EXECUTE result as a hard planning constraint: any pre-existing issue-181 working-tree edit counts as candidate repair to keep or reapply deliberately, not as committed proof.
-- [ ] Freeze three packaged-QA surfaces explicitly: the controlled smoke must use binary path `code/cli/build/bin/inquiry.exe`, a chosen working directory, and explicit valid `--state` values derived from the APE definitions (`clarification` for `socrates`, `decomposition` for `descartes`); the ambient repo-root smoke without `--state` is documentation-only evidence of workspace-sensitive success; the ambient `code/cli` smoke without `--state` is documentation-only negative control expected to reproduce the `_DONE` failure. Neither ambient run may replace the explicit-state verdict.
-- [ ] Cross-check `analyze/confirmed.md` findings F4-F6 and `/memories/repo/release-qa.md` against those frozen QA modes so committed proof, local coherence, and workspace sensitivity remain separate claims.
-- [ ] Record whether execution starts from a genuinely clean committed baseline or from a local repair that may only count as candidate evidence.
+- [ ] Read the committed `HEAD` and working-tree contents separately for these issue-181 surfaces: `code/cli/assets/agents/inquiry.agent.md`, `code/cli/build/assets/agents/inquiry.agent.md`, `code/cli/test/firmware_agent_test.dart`, `code/cli/assets/fsm/transition_contract.yaml`, `code/cli/assets/instructions/issue-start.md`, `code/cli/lib/modules/fsm/effect_executor.dart`, `code/cli/test/fsm_contract_test.dart`, `code/cli/test/fsm_transition_test.dart`, `code/cli/test/instruction_prompt_loader_test.dart`, `code/cli/test/assets_test.dart`, and `code/cli/test/effect_executor_test.dart`.
+- [ ] Extend `phase-0-contract-baseline.md` if needed so every issue-181-relevant committed-vs-working-tree difference across dispatch, control, and state-reset surfaces is recorded in one authoritative place.
+- [ ] Freeze the admissible QA harness: packaged QA must begin in a fresh working directory with no pre-existing `.inquiry` trace, and that clean trace must be created deliberately before packaged smoke runs.
+- [ ] Record the exact clean-QA bootstrap to be used later: explicit packaged binary path, fresh working directory, and the sequence of FSM transitions that produces runnable SOCRATES and DESCARTES states without inheriting stale `_DONE`.
+- [ ] Record repo-root `.inquiry` and `code/cli/.inquiry` as negative controls only. They may be consulted diagnostically later, but they do not count as admissible proof for this issue.
+- [ ] Record explicit `--state` overrides as diagnostic disambiguators only, never as substitutes for a clean `.inquiry` trace.
+- [ ] Cross-check diagnosis decisions 2, 4, and 6, confirmed findings F5-F8, and `/memories/repo/release-qa.md` against these frozen evidence classes so clean proof, diagnostic overrides, and ambient negative controls do not get merged later.
 
 **Verification / test definition:**
 ```text
-committed_source = git show HEAD:code/cli/assets/agents/inquiry.agent.md
-working_source = read code/cli/assets/agents/inquiry.agent.md
-committed_build = git show HEAD:code/cli/build/assets/agents/inquiry.agent.md
-working_build = read code/cli/build/assets/agents/inquiry.agent.md
-committed_test = git show HEAD:code/cli/test/firmware_agent_test.dart
-working_test = read code/cli/test/firmware_agent_test.dart
-assert committed_source was reviewed separately from working_source
-assert committed_build was reviewed separately from working_build
-assert committed_test was reviewed separately from working_test
+committed = git show HEAD:<path>
+working = read <path>
+for each issue-181 surface in phase 0:
+  assert committed was reviewed separately from working
 assert phase-0-contract-baseline.md names every issue-181-relevant committed-vs-working-tree difference
-assert the rejected Phase 0 EXECUTE result is recorded as a constraint on how working-tree evidence may be used
-assert packaged QA preconditions name explicit binary path, chosen working directory, explicit valid --state input derived from the APE definitions, an ambient repo-root smoke, and an ambient code/cli smoke
-assert both ambient modes are documented as workspace-sensitivity evidence only and never as substitutes for the explicit-state verdict
-assert confirmed.md F4-F6 and /memories/repo/release-qa.md are cross-checked against the frozen QA modes so baseline proof and workspace-sensitive smoke are not treated as the same evidence
+assert the admissible QA harness starts from a fresh working directory with no pre-existing .inquiry
+assert repo-root .inquiry and code/cli/.inquiry are recorded only as diagnostic controls
+assert explicit --state overrides are recorded only as diagnostic disambiguators
+assert the clean-QA bootstrap names the packaged binary path and the clean transition sequence that yields runnable SOCRATES and DESCARTES states
 ```
 
-**TDD applicability:** None. This phase establishes evidence boundaries, not behavior.
+**TDD applicability:** None. This phase freezes evidence boundaries and QA admissibility.
 
-Deviation anchor already established (2026-05-29): `phase-0-contract-baseline.md` records that the source firmware and firmware regression guard already contain uncommitted issue-slice edits, so execution cannot treat the current working tree as clean baseline proof.
+## Phase 1: Lock the dispatch regression guard into executable form
 
-## Phase 1: Lock the decoupled rule into the committed regression guard
-
-**Entry criteria:** Phase 0 has separated committed baseline evidence from working-tree repairs; the exact committed and working-tree contents of the firmware guard are known.
+**Entry criteria:** Phase 0 has separated committed baseline evidence from working-tree repairs and frozen the clean-QA boundary.
 
 **Dependencies:** Phase 0 complete.
 
-**Risk note:** Diagnosis decision 3 says the decoupled rule is only provisional until it exists in the committed regression baseline. Without this phase, a green runtime smoke can still overstate the repository's committed guarantees.
+**Risk note:** Diagnosis decisions 3 and 5 say the decoupled rule is only provisional until it exists in the regression guard. Without this phase, a green runtime smoke can still overstate the committed guarantees.
 
-- [ ] Compare the committed `code/cli/test/firmware_agent_test.dart` guard against the exact issue-181 contract strings already evidenced in the working-tree guard: `generic/current sub-agent path`, omit `agentName`, `independent of APE identity`, Do NOT set `agentName` from `ape.name`, and rejection of `@<ape.name>`.
-- [ ] If the committed test already requires those exact strings and rejects APE-name-bound dispatch syntax, record that no RED setup edit is needed.
-- [ ] Otherwise, add the minimal regression assertions that require those exact strings and the rejection of `@<ape.name>`.
-- [ ] Run the targeted firmware contract test immediately after the guard is in place.
-- [ ] Record whether the first result is immediate GREEN because the committed source already matches the guard, or intentional RED because the source/build contract still drifts.
+- [ ] Compare the committed `code/cli/test/firmware_agent_test.dart` against the working-tree guard and isolate the minimum missing assertions.
+- [ ] Ensure the guard requires the exact issue-181 literals already evidenced locally: `generic/current sub-agent path`, omit `agentName`, `independent of APE identity`, `Do NOT set agentName from ape.name`, and rejection of `@<ape.name>`.
+- [ ] If the committed guard already encodes those constraints exactly, record that no RED setup edit was required.
+- [ ] Otherwise, add the minimal assertions needed to make the guard fail on named-dispatch coupling and pass on generic/current dispatch.
+- [ ] Run the targeted firmware guard immediately after the assertions are fixed.
+- [ ] Record whether the first executable result is immediate GREEN or intentional RED before any source repair.
 
 **Verification / test definition:**
 ```text
 run "cd code/cli && dart test test/firmware_agent_test.dart"
-if the guard had to be strengthened:
-  expect the first run to expose RED against any remaining source/build drift
+if the guard was strengthened:
+  expect the first run to distinguish RED from GREEN on dispatch wording
 else:
   expect the first run to stay GREEN
-assert code/cli/test/firmware_agent_test.dart now encodes 'generic/current sub-agent path'
-assert code/cli/test/firmware_agent_test.dart now encodes 'omit `agentName`'
-assert code/cli/test/firmware_agent_test.dart now encodes 'independent of APE identity'
-assert code/cli/test/firmware_agent_test.dart now encodes 'Do NOT set `agentName` from `ape.name`'
+assert code/cli/test/firmware_agent_test.dart contains 'generic/current sub-agent path'
+assert code/cli/test/firmware_agent_test.dart contains 'omit agentName'
+assert code/cli/test/firmware_agent_test.dart contains 'independent of APE identity'
+assert code/cli/test/firmware_agent_test.dart contains 'Do NOT set agentName from ape.name'
 assert code/cli/test/firmware_agent_test.dart rejects '@<ape.name>' dispatch syntax
-assert the phase output states clearly whether execution is entering GREEN confirmation or RED -> GREEN repair
 ```
 
-**TDD applicability:** Yes. This is the RED gate that turns the diagnosis into an executable regression contract.
+**TDD applicability:** Yes. This is the dispatch RED/GREEN gate.
 
-## Phase 2: Align the source-of-truth firmware contract
+## Phase 2: Lock the control-plane and state-reset guards
 
-**Entry criteria:** Phase 1 has established the committed regression guard; the source asset still diverges from that guard, or Phase 1 recorded that it already matches and only needs confirmation.
+**Entry criteria:** Phase 1 has established the dispatch guard; the relevant committed and working-tree control surfaces are known.
 
 **Dependencies:** Phase 1 complete.
 
-**Risk note:** Diagnosis decisions 2 and 5 identify the source firmware contract as a live problem surface. Because scheduler behavior is instruction-driven, a source-side wording defect is a runtime defect.
+**Risk note:** Diagnosis decisions 2, 4, and 7 mean EXECUTE leakage and `_DONE` preservation are not secondary curiosities. If they stay unguarded, EXECUTE can legally drift back into ANALYZE or reopen ANALYZE with a non-invocable APE.
 
-- [ ] Update `code/cli/assets/agents/inquiry.agent.md` so `iq ape prompt --name <ape.name>` remains prompt assembly only, while runtime dispatch says `generic/current sub-agent path`, tells the runtime to omit `agentName`, and remains `independent of APE identity`.
-- [ ] Preserve the explicit prohibition Do NOT set `agentName` from `ape.name` in the source asset.
-- [ ] Keep the edit surface bounded to the dispatch-contract instructions named in diagnosis decisions 1-3.
+- [ ] Compare the committed and working-tree control tests: `code/cli/test/fsm_contract_test.dart`, `code/cli/test/fsm_transition_test.dart`, `code/cli/test/instruction_prompt_loader_test.dart`, `code/cli/test/assets_test.dart`, and `code/cli/test/effect_executor_test.dart`.
+- [ ] Strengthen the transition/contract guards so `plan_to_execute` and `execute_continue` can no longer pass while still injecting `issue-start` or implying `start_analyze` from EXECUTE.
+- [ ] Keep `issue-start` tested as an IDLE-to-ANALYZE startup instruction, not as an EXECUTE continuation instruction.
+- [ ] Add or strengthen the nearby state-effect guard so continuing ANALYZE after `_DONE` leaves the active APE in a runnable prompt state rather than preserving `_DONE`.
+- [ ] Run the targeted control-plane and state-effect tests immediately after the guard changes.
+- [ ] Record RED/GREEN separately for prompt-surface leakage and for `_DONE`-state preservation so execution can see which control defect actually fails first.
+
+**Verification / test definition:**
+```text
+run "cd code/cli && dart test test/fsm_contract_test.dart test/fsm_transition_test.dart test/instruction_prompt_loader_test.dart test/assets_test.dart test/effect_executor_test.dart"
+expect the suite to fail RED until the leaked EXECUTE instructions and _DONE continuation behavior are guarded correctly, unless the committed baseline already matches the desired behavior
+assert plan_to_execute and execute_continue no longer require issue-start as the green condition
+assert issue-start remains tested as a startup-only instruction surface
+assert continuing ANALYZE from _DONE is tested to end in a runnable APE state, not _DONE
+assert the phase output distinguishes control-leak RED from state-reset RED when they differ
+```
+
+**TDD applicability:** Yes. This is the control-plane RED/GREEN gate.
+
+## Phase 3: Align the source-of-truth dispatch contract
+
+**Entry criteria:** Phase 1 is green; the exact dispatch wording required by the guard is known.
+
+**Dependencies:** Phase 1 complete.
+
+**Risk note:** Diagnosis decisions 3 and 7 identify the source firmware contract as one live problem surface. Because scheduler behavior is instruction-driven, wording drift in the source asset is a runtime defect.
+
+- [ ] Update `code/cli/assets/agents/inquiry.agent.md` so prompt assembly still uses `iq ape prompt --name <ape.name>`, while runtime dispatch stays on the generic/current sub-agent path and does not derive `agentName` from `ape.name`.
+- [ ] Preserve the explicit prohibition `Do NOT set agentName from ape.name` in the source asset.
+- [ ] Keep the edit surface limited to the dispatch-contract slice named in the diagnosis and guarded in Phase 1.
 - [ ] Re-run `dart test test/firmware_agent_test.dart` immediately after the source edit.
-- [ ] Record the exact source wording that Phase 3 must mirror into the packaged asset.
+- [ ] Record the exact source wording that the packaged mirror must reproduce later.
 
 **Verification / test definition:**
 ```text
 run "cd code/cli && dart test test/firmware_agent_test.dart"
 expect exit_code == 0
 assert code/cli/assets/agents/inquiry.agent.md contains "iq ape prompt --name <ape.name>"
-assert code/cli/assets/agents/inquiry.agent.md contains 'generic/current sub-agent path'
-assert code/cli/assets/agents/inquiry.agent.md contains 'omit `agentName`'
-assert code/cli/assets/agents/inquiry.agent.md contains 'independent of APE identity'
-assert code/cli/assets/agents/inquiry.agent.md contains 'Do NOT set `agentName` from `ape.name`'
-assert code/cli/assets/agents/inquiry.agent.md no longer requires named dispatch as the runtime path
+assert code/cli/assets/agents/inquiry.agent.md contains "generic/current sub-agent path"
+assert code/cli/assets/agents/inquiry.agent.md contains "omit agentName"
+assert code/cli/assets/agents/inquiry.agent.md contains "independent of APE identity"
+assert code/cli/assets/agents/inquiry.agent.md contains "Do NOT set agentName from ape.name"
+assert code/cli/assets/agents/inquiry.agent.md no longer instructs named dispatch as the runtime path
 ```
 
-**TDD applicability:** Yes. This is the GREEN step for the Phase 1 regression gate.
+**TDD applicability:** Yes. This is the GREEN step for the dispatch guard.
 
-## Phase 3: Align the packaged build mirror
+## Phase 4: Align the source control contract and same-APE continuation behavior
 
-**Entry criteria:** Phase 2 has produced a GREEN source contract and a stable wording to mirror.
+**Entry criteria:** Phase 2 is green or has identified the exact source surfaces that still fail it.
 
 **Dependencies:** Phase 2 complete.
 
-**Risk note:** Diagnosis decisions 2 and 5 explicitly identify source/build contract drift as part of the live problem. Leaving `code/cli/build/assets` stale would recreate the same ambiguity under a different file path.
+**Risk note:** Diagnosis decisions 2, 4, and 7 say the control defect spans both prompt surfaces and CLI-side state effects. Fixing only one side leaves EXECUTE or reopened ANALYZE in an unsafe intermediate state.
 
-- [ ] Regenerate or minimally update `code/cli/build/assets/agents/inquiry.agent.md` from the aligned source contract.
-- [ ] Compare source and packaged assets only on the exact issue-181 dispatch-contract strings named in Phase 2, rather than on paraphrases.
-- [ ] Record any intentional difference outside the dispatch-contract slice as out of scope rather than letting it blur this issue.
-- [ ] Do not widen the edit surface beyond the packaged mirror needed for the issue-181 contract.
+- [ ] Remove IDLE startup instructions from the EXECUTE prompt surfaces in `code/cli/assets/fsm/transition_contract.yaml`. `plan_to_execute` and `execute_continue` must no longer route through `issue-start` or imply `start_analyze`.
+- [ ] Keep `code/cli/assets/instructions/issue-start.md` scoped to IDLE/DONE startup before ANALYZE. If its wording changes, keep that scope explicit and update the prompt-loader and asset tests accordingly.
+- [ ] Update `code/cli/lib/modules/fsm/effect_executor.dart` so continuing ANALYZE from `_DONE` does not leave SOCRATES stranded in `_DONE`. The post-transition state must be runnable for the active APE.
+- [ ] Keep the implementation choice bounded to the observable green condition defined in Phase 2, rather than widening into unrelated FSM redesign.
+- [ ] Re-run the targeted control-plane and state-effect test bundle immediately after the source edits.
 
 **Verification / test definition:**
 ```text
-source = read code/cli/assets/agents/inquiry.agent.md
-packaged = read code/cli/build/assets/agents/inquiry.agent.md
-required_strings = [
-  'iq ape prompt --name <ape.name>',
-  'generic/current sub-agent path',
-  'omit `agentName`',
-  'independent of APE identity',
-  'Do NOT set `agentName` from `ape.name`',
-]
-for each required_string in required_strings:
-  assert source contains required_string
-  assert packaged contains required_string
-assert code/cli/build/assets/agents/inquiry.agent.md no longer drifts from the source asset on issue-181 wording
+run "cd code/cli && dart test test/fsm_contract_test.dart test/fsm_transition_test.dart test/instruction_prompt_loader_test.dart test/assets_test.dart test/effect_executor_test.dart"
+expect exit_code == 0
+assert code/cli/assets/fsm/transition_contract.yaml no longer assigns issue-start to plan_to_execute
+assert code/cli/assets/fsm/transition_contract.yaml no longer assigns issue-start to execute_continue
+assert code/cli/assets/instructions/issue-start.md still describes startup into ANALYZE, not EXECUTE continuation
+assert continuing ANALYZE from _DONE now leaves the active APE in a runnable state
 ```
 
-**TDD applicability:** None. This phase mirrors an already-green contract into the packaged surface.
+**TDD applicability:** Yes. This is the GREEN step for the control-plane guard.
 
-## Phase 4: Reproduce packaged runtime behavior under controlled state
+## Phase 5: Rebuild the packaged surface and verify mirror alignment
 
-**Entry criteria:** Phases 1-3 are green; the packaged mirror is aligned; the QA preconditions frozen in Phase 0 are available.
+**Entry criteria:** Phases 3 and 4 are green; the source dispatch and control surfaces are stable.
 
-**Dependencies:** Phase 3 complete.
+**Dependencies:** Phases 3-4 complete.
 
-**Risk note:** Diagnosis decision 4, confirmed findings F5-F6, and the repository QA notes show that packaged evidence splits into two different proof surfaces: packaged prompt assembly is locally observable from the CLI binary, but named-vs-generic dispatch proof only exists in the host runtime that actually honors the agent dispatch contract. This phase must keep those surfaces separate instead of treating prompt-string inspection alone as dispatch proof.
+**Risk note:** Diagnosis decisions 3 and 6 explicitly identify source/build drift as part of the live problem. Leaving packaged surfaces stale would recreate the same ambiguity under a different path.
 
-- [ ] Identify the concrete host-side issue-181 smoke procedure already used to prove named-failure vs generic-success, and record its runtime, exact invocation surface, and the precondition that no matching custom agent exists.
-- [ ] If only the narrative bullet in `/memories/repo/release-qa.md` exists and no reusable smoke procedure can be named, record a deviation and stop instead of inventing a new runtime proof during EXECUTE.
-- [ ] Build the CLI package with `code/cli/scripts/build.ps1` so runtime smoke uses the paired `build/assets` tree.
-- [ ] Run the packaged binary by explicit path and assemble prompts with explicit valid APE states taken from the APE definitions (`clarification` for `socrates`, `decomposition` for `descartes`) instead of ambient `.inquiry/state.yaml`.
-- [ ] Treat each assembled packaged prompt as the exact runtime instruction surface that the host dispatch smoke must consume; do not infer dispatch success from prompt assembly alone.
-- [ ] Replay the repository-QA distinction from `/memories/repo/release-qa.md` for both `socrates` and `descartes` using that identified host-side smoke procedure, because the recorded failure mode mentions both identities.
-- [ ] For each packaged prompt, verify in that host runtime that named dispatch to the APE identity fails without a matching custom agent while generic/current dispatch succeeds with omitted `agentName`.
-- [ ] Run one ambient smoke from the repo root and one ambient smoke from `code/cli`, both without the explicit `--state` override, only to document workspace sensitivity; do not let either ambient result replace the explicit-state verdict.
-- [ ] If the explicit-state smoke contradicts diagnosis decisions 2 or 4, record a deviation and stop.
+- [ ] Rebuild the CLI package with `code/cli/scripts/build.ps1` so the compiled binary and paired `code/cli/build/assets` tree reflect the repaired source surfaces.
+- [ ] Compare source versus packaged assets on the exact issue-181 slices only: dispatch firmware, transition contract, and startup instruction scope.
+- [ ] Record any difference outside the issue-181 slice as out of scope rather than letting it blur this plan.
+- [ ] Confirm that the rebuilt binary exists at `code/cli/build/bin/inquiry.exe` and that the packaged assets tree contains the mirrored agent, FSM, and instruction surfaces needed for QA.
 
 **Verification / test definition:**
 ```text
-host_smoke = locate existing issue-181 dispatch smoke procedure already used for release QA
-if host_smoke is null:
-  record deviation and stop
-assert host_smoke names runtime, exact invocation surface, and the no-custom-agent precondition
 run "pwsh -File code/cli/scripts/build.ps1"
 expect exit_code == 0
-for each (ape, state) in [("socrates", "clarification"), ("descartes", "decomposition")]:  # initial_state from the APE definitions
-  prompt = run "code/cli/build/bin/inquiry.exe ape prompt --name <ape> --state <state>"
-  expect prompt exit_code == 0
-  expect prompt contains the generic/current dispatch wording
-  expect prompt contains the explicit prohibition on deriving agentName from ape.name
-  named_result = run host_smoke with the same prompt and agentName = <ape>
-  expect named_result == failure when no matching custom agent exists
-  generic_result = run host_smoke with the same prompt and agentName omitted
-  expect generic_result == success
-ambient_root = run the packaged prompt from repo root without --state
-record ambient_root as workspace-sensitivity evidence only
-ambient_cli = run the packaged prompt from code/cli without --state
-record ambient_cli as workspace-sensitivity evidence only
+assert code/cli/build/bin/inquiry.exe exists
+for each mirrored surface in [
+  ("code/cli/assets/agents/inquiry.agent.md", "code/cli/build/assets/agents/inquiry.agent.md"),
+  ("code/cli/assets/fsm/transition_contract.yaml", "code/cli/build/assets/fsm/transition_contract.yaml"),
+  ("code/cli/assets/instructions/issue-start.md", "code/cli/build/assets/instructions/issue-start.md"),
+]:
+  assert source and packaged agree on the issue-181 strings
+assert the packaged tree is ready for clean-state QA
 ```
 
-**TDD applicability:** None. This phase validates runtime evidence under controlled preconditions.
+**TDD applicability:** None. This phase mirrors already-green source behavior into the packaged surface.
 
-## Phase 5: Synchronize release metadata for the verified issue slice
+## Phase 6: Reproduce packaged and host-side behavior from a clean `.inquiry` trace
 
-**Entry criteria:** Phase 4 has confirmed the decoupled dispatch rule under controlled packaged QA; no unresolved deviations remain.
+**Entry criteria:** Phase 5 is complete; the clean-QA harness defined in Phase 0 is available; no unresolved deviations remain.
 
-**Dependencies:** Phase 4 complete.
+**Dependencies:** Phase 5 complete.
 
-**Risk note:** Repository policy requires a version bump for every merged issue, and the repository already ships a targeted version-sync guard. If the dispatch-contract repair is verified but version surfaces remain unsynchronized, the issue is still incomplete.
+**Risk note:** Diagnosis decisions 2 and 6, confirmed findings F5-F8, and `/memories/repo/release-qa.md` all say the proof surface is invalid if packaged QA starts from ambient state. This phase must start clean and use ambient state only as a secondary diagnostic control.
 
-- [ ] Refresh branch comparison against `origin/main` before choosing the version bump so stale local history cannot mis-state the required release metadata.
+- [ ] Create the fresh working directory frozen in Phase 0 and confirm it has no existing `.inquiry`.
+- [ ] Use the packaged binary by explicit path to create a clean trace in that directory and drive the minimum FSM transitions needed to obtain runnable SOCRATES and DESCARTES states without relying on manual `--state` overrides.
+- [ ] From that clean trace, verify packaged prompt assembly for `socrates` and `descartes` succeeds without inherited `_DONE`.
+- [ ] Identify and replay the existing host-side issue-181 smoke procedure that proves named dispatch fails without a matching custom agent while generic/current dispatch succeeds when `agentName` is omitted.
+- [ ] If no reusable host-side smoke procedure can be named beyond the narrative note in `/memories/repo/release-qa.md`, record a deviation and stop instead of inventing a new proof surface during EXECUTE.
+- [ ] Use explicit `--state` overrides only if the clean-trace smoke needs diagnostic disambiguation. Record them as secondary evidence, not as the primary verdict.
+- [ ] Optionally run the current repo-root and `code/cli` ambient smokes afterward as negative controls only, to document that stale `.inquiry` no longer governs the verdict.
+
+**Verification / test definition:**
+```text
+clean_dir = create fresh working directory with no .inquiry
+assert clean_dir has no .inquiry before bootstrap
+bootstrap clean trace with code/cli/build/bin/inquiry.exe
+drive the minimal FSM transitions that yield runnable socrates and descartes states
+run "code/cli/build/bin/inquiry.exe ape prompt --name socrates" from clean_dir
+expect exit_code == 0
+run "code/cli/build/bin/inquiry.exe ape prompt --name descartes" from clean_dir after the clean transition into PLAN
+expect exit_code == 0
+host_smoke = locate the existing named-failure versus generic-success procedure
+if host_smoke is null:
+  record deviation and stop
+named_result = run host_smoke with agentName forced to the APE identity and no matching custom agent
+expect named_result == failure
+generic_result = run host_smoke with agentName omitted
+expect generic_result == success
+record any explicit --state override or ambient workspace run as diagnostic-only evidence
+```
+
+**TDD applicability:** None. This phase validates packaged and host behavior under admissible clean-QA preconditions.
+
+## Phase 7: Synchronize release metadata for the verified issue slice
+
+**Entry criteria:** Phase 6 has confirmed the repaired issue slice under clean packaged QA; no unresolved deviations remain.
+
+**Dependencies:** Phase 6 complete.
+
+**Risk note:** Repository policy requires a version bump for every merged issue, and the repository already has a targeted version-sync guard. If behavior is verified but version surfaces drift, the issue is still incomplete.
+
+- [ ] Refresh branch comparison against `origin/main` before choosing the version bump.
 - [ ] Determine the required semantic version bump from the final issue-181 change set.
 - [ ] Update the synchronized version surfaces `code/cli/pubspec.yaml`, `code/cli/lib/src/version.dart`, and `code/site/index.html`.
-- [ ] Update the issue-facing changelog surface required by current repository policy in `code/cli/CHANGELOG.md`.
+- [ ] Update `code/cli/CHANGELOG.md` in the repository's current issue-facing format.
 - [ ] Run `dart test test/version_sync_test.dart` immediately after the version surfaces are updated.
-- [ ] Keep the version-metadata diff separate from unrelated product changes.
-- [ ] Prepare this phase so the final executable verification still happens after every versioned surface is synchronized.
+- [ ] Keep version metadata changes separate from unrelated product changes.
 
 **Verification / test definition:**
 ```text
 run "git fetch origin --prune"
 expect exit_code == 0
-assert version selection was compared against origin/main rather than stale local main
+assert version choice was compared against origin/main
 run "cd code/cli && dart test test/version_sync_test.dart"
 expect exit_code == 0
-assert code/cli/pubspec.yaml, code/cli/lib/src/version.dart, and code/site/index.html all contain the same approved version
-assert code/cli/CHANGELOG.md names issue #181 in the expected repository format
-assert the plan still ends with a full-project test run after this phase completes
+assert code/cli/pubspec.yaml, code/cli/lib/src/version.dart, and code/site/index.html contain the same approved version
+assert code/cli/CHANGELOG.md names issue #181 in the repository format
 ```
 
-**TDD applicability:** None. This phase prepares release metadata before the final verification gate.
+**TDD applicability:** None. This phase synchronizes release metadata before the final gate.
 
-## Phase 6: Run the full project verification gate
+## Phase 8: Run the full project verification gate
 
-**Entry criteria:** Phases 0-5 are complete; every issue-181 behavior change and versioned surface is in its intended final state.
+**Entry criteria:** Phases 0-7 are complete; every issue-181 behavior change and versioned surface is in final form.
 
-**Dependencies:** Phases 0-5 complete.
+**Dependencies:** Phases 0-7 complete.
 
-**Risk note:** The PLAN contract requires the final verification step to cover the full project, not only the firmware slice. Repository evidence in `code/cli/test` and `code/vscode/test` shows the existing test surfaces for this repo are the CLI Dart suite plus the VS Code extension unit and integration suites.
+**Risk note:** The PLAN contract requires the final verification step to cover the whole project. A narrower slice cannot close the cycle.
 
-- [ ] Restore CLI dependencies and run structural verification from `code/cli` so relative-path tests such as `version_sync_test.dart` resolve correctly.
-- [ ] Run the full existing CLI suite from `code/cli`.
+- [ ] Restore CLI dependencies and run the full CLI verification from `code/cli`.
 - [ ] Restore VS Code extension dependencies in `code/vscode` if needed.
 - [ ] Run the VS Code extension unit suite.
 - [ ] Run the VS Code extension integration suite.
@@ -276,12 +315,11 @@ run "cd code/vscode && npm run test:unit"
 expect exit_code == 0
 run "cd code/vscode && npm run test:integration"
 expect exit_code == 0
-assert repository test surfaces discovered for this plan are code/cli/test and code/vscode/test
-assert every existing project test surface is green
+assert the full existing project test surface is green
 assert this phase is the final executable verification step in the plan
 ```
 
-**TDD applicability:** None. This phase is the final system-wide confirmation gate.
+**TDD applicability:** None. This is the final system-wide confirmation gate.
 
 ---
 
@@ -289,18 +327,21 @@ assert this phase is the final executable verification step in the plan
 
 | Phase | Depends on | Why |
 |---|---|---|
-| 0 | none | separate committed proof from working-tree repair before any repair or validation claim |
-| 1 | 0 | turn the diagnosis into an executable regression guard before changing the contract |
-| 2 | 1 | align the source-of-truth firmware wording to the regression guard |
-| 3 | 2 | remove source/build drift after the source contract is green |
-| 4 | 3 | validate packaged behavior only after source, build, and test surfaces agree |
-| 5 | 4 | synchronize mandatory release metadata only after the behavior is verified |
-| 6 | 0-5 | run the full project suite last, after every issue-181 surface is in final form |
+| 0 | none | separate committed proof, working-tree repair, and clean-QA admissibility before any repair claim |
+| 1 | 0 | turn the dispatch diagnosis into an executable regression guard before editing the contract |
+| 2 | 1 | turn the control-plane and state-reset diagnosis into executable guards before editing those surfaces |
+| 3 | 1 | align the source dispatch contract to the dispatch guard |
+| 4 | 2 | align the source control surfaces to the control guard |
+| 5 | 3-4 | rebuild packaged surfaces only after both source slices are green |
+| 6 | 5 | validate packaged and host behavior only after source and packaged surfaces agree |
+| 7 | 6 | synchronize mandatory release metadata only after the repaired behavior is proven |
+| 8 | 0-7 | run the full project verification gate last |
 
 ## Expected execution outcomes
 
-- If Phase 0 finds that the committed baseline is already aligned, the later phases still run, but they become confirmation phases instead of repair phases.
-- If Phase 1 immediately turns GREEN, Phase 2 must still confirm that the source wording and the test guard are describing the same contract, not just passing accidentally.
-- If Phase 4 can only assemble prompts locally but cannot replay the host dispatch smoke, that is a deviation in proof surface, not a silent pass.
-- If Phase 4 fails only in the ambient-state negative control, that result is evidence about QA preconditions, not by itself proof that the decoupled dispatch rule is wrong.
-- Phase 6 remains the final executable verification gate for the entire repository and cannot be replaced by a narrower CLI-only run.
+- If Phase 0 finds that the committed baseline already matches the working tree on one surface, later phases still run, but they become confirmation phases instead of repair phases.
+- If Phase 1 is immediately GREEN, Phase 3 still has to confirm that the source dispatch wording and the guard are describing the same contract.
+- If Phase 2 is immediately GREEN on one control surface but RED on another, EXECUTE stops at the first failing control defect instead of widening scope.
+- If Phase 6 can only pass with explicit `--state` overrides and not from a clean `.inquiry` trace, that is a deviation in QA admissibility, not a silent pass.
+- If Phase 6 passes from a clean trace but ambient repo-root or `code/cli` still fails, those ambient failures remain diagnostic controls only.
+- Phase 8 remains the final executable verification gate for the entire repository and cannot be replaced by a narrower CLI-only run.
