@@ -180,11 +180,27 @@ assert state output exposes the operational contract data needed by firmware to 
 
 **Risk note:** D3 says the defect is distributed across firmware, bootstrap, and prompt surfaces. If only the YAML contract changes, the user still experiences the same hidden runtime behavior.
 
-- [ ] Update `code/cli/assets/agents/inquiry.agent.md` so the scheduler no longer treats the completion gate as the only user interaction point in every state.
-- [ ] Make firmware behavior explicitly state-aware for ANALYZE: the active analysis APE's output must remain visible, further inner-loop movement must depend on visible user exchange, and hidden autonomous progression to `_DONE` must no longer be the implied default.
-- [ ] Update `code/cli/lib/modules/fsm/effect_executor.dart` so analyze bootstrap uses confirmations.md and no longer stamps the analyze artifact as if SOCRATES owned it.
-- [ ] Update `code/cli/test/ape_prompt_test.dart` and any nearby prompt/context expectations so the analyze corpus references confirmations.md consistently.
-- [ ] Re-run firmware, effect, and prompt tests immediately after the edits.
+- [x] Update `code/cli/assets/agents/inquiry.agent.md` so the scheduler no longer treats the completion gate as the only user interaction point in every state.
+- [x] Make firmware behavior explicitly state-aware for ANALYZE: the active analysis APE's output must remain visible, further inner-loop movement must depend on visible user exchange, and hidden autonomous progression to `_DONE` must no longer be the implied default.
+- [x] Update `code/cli/lib/modules/fsm/effect_executor.dart` so analyze bootstrap uses confirmations.md and no longer stamps the analyze artifact as if SOCRATES owned it.
+- [x] Update `code/cli/test/ape_prompt_test.dart` and any nearby prompt/context expectations so the analyze corpus references confirmations.md consistently.
+- [x] Re-run firmware, effect, and prompt tests immediately after the edits.
+
+**QA result:** PASS
+
+Focused runtime bundle executed after the firmware/bootstrap alignment:
+
+- `firmware_agent_test.dart`
+- `effect_executor_test.dart`
+- `ape_prompt_test.dart`
+
+Observed result after one firmware-thinning repair pass: 77 passed, 0 failed.
+
+What is now green in the issue-180 slice:
+
+- firmware no longer frames the completion gate as a universal interaction monopoly and now states that ANALYZE must remain visible to the user;
+- the analyze bootstrap now creates `confirmations.md` and removes methodology-colored ownership from the file template;
+- the SOCRATES runtime prompt context now injects `confirmations_doc` instead of `confirmed_doc`.
 
 **Verification / test definition:**
 ```text
