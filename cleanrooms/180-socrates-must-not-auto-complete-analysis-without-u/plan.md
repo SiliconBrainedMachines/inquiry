@@ -264,10 +264,27 @@ assert no touched APE prompt becomes empty, incoherent, or dependent on hidden f
 
 **Risk note:** The repo ships packaged assets. Leaving the build tree stale would preserve exactly the kind of source/build ambiguity that previously confused issue #181.
 
-- [ ] Rebuild the CLI package with `code/cli/scripts/build.ps1` so `code/cli/build/bin/inquiry.exe` and `code/cli/build/assets/` mirror the repaired source surfaces.
-- [ ] Compare source vs packaged assets for this slice only: `inquiry.agent.md`, `fsm/states/analyze.yaml`, `fsm/transition_contract.yaml`, active APE YAMLs touched in this cycle, and the analyze bootstrap artifacts implied by prompt/context output.
-- [ ] Replay the narrow packaged behavior checks needed for this issue from a clean workspace trace: packaged `fsm state`, packaged `ape prompt` for ANALYZE and PLAN, and packaged analyze bootstrap naming.
-- [ ] Record any discrepancy outside the issue-180 slice as out of scope rather than letting it blur this plan.
+- [x] Rebuild the CLI package with `code/cli/scripts/build.ps1` so `code/cli/build/bin/inquiry.exe` and `code/cli/build/assets/` mirror the repaired source surfaces.
+- [x] Compare source vs packaged assets for this slice only: `inquiry.agent.md`, `fsm/states/analyze.yaml`, `fsm/transition_contract.yaml`, active APE YAMLs touched in this cycle, and the analyze bootstrap artifacts implied by prompt/context output.
+- [x] Replay the narrow packaged behavior checks needed for this issue from a clean workspace trace: packaged `fsm state`, packaged `ape prompt` for ANALYZE and PLAN, and packaged analyze bootstrap naming.
+- [x] Record any discrepancy outside the issue-180 slice as out of scope rather than letting it blur this plan.
+
+**QA result:** PASS
+
+Packaged validation executed in two passes:
+
+- initial rebuild with `code/cli/scripts/build.ps1`;
+- packaged trace replay after a local repair to `instructions/doc-write.md`, which still leaked `confirmed_doc` into transition-owned instructions.
+
+Final packaged checks that passed:
+
+- source/package asset parity for `inquiry.agent.md`, `fsm/states/analyze.yaml`, `fsm/transition_contract.yaml`, `instructions/doc-write.md`, and the touched active APE YAMLs;
+- packaged `fsm state --json` in IDLE, ANALYZE, and PLAN from a clean temporary git workspace;
+- packaged ANALYZE bootstrap creating `index.md` and `confirmations.md` on `start_analyze`;
+- packaged `ape prompt --name socrates --state clarification` exposing `confirmations_doc` with no stale `confirmed_doc` leakage;
+- packaged `ape prompt --name descartes --state decomposition` exposing `analysis_input` after `complete_analysis`.
+
+No out-of-scope packaged discrepancy remains open for the issue-180 slice after the `doc-write.md` repair.
 
 **Verification / test definition:**
 ```text
