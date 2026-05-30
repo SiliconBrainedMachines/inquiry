@@ -15,7 +15,7 @@ hypothesis ledger (H1–H7) as evidence accumulates.
 |----|-----------|--------|-------------------|
 | H1 | Centralized resolution is behavior-preserving | CONFIRMED | Phase 1: +7 resolver tests green, existing suite unchanged (386 total) |
 | H2 | State can be cycle-local with IDLE derived | CONFIRMED | Phase 2: state at `cleanrooms/<branch>/.iq.state.yaml`, IDLE derived from `status: completed`/no-cycle, never persisted; full suite green (393) |
-| H3 | IDLE→ANALYZE is a sufficient bootstrap | PENDING | Phase 3 |
+| H3 | IDLE→ANALYZE is a sufficient bootstrap | CONFIRMED | Phase 3: transition materializes analyze/index.md + confirmations.md + issue.md mirror + `.iq.state.yaml` (status active, state ANALYZE); freshly created cycle resolves as active; suite green (397) |
 | H4 | Cycle runtime and CLI config separate cleanly | PENDING | Phase 4 |
 | H5 | status lifecycle expressible without persisting IDLE | PENDING | Phase 5 |
 | H6 | Discovery degrades safely at the edges | CONFIRMED | Phase 2: no-cycle (non-git / detached HEAD) resolves to derived IDLE without error; load returns IDLE on missing/malformed state |
@@ -60,3 +60,20 @@ hypothesis ledger (H1–H7) as evidence accumulates.
   branch and write/read cycle-local state. Removed obsolete "activates dewey on IDLE" test
   (dewey now derived). Full suite: **393 green**. `dart analyze` clean.
 - **H2 CONFIRMED**, **H6 CONFIRMED**.
+
+### Phase 3 — Bootstrap on IDLE→ANALYZE
+
+- `lib/modules/fsm/effect_executor.dart`: `openAnalysisContext()` now also writes a
+  best-effort `cleanrooms/<branch>/issue.md` mirror (F7).
+  - New `typedef IssueBodyProvider = String? Function(String issue, String workingDirectory);`
+    injected via the constructor; default runs `gh issue view <n> --json body -q .body`.
+  - Body fetch is **best-effort**: failure/empty → mirror still written with metadata and a
+    placeholder note (non-fatal).
+  - **Idempotent**: existing `issue.md` is never clobbered.
+- The `.iq.state.yaml` (status `active`, state `ANALYZE`) and analyze bootstrap files were
+  already produced by `updateState` + `openAnalysisContext` (Phase 2); Phase 3 closes the gap
+  with the issue mirror and an end-to-end bootstrap assertion.
+- Tests: 3 new `effect_executor_test` cases (mirror with body / null body non-fatal /
+  no-clobber) + 1 `fsm_transition_integration_test` end-to-end bootstrap. Full suite:
+  **397 green**. `dart analyze` clean.
+- **H3 CONFIRMED**.

@@ -261,6 +261,56 @@ void main() {
         expect(content, contains('title: "Confirmations"'));
         expect(content, isNot(contains('author: socrates')));
       });
+
+      test('writes issue.md mirror with fetched body', () {
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+
+        final executor = EffectExecutor(
+          workingDirectory: tempDir.path,
+          issueBodyProvider: (issue, _) => 'Body for issue $issue',
+        );
+        executor.openAnalysisContext();
+
+        final issueFile = File('${tempDir.path}/cleanrooms/$branch/issue.md');
+        expect(issueFile.existsSync(), isTrue);
+        final content = issueFile.readAsStringSync();
+        expect(content, contains('Body for issue 145'));
+        expect(content, contains('#145'));
+      });
+
+      test('issue.md is non-fatal when body fetch returns null', () {
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+
+        final executor = EffectExecutor(
+          workingDirectory: tempDir.path,
+          issueBodyProvider: (issue, _) => null,
+        );
+
+        expect(executor.openAnalysisContext, returnsNormally);
+
+        // Analyze bootstrap still created despite missing body.
+        expect(
+          File(
+            '${tempDir.path}/cleanrooms/$branch/analyze/index.md',
+          ).existsSync(),
+          isTrue,
+        );
+      });
+
+      test('does not clobber an existing issue.md', () {
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+        final issueFile = File('${tempDir.path}/cleanrooms/$branch/issue.md')
+          ..createSync(recursive: true);
+        issueFile.writeAsStringSync('CUSTOM CONTENT');
+
+        final executor = EffectExecutor(
+          workingDirectory: tempDir.path,
+          issueBodyProvider: (issue, _) => 'Body for issue $issue',
+        );
+        executor.openAnalysisContext();
+
+        expect(issueFile.readAsStringSync(), 'CUSTOM CONTENT');
+      });
     });
 
     group('APE auto-activation', () {

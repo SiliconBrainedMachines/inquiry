@@ -25,12 +25,23 @@ const cliEffects = {
   'open_analysis_context',
 };
 
+/// Resolves the body of a GitHub issue for the `issue.md` mirror.
+///
+/// Returns `null` when the body cannot be fetched (best-effort; non-fatal).
+typedef IssueBodyProvider =
+    String? Function(String issue, String workingDirectory);
+
 class EffectExecutor {
   final String workingDirectory;
   final Assets? _assets;
+  final IssueBodyProvider _issueBodyProvider;
 
-  EffectExecutor({required this.workingDirectory, Assets? assets})
-    : _assets = assets;
+  EffectExecutor({
+    required this.workingDirectory,
+    Assets? assets,
+    IssueBodyProvider? issueBodyProvider,
+  }) : _assets = assets,
+       _issueBodyProvider = issueBodyProvider ?? _defaultIssueBodyProvider;
 
   String get _inquiryDir => p.join(workingDirectory, '.inquiry');
 
@@ -156,6 +167,71 @@ class EffectExecutor {
         '> Living document. Update as findings are confirmed, revised, or invalidated.\n'
         '> Format: ## F<N>: <title> — CONFIRMED|REVISED|INVALIDATED\n',
       );
+    }
+
+    _writeIssueMirror(branch, issue, today);
+  }
+
+  /// Best-effort `cleanrooms/<branch>/issue.md` mirror of the GitHub issue.
+  ///
+  /// Idempotent: never clobbers an existing mirror. A failed/empty body fetch
+  /// is non-fatal — the mirror is still written with the available metadata.
+  void _writeIssueMirror(String branch, String issue, String today) {
+    final issueFile = File(
+      p.join(workingDirectory, 'cleanrooms', branch, 'issue.md'),
+    );
+    if (issueFile.existsSync()) return;
+
+    String? body;
+    if (issue.isNotEmpty) {
+      try {
+        body = _issueBodyProvider(issue, workingDirectory);
+      } catch (_) {
+        body = null;
+      }
+    }
+
+    final issueRef = issue.isNotEmpty ? '#$issue' : '(unassigned)';
+    final buffer = StringBuffer()
+      ..write('---\n')
+      ..write('id: issue\n')
+      ..write('issue: "$issue"\n')
+      ..write('branch: $branch\n')
+      ..write('date: $today\n')
+      ..write('---\n')
+      ..write('\n')
+      ..write('# Issue $issueRef\n')
+      ..write('\n');
+    if (body != null && body.trim().isNotEmpty) {
+      buffer.write(body.trim());
+      buffer.write('\n');
+    } else {
+      buffer.write('> Issue body unavailable (fetched best-effort).\n');
+    }
+
+    issueFile.parent.createSync(recursive: true);
+    issueFile.writeAsStringSync(buffer.toString());
+  }
+
+  static String? _defaultIssueBodyProvider(
+    String issue,
+    String workingDirectory,
+  ) {
+    try {
+      final result = Process.runSync('gh', [
+        'issue',
+        'view',
+        issue,
+        '--json',
+        'body',
+        '-q',
+        '.body',
+      ], workingDirectory: workingDirectory);
+      if (result.exitCode != 0) return null;
+      final body = result.stdout.toString().trim();
+      return body.isEmpty ? null : body;
+    } catch (_) {
+      return null;
     }
   }
 
