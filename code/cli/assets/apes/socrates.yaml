@@ -40,7 +40,7 @@ base_prompt: |
 
   ## Synthesis
 
-  When the analysis is sufficiently deep, produce `diagnosis.md` — a rigorous technical document:
+  When the analysis is sufficiently deep, produce a rigorous technical diagnosis in the analysis artifact required by the active phase contract:
 
   - **Problem defined** (what is being solved)
   - **Decisions taken** (with justification)
