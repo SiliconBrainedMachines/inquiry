@@ -236,7 +236,7 @@ void main() {
       expect(output.allowed, isTrue);
       expect(output.nextState, 'EXECUTE');
       expect(output.promptFragmentId, 'plan_to_execute');
-      expect(output.requiredInstructions, ['issue-start']);
+      expect(output.requiredInstructions, isEmpty);
       expect(_commitCount(tempDir.path), commitsBefore + 1);
 
       final stateContent = File(
@@ -279,6 +279,24 @@ void main() {
         p.join(tempDir.path, '.inquiry', 'state.yaml'),
       ).readAsStringSync();
       expect(stateContent, contains('state: PLAN'));
+    });
+
+    test('continuing EXECUTE does not require startup instructions', () async {
+      _writeState(tempDir.path, 'EXECUTE', issue: '51');
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'go_execute',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isTrue);
+      expect(output.nextState, 'EXECUTE');
+      expect(output.promptFragmentId, 'execute_continue');
+      expect(output.requiredInstructions, isEmpty);
     });
 
     test('routes EXECUTE through END before PR creation', () async {

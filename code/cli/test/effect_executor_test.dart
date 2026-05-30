@@ -342,6 +342,26 @@ void main() {
         expect(content, contains('state: _DONE'));
       });
 
+      test('re-initializes socrates when ANALYZE continues from _DONE', () {
+        final apesDir = Directory('${tempDir.path}/assets/apes');
+        apesDir.createSync(recursive: true);
+        File('assets/apes/socrates.yaml')
+            .copySync('${apesDir.path}/socrates.yaml');
+
+        File('${tempDir.path}/.inquiry/state.yaml').writeAsStringSync(
+          'state: ANALYZE\nissue: "145"\nape:\n  name: socrates\n  state: _DONE\n',
+        );
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.updateState('ANALYZE');
+
+        final content =
+            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        expect(content, contains('name: socrates'));
+        expect(content, contains('state: clarification'));
+        expect(content, isNot(contains('state: _DONE')));
+      });
+
       test('re-initializes APE when transitioning to state with different APE', () {
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
