@@ -278,6 +278,16 @@ class StateTransitionCommand
       return 'ERROR_PRECONDITION_DIAGNOSIS_MISSING: diagnosis.md missing for current issue branch';
     }
 
+    if (prechecks.contains('index_exists') &&
+        !_analysisIndexExists(branch, workingDirectory)) {
+      return 'ERROR_PRECONDITION_ANALYZE_INDEX_MISSING: index.md missing for current issue branch';
+    }
+
+    if (prechecks.contains('confirmations_exists') &&
+        !_analysisConfirmationsExists(branch, workingDirectory)) {
+      return 'ERROR_PRECONDITION_CONFIRMATIONS_MISSING: confirmations.md missing for current issue branch';
+    }
+
     if (prechecks.contains('plan_approved') && !_planExists(branch, workingDirectory)) {
       return 'ERROR_PRECONDITION_PLAN_MISSING: plan.md missing for current issue branch';
     }
@@ -385,6 +395,30 @@ class StateTransitionCommand
       'diagnosis.md',
     );
     return File(diagnosisPath).existsSync();
+  }
+
+  bool _analysisIndexExists(String branch, String workingDirectory) {
+    if (branch.isEmpty) return false;
+    final indexPath = p.join(
+      workingDirectory,
+      'cleanrooms',
+      branch,
+      'analyze',
+      'index.md',
+    );
+    return File(indexPath).existsSync();
+  }
+
+  bool _analysisConfirmationsExists(String branch, String workingDirectory) {
+    if (branch.isEmpty) return false;
+    final confirmationsPath = p.join(
+      workingDirectory,
+      'cleanrooms',
+      branch,
+      'analyze',
+      'confirmations.md',
+    );
+    return File(confirmationsPath).existsSync();
   }
 
   bool _planExists(String branch, String workingDirectory) {

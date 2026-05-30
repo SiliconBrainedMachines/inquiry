@@ -110,7 +110,7 @@ transitions:
     to: PLAN
     allowed: true
     operations:
-      prechecks: [issue_selected_or_created, diagnosis_exists]
+      prechecks: [issue_selected_or_created, diagnosis_exists, index_exists, confirmations_exists]
       effects: [generate_plan]
       artifacts: [plan.md]
       commit_policy: commit_analysis_boundary
@@ -435,6 +435,12 @@ preconditions:
     kind: issue
   diagnosis_exists:
     description: "diagnosis.md exists for current issue"
+    kind: filesystem
+  index_exists:
+    description: "index.md exists for current issue analysis corpus"
+    kind: filesystem
+  confirmations_exists:
+    description: "confirmations.md exists for current issue analysis corpus"
     kind: filesystem
   issue_selected:
     description: "Issue selected in current context"
