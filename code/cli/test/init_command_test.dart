@@ -71,6 +71,14 @@ void main() {
         },
       );
 
+      test('ignores cycle-local state files under cleanrooms/', () async {
+        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
+        await command.execute();
+
+        final content = File('${tempDir.path}/.gitignore').readAsStringSync();
+        expect(content, contains('cleanrooms/**/.iq.state.yaml'));
+      });
+
       test('appends .inquiry/ to existing .gitignore that lacks it', () async {
         File('${tempDir.path}/.gitignore').writeAsStringSync('node_modules/\n');
 
@@ -80,52 +88,52 @@ void main() {
         final content = File('${tempDir.path}/.gitignore').readAsStringSync();
         expect(content, contains('node_modules/'));
         expect(content, contains('.inquiry/'));
+        expect(content, contains('cleanrooms/**/.iq.state.yaml'));
       });
 
-      test('does not modify .gitignore if .inquiry/ already present', () async {
-        final original = 'node_modules/\n.inquiry/\nbuild/\n';
-        File('${tempDir.path}/.gitignore').writeAsStringSync(original);
+      test(
+        'does not modify .gitignore if all entries already present',
+        () async {
+          final original =
+              'node_modules/\n.inquiry/\ncleanrooms/**/.iq.state.yaml\nbuild/\n';
+          File('${tempDir.path}/.gitignore').writeAsStringSync(original);
 
+          final command = InitCommand(
+            InitInput(workingDirectory: tempDir.path),
+          );
+          await command.execute();
+
+          final content = File('${tempDir.path}/.gitignore').readAsStringSync();
+          expect(content, equals(original));
+        },
+      );
+    });
+
+    // ─── Cycle-local model: init no longer scaffolds repo-level runtime ──
+
+    group('cycle-local model', () {
+      test('does not create repo-level .inquiry/state.yaml', () async {
         final command = InitCommand(InitInput(workingDirectory: tempDir.path));
         await command.execute();
 
-        final content = File('${tempDir.path}/.gitignore').readAsStringSync();
-        expect(content, equals(original));
+        expect(
+          File('${tempDir.path}/.inquiry/state.yaml').existsSync(),
+          isFalse,
+        );
+      });
+
+      test('does not create repo-level .inquiry/mutations.md', () async {
+        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
+        await command.execute();
+
+        expect(
+          File('${tempDir.path}/.inquiry/mutations.md').existsSync(),
+          isFalse,
+        );
       });
     });
 
-    // ─── Step 4: .inquiry/state.yaml ──────────────────────────────────────
-
-    group('.inquiry/state.yaml', () {
-      test('creates .inquiry/state.yaml with initial IDLE state and ape: null', () async {
-        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
-        await command.execute();
-
-        final stateFile = File('${tempDir.path}/.inquiry/state.yaml');
-        expect(stateFile.existsSync(), isTrue);
-
-        final content = stateFile.readAsStringSync();
-        expect(content, contains('state: IDLE'));
-        expect(content, contains('issue: null'));
-        expect(content, contains('ape: null'));
-      });
-
-      test('skips .inquiry/state.yaml if already exists', () async {
-        Directory('${tempDir.path}/.inquiry').createSync();
-        File(
-          '${tempDir.path}/.inquiry/state.yaml',
-        ).writeAsStringSync('state: ANALYZE\nissue: "042-something"\n');
-
-        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
-        await command.execute();
-
-        final content = File(
-          '${tempDir.path}/.inquiry/state.yaml',
-        ).readAsStringSync();
-        expect(content, contains('state: ANALYZE'));
-        expect(content, contains('042-something'));
-      });
-    });
+    // ─── Step 4: .inquiry/state.yaml — removed (cycle-local model) ────────
 
     // ─── Step 5: .inquiry/config.yaml ─────────────────────────────────────
 
@@ -160,34 +168,7 @@ void main() {
 
     // ─── Step 6: .inquiry/mutations.md ──────────────────────────────────
 
-    group('.inquiry/mutations.md', () {
-      test('creates .inquiry/mutations.md with header template', () async {
-        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
-        await command.execute();
-
-        final mutationsFile = File('${tempDir.path}/.inquiry/mutations.md');
-        expect(mutationsFile.existsSync(), isTrue);
-
-        final content = mutationsFile.readAsStringSync();
-        expect(content, contains('# Mutations'));
-        expect(content, contains('Notes for DARWIN'));
-      });
-
-      test('skips .inquiry/mutations.md if already exists', () async {
-        Directory('${tempDir.path}/.inquiry').createSync();
-        File(
-          '${tempDir.path}/.inquiry/mutations.md',
-        ).writeAsStringSync('# Mutations\n\n- My custom note\n');
-
-        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
-        await command.execute();
-
-        final content = File(
-          '${tempDir.path}/.inquiry/mutations.md',
-        ).readAsStringSync();
-        expect(content, contains('My custom note'));
-      });
-    });
+    // ─── Step 6: .inquiry/mutations.md — removed (cycle-local model) ──────
 
     // ─── Idempotency ──────────────────────────────────────────────────
 
@@ -197,38 +178,24 @@ void main() {
 
         await command.execute();
         // Capture state after first run
-        final stateAfterFirst = File(
-          '${tempDir.path}/.inquiry/state.yaml',
-        ).readAsStringSync();
         final gitignoreAfterFirst = File(
           '${tempDir.path}/.gitignore',
         ).readAsStringSync();
         final configAfterFirst = File(
           '${tempDir.path}/.inquiry/config.yaml',
         ).readAsStringSync();
-        final mutationsAfterFirst = File(
-          '${tempDir.path}/.inquiry/mutations.md',
-        ).readAsStringSync();
 
         await command.execute();
         // Verify state unchanged after second run
-        final stateAfterSecond = File(
-          '${tempDir.path}/.inquiry/state.yaml',
-        ).readAsStringSync();
         final gitignoreAfterSecond = File(
           '${tempDir.path}/.gitignore',
         ).readAsStringSync();
         final configAfterSecond = File(
           '${tempDir.path}/.inquiry/config.yaml',
         ).readAsStringSync();
-        final mutationsAfterSecond = File(
-          '${tempDir.path}/.inquiry/mutations.md',
-        ).readAsStringSync();
 
-        expect(stateAfterSecond, equals(stateAfterFirst));
         expect(gitignoreAfterSecond, equals(gitignoreAfterFirst));
         expect(configAfterSecond, equals(configAfterFirst));
-        expect(mutationsAfterSecond, equals(mutationsAfterFirst));
         expect(Directory('${tempDir.path}/cleanrooms').existsSync(), isTrue);
       });
     });
@@ -250,32 +217,37 @@ void main() {
 
       setUp(() {
         // Minimal assets tree with an agent file
-        assetsRoot = Directory.systemTemp.createTempSync('inquiry_assets_test_');
+        assetsRoot = Directory.systemTemp.createTempSync(
+          'inquiry_assets_test_',
+        );
         final agentDir = Directory(p.join(assetsRoot.path, 'assets', 'agents'));
         agentDir.createSync(recursive: true);
-        File(p.join(agentDir.path, 'inquiry.agent.md'))
-            .writeAsStringSync('---\nname: inquiry\n---\nTest agent content.');
+        File(
+          p.join(agentDir.path, 'inquiry.agent.md'),
+        ).writeAsStringSync('---\nname: inquiry\n---\nTest agent content.');
       });
 
       tearDown(() {
         if (assetsRoot.existsSync()) assetsRoot.deleteSync(recursive: true);
       });
 
-      test('writes inquiry.agent.md to .github/agents/ when assets provided',
-          () async {
-        final assets = Assets(root: assetsRoot.path);
-        final command = InitCommand(
-          InitInput(workingDirectory: tempDir.path),
-          assets: assets,
-        );
-        await command.execute();
+      test(
+        'writes inquiry.agent.md to .github/agents/ when assets provided',
+        () async {
+          final assets = Assets(root: assetsRoot.path);
+          final command = InitCommand(
+            InitInput(workingDirectory: tempDir.path),
+            assets: assets,
+          );
+          await command.execute();
 
-        final agentFile = File(
-          p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
-        );
-        expect(agentFile.existsSync(), isTrue);
-        expect(agentFile.readAsStringSync(), contains('Test agent content.'));
-      });
+          final agentFile = File(
+            p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+          );
+          expect(agentFile.existsSync(), isTrue);
+          expect(agentFile.readAsStringSync(), contains('Test agent content.'));
+        },
+      );
 
       test('creates .github/agents/ directory if missing', () async {
         final assets = Assets(root: assetsRoot.path);
@@ -291,28 +263,30 @@ void main() {
         );
       });
 
-      test('overwrites existing inquiry.agent.md on re-init (idempotent)',
-          () async {
-        // Write stale content first
-        final agentDir = Directory(
-          p.join(tempDir.path, '.github', 'agents'),
-        )..createSync(recursive: true);
-        File(p.join(agentDir.path, 'inquiry.agent.md'))
-            .writeAsStringSync('stale content');
+      test(
+        'overwrites existing inquiry.agent.md on re-init (idempotent)',
+        () async {
+          // Write stale content first
+          final agentDir = Directory(p.join(tempDir.path, '.github', 'agents'))
+            ..createSync(recursive: true);
+          File(
+            p.join(agentDir.path, 'inquiry.agent.md'),
+          ).writeAsStringSync('stale content');
 
-        final assets = Assets(root: assetsRoot.path);
-        final command = InitCommand(
-          InitInput(workingDirectory: tempDir.path),
-          assets: assets,
-        );
-        await command.execute();
+          final assets = Assets(root: assetsRoot.path);
+          final command = InitCommand(
+            InitInput(workingDirectory: tempDir.path),
+            assets: assets,
+          );
+          await command.execute();
 
-        final content = File(
-          p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
-        ).readAsStringSync();
-        expect(content, contains('Test agent content.'));
-        expect(content, isNot(contains('stale content')));
-      });
+          final content = File(
+            p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+          ).readAsStringSync();
+          expect(content, contains('Test agent content.'));
+          expect(content, isNot(contains('stale content')));
+        },
+      );
 
       test('skips agent deploy silently when assets is null', () async {
         final command = InitCommand(
