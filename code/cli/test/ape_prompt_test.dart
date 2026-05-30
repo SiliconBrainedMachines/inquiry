@@ -431,8 +431,9 @@ void main() {
 
         expect(result.prompt, contains('EPISTEMIC HUMILITY'));
         expect(result.prompt, contains('MIDWIFE OF IDEAS'));
-        expect(result.prompt, contains('diagnosis.md'));
         expect(result.prompt, contains('Clarification questions'));
+        expect(result.prompt, contains('## Phase-Owned Operational Contract'));
+        expect(result.prompt, contains('diagnosis.md'));
       });
 
       test('descartes prompt covers Cartesian method', () async {
