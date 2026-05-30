@@ -100,7 +100,7 @@ Ignored.
           'Store documents in output_dir.\n'
           'Update index_file after every write.\n'
           'Keep one topic per document.\n'
-          'Use confirmed_doc for confirmed findings when it applies.',
+          'Use confirmations_doc for confirmations when it applies.',
         ),
       );
       expect(summary, isNot(contains('---')));
