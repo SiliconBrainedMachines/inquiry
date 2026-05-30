@@ -122,14 +122,15 @@ class InquiryState {
   /// Reads the active cycle state for [workingDirectory].
   ///
   /// Returns derived IDLE when no cycle resolves, the file is missing, or the
-  /// cycle's `status` is `completed`.
+  /// cycle's `status` is `completed` or `blocked` (every closing/pausing
+  /// transition targets IDLE, which is never persisted).
   static InquiryState load(String workingDirectory) {
     final path = stateFileFor(workingDirectory);
     if (path == null) {
       return const InquiryState(state: 'IDLE');
     }
     final raw = loadFrom(path);
-    if (raw.status == 'completed') {
+    if (raw.status == 'completed' || raw.status == 'blocked') {
       return const InquiryState(state: 'IDLE');
     }
     return raw;

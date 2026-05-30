@@ -102,14 +102,24 @@ class EffectExecutor {
   }
 
   /// Mark the active cycle as `completed` (IDLE is derived, never persisted).
-  void _markCompleted() {
+  void _markCompleted() => _markStatus('completed');
+
+  /// Mark the active cycle as `blocked` (IDLE is derived, never persisted).
+  void _markBlocked() => _markStatus('blocked');
+
+  /// Centralized terminal-status write for the active cycle.
+  ///
+  /// IDLE is never persisted: the cycle file keeps its last phase but records
+  /// [status] (`completed` or `blocked`) so `load()` derives IDLE. Clears any
+  /// active APE sub-state. No-op when already at [status].
+  void _markStatus(String status) {
     final path = InquiryState.stateFileFor(workingDirectory);
     if (path == null) return;
     if (!File(path).existsSync()) return;
     final raw = InquiryState.loadFrom(path);
-    if (raw.status == 'completed') return;
-    final completed = raw.copyWith(status: 'completed', clearApe: true);
-    completed.saveTo(path);
+    if (raw.status == status) return;
+    final marked = raw.copyWith(status: status, clearApe: true);
+    marked.saveTo(path);
   }
 
   /// Create `cleanrooms/<branch>/analyze/index.md` and `confirmations.md` for ANALYZE phase.
@@ -353,6 +363,10 @@ class EffectExecutor {
           executed.add(effect);
         case 'collect_metrics':
           collectMetrics();
+          executed.add(effect);
+        case 'pause_analysis':
+        case 'pause_plan':
+          _markBlocked();
           executed.add(effect);
         // Skill-side effects — not executed by CLI
         default:
