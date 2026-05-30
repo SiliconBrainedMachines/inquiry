@@ -11,7 +11,7 @@ Write inside the CLI-created template and keep frontmatter unchanged.
 Store documents in output_dir.
 Update index_file after every write.
 Keep one topic per document.
-Use confirmed_doc for confirmed findings when it applies.
+Use confirmations_doc for confirmations when it applies.
 
 ## When to Use
 
@@ -28,12 +28,12 @@ At the end of your prompt, the CLI injects a fenced YAML block:
 # --- inquiry-context ---
 output_dir: cleanrooms/<branch>/analyze/
 index_file: cleanrooms/<branch>/analyze/index.md
-confirmed_doc: cleanrooms/<branch>/analyze/confirmed.md
+confirmations_doc: cleanrooms/<branch>/analyze/confirmations.md
 ```
 
 - `output_dir` — where ALL your documents go
 - `index_file` — the index you MUST update after every write
-- `confirmed_doc` — the mandatory living document for confirmed findings
+- `confirmations_doc` — the mandatory living document for confirmations
 
 ## How It Works
 
@@ -45,7 +45,7 @@ The CLI creates file templates with pre-filled YAML frontmatter. Your job:
 
 ## Creating New Documents
 
-When you need a new document beyond `confirmed.md`:
+When you need a new document beyond `confirmations.md`:
 
 1. Create the file in `output_dir` with this frontmatter:
 
@@ -75,7 +75,7 @@ Add or update a row in the documents table:
 ```markdown
 | # | File | Title | Status | Tags |
 |---|------|-------|--------|------|
-| 1 | confirmed.md | Confirmed findings | active | findings, confirmed |
+| 1 | confirmations.md | Confirmations | active | confirmations, findings |
 | 2 | <new-file>.md | <title> | <status> | <tags> |
 ```
 

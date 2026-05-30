@@ -649,6 +649,8 @@ void main() {
         expect(result.prompt, contains('confirmations_doc: cleanrooms/152-test-branch/analyze/confirmations.md'));
         expect(result.prompt, contains('index_file: cleanrooms/152-test-branch/analyze/index.md'));
         expect(result.prompt, contains('doc_protocol: doc-write'));
+        expect(result.prompt, isNot(contains('confirmed_doc')));
+        expect(result.prompt, isNot(contains('confirmed.md')));
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'output_dir: cleanrooms/152-test-branch/analyze/',
