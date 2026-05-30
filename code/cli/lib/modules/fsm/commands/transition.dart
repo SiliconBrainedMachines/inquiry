@@ -5,17 +5,18 @@ import 'dart:io';
 import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
-import 'package:yaml/yaml.dart';
 
 import '../../../assets.dart';
 import '../../../fsm_contract.dart';
+import '../../ape/inquiry_state.dart';
 import '../effect_executor.dart';
 
 typedef BranchProvider = Future<String> Function(String workingDirectory);
-typedef GitCommandRunner = Future<ProcessResult> Function(
-  String workingDirectory,
-  List<String> arguments,
-);
+typedef GitCommandRunner =
+    Future<ProcessResult> Function(
+      String workingDirectory,
+      List<String> arguments,
+    );
 
 class _BoundaryCommitSpec {
   final String label;
@@ -129,10 +130,9 @@ class StateTransitionCommand
     BranchProvider? branchProvider,
     GitCommandRunner? gitCommandRunner,
     Assets? assets,
-  })
-    : branchProvider = branchProvider ?? _defaultBranchProvider,
-      gitCommandRunner = gitCommandRunner ?? _defaultGitCommandRunner,
-      _assets = assets;
+  }) : branchProvider = branchProvider ?? _defaultBranchProvider,
+       gitCommandRunner = gitCommandRunner ?? _defaultGitCommandRunner,
+       _assets = assets;
 
   @override
   String? validate() => null;
@@ -149,13 +149,17 @@ class StateTransitionCommand
 
     final contractPath = _assets != null
         ? _assets.path('fsm/transition_contract.yaml')
-        : p.join(input.workingDirectory, 'assets', 'fsm', 'transition_contract.yaml');
+        : p.join(
+            input.workingDirectory,
+            'assets',
+            'fsm',
+            'transition_contract.yaml',
+          );
     final contract = parseFsmContract(File(contractPath).readAsStringSync());
 
-    final current =
-        input.currentState != null
-            ? FsmState.fromValue(input.currentState!.trim().toUpperCase())
-            : _loadCurrentState(input.workingDirectory);
+    final current = input.currentState != null
+        ? FsmState.fromValue(input.currentState!.trim().toUpperCase())
+        : _loadCurrentState(input.workingDirectory);
     final event = FsmEvent.fromValue(input.event!.trim().toLowerCase());
 
     final transition = contract.transitionFor(current, event);
@@ -220,11 +224,13 @@ class StateTransitionCommand
 
     final operations = transition.operations;
     final promptId = operations?.promptFragmentId;
-    final prompt =
-        promptId != null ? contract.promptFragments[promptId] : null;
+    final prompt = promptId != null ? contract.promptFragments[promptId] : null;
 
     // Execute CLI-side effects
-    final executor = EffectExecutor(workingDirectory: input.workingDirectory, assets: _assets);
+    final executor = EffectExecutor(
+      workingDirectory: input.workingDirectory,
+      assets: _assets,
+    );
     final executedEffects = executor.executeAll(
       effects: operations?.effects ?? const <String>[],
       newState: transition.to?.value ?? current.value,
@@ -259,7 +265,8 @@ class StateTransitionCommand
     String? inputIssue,
   }) async {
     final prechecks = transition.operations?.prechecks ?? const <String>[];
-    final issueSelected = _isIssueSelected(workingDirectory) ||
+    final issueSelected =
+        _isIssueSelected(workingDirectory) ||
         (inputIssue != null && inputIssue.trim().isNotEmpty);
 
     if ((prechecks.contains('issue_selected') ||
@@ -288,7 +295,8 @@ class StateTransitionCommand
       return 'ERROR_PRECONDITION_CONFIRMATIONS_MISSING: confirmations.md missing for current issue branch';
     }
 
-    if (prechecks.contains('plan_approved') && !_planExists(branch, workingDirectory)) {
+    if (prechecks.contains('plan_approved') &&
+        !_planExists(branch, workingDirectory)) {
       return 'ERROR_PRECONDITION_PLAN_MISSING: plan.md missing for current issue branch';
     }
 
@@ -367,7 +375,9 @@ class StateTransitionCommand
   }
 
   String _boundaryCommitMessage(String boundary, String? issue) {
-    final suffix = issue != null && issue.trim().isNotEmpty ? ' for #$issue' : '';
+    final suffix = issue != null && issue.trim().isNotEmpty
+        ? ' for #$issue'
+        : '';
     return 'approve $boundary boundary$suffix';
   }
 
@@ -431,68 +441,25 @@ class StateTransitionCommand
     if (inputIssue != null && inputIssue.trim().isNotEmpty) {
       return inputIssue.trim();
     }
-
-    final statePath = p.join(workingDirectory, '.inquiry', 'state.yaml');
-    final stateFile = File(statePath);
-    if (!stateFile.existsSync()) return null;
-
-    final yaml = loadYaml(stateFile.readAsStringSync());
-    if (yaml is! YamlMap) return null;
-
-    final issue = yaml['issue'];
-    if (issue is String && issue.trim().isNotEmpty) return issue.trim();
-    if (issue is int && issue > 0) return issue.toString();
-    if (issue is YamlMap) {
-      final id = issue['id'] ?? issue['number'];
-      if (id is String && id.trim().isNotEmpty) return id.trim();
-      if (id is int && id > 0) return id.toString();
-    }
-
-    return null;
+    return InquiryState.load(workingDirectory).issue;
   }
 
   bool _isIssueSelected(String workingDirectory) {
-    final statePath = p.join(workingDirectory, '.inquiry', 'state.yaml');
-    final stateFile = File(statePath);
-    if (!stateFile.existsSync()) return false;
-
-    final yaml = loadYaml(stateFile.readAsStringSync());
-    if (yaml is! YamlMap) return false;
-
-    final issue = yaml['issue'];
-    if (issue == null) return false;
-
-    if (issue is String) return issue.trim().isNotEmpty;
-    if (issue is int) return issue > 0;
-    if (issue is YamlMap) {
-      final id = issue['id'] ?? issue['number'];
-      if (id is int) return id > 0;
-      if (id is String) return id.trim().isNotEmpty;
-    }
-
-    return false;
+    return InquiryState.load(workingDirectory).issue != null;
   }
 
   FsmState _loadCurrentState(String workingDirectory) {
-    final statePath = p.join(workingDirectory, '.inquiry', 'state.yaml');
-    final file = File(statePath);
-    if (!file.existsSync()) {
-      return FsmState.idle;
-    }
-
-    final yaml = loadYaml(file.readAsStringSync());
-    if (yaml is! YamlMap) return FsmState.idle;
-    final phase = yaml['state'];
-    if (phase is! String || phase.trim().isEmpty) return FsmState.idle;
+    final phase = InquiryState.load(workingDirectory).state;
+    if (phase.trim().isEmpty) return FsmState.idle;
     return FsmState.fromValue(phase.trim().toUpperCase());
   }
 
   static Future<String> _defaultBranchProvider(String workingDirectory) async {
-    final result = await Process.run(
-      'git',
-      ['rev-parse', '--abbrev-ref', 'HEAD'],
-      workingDirectory: workingDirectory,
-    );
+    final result = await Process.run('git', [
+      'rev-parse',
+      '--abbrev-ref',
+      'HEAD',
+    ], workingDirectory: workingDirectory);
     if (result.exitCode != 0) return '';
     return result.stdout.toString().trim();
   }
@@ -501,10 +468,6 @@ class StateTransitionCommand
     String workingDirectory,
     List<String> arguments,
   ) {
-    return Process.run(
-      'git',
-      arguments,
-      workingDirectory: workingDirectory,
-    );
+    return Process.run('git', arguments, workingDirectory: workingDirectory);
   }
 }

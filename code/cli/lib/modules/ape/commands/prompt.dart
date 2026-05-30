@@ -106,14 +106,13 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     if (input.name == null || input.name!.trim().isEmpty) {
       throw CommandException(
         code: 'MISSING_NAME',
-        message: 'Missing required flag --name. Usage: iq ape prompt --name <name>',
+        message:
+            'Missing required flag --name. Usage: iq ape prompt --name <name>',
         exitCode: ExitCode.validationFailed,
       );
     }
     final inquiry = InquiryState.load(input.workingDirectory);
-    final currentState = FsmState.fromValue(
-      inquiry.state.trim().toUpperCase(),
-    );
+    final currentState = FsmState.fromValue(inquiry.state.trim().toUpperCase());
 
     // Verify the APE exists
     final yamlPath = _resolveApePath(input.name!);
@@ -131,7 +130,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     if (!activeApes.contains(input.name!)) {
       throw CommandException(
         code: 'APE_NOT_ACTIVE',
-        message: '"${input.name!}" is not active in state '
+        message:
+            '"${input.name!}" is not active in state '
             '${currentState.value}. Active APEs: ${activeApes.join(', ')}',
         exitCode: ExitCode.conflict,
       );
@@ -203,8 +203,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
   /// Resolves dynamic context paths per APE and FSM state.
   Map<String, String>? _resolveContext(
     String apeName,
-    String? subState,
-    {
+    String? subState, {
     required OperationalContract operationalContract,
   }) {
     final context = <String, String>{};
@@ -258,8 +257,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'diagnosis_file': '${analyzeDir}diagnosis.md',
           'plan_file': 'cleanrooms/$branch/plan.md',
           'retrospective_file': 'cleanrooms/$branch/retrospective.md',
-          'mutations_file': '.inquiry/mutations.md',
-          'state_file': '.inquiry/state.yaml',
+          'mutations_file': 'cleanrooms/$branch/mutations.md',
+          'state_file': 'cleanrooms/$branch/.iq.state.yaml',
           'metrics_snapshot_file': '.inquiry/metrics_snapshot.yaml',
           'metrics_file': '.inquiry/metrics.yaml',
           'output_dir': 'cleanrooms/$branch/',
@@ -275,5 +274,4 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     }
     return p.join(input.workingDirectory, 'assets', 'apes', '$name.yaml');
   }
-
 }
