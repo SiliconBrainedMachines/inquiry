@@ -65,6 +65,7 @@ class InquiryState {
   /// Write to `.inquiry/state.yaml` in [workingDirectory].
   void save(String workingDirectory) {
     final file = File(p.join(workingDirectory, '.inquiry', 'state.yaml'));
+    file.parent.createSync(recursive: true);
     final buf = StringBuffer();
     buf.writeln('state: $state');
     buf.writeln(issue != null ? 'issue: "$issue"' : 'issue: null');

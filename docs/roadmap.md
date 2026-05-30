@@ -2,7 +2,7 @@
 
 > Status note: This roadmap is a strategic and partially historical planning document. It preserves backlog framing from earlier releases and should not be used as the authoritative description of the current operational model. For the current canonical explanation, see [architecture.md](architecture.md), [spec/finite-ape-machine.md](spec/finite-ape-machine.md), and [thinking-tools.md](thinking-tools.md).
 
-> Version note: the live CLI source currently tracks `0.5.1` in [../code/cli/pubspec.yaml](../code/cli/pubspec.yaml). Public-facing version markers elsewhere in the repository may lag until the next coordinated release pass.
+> Version note: the live CLI source currently tracks `0.5.2` in [../code/cli/pubspec.yaml](../code/cli/pubspec.yaml). Public-facing version markers elsewhere in the repository may lag until the next coordinated release pass.
 
 > Where APE is going next. For where APE is today, see [../README.md](../README.md).
 
@@ -31,7 +31,7 @@ Recent research in [research/harness_engineering.md](research/harness_engineerin
 - 131 tests, cross-platform (Windows + Linux), 12 GitHub releases
 - Empirical bootstrap underway: APE is being built using APE (see [bootstrap-validation](research/ape_builds_ape/bootstrap-validation.md))
 
-## Current runtime snapshot (v0.5.1)
+## Current runtime snapshot (v0.5.2)
 
 The current CLI surface is still intentionally small. The live source tree exposes four active modules:
 
@@ -63,7 +63,7 @@ Read through the current harness taxonomy, Inquiry's unfinished work clusters in
 
 This section is strategic framing, not a substitute for the issue tracker. The issue-backed frontier remains below.
 
-## Current frontier (post-v0.5.1)
+## Current frontier (post-v0.5.2)
 
 This section is intentionally selective. It groups the open issues that most clearly define the next iterations of Inquiry; it is not a full dump of every issue in the tracker.
 
