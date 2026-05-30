@@ -431,8 +431,9 @@ void main() {
 
         expect(result.prompt, contains('EPISTEMIC HUMILITY'));
         expect(result.prompt, contains('MIDWIFE OF IDEAS'));
-        expect(result.prompt, contains('diagnosis.md'));
         expect(result.prompt, contains('Clarification questions'));
+        expect(result.prompt, contains('## Phase-Owned Operational Contract'));
+        expect(result.prompt, contains('diagnosis.md'));
       });
 
       test('descartes prompt covers Cartesian method', () async {
@@ -645,16 +646,18 @@ void main() {
         expect(result.prompt, contains('Clarification questions'));
         expect(result.prompt, contains('# --- inquiry-context ---'));
         expect(result.prompt, contains('output_dir: cleanrooms/152-test-branch/analyze/'));
-        expect(result.prompt, contains('confirmed_doc: cleanrooms/152-test-branch/analyze/confirmed.md'));
+        expect(result.prompt, contains('confirmations_doc: cleanrooms/152-test-branch/analyze/confirmations.md'));
         expect(result.prompt, contains('index_file: cleanrooms/152-test-branch/analyze/index.md'));
         expect(result.prompt, contains('doc_protocol: doc-write'));
+        expect(result.prompt, isNot(contains('confirmed_doc')));
+        expect(result.prompt, isNot(contains('confirmed.md')));
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'output_dir: cleanrooms/152-test-branch/analyze/',
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          'confirmed_doc: cleanrooms/152-test-branch/analyze/confirmed.md',
+          'confirmations_doc: cleanrooms/152-test-branch/analyze/confirmations.md',
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,

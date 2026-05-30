@@ -86,7 +86,7 @@ class EffectExecutor {
     updated.save(workingDirectory);
   }
 
-  /// Create `cleanrooms/<branch>/analyze/index.md` and `confirmed.md` for ANALYZE phase.
+  /// Create `cleanrooms/<branch>/analyze/index.md` and `confirmations.md` for ANALYZE phase.
   void openAnalysisContext() {
     final branch = _getCurrentBranch();
     if (branch.isEmpty) return;
@@ -116,23 +116,22 @@ class EffectExecutor {
         '\n'
         '| # | File | Title | Status | Tags |\n'
         '|---|------|-------|--------|------|\n'
-        '| 1 | confirmed.md | Confirmed findings | active | findings, confirmed |\n',
+        '| 1 | confirmations.md | Confirmations | active | confirmations, findings |\n',
       );
     }
 
-    final confirmedFile = File(p.join(cleanroomDir, 'confirmed.md'));
-    if (!confirmedFile.existsSync()) {
-      confirmedFile.writeAsStringSync(
+    final confirmationsFile = File(p.join(cleanroomDir, 'confirmations.md'));
+    if (!confirmationsFile.existsSync()) {
+      confirmationsFile.writeAsStringSync(
         '---\n'
-        'id: confirmed\n'
-        'title: "Confirmed findings"\n'
+        'id: confirmations\n'
+        'title: "Confirmations"\n'
         'date: $today\n'
         'status: active\n'
-        'tags: [findings, confirmed]\n'
-        'author: socrates\n'
+        'tags: [confirmations, findings]\n'
         '---\n'
         '\n'
-        '# Confirmed Findings\n'
+        '# Confirmations\n'
         '\n'
         '> Living document. Update as findings are confirmed, revised, or invalidated.\n'
         '> Format: ## F<N>: <title> — CONFIRMED|REVISED|INVALIDATED\n',

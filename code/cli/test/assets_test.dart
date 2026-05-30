@@ -90,6 +90,10 @@ void main() {
     test('reads instructions/doc-write.md', () {
       final content = assets.loadString('instructions/doc-write.md');
       expect(content, contains('doc-write'));
+      expect(content, contains('confirmations_doc'));
+      expect(content, contains('confirmations.md'));
+      expect(content, isNot(contains('confirmed_doc')));
+      expect(content, isNot(contains('confirmed.md')));
       expect(content, isNotEmpty);
     });
 

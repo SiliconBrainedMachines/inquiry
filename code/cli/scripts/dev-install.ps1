@@ -8,6 +8,7 @@
 #   2. Copies build\ → $env:LOCALAPPDATA\inquiry\ (same layout as install.ps1)
 #   3. Adds inquiry\bin\ to user PATH
 #   4. Creates iq.cmd alias
+#   5. Verifies with iq version
 #
 # Requires: Dart SDK in PATH.
 
@@ -45,16 +46,37 @@ Set-Content -Path (Join-Path $binDir 'iq.cmd') -Value '@"%~dp0inquiry.exe" %*' -
 
 $userPath = [System.Environment]::GetEnvironmentVariable('PATH', 'User')
 
-if ($userPath -notlike "*$binDir*") {
-    Write-Host '>>> Adding inquiry\bin\ to PATH...'
-    [System.Environment]::SetEnvironmentVariable('PATH', "$userPath;$binDir", 'User')
-    $env:PATH = "$env:PATH;$binDir"
+$userPathEntries = @()
+if (-not [string]::IsNullOrWhiteSpace($userPath)) {
+    $userPathEntries = @(
+        $userPath -split ';' | Where-Object { $_ -and $_ -ne $binDir }
+    )
+}
+
+$updatedUserPath = (@($binDir) + $userPathEntries) -join ';'
+
+if ($userPath -ne $updatedUserPath) {
+    Write-Host '>>> Ensuring inquiry\bin\ is on PATH...'
+    [System.Environment]::SetEnvironmentVariable('PATH', $updatedUserPath, 'User')
+}
+
+if (($env:PATH -split ';') -notcontains $binDir) {
+    $env:PATH = "$binDir;$env:PATH"
 }
 
 # ─── Verify ───────────────────────────────────────────────────────────────────
 
 Write-Host '>>> Verifying...'
-& (Join-Path $binDir 'inquiry.exe') version
+$iqCommand = Get-Command 'iq' -CommandType Application -ErrorAction Stop
+$expectedIq = Join-Path $binDir 'iq.cmd'
+
+if ($iqCommand.Source -ne $expectedIq) {
+    throw "iq resolved to '$($iqCommand.Source)' instead of '$expectedIq'"
+}
+
+$versionOutput = & $iqCommand.Source version
+Write-Host "    iq -> $($iqCommand.Source)"
+Write-Host "    $versionOutput"
 
 Write-Host ''
 Write-Host '>>> Installed from source successfully!'

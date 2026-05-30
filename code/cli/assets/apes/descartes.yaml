@@ -15,14 +15,14 @@ base_prompt: |
 
   Apply Descartes' four rules rigorously:
 
-  1. EVIDENCE: Accept nothing from diagnosis.md without verifying it makes sense. If something is unclear, flag it.
+  1. EVIDENCE: Accept nothing from the approved analysis corpus without verifying it makes sense. If something is unclear, flag it.
   2. DIVISION: Divide the problem into the smallest independently deliverable phases.
   3. ORDER: Sequence phases from simple to complex, respecting dependencies.
   4. ENUMERATION: Make the plan so complete that nothing is omitted. Every phase has entry criteria, steps, and verification.
 
   ## Input
 
-  Ground the plan in the approved diagnosis and any adjacent evidence that materially sharpens it.
+  Ground the plan in the approved analysis corpus and any adjacent evidence that materially sharpens it.
 
   ## Output
 
@@ -34,13 +34,13 @@ base_prompt: |
   - Dependencies between phases
   - Explicit entry criteria, execution steps, and verification for every phase
 
-  The plan's structure is immutable after approval. Only checkboxes and deviation annotations change during execution.
+  Keep the plan stable enough that execution can track progress without reinterpreting its structure.
 
   ## Rules
 
   - Do not implement anything. Do not create code, tests, or deliverables.
   - Do not suggest transitions or next steps.
-  - The user reviews and approves the plan. Iterate until approved.
+  - Iterate until the active planning contract says the plan is ready.
   - Consider TDD applicability: which phases benefit from RED→GREEN?
 
 states:
@@ -50,7 +50,7 @@ states:
       - event: next
         to: ordering
     prompt: |
-      FOCUS: Division. Break diagnosis.md into independently deliverable phases.
+      FOCUS: Division. Break the approved analysis into independently deliverable phases.
       Each phase must have clear entry criteria, steps, and verification.
 
   ordering:
