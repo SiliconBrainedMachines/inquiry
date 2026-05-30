@@ -148,3 +148,21 @@ hypothesis ledger (H1–H7) as evidence accumulates.
   `effect_executor_test` block cases (pause_analysis / pause_plan → blocked + derived IDLE).
   CLI suite: **400 green**. `dart analyze` clean.
 - **H5 CONFIRMED**.
+
+### Phase 6 — `iq init` + `.gitignore` aligned with cycle-local model
+
+- `lib/modules/global/commands/init.dart`:
+  - Removed `_ensureStateYaml` and `_ensureMutationsMd` — init no longer scaffolds
+    repo-level `.inquiry/state.yaml` or `.inquiry/mutations.md` (cycle runtime is
+    materialized per cycle under `cleanrooms/<branch>/` by the FSM).
+  - `_ensureGitignore` now ensures **two** entries idempotently: `.inquiry/` and
+    `cleanrooms/**/.iq.state.yaml` (F6 — derived cycle state never tracked).
+  - `_ensureConfigYaml` keeps `.inquiry/config.yaml` (project-scoped, U1) and now creates
+    `.inquiry/` itself when absent (previously relied on the removed state step).
+  - Steps renumbered 1–4; doc comment updated.
+- Real repo `.gitignore`: added `cleanrooms/**/.iq.state.yaml` (no state file was tracked).
+- Tests: removed obsolete `.inquiry/state.yaml` (2) and `.inquiry/mutations.md` (2) groups;
+  added `ignores cycle-local state files under cleanrooms/` + a `cycle-local model` group
+  (no repo-level state.yaml / mutations.md); idempotency test trimmed to gitignore+config.
+  CLI suite: **399 green**. `dart analyze` clean.
+- **H4 CONFIRMED** (init alignment — nothing cycle-scoped scaffolded at repo-level `.inquiry/`).
