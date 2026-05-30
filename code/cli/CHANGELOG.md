@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.1]
+### Fixed
+- **Windows cycle-root normalization**: `git rev-parse --show-toplevel` paths are now normalized before Inquiry composes cycle-local paths, preventing Windows-only failures in `InquiryState.stateFileFor` and unblocking the Windows release build
+
 ## [0.6.0]
 ### Breaking changes
 - **Canonical cycle runtime root**: active cycle state now persists at `cleanrooms/<branch>/.iq.state.yaml`, and cycle mutations now resolve to `cleanrooms/<branch>/mutations.md`; repo-level `.inquiry/state.yaml` is no longer the canonical runtime state surface (#209)
