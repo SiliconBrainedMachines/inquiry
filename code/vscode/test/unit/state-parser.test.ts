@@ -51,4 +51,28 @@ describe('parseState', () => {
     assert.strictEqual(result.phase, 'IDLE');
     assert.strictEqual(result.task, '');
   });
+
+  it('status active conserva la fase', () => {
+    const result: ApeState = parseState(
+      'state: EXECUTE\nissue: "209"\nstatus: active\n',
+    );
+    assert.strictEqual(result.phase, 'EXECUTE');
+    assert.strictEqual(result.task, '209');
+  });
+
+  it('status completed deriva IDLE', () => {
+    const result: ApeState = parseState(
+      'state: EVOLUTION\nissue: "209"\nstatus: completed\n',
+    );
+    assert.strictEqual(result.phase, 'IDLE');
+    assert.strictEqual(result.task, '');
+  });
+
+  it('status blocked deriva IDLE', () => {
+    const result: ApeState = parseState(
+      'state: ANALYZE\nissue: "209"\nstatus: blocked\n',
+    );
+    assert.strictEqual(result.phase, 'IDLE');
+    assert.strictEqual(result.task, '');
+  });
 });
