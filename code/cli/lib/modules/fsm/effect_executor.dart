@@ -239,9 +239,9 @@ class EffectExecutor {
     return getCurrentBranch(workingDirectory);
   }
 
-  /// Reset `.inquiry/mutations.md` to empty template.
+  /// Reset the cycle-local `cleanrooms/<branch>/mutations.md` to empty template.
   void resetMutations() {
-    final file = File(p.join(_inquiryDir, 'mutations.md'));
+    final file = File(_mutationsPath());
     file.parent.createSync(recursive: true);
     file.writeAsStringSync(
       '# Mutations\n'
@@ -249,6 +249,18 @@ class EffectExecutor {
       'Notes for DARWIN. Write observations about the current cycle here.\n'
       'This file is read during EVOLUTION and cleared afterwards.\n',
     );
+  }
+
+  /// Resolve the cycle-local `mutations.md` path.
+  ///
+  /// Falls back to repo-level `.inquiry/mutations.md` only when no cycle
+  /// resolves (derived IDLE / not a git repo).
+  String _mutationsPath() {
+    final branch = _getCurrentBranch();
+    if (branch.isEmpty) {
+      return p.join(_inquiryDir, 'mutations.md');
+    }
+    return p.join(workingDirectory, 'cleanrooms', branch, 'mutations.md');
   }
 
   /// Resolve the initial_state for an APE by loading its YAML definition.
@@ -272,6 +284,7 @@ class EffectExecutor {
     final issueLine = current.issue != null
         ? 'issue: "${current.issue}"'
         : 'issue: null';
+    Directory(_inquiryDir).createSync(recursive: true);
     final snapshot = File(p.join(_inquiryDir, 'metrics_snapshot.yaml'));
     snapshot.writeAsStringSync(
       'snapshot_at: "${DateTime.now().toUtc().toIso8601String()}"\n'
@@ -296,6 +309,7 @@ class EffectExecutor {
         '  - $issueLine\n'
         '    completed_at: "${DateTime.now().toUtc().toIso8601String()}"\n';
 
+    Directory(_inquiryDir).createSync(recursive: true);
     final metricsFile = File(p.join(_inquiryDir, 'metrics.yaml'));
     if (metricsFile.existsSync()) {
       metricsFile.writeAsStringSync(entry, mode: FileMode.append);
