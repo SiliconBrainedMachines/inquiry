@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.0] - 2026-05-30
+
+### Changed
+- The extension now follows the CLI cycle-local state model and resolves the active cleanroom from `cleanrooms/<branch>/` instead of assuming repo-root state (#209)
+
+### Fixed
+- `Inquiry: Init` no longer runs a redundant `iq target get` after `iq init`; it now relies on the CLI's own initialization flow
+
 ## [0.3.0] - 2026-04-30
 
 ### Fixed
