@@ -113,6 +113,17 @@ void main() {
       expect(content, contains('ape: null'));
     });
 
+    test('creates .inquiry directory when missing', () {
+      Directory('${tmpDir.path}/.inquiry').deleteSync(recursive: true);
+
+      const state = InquiryState(state: 'IDLE');
+      state.save(tmpDir.path);
+
+      final file = File('${tmpDir.path}/.inquiry/state.yaml');
+      expect(file.existsSync(), isTrue);
+      expect(file.readAsStringSync(), contains('state: IDLE'));
+    });
+
     test('roundtrips correctly', () {
       const original = InquiryState(
         state: 'EXECUTE',

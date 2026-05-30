@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.5.2]
+### Changed
+- **EXECUTE startup boundary**: `plan_to_execute` and `execute_continue` no longer inject `issue-start`; the startup protocol remains scoped to the explicit IDLE/DONE handoff into ANALYZE (#181)
+
+### Fixed
+- **Scheduler dispatch contract**: firmware dispatch now stays on the generic/current sub-agent path and explicitly forbids deriving `agentName` from `ape.name` (#181)
+- **ANALYZE reentry after `_DONE`**: reopening ANALYZE now reinitializes SOCRATES to its initial runnable state instead of leaving the APE stranded at `_DONE` (#181)
+- **Clean-state QA bootstrap**: `InquiryState.save` now creates `.inquiry/` before writing `state.yaml`, allowing packaged `fsm transition --event start_analyze` from a truly clean workspace (#181)
+
 ## [0.5.1]
 ### Added
 - **Prompt-ready transition instruction summaries**: transition-owned private instruction assets now expose compact runtime summaries for `doc-read`, `doc-write`, `issue-start`, and `issue-end`, so prompt assembly consumes deterministic text instead of raw Markdown (#185)
