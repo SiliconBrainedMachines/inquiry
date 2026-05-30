@@ -74,7 +74,9 @@ void main() {
 
     group('reset_mutations', () {
       test('resets mutations.md to empty template', () {
-        File('${tempDir.path}/.inquiry/mutations.md').writeAsStringSync(
+        File(
+          '${tempDir.path}/cleanrooms/$branch/mutations.md',
+        ).writeAsStringSync(
           '# Mutations\n\nNotes for DARWIN.\n- old observation\n- another one\n',
         );
 
@@ -82,7 +84,7 @@ void main() {
         executor.resetMutations();
 
         final content = File(
-          '${tempDir.path}/.inquiry/mutations.md',
+          '${tempDir.path}/cleanrooms/$branch/mutations.md',
         ).readAsStringSync();
         expect(content, contains('# Mutations'));
         expect(content, contains('Notes for DARWIN'));
@@ -94,7 +96,7 @@ void main() {
         executor.resetMutations();
 
         expect(
-          File('${tempDir.path}/.inquiry/mutations.md').existsSync(),
+          File('${tempDir.path}/cleanrooms/$branch/mutations.md').existsSync(),
           isTrue,
         );
       });
@@ -184,7 +186,7 @@ void main() {
       test('executes multiple effects in order', () {
         File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
         File(
-          '${tempDir.path}/.inquiry/mutations.md',
+          '${tempDir.path}/cleanrooms/$branch/mutations.md',
         ).writeAsStringSync('# Mutations\n- old stuff\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
@@ -207,7 +209,7 @@ void main() {
 
         // Mutations reset
         final mutContent = File(
-          '${tempDir.path}/.inquiry/mutations.md',
+          '${tempDir.path}/cleanrooms/$branch/mutations.md',
         ).readAsStringSync();
         expect(mutContent, isNot(contains('old stuff')));
       });
