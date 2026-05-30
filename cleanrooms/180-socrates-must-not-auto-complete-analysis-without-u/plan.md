@@ -222,11 +222,28 @@ assert the analyze artifact bootstrap no longer encodes author: socrates as the 
 
 **Risk note:** D2 and D4 say the doctrine must be generalized, but the issue must stay bounded. This phase is hygiene, not a full phase-contract rewrite for IDLE, PLAN, and EXECUTE.
 
-- [ ] Remove repository-procedure leakage from `code/cli/assets/apes/socrates.yaml` so SOCRATES keeps mayeutic method but stops owning named repository deliverables or implicit completion authority.
-- [ ] Apply the same bounded cleanup rule to `code/cli/assets/apes/dewey.yaml`, `code/cli/assets/apes/descartes.yaml`, and `code/cli/assets/apes/basho.yaml`: keep method, remove the clearest phase-policy and repository-procedure leakage that is now owned elsewhere.
-- [ ] Keep the cleanup bounded to prompt purity. Do not simultaneously redesign all state contracts for IDLE, PLAN, and EXECUTE in this phase.
-- [ ] Update the nearby tests that hardcode the old artifact and prompt assumptions, especially `code/cli/test/ape_definition_test.dart`, `code/cli/test/ape_prompt_test.dart`, and any other touched prompt tests.
-- [ ] If the bounded cleanup reveals that DEWEY, DESCARTES, or BASHO need a larger host-phase redesign to stay coherent, record a deviation and stop widening scope under #180.
+- [x] Remove repository-procedure leakage from `code/cli/assets/apes/socrates.yaml` so SOCRATES keeps mayeutic method but stops owning named repository deliverables or implicit completion authority.
+- [x] Apply the same bounded cleanup rule to `code/cli/assets/apes/dewey.yaml`, `code/cli/assets/apes/descartes.yaml`, and `code/cli/assets/apes/basho.yaml`: keep method, remove the clearest phase-policy and repository-procedure leakage that is now owned elsewhere.
+- [x] Keep the cleanup bounded to prompt purity. Do not simultaneously redesign all state contracts for IDLE, PLAN, and EXECUTE in this phase.
+- [x] Update the nearby tests that hardcode the old artifact and prompt assumptions, especially `code/cli/test/ape_definition_test.dart`, `code/cli/test/ape_prompt_test.dart`, and any other touched prompt tests.
+- [x] If the bounded cleanup reveals that DEWEY, DESCARTES, or BASHO need a larger host-phase redesign to stay coherent, record a deviation and stop widening scope under #180.
+
+**QA result:** PASS
+
+Focused prompt-hygiene bundle executed after the bounded APE cleanup:
+
+- `ape_definition_test.dart`
+- `ape_prompt_test.dart`
+- `firmware_agent_test.dart`
+
+Observed result: 81 passed, 0 failed.
+
+What is now green in the issue-180 slice:
+
+- SOCRATES keeps Socratic method while dropping direct ownership of a named repository deliverable;
+- DEWEY no longer carries the clearest repository-procedure leakage in its base prompt and local sub-prompts;
+- DESCARTES now speaks in terms of approved analysis/planning contracts instead of hardwiring `diagnosis.md` and approval semantics into its identity prompt;
+- BASHO now refers to the approved phase plan and active execution contract without owning `plan.md` or commit procedure details directly.
 
 **Verification / test definition:**
 ```text
