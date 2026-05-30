@@ -189,7 +189,16 @@ void main() {
       final expected = setupCycle(tmpDir.path, branch: '209-foo');
       final resolved = InquiryState.stateFileFor(tmpDir.path);
       expect(resolved, isNotNull);
-      expect(p.equals(resolved!, expected), isTrue);
+
+      final expectedDir = Directory(
+        p.dirname(expected),
+      ).resolveSymbolicLinksSync();
+      final resolvedDir = Directory(
+        p.dirname(resolved!),
+      ).resolveSymbolicLinksSync();
+
+      expect(resolvedDir, equals(expectedDir));
+      expect(p.basename(resolved), equals(kStateFileName));
     });
 
     test('save then load roundtrips via cycle-local path', () {
