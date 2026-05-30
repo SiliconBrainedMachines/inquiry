@@ -152,6 +152,8 @@ void main() {
         expect(result.fsmState, equals('PLAN'));
         expect(result.prompt, contains('DESCARTES'));
         expect(result.prompt, contains('scientific method'));
+        expect(result.prompt, contains('enumerate every construction site'));
+        expect(result.prompt, contains('object literals, factory returns'));
       });
 
       test(
