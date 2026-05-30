@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:inquiry_cli/modules/ape/commands/transition.dart';
+import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -8,16 +9,20 @@ import 'package:test/test.dart';
 void main() {
   late Directory tmpDir;
 
+  const branch = '145-test-branch';
+
   setUp(() {
     tmpDir = Directory.systemTemp.createTempSync('ape_transition_test_');
     Directory(p.join(tmpDir.path, '.inquiry')).createSync(recursive: true);
+    _initGitRepo(tmpDir.path, branch: branch);
 
     // Copy APE YAML assets
     final apesDir = Directory(p.join(tmpDir.path, 'assets', 'apes'));
     apesDir.createSync(recursive: true);
     for (final name in ['socrates', 'dewey', 'descartes', 'basho', 'darwin']) {
-      File('assets/apes/$name.yaml')
-          .copySync(p.join(apesDir.path, '$name.yaml'));
+      File(
+        'assets/apes/$name.yaml',
+      ).copySync(p.join(apesDir.path, '$name.yaml'));
     }
   });
 
@@ -41,8 +46,9 @@ void main() {
     } else {
       buf.writeln('ape: null');
     }
-    File(p.join(tmpDir.path, '.inquiry', 'state.yaml'))
-        .writeAsStringSync(buf.toString());
+    File(p.join(tmpDir.path, 'cleanrooms', branch, kStateFileName))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(buf.toString());
   }
 
   void setupGitRepoWithFeatureCommit() {
@@ -59,16 +65,9 @@ void main() {
       }
     }
 
-    git(['init']);
-    git(['config', 'user.email', 'test@test.com']);
-    git(['config', 'user.name', 'Test User']);
-
+    // setUp already initialised the repo on the feature branch; add a
+    // feature commit on top.
     final trackedFile = File(p.join(tmpDir.path, 'README.md'));
-    trackedFile.writeAsStringSync('# Test repo\n');
-    git(['add', '.']);
-    git(['commit', '-m', 'init']);
-
-    git(['checkout', '-b', '145-test-branch']);
     trackedFile.writeAsStringSync('# Test repo\nfeature change\n');
     git(['add', 'README.md']);
     git(['commit', '-m', 'phase commit']);
@@ -109,8 +108,9 @@ void main() {
         await cmd.execute();
 
         // Verify persisted
-        final content = File(p.join(tmpDir.path, '.inquiry', 'state.yaml'))
-            .readAsStringSync();
+        final content = File(
+          p.join(tmpDir.path, 'cleanrooms', branch, kStateFileName),
+        ).readAsStringSync();
         expect(content, contains('state: assumptions'));
         // Main FSM state preserved
         expect(content, contains('state: ANALYZE'));
@@ -151,39 +151,42 @@ void main() {
         expect(result.to, equals('implement'));
       });
 
-      test('basho commit --next_phase--> implement preserves outer FSM state', () async {
-        setupGitRepoWithFeatureCommit();
-        writeState(
-          state: 'EXECUTE',
-          issue: '145',
-          apeName: 'basho',
-          apeState: 'commit',
-        );
+      test(
+        'basho commit --next_phase--> implement preserves outer FSM state',
+        () async {
+          setupGitRepoWithFeatureCommit();
+          writeState(
+            state: 'EXECUTE',
+            issue: '145',
+            apeName: 'basho',
+            apeState: 'commit',
+          );
 
-        final cmd = ApeTransitionCommand(
-          ApeTransitionInput(event: 'next_phase', workingDirectory: tmpDir.path),
-        );
-        final result = await cmd.execute();
+          final cmd = ApeTransitionCommand(
+            ApeTransitionInput(
+              event: 'next_phase',
+              workingDirectory: tmpDir.path,
+            ),
+          );
+          final result = await cmd.execute();
 
-        expect(result.from, equals('commit'));
-        expect(result.to, equals('implement'));
+          expect(result.from, equals('commit'));
+          expect(result.to, equals('implement'));
 
-        final content = File(p.join(tmpDir.path, '.inquiry', 'state.yaml'))
-            .readAsStringSync();
-        expect(content, contains('state: EXECUTE'));
-        expect(content, contains('issue: "145"'));
-        expect(content, contains('name: basho'));
-        expect(content, contains('state: implement'));
-        expect(content, isNot(contains('issue: null')));
-        expect(content, isNot(contains('state: IDLE')));
-      });
+          final content = File(
+            p.join(tmpDir.path, 'cleanrooms', branch, kStateFileName),
+          ).readAsStringSync();
+          expect(content, contains('state: EXECUTE'));
+          expect(content, contains('issue: "145"'));
+          expect(content, contains('name: basho'));
+          expect(content, contains('state: implement'));
+          expect(content, isNot(contains('issue: null')));
+          expect(content, isNot(contains('state: IDLE')));
+        },
+      );
 
       test('dewey confirm --complete--> evaluate_scope', () async {
-        writeState(
-          state: 'IDLE',
-          apeName: 'dewey',
-          apeState: 'confirm',
-        );
+        writeState(state: 'IDLE', apeName: 'dewey', apeState: 'confirm');
 
         final cmd = ApeTransitionCommand(
           ApeTransitionInput(event: 'complete', workingDirectory: tmpDir.path),
@@ -266,22 +269,34 @@ void main() {
     });
 
     group('error cases', () {
-      test('throws CommandException MISSING_EVENT when event flag is null', () async {
-        writeState(state: 'ANALYZE', issue: '145', apeName: 'socrates', apeState: 'clarification');
+      test(
+        'throws CommandException MISSING_EVENT when event flag is null',
+        () async {
+          writeState(
+            state: 'ANALYZE',
+            issue: '145',
+            apeName: 'socrates',
+            apeState: 'clarification',
+          );
 
-        final cmd = ApeTransitionCommand(
-          ApeTransitionInput(event: null, workingDirectory: tmpDir.path),
-        );
+          final cmd = ApeTransitionCommand(
+            ApeTransitionInput(event: null, workingDirectory: tmpDir.path),
+          );
 
-        expect(
-          () => cmd.execute(),
-          throwsA(
-            isA<CommandException>()
-                .having((e) => e.code, 'code', equals('MISSING_EVENT'))
-                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.validationFailed)),
-          ),
-        );
-      });
+          expect(
+            () => cmd.execute(),
+            throwsA(
+              isA<CommandException>()
+                  .having((e) => e.code, 'code', equals('MISSING_EVENT'))
+                  .having(
+                    (e) => e.exitCode,
+                    'exitCode',
+                    equals(ExitCode.validationFailed),
+                  ),
+            ),
+          );
+        },
+      );
 
       test('throws NO_ACTIVE_APE when no APE in state', () async {
         writeState(state: 'IDLE');
@@ -295,7 +310,11 @@ void main() {
           throwsA(
             isA<CommandException>()
                 .having((e) => e.code, 'code', equals('NO_ACTIVE_APE'))
-                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
+                .having(
+                  (e) => e.exitCode,
+                  'exitCode',
+                  equals(ExitCode.conflict),
+                ),
           ),
         );
       });
@@ -317,7 +336,11 @@ void main() {
           throwsA(
             isA<CommandException>()
                 .having((e) => e.code, 'code', equals('APE_COMPLETED'))
-                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.conflict)),
+                .having(
+                  (e) => e.exitCode,
+                  'exitCode',
+                  equals(ExitCode.conflict),
+                ),
           ),
         );
       });
@@ -339,15 +362,20 @@ void main() {
           throwsA(
             isA<CommandException>()
                 .having((e) => e.code, 'code', equals('INVALID_APE_EVENT'))
-                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.validationFailed)),
+                .having(
+                  (e) => e.exitCode,
+                  'exitCode',
+                  equals(ExitCode.validationFailed),
+                ),
           ),
         );
       });
 
       test('throws APE_NOT_FOUND when YAML missing', () async {
         // Delete socrates YAML
-        File(p.join(tmpDir.path, 'assets', 'apes', 'socrates.yaml'))
-            .deleteSync();
+        File(
+          p.join(tmpDir.path, 'assets', 'apes', 'socrates.yaml'),
+        ).deleteSync();
 
         writeState(
           state: 'ANALYZE',
@@ -365,7 +393,11 @@ void main() {
           throwsA(
             isA<CommandException>()
                 .having((e) => e.code, 'code', equals('APE_NOT_FOUND'))
-                .having((e) => e.exitCode, 'exitCode', equals(ExitCode.notFound)),
+                .having(
+                  (e) => e.exitCode,
+                  'exitCode',
+                  equals(ExitCode.notFound),
+                ),
           ),
         );
       });
@@ -409,4 +441,21 @@ void main() {
       });
     });
   });
+}
+
+void _initGitRepo(String root, {required String branch}) {
+  void git(List<String> args) {
+    final result = Process.runSync('git', args, workingDirectory: root);
+    if (result.exitCode != 0) {
+      throw StateError('git ${args.join(' ')} failed: ${result.stderr}');
+    }
+  }
+
+  git(['init']);
+  git(['config', 'user.email', 'test@test.com']);
+  git(['config', 'user.name', 'Test']);
+  File(p.join(root, '.gitkeep')).writeAsStringSync('');
+  git(['add', '.']);
+  git(['commit', '-m', 'init']);
+  git(['checkout', '-b', branch]);
 }
