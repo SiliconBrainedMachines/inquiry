@@ -63,6 +63,22 @@ void main() {
         isNotEmpty,
         reason: 'Operational contract for ${state.value} should expose allowed actions',
       );
+
+      if (state == FsmState.analyze) {
+        expect(
+          operationalContract.toJson()['required_artifacts'],
+          equals(['index.md', 'confirmations.md', 'diagnosis.md']),
+          reason: 'ANALYZE should expose its inspectable artifact contract',
+        );
+        expect(
+          operationalContract.toJson()['interaction'],
+          equals({
+            'mode': 'visible_iterative_dialogue',
+            'user_participation_required': true,
+          }),
+          reason: 'ANALYZE should expose interaction policy to the runtime',
+        );
+      }
     }
   });
 
@@ -111,6 +127,10 @@ void main() {
     expect(
       analyzeTransition.operations!.prechecks,
       contains('issue_selected_or_created'),
+    );
+    expect(
+      analyzeTransition.operations!.prechecks,
+      containsAll(['diagnosis_exists', 'index_exists', 'confirmations_exist']),
     );
     expect(
       analyzeTransition.operations!.commitPolicy,

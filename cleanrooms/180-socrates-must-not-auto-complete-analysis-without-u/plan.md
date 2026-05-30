@@ -93,11 +93,30 @@ assert DARWIN and full multi-phase redesign are recorded as out of scope
 
 **Risk note:** D1, D3, and F5 say the failure must be made executable before source edits claim to solve it. Otherwise the implementation can still pass by narrative rather than by guard.
 
-- [ ] Strengthen the nearby tests so they can fail on the issue-180 defects now named in the diagnosis: hidden ANALYZE progression, insufficient ANALYZE completion proof, and confirmed.md bootstrapping where the contract target is confirmations.md.
-- [ ] Add or adjust assertions in `code/cli/test/firmware_agent_test.dart` so firmware can be distinguished between universally hidden dispatch and state-aware ANALYZE dialogue behavior.
-- [ ] Add or adjust assertions in `code/cli/test/fsm_contract_test.dart`, `code/cli/test/fsm_state_test.dart`, and `code/cli/test/fsm_transition_test.dart` so the ANALYZE contract and the ANALYZE -> PLAN boundary can be tested for the new required conditions instead of only `diagnosis_exists`.
-- [ ] Add or adjust assertions in `code/cli/test/effect_executor_test.dart` and `code/cli/test/ape_prompt_test.dart` so confirmations.md becomes the target analyze artifact name and prompt/context surfaces stop hardwiring confirmed.md as the canonical artifact.
-- [ ] Keep the RED surface bounded to #180. Do not invent a new all-phase generic policy engine in the tests before there is a minimal source design to support it.
+- [x] Strengthen the nearby tests so they can fail on the issue-180 defects now named in the diagnosis: hidden ANALYZE progression, insufficient ANALYZE completion proof, and confirmed.md bootstrapping where the contract target is confirmations.md.
+- [x] Add or adjust assertions in `code/cli/test/firmware_agent_test.dart` so firmware can be distinguished between universally hidden dispatch and state-aware ANALYZE dialogue behavior.
+- [x] Add or adjust assertions in `code/cli/test/fsm_contract_test.dart`, `code/cli/test/fsm_state_test.dart`, and `code/cli/test/fsm_transition_test.dart` so the ANALYZE contract and the ANALYZE -> PLAN boundary can be tested for the new required conditions instead of only `diagnosis_exists`.
+- [x] Add or adjust assertions in `code/cli/test/effect_executor_test.dart` and `code/cli/test/ape_prompt_test.dart` so confirmations.md becomes the target analyze artifact name and prompt/context surfaces stop hardwiring confirmed.md as the canonical artifact.
+- [x] Keep the RED surface bounded to #180. Do not invent a new all-phase generic policy engine in the tests before there is a minimal source design to support it.
+
+**QA result:** PASS (expected RED observed)
+
+Focused bundle executed:
+
+- `firmware_agent_test.dart`
+- `ape_prompt_test.dart`
+- `fsm_contract_test.dart`
+- `fsm_state_test.dart`
+- `fsm_transition_test.dart`
+
+Observed RED boundary after the first TDD pass: 105 tests passed, 8 failed.
+
+The failing cases are now concentrated on the intended issue-180 slice:
+
+- firmware still declares a universal user-interaction rule and does not document visible ANALYZE interaction;
+- analyze prompt/context still emits `confirmed_doc` and `confirmed.md` instead of `confirmations_doc` and `confirmations.md`;
+- the operational contract for ANALYZE still exposes neither `required_artifacts` nor `interaction`;
+- the ANALYZE -> PLAN boundary still requires only `diagnosis_exists` and therefore still allows completion without `index.md` and `confirmations.md`.
 
 **Verification / test definition:**
 ```text
