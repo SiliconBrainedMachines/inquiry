@@ -56,10 +56,18 @@ author: DESCARTES
 
 **Risk note:** D3 and D4 make scope control mandatory. Without a frozen list of source-of-truth surfaces and the minimum vocabulary required for ANALYZE, execution can drift into a repo-wide contract rewrite.
 
-- [ ] Read the current source surfaces for this slice only: `code/cli/assets/agents/inquiry.agent.md`, `code/cli/assets/fsm/states/analyze.yaml`, `code/cli/assets/fsm/transition_contract.yaml`, `code/cli/lib/modules/ape/operational_contract.dart`, `code/cli/lib/modules/fsm/commands/state.dart`, `code/cli/lib/modules/fsm/commands/transition.dart`, `code/cli/lib/modules/fsm/effect_executor.dart`, `code/cli/assets/apes/socrates.yaml`, `code/cli/assets/apes/dewey.yaml`, `code/cli/assets/apes/descartes.yaml`, and `code/cli/assets/apes/basho.yaml`.
-- [ ] Freeze the minimum new contract vocabulary needed for this issue. Prefer the smallest extension that can encode ANALYZE interaction visibility, participation requirements, required artifacts, and completion requirements without redesigning every phase schema.
-- [ ] Freeze the executable guard set that will be used during the cycle: `firmware_agent_test.dart`, `fsm_contract_test.dart`, `fsm_state_test.dart`, `fsm_transition_test.dart`, `effect_executor_test.dart`, `ape_prompt_test.dart`, `ape_definition_test.dart`, and `assets_test.dart`.
-- [ ] Record explicit out-of-scope boundaries for this issue: DARWIN/EVOLUTION work, a full generic configurable APE registry across all states, and a complete rewrite of IDLE/PLAN/EXECUTE state contracts beyond bounded hygiene.
+- [x] Read the current source surfaces for this slice only: `code/cli/assets/agents/inquiry.agent.md`, `code/cli/assets/fsm/states/analyze.yaml`, `code/cli/assets/fsm/transition_contract.yaml`, `code/cli/lib/modules/ape/operational_contract.dart`, `code/cli/lib/modules/fsm/commands/state.dart`, `code/cli/lib/modules/fsm/commands/transition.dart`, `code/cli/lib/modules/fsm/effect_executor.dart`, `code/cli/assets/apes/socrates.yaml`, `code/cli/assets/apes/dewey.yaml`, `code/cli/assets/apes/descartes.yaml`, and `code/cli/assets/apes/basho.yaml`.
+- [x] Freeze the minimum new contract vocabulary needed for this issue. Prefer the smallest extension that can encode ANALYZE interaction visibility, participation requirements, required artifacts, and completion requirements without redesigning every phase schema.
+- [x] Freeze the executable guard set that will be used during the cycle: `firmware_agent_test.dart`, `fsm_contract_test.dart`, `fsm_state_test.dart`, `fsm_transition_test.dart`, `effect_executor_test.dart`, `ape_prompt_test.dart`, `ape_definition_test.dart`, and `assets_test.dart`.
+- [x] Record explicit out-of-scope boundaries for this issue: DARWIN/EVOLUTION work, a full generic configurable APE registry across all states, and a complete rewrite of IDLE/PLAN/EXECUTE state contracts beyond bounded hygiene.
+
+**QA result:** PASS
+
+Execution boundary frozen before the first product edit.
+
+- Minimum contract vocabulary for this cycle: interaction visibility, user participation requirement, required analyze artifacts, completion requirements, and the smallest state/runtime exposure needed for firmware to obey that contract.
+- Frozen guard set for the first RED pass: `firmware_agent_test.dart`, `fsm_contract_test.dart`, `fsm_state_test.dart`, `fsm_transition_test.dart`, `effect_executor_test.dart`, `ape_prompt_test.dart`, `ape_definition_test.dart`, and `assets_test.dart`.
+- Out of scope for #180 EXECUTE: DARWIN/EVOLUTION cleanup, a generic configurable APE registry across all states, and a full state-contract rewrite of IDLE/PLAN/EXECUTE beyond bounded prompt hygiene.
 
 **Verification / test definition:**
 ```text
