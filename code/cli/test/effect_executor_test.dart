@@ -1,14 +1,23 @@
 import 'dart:io';
 
+import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:inquiry_cli/modules/fsm/effect_executor.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
   late Directory tempDir;
+  late String stateFilePath;
+
+  const branch = '145-test-branch';
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('effect_executor_test_');
     Directory('${tempDir.path}/.inquiry').createSync(recursive: true);
+    _initGitRepo(tempDir.path, branch: branch);
+    final cycleDir = Directory(p.join(tempDir.path, 'cleanrooms', branch))
+      ..createSync(recursive: true);
+    stateFilePath = p.join(cycleDir.path, kStateFileName);
   });
 
   tearDown(() {
@@ -18,8 +27,7 @@ void main() {
   group('EffectExecutor', () {
     group('update_state', () {
       test('writes new state and issue to state.yaml', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: IDLE\nissue: null\n');
+        File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState(
@@ -28,39 +36,39 @@ void main() {
           promptFragmentId: 'idle_to_analyze',
         );
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('state: ANALYZE'));
         expect(content, contains('issue: "145"'));
         expect(content, contains('prompt_fragment_id: idle_to_analyze'));
       });
 
       test('preserves issue when not provided', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('PLAN', promptFragmentId: 'analyze_to_plan');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('state: PLAN'));
         expect(content, contains('issue: "145"'));
         expect(content, contains('prompt_fragment_id: analyze_to_plan'));
       });
 
-      test('clears issue when transitioning to IDLE', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
+      test('marks cycle completed when transitioning to IDLE', () {
+        File(
+          stateFilePath,
+        ).writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('IDLE');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
-        expect(content, contains('state: IDLE'));
-        expect(content, contains('issue: null'));
-        expect(content, contains('prompt_fragment_id: null'));
+        // IDLE is derived: the cycle file is marked completed, not rewritten to
+        // a persisted IDLE record. load() maps completed -> derived IDLE.
+        final raw = InquiryState.loadFrom(stateFilePath);
+        expect(raw.status, 'completed');
+        final derived = InquiryState.load(tempDir.path);
+        expect(derived.state, 'IDLE');
+        expect(derived.issue, isNull);
       });
     });
 
@@ -73,8 +81,9 @@ void main() {
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.resetMutations();
 
-        final content =
-            File('${tempDir.path}/.inquiry/mutations.md').readAsStringSync();
+        final content = File(
+          '${tempDir.path}/.inquiry/mutations.md',
+        ).readAsStringSync();
         expect(content, contains('# Mutations'));
         expect(content, contains('Notes for DARWIN'));
         expect(content, isNot(contains('old observation')));
@@ -105,39 +114,41 @@ void main() {
       });
 
       test('captures current state in snapshot', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: ANALYZE\nissue: "99"\n');
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "99"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.snapshotMetrics();
 
-        final content =
-            File('${tempDir.path}/.inquiry/metrics_snapshot.yaml')
-                .readAsStringSync();
+        final content = File(
+          '${tempDir.path}/.inquiry/metrics_snapshot.yaml',
+        ).readAsStringSync();
         expect(content, contains('state: ANALYZE'));
         expect(content, contains('issue: "99"'));
       });
     });
 
     group('close_cycle', () {
-      test('resets state to IDLE and clears issue', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
+      test('marks cycle completed and derives IDLE', () {
+        File(
+          stateFilePath,
+        ).writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.closeCycle();
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
-        expect(content, contains('state: IDLE'));
-        expect(content, contains('issue: null'));
+        final raw = InquiryState.loadFrom(stateFilePath);
+        expect(raw.status, 'completed');
+        final derived = InquiryState.load(tempDir.path);
+        expect(derived.state, 'IDLE');
+        expect(derived.issue, isNull);
       });
     });
 
     group('collect_metrics', () {
       test('appends cycle entry to metrics.yaml', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
+        File(
+          stateFilePath,
+        ).writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.collectMetrics();
@@ -151,16 +162,19 @@ void main() {
       });
 
       test('appends to existing metrics.yaml', () {
-        File('${tempDir.path}/.inquiry/metrics.yaml')
-            .writeAsStringSync('cycles:\n  - issue: "100"\n');
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
+        File(
+          '${tempDir.path}/.inquiry/metrics.yaml',
+        ).writeAsStringSync('cycles:\n  - issue: "100"\n');
+        File(
+          stateFilePath,
+        ).writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.collectMetrics();
 
-        final content =
-            File('${tempDir.path}/.inquiry/metrics.yaml').readAsStringSync();
+        final content = File(
+          '${tempDir.path}/.inquiry/metrics.yaml',
+        ).readAsStringSync();
         expect(content, contains('issue: "100"'));
         expect(content, contains('issue: "145"'));
       });
@@ -168,10 +182,10 @@ void main() {
 
     group('executeAll', () {
       test('executes multiple effects in order', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: IDLE\nissue: null\n');
-        File('${tempDir.path}/.inquiry/mutations.md')
-            .writeAsStringSync('# Mutations\n- old stuff\n');
+        File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
+        File(
+          '${tempDir.path}/.inquiry/mutations.md',
+        ).writeAsStringSync('# Mutations\n- old stuff\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         final executed = executor.executeAll(
@@ -181,23 +195,25 @@ void main() {
           promptFragmentId: 'idle_to_analyze',
         );
 
-        expect(executed, containsAll(['update_state', 'reset_mutations', 'snapshot_metrics']));
+        expect(
+          executed,
+          containsAll(['update_state', 'reset_mutations', 'snapshot_metrics']),
+        );
 
         // State updated
-        final stateContent =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final stateContent = File(stateFilePath).readAsStringSync();
         expect(stateContent, contains('state: ANALYZE'));
         expect(stateContent, contains('prompt_fragment_id: idle_to_analyze'));
 
         // Mutations reset
-        final mutContent =
-            File('${tempDir.path}/.inquiry/mutations.md').readAsStringSync();
+        final mutContent = File(
+          '${tempDir.path}/.inquiry/mutations.md',
+        ).readAsStringSync();
         expect(mutContent, isNot(contains('old stuff')));
       });
 
       test('skips unknown effects gracefully', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: IDLE\nissue: null\n');
+        File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         final executed = executor.executeAll(
@@ -214,10 +230,7 @@ void main() {
 
     group('openAnalysisContext', () {
       test('creates analyze bootstrap with confirmations.md', () {
-        const branch = '145-test-branch';
-        _initGitRepo(tempDir.path, branch: branch);
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.openAnalysisContext();
@@ -235,10 +248,7 @@ void main() {
       });
 
       test('creates methodology-neutral confirmations bootstrap', () {
-        const branch = '145-test-branch';
-        _initGitRepo(tempDir.path, branch: branch);
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.openAnalysisContext();
@@ -255,108 +265,80 @@ void main() {
 
     group('APE auto-activation', () {
       test('writes ape field when transitioning to ANALYZE', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: IDLE\nissue: null\n');
+        File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
 
         // Copy APE assets so _resolveInitialState can find them
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/socrates.yaml')
-            .copySync('${apesDir.path}/socrates.yaml');
+        File(
+          'assets/apes/socrates.yaml',
+        ).copySync('${apesDir.path}/socrates.yaml');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('ANALYZE', issue: '145');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('state: ANALYZE'));
         expect(content, contains('ape:'));
         expect(content, contains('name: socrates'));
         expect(content, contains('state: clarification'));
       });
 
-      test('activates dewey when transitioning to IDLE', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: EVOLUTION\nissue: "145"\n');
-
-        final apesDir = Directory('${tempDir.path}/assets/apes');
-        apesDir.createSync(recursive: true);
-        File('assets/apes/dewey.yaml').copySync('${apesDir.path}/dewey.yaml');
-
-        final executor = EffectExecutor(workingDirectory: tempDir.path);
-        executor.updateState('IDLE');
-
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
-        expect(content, contains('state: IDLE'));
-        expect(content, contains('name: dewey'));
-        expect(content, contains('state: evaluate_scope'));
-      });
-
       test('activates descartes when transitioning to PLAN', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
 
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/descartes.yaml')
-            .copySync('${apesDir.path}/descartes.yaml');
+        File(
+          'assets/apes/descartes.yaml',
+        ).copySync('${apesDir.path}/descartes.yaml');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('PLAN');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('name: descartes'));
         expect(content, contains('state: decomposition'));
       });
 
       test('activates basho when transitioning to EXECUTE', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: PLAN\nissue: "145"\n');
+        File(stateFilePath).writeAsStringSync('state: PLAN\nissue: "145"\n');
 
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/basho.yaml')
-            .copySync('${apesDir.path}/basho.yaml');
+        File('assets/apes/basho.yaml').copySync('${apesDir.path}/basho.yaml');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('EXECUTE');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('name: basho'));
         expect(content, contains('state: implement'));
       });
 
       test('activates darwin when transitioning to EVOLUTION', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: END\nissue: "145"\n');
+        File(stateFilePath).writeAsStringSync('state: END\nissue: "145"\n');
 
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/darwin.yaml')
-            .copySync('${apesDir.path}/darwin.yaml');
+        File('assets/apes/darwin.yaml').copySync('${apesDir.path}/darwin.yaml');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('EVOLUTION');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('name: darwin'));
         expect(content, contains('state: observe'));
       });
 
       test('graceful fallback when APE YAML not found', () {
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync('state: IDLE\nissue: null\n');
+        File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
 
         // No APE assets copied
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('ANALYZE', issue: '145');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('state: ANALYZE'));
         expect(content, contains('name: socrates'));
         // initialState is null when YAML not found — still writes the name
@@ -365,20 +347,17 @@ void main() {
       test('preserves APE sub-state when same APE continues (EXECUTE→END)', () {
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/basho.yaml')
-            .copySync('${apesDir.path}/basho.yaml');
+        File('assets/apes/basho.yaml').copySync('${apesDir.path}/basho.yaml');
 
         // basho is at _DONE in EXECUTE
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync(
-              'state: EXECUTE\nissue: "145"\nape:\n  name: basho\n  state: _DONE\n',
-            );
+        File(stateFilePath).writeAsStringSync(
+          'state: EXECUTE\nissue: "145"\nape:\n  name: basho\n  state: _DONE\n',
+        );
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('END');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('name: basho'));
         expect(content, contains('state: _DONE'));
       });
@@ -386,18 +365,18 @@ void main() {
       test('re-initializes socrates when ANALYZE continues from _DONE', () {
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/socrates.yaml')
-            .copySync('${apesDir.path}/socrates.yaml');
+        File(
+          'assets/apes/socrates.yaml',
+        ).copySync('${apesDir.path}/socrates.yaml');
 
-        File('${tempDir.path}/.inquiry/state.yaml').writeAsStringSync(
+        File(stateFilePath).writeAsStringSync(
           'state: ANALYZE\nissue: "145"\nape:\n  name: socrates\n  state: _DONE\n',
         );
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('ANALYZE');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('name: socrates'));
         expect(content, contains('state: clarification'));
         expect(content, isNot(contains('state: _DONE')));
@@ -406,20 +385,19 @@ void main() {
       test('re-initializes APE when transitioning to state with different APE', () {
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/descartes.yaml')
-            .copySync('${apesDir.path}/descartes.yaml');
+        File(
+          'assets/apes/descartes.yaml',
+        ).copySync('${apesDir.path}/descartes.yaml');
 
         // socrates is active in ANALYZE, transitioning to PLAN activates descartes
-        File('${tempDir.path}/.inquiry/state.yaml')
-            .writeAsStringSync(
-              'state: ANALYZE\nissue: "145"\nape:\n  name: socrates\n  state: _DONE\n',
-            );
+        File(stateFilePath).writeAsStringSync(
+          'state: ANALYZE\nissue: "145"\nape:\n  name: socrates\n  state: _DONE\n',
+        );
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('PLAN');
 
-        final content =
-            File('${tempDir.path}/.inquiry/state.yaml').readAsStringSync();
+        final content = File(stateFilePath).readAsStringSync();
         expect(content, contains('name: descartes'));
         expect(content, contains('state: decomposition'));
       });

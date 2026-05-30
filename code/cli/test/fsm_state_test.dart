@@ -1,10 +1,14 @@
 import 'dart:io';
 
+import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:inquiry_cli/modules/fsm/commands/state.dart';
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
   late Directory tempDir;
+
+  const branch = '145-test-branch';
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('fsm_state_test_');
@@ -14,7 +18,7 @@ void main() {
     tempDir.deleteSync(recursive: true);
   });
 
-  /// Creates a minimal test workspace with .inquiry/state.yaml and
+  /// Creates a minimal test workspace with a cycle-local `.iq.state.yaml` and
   /// assets/fsm/transition_contract.yaml.
   void setupWorkspace({
     required String state,
@@ -22,7 +26,8 @@ void main() {
     String? apeName,
     String? apeState,
   }) {
-    // .inquiry/state.yaml
+    // Cycle-local state lives at cleanrooms/<branch>/.iq.state.yaml.
+    _initGitRepo(tempDir.path, branch: branch);
     Directory('${tempDir.path}/.inquiry').createSync(recursive: true);
     final buf = StringBuffer();
     buf.writeln('state: $state');
@@ -34,8 +39,10 @@ void main() {
     } else {
       buf.writeln('ape: null');
     }
-    File('${tempDir.path}/.inquiry/state.yaml')
-        .writeAsStringSync(buf.toString());
+    final stateFile = File(
+      p.join(tempDir.path, 'cleanrooms', branch, kStateFileName),
+    )..createSync(recursive: true);
+    stateFile.writeAsStringSync(buf.toString());
 
     // Copy real contract from project assets
     final contractSource = File('assets/fsm/transition_contract.yaml');
@@ -56,7 +63,14 @@ void main() {
     // Copy state instruction YAMLs
     final statesDir = Directory('${tempDir.path}/assets/fsm/states');
     statesDir.createSync(recursive: true);
-    for (final name in ['idle', 'analyze', 'plan', 'execute', 'end', 'evolution']) {
+    for (final name in [
+      'idle',
+      'analyze',
+      'plan',
+      'execute',
+      'end',
+      'evolution',
+    ]) {
       final src = File('assets/fsm/states/$name.yaml');
       if (src.existsSync()) {
         src.copySync('${statesDir.path}/$name.yaml');
@@ -66,30 +80,33 @@ void main() {
 
   group('FsmStateCommand', () {
     group('JSON output structure', () {
-      test('returns state, task, transitions, apes, and instructions', () async {
-        setupWorkspace(state: 'ANALYZE', issue: '145');
+      test(
+        'returns state, task, transitions, apes, and instructions',
+        () async {
+          setupWorkspace(state: 'ANALYZE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
-        final result = await command.execute();
-        final json = result.toJson();
+          final command = FsmStateCommand(
+            FsmStateInput(workingDirectory: tempDir.path),
+          );
+          final result = await command.execute();
+          final json = result.toJson();
 
-        expect(json['state'], equals('ANALYZE'));
-        expect(json['issue'], equals('145'));
-        expect(json['transitions'], isList);
-        expect(json['apes'], isList);
-        expect(json['instructions'], isA<String>());
-        expect(json['operational_contract']['required_artifacts'], isList);
-        expect(json['operational_contract']['interaction'], isA<Map>());
-      });
+          expect(json['state'], equals('ANALYZE'));
+          expect(json['issue'], equals('145'));
+          expect(json['transitions'], isList);
+          expect(json['apes'], isList);
+          expect(json['instructions'], isA<String>());
+          expect(json['operational_contract']['required_artifacts'], isList);
+          expect(json['operational_contract']['interaction'], isA<Map>());
+        },
+      );
 
       test('returns operational contract sourced from state assets', () async {
         setupWorkspace(state: 'EXECUTE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
         final operationalContract =
@@ -98,7 +115,9 @@ void main() {
         expect(operationalContract, isNotNull);
         expect(
           operationalContract!['instructions'],
-          contains('Implement the plan phase by phase under its formal constraints.'),
+          contains(
+            'Implement the plan phase by phase under its formal constraints.',
+          ),
         );
         expect(
           operationalContract['constraints'],
@@ -113,9 +132,9 @@ void main() {
       test('IDLE state has no task', () async {
         setupWorkspace(state: 'IDLE');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -128,9 +147,9 @@ void main() {
       test('ANALYZE includes complete_analysis and block', () async {
         setupWorkspace(state: 'ANALYZE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final transitions = result.toJson()['transitions'] as List;
         final events = transitions.map((t) => t['event']).toList();
@@ -143,9 +162,9 @@ void main() {
       test('IDLE includes start_analyze only', () async {
         setupWorkspace(state: 'IDLE');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final transitions = result.toJson()['transitions'] as List;
         final events = transitions.map((t) => t['event']).toList();
@@ -157,9 +176,9 @@ void main() {
       test('each transition has event only', () async {
         setupWorkspace(state: 'PLAN', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final transitions = result.toJson()['transitions'] as List;
 
@@ -174,9 +193,9 @@ void main() {
       test('ANALYZE has socrates running', () async {
         setupWorkspace(state: 'ANALYZE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final apes = result.toJson()['apes'] as List;
 
@@ -188,9 +207,9 @@ void main() {
       test('IDLE has dewey active', () async {
         setupWorkspace(state: 'IDLE');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final apes = result.toJson()['apes'] as List;
 
@@ -201,9 +220,9 @@ void main() {
       test('PLAN has descartes running', () async {
         setupWorkspace(state: 'PLAN', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final apes = result.toJson()['apes'] as List;
 
@@ -214,9 +233,9 @@ void main() {
       test('EXECUTE has basho running', () async {
         setupWorkspace(state: 'EXECUTE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final apes = result.toJson()['apes'] as List;
 
@@ -227,9 +246,9 @@ void main() {
       test('EVOLUTION has darwin running', () async {
         setupWorkspace(state: 'EVOLUTION', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final apes = result.toJson()['apes'] as List;
 
@@ -242,9 +261,9 @@ void main() {
       test('ANALYZE instructions describe the mission', () async {
         setupWorkspace(state: 'ANALYZE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
 
         expect(result.toJson()['instructions'], contains('Investigate'));
@@ -262,29 +281,32 @@ void main() {
         );
       });
 
-      test('IDLE instructions describe TRIAGE issue creation and DONE handoff', () async {
-        setupWorkspace(state: 'IDLE');
+      test(
+        'IDLE instructions describe TRIAGE issue creation and DONE handoff',
+        () async {
+          setupWorkspace(state: 'IDLE');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
-        final result = await command.execute();
+          final command = FsmStateCommand(
+            FsmStateInput(workingDirectory: tempDir.path),
+          );
+          final result = await command.execute();
 
-        expect(result.toJson()['instructions'], contains('TRIAGE'));
-        expect(result.toJson()['instructions'], contains('DONE'));
-        expect(result.toJson()['instructions'], contains('create_or_select'));
-        expect(result.toJson()['instructions'], contains('issue-create'));
-        expect(result.toJson()['instructions'], contains('gh issue create'));
-        expect(result.toJson()['instructions'], contains('issue-start'));
-        expect(result.toJson()['instructions'], contains('start_analyze'));
-      });
+          expect(result.toJson()['instructions'], contains('TRIAGE'));
+          expect(result.toJson()['instructions'], contains('DONE'));
+          expect(result.toJson()['instructions'], contains('create_or_select'));
+          expect(result.toJson()['instructions'], contains('issue-create'));
+          expect(result.toJson()['instructions'], contains('gh issue create'));
+          expect(result.toJson()['instructions'], contains('issue-start'));
+          expect(result.toJson()['instructions'], contains('start_analyze'));
+        },
+      );
 
       test('EVOLUTION instructions own darwin repository procedure', () async {
         setupWorkspace(state: 'EVOLUTION', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
 
         expect(
@@ -294,7 +316,10 @@ void main() {
         expect(result.toJson()['instructions'], contains('gh issue list'));
         expect(result.toJson()['instructions'], contains('gh issue comment'));
         expect(result.toJson()['instructions'], contains('gh issue create'));
-        expect(result.toJson()['instructions'], contains('.inquiry/metrics.yaml'));
+        expect(
+          result.toJson()['instructions'],
+          contains('.inquiry/metrics.yaml'),
+        );
       });
     });
 
@@ -308,16 +333,23 @@ void main() {
 
         final statesDir = Directory('${tempDir.path}/assets/fsm/states');
         statesDir.createSync(recursive: true);
-        for (final name in ['idle', 'analyze', 'plan', 'execute', 'end', 'evolution']) {
+        for (final name in [
+          'idle',
+          'analyze',
+          'plan',
+          'execute',
+          'end',
+          'evolution',
+        ]) {
           final src = File('assets/fsm/states/$name.yaml');
           if (src.existsSync()) {
             src.copySync('${statesDir.path}/$name.yaml');
           }
         }
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
 
         expect(result.toJson()['state'], equals('IDLE'));
@@ -329,9 +361,9 @@ void main() {
       test('returns formatted text output', () async {
         setupWorkspace(state: 'ANALYZE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final text = result.toText();
 
@@ -349,9 +381,9 @@ void main() {
           apeState: 'clarification',
         );
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -369,9 +401,9 @@ void main() {
           apeState: 'decomposition',
         );
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final ape = result.toJson()['ape'] as Map<String, dynamic>;
         final transitions = ape['transitions'] as List;
@@ -383,9 +415,9 @@ void main() {
       test('omits ape field when no APE active', () async {
         setupWorkspace(state: 'IDLE');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -400,9 +432,9 @@ void main() {
           apeState: '_DONE',
         );
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final ape = result.toJson()['ape'] as Map<String, dynamic>;
 
@@ -417,9 +449,9 @@ void main() {
       test('ANALYZE has completion_authority: user', () async {
         setupWorkspace(state: 'ANALYZE', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -429,9 +461,9 @@ void main() {
       test('PLAN has completion_authority: user', () async {
         setupWorkspace(state: 'PLAN', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -441,9 +473,9 @@ void main() {
       test('END has completion_authority: automatic', () async {
         setupWorkspace(state: 'END', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -453,9 +485,9 @@ void main() {
       test('EVOLUTION has completion_authority: automatic', () async {
         setupWorkspace(state: 'EVOLUTION', issue: '145');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -465,9 +497,9 @@ void main() {
       test('IDLE has completion_authority: user', () async {
         setupWorkspace(state: 'IDLE');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final json = result.toJson();
 
@@ -476,33 +508,37 @@ void main() {
     });
 
     group('END transition filtering by config.yaml', () {
-      test('END with evolution disabled shows only pr_ready_no_evolution',
-          () async {
-        setupWorkspace(state: 'END', issue: '145');
-        // config.yaml with evolution.enabled: false
-        File('${tempDir.path}/.inquiry/config.yaml')
-            .writeAsStringSync('evolution:\n  enabled: false\n');
+      test(
+        'END with evolution disabled shows only pr_ready_no_evolution',
+        () async {
+          setupWorkspace(state: 'END', issue: '145');
+          // config.yaml with evolution.enabled: false
+          File(
+            '${tempDir.path}/.inquiry/config.yaml',
+          ).writeAsStringSync('evolution:\n  enabled: false\n');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
-        final result = await command.execute();
-        final transitions = result.toJson()['transitions'] as List;
-        final events = transitions.map((t) => t['event']).toList();
+          final command = FsmStateCommand(
+            FsmStateInput(workingDirectory: tempDir.path),
+          );
+          final result = await command.execute();
+          final transitions = result.toJson()['transitions'] as List;
+          final events = transitions.map((t) => t['event']).toList();
 
-        expect(events, contains('pr_ready_no_evolution'));
-        expect(events, isNot(contains('pr_ready')));
-      });
+          expect(events, contains('pr_ready_no_evolution'));
+          expect(events, isNot(contains('pr_ready')));
+        },
+      );
 
       test('END with evolution enabled shows only pr_ready', () async {
         setupWorkspace(state: 'END', issue: '145');
         // config.yaml with evolution.enabled: true
-        File('${tempDir.path}/.inquiry/config.yaml')
-            .writeAsStringSync('evolution:\n  enabled: true\n');
+        File(
+          '${tempDir.path}/.inquiry/config.yaml',
+        ).writeAsStringSync('evolution:\n  enabled: true\n');
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
         final result = await command.execute();
         final transitions = result.toJson()['transitions'] as List;
         final events = transitions.map((t) => t['event']).toList();
@@ -511,21 +547,40 @@ void main() {
         expect(events, isNot(contains('pr_ready_no_evolution')));
       });
 
-      test('END without config.yaml defaults to pr_ready_no_evolution',
-          () async {
-        setupWorkspace(state: 'END', issue: '145');
-        // No config.yaml file
+      test(
+        'END without config.yaml defaults to pr_ready_no_evolution',
+        () async {
+          setupWorkspace(state: 'END', issue: '145');
+          // No config.yaml file
 
-        final command = FsmStateCommand(FsmStateInput(
-          workingDirectory: tempDir.path,
-        ));
-        final result = await command.execute();
-        final transitions = result.toJson()['transitions'] as List;
-        final events = transitions.map((t) => t['event']).toList();
+          final command = FsmStateCommand(
+            FsmStateInput(workingDirectory: tempDir.path),
+          );
+          final result = await command.execute();
+          final transitions = result.toJson()['transitions'] as List;
+          final events = transitions.map((t) => t['event']).toList();
 
-        expect(events, contains('pr_ready_no_evolution'));
-        expect(events, isNot(contains('pr_ready')));
-      });
+          expect(events, contains('pr_ready_no_evolution'));
+          expect(events, isNot(contains('pr_ready')));
+        },
+      );
     });
   });
+}
+
+void _initGitRepo(String root, {required String branch}) {
+  void git(List<String> args) {
+    final result = Process.runSync('git', args, workingDirectory: root);
+    if (result.exitCode != 0) {
+      throw StateError('git ${args.join(' ')} failed: ${result.stderr}');
+    }
+  }
+
+  git(['init']);
+  git(['config', 'user.email', 'test@test.com']);
+  git(['config', 'user.name', 'Test']);
+  File('$root/.gitkeep').writeAsStringSync('');
+  git(['add', '.']);
+  git(['commit', '-m', 'init']);
+  git(['checkout', '-b', branch]);
 }

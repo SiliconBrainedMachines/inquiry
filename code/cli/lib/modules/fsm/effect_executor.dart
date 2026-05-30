@@ -29,7 +29,8 @@ class EffectExecutor {
   final String workingDirectory;
   final Assets? _assets;
 
-  EffectExecutor({required this.workingDirectory, Assets? assets}) : _assets = assets;
+  EffectExecutor({required this.workingDirectory, Assets? assets})
+    : _assets = assets;
 
   String get _inquiryDir => p.join(workingDirectory, '.inquiry');
 
@@ -48,16 +49,15 @@ class EffectExecutor {
   /// If the new state has an associated APE, loads its YAML to find `initial_state`
   /// and writes `ape: {name, state}`. Otherwise clears the `ape:` field.
   void updateState(String newState, {String? issue, String? promptFragmentId}) {
+    if (newState == 'IDLE') {
+      _markCompleted();
+      return;
+    }
+
     final currentState = InquiryState.load(workingDirectory);
     String? resolvedIssue = issue;
     String? resolvedPromptFragmentId = promptFragmentId;
-
-    if (newState == 'IDLE') {
-      resolvedIssue = null;
-      resolvedPromptFragmentId = null;
-    } else {
-      resolvedIssue ??= currentState.issue;
-    }
+    resolvedIssue ??= currentState.issue;
 
     // Auto-activate APE
     String? apeName;
@@ -66,7 +66,8 @@ class EffectExecutor {
     if (ape != null) {
       apeName = ape;
       if (currentState.apeName == ape && currentState.apeState != null) {
-        if (currentState.state == newState && currentState.apeState == '_DONE') {
+        if (currentState.state == newState &&
+            currentState.apeState == '_DONE') {
           apeInitialState = _resolveInitialState(ape);
         } else {
           apeInitialState = currentState.apeState;
@@ -82,8 +83,22 @@ class EffectExecutor {
       promptFragmentId: resolvedPromptFragmentId,
       apeName: apeName,
       apeState: apeInitialState,
+      version: currentState.version,
+      status: 'active',
+      createdAt: currentState.createdAt,
     );
     updated.save(workingDirectory);
+  }
+
+  /// Mark the active cycle as `completed` (IDLE is derived, never persisted).
+  void _markCompleted() {
+    final path = InquiryState.stateFileFor(workingDirectory);
+    if (path == null) return;
+    if (!File(path).existsSync()) return;
+    final raw = InquiryState.loadFrom(path);
+    if (raw.status == 'completed') return;
+    final completed = raw.copyWith(status: 'completed', clearApe: true);
+    completed.saveTo(path);
   }
 
   /// Create `cleanrooms/<branch>/analyze/index.md` and `confirmations.md` for ANALYZE phase.
@@ -92,7 +107,12 @@ class EffectExecutor {
     if (branch.isEmpty) return;
 
     final issue = InquiryState.load(workingDirectory).issue ?? '';
-    final cleanroomDir = p.join(workingDirectory, 'cleanrooms', branch, 'analyze');
+    final cleanroomDir = p.join(
+      workingDirectory,
+      'cleanrooms',
+      branch,
+      'analyze',
+    );
     final dir = Directory(cleanroomDir);
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
@@ -146,6 +166,7 @@ class EffectExecutor {
   /// Reset `.inquiry/mutations.md` to empty template.
   void resetMutations() {
     final file = File(p.join(_inquiryDir, 'mutations.md'));
+    file.parent.createSync(recursive: true);
     file.writeAsStringSync(
       '# Mutations\n'
       '\n'
@@ -172,8 +193,9 @@ class EffectExecutor {
   void snapshotMetrics() {
     final current = InquiryState.load(workingDirectory);
 
-    final issueLine =
-        current.issue != null ? 'issue: "${current.issue}"' : 'issue: null';
+    final issueLine = current.issue != null
+        ? 'issue: "${current.issue}"'
+        : 'issue: null';
     final snapshot = File(p.join(_inquiryDir, 'metrics_snapshot.yaml'));
     snapshot.writeAsStringSync(
       'snapshot_at: "${DateTime.now().toUtc().toIso8601String()}"\n'
@@ -191,8 +213,9 @@ class EffectExecutor {
   void collectMetrics() {
     final current = InquiryState.load(workingDirectory);
 
-    final issueLine =
-        current.issue != null ? 'issue: "${current.issue}"' : 'issue: null';
+    final issueLine = current.issue != null
+        ? 'issue: "${current.issue}"'
+        : 'issue: null';
     final entry =
         '  - $issueLine\n'
         '    completed_at: "${DateTime.now().toUtc().toIso8601String()}"\n';
@@ -221,11 +244,7 @@ class EffectExecutor {
     final executed = <String>[];
 
     // Always update state on valid transition
-    updateState(
-      newState,
-      issue: issue,
-      promptFragmentId: promptFragmentId,
-    );
+    updateState(newState, issue: issue, promptFragmentId: promptFragmentId);
     executed.add('update_state');
 
     for (final effect in effects) {
