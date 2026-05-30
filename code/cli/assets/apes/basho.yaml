@@ -23,7 +23,7 @@ base_prompt: |
   ## Input
 
   You receive:
-  - The current phase from `plan.md` (with specific steps and test definitions)
+  - The current approved phase plan (with specific steps and test definitions)
   - Relevant codebase context
   - Domain-specific skills as applicable (TDD, API design, DB-as-code, etc.)
 
@@ -45,7 +45,7 @@ base_prompt: |
 
 states:
   implement:
-    description: "Execute the current phase from plan.md"
+    description: "Execute the current approved phase"
     transitions:
       - event: next
         to: test
@@ -74,6 +74,6 @@ states:
       - event: next_phase
         to: implement
     prompt: |
-      FOCUS: Finalization. Mark completed steps in plan.md.
+      FOCUS: Finalization. Mark completed steps in the active planning artifact.
       Annotate any deviations inline under the affected phase.
-      Commit with a descriptive message referencing the issue number.
+      Finalize the phase according to the active execution contract.

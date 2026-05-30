@@ -212,6 +212,47 @@ void main() {
       });
     });
 
+    group('openAnalysisContext', () {
+      test('creates analyze bootstrap with confirmations.md', () {
+        const branch = '145-test-branch';
+        _initGitRepo(tempDir.path, branch: branch);
+        File('${tempDir.path}/.inquiry/state.yaml')
+            .writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.openAnalysisContext();
+
+        final indexFile = File(
+          '${tempDir.path}/cleanrooms/$branch/analyze/index.md',
+        );
+        final confirmationsFile = File(
+          '${tempDir.path}/cleanrooms/$branch/analyze/confirmations.md',
+        );
+
+        expect(indexFile.existsSync(), isTrue);
+        expect(confirmationsFile.existsSync(), isTrue);
+        expect(indexFile.readAsStringSync(), contains('confirmations.md'));
+      });
+
+      test('creates methodology-neutral confirmations bootstrap', () {
+        const branch = '145-test-branch';
+        _initGitRepo(tempDir.path, branch: branch);
+        File('${tempDir.path}/.inquiry/state.yaml')
+            .writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.openAnalysisContext();
+
+        final confirmationsFile = File(
+          '${tempDir.path}/cleanrooms/$branch/analyze/confirmations.md',
+        );
+        final content = confirmationsFile.readAsStringSync();
+
+        expect(content, contains('title: "Confirmations"'));
+        expect(content, isNot(contains('author: socrates')));
+      });
+    });
+
     group('APE auto-activation', () {
       test('writes ape field when transitioning to ANALYZE', () {
         File('${tempDir.path}/.inquiry/state.yaml')
@@ -384,4 +425,23 @@ void main() {
       });
     });
   });
+}
+
+void _initGitRepo(String root, {required String branch}) {
+  _git(root, ['init']);
+  _git(root, ['config', 'user.email', 'test@test.com']);
+  _git(root, ['config', 'user.name', 'Test']);
+  File('$root/.gitkeep').writeAsStringSync('');
+  _git(root, ['add', '.']);
+  _git(root, ['commit', '-m', 'init']);
+  _git(root, ['checkout', '-b', branch]);
+}
+
+void _git(String root, List<String> args) {
+  final result = Process.runSync('git', args, workingDirectory: root);
+  if (result.exitCode != 0) {
+    throw StateError(
+      'git ${args.join(' ')} failed: ${result.stderr}\n${result.stdout}',
+    );
+  }
 }

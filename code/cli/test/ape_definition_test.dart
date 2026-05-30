@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 void main() {
   group('ApeDefinition', () {
     group('schema validation', () {
-      for (final apeName in ['socrates', 'descartes', 'basho', 'darwin']) {
+      for (final apeName in ['socrates', 'dewey', 'descartes', 'basho', 'darwin']) {
         test('$apeName.yaml parses into valid ApeDefinition', () {
           final yaml = File('assets/apes/$apeName.yaml').readAsStringSync();
           final def = ApeDefinition.parse(yaml);
@@ -51,6 +51,17 @@ void main() {
         expect(names, containsAll([
           'clarification', 'assumptions', 'evidence',
           'perspectives', 'implications', 'meta_reflection',
+        ]));
+      });
+
+      test('dewey has 4 states', () {
+        final def = ApeDefinition.parse(
+          File('assets/apes/dewey.yaml').readAsStringSync(),
+        );
+        expect(def.states.length, equals(4));
+        final names = def.states.map((s) => s.name).toList();
+        expect(names, containsAll([
+          'evaluate_scope', 'search_existing', 'create_or_select', 'confirm',
         ]));
       });
 
@@ -146,11 +157,24 @@ void main() {
         expect(def.basePrompt, contains('SOCRATES'));
         expect(def.basePrompt, contains('Socratic method'));
         expect(def.basePrompt, contains('EPISTEMIC HUMILITY'));
-        expect(def.basePrompt, contains('diagnosis.md'));
+        expect(def.basePrompt, isNot(contains('diagnosis.md')));
         expect(def.basePrompt, isNot(contains('output_dir')));
-        expect(def.basePrompt, isNot(contains('confirmed_doc')));
+        expect(def.basePrompt, isNot(contains('confirmations_doc')));
         expect(def.basePrompt, isNot(contains('index_file')));
         expect(def.basePrompt, isNot(contains('doc-write')));
+      });
+
+      test('dewey base_prompt stays methodological and drops operational routing details', () {
+        final def = ApeDefinition.parse(
+          File('assets/apes/dewey.yaml').readAsStringSync(),
+        );
+        expect(def.basePrompt, contains('DEWEY'));
+        expect(def.basePrompt, contains('PROBLEMATIZATION'));
+        expect(def.basePrompt, contains('DEDUPLICATION'));
+        expect(def.basePrompt, isNot(contains('branches, directories, or files')));
+        expect(def.basePrompt, isNot(contains('.inquiry/')));
+        expect(def.basePrompt, isNot(contains('allowed_commands')));
+        expect(def.basePrompt, isNot(contains('deterministic_skill')));
       });
 
       test('descartes base_prompt contains Cartesian method keywords', () {
@@ -161,6 +185,9 @@ void main() {
         expect(def.basePrompt, contains('scientific method'));
         expect(def.basePrompt, contains('EVIDENCE'));
         expect(def.basePrompt, contains('experimental design'));
+        expect(def.basePrompt, isNot(contains('diagnosis.md')));
+        expect(def.basePrompt, isNot(contains('plan.md')));
+        expect(def.basePrompt, isNot(contains('approved by user')));
         expect(def.basePrompt, isNot(contains('analysis_input')));
         expect(def.basePrompt, isNot(contains('plan_file')));
         expect(def.basePrompt, isNot(contains('Commit:')));
@@ -174,6 +201,7 @@ void main() {
         expect(def.basePrompt, contains('用の美'));
         expect(def.basePrompt, contains('NOTHING WASTED'));
         expect(def.basePrompt, contains('functional art'));
+        expect(def.basePrompt, isNot(contains('plan.md')));
         expect(def.basePrompt, isNot(contains('Run tests, lint, build')));
         expect(def.basePrompt, isNot(contains('retrospective.md')));
       });
@@ -228,7 +256,7 @@ void main() {
 
     group('transitions', () {
       test('_DONE is reachable from every APE', () {
-        for (final apeName in ['socrates', 'descartes', 'basho', 'darwin']) {
+        for (final apeName in ['socrates', 'dewey', 'descartes', 'basho', 'darwin']) {
           final def = ApeDefinition.parse(
             File('assets/apes/$apeName.yaml').readAsStringSync(),
           );
