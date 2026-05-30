@@ -130,7 +130,7 @@ void main() {
     );
     expect(
       analyzeTransition.operations!.prechecks,
-      containsAll(['diagnosis_exists', 'index_exists', 'confirmations_exist']),
+      containsAll(['diagnosis_exists', 'index_exists', 'confirmations_exists']),
     );
     expect(
       analyzeTransition.operations!.commitPolicy,
