@@ -75,7 +75,7 @@ iq fsm transition --event <event>
 Dispatch is **unconditional and immediate**. When you enter the Inner Loop, execute steps 1–2 without asking, narrating, or confirming.
 
 1. Run `iq ape prompt --name <ape.name>` to inspect the exact effective sub-agent prompt (APE identity + phase-owned operational contract + inquiry-context). Treat that output as the complete runtime prompt surface; do not invent hidden glue or recover missing procedure from the APE YAML.
-2. **Dispatch** that sub-agent: use the `agent` tool to invoke `@<ape.name>` with the prompt as context. Do NOT perform the sub-agent's work yourself. Do NOT render its output in chat. Do NOT announce what the sub-agent will do.
+2. **Dispatch** that sub-agent: use the `agent` tool to invoke a generic/current sub-agent path with the prompt as full context. Do NOT set `agentName` from `ape.name`; omit `agentName` unless the runtime explicitly exposes an invocable generic helper that is independent of APE identity. Do NOT perform the sub-agent's work yourself. Do NOT render its output in chat. Do NOT announce what the sub-agent will do.
 3. Wait for the sub-agent to signal completion (it will announce its sub-phase is done).
 4. When signaled: `iq ape transition --event <event>` to advance the sub-FSM.
 5. If `ape.state` becomes `_DONE`: exit Inner Loop, enter Completion Gate.

@@ -33,6 +33,20 @@ void main() {
       expect(content, contains('iq ape transition'));
     });
 
+    test('does not dispatch sub-agents by APE name', () {
+      expect(content, isNot(contains('@<ape.name>')));
+      expect(content, contains('Do NOT set `agentName` from `ape.name`'));
+    });
+
+    test('documents generic agent dispatch without ape-bound agentName', () {
+      expect(content, contains('generic/current sub-agent path'));
+      expect(content, contains('omit `agentName`'));
+      expect(
+        content,
+        contains('independent of APE identity'),
+      );
+    });
+
     test('references iq fsm transition', () {
       expect(content, contains('iq fsm transition'));
     });
