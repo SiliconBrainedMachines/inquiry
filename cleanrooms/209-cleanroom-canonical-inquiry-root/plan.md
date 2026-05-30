@@ -275,15 +275,18 @@ outputs from Phase 0 preserved for equivalent scenarios.
 
 **Goal:** keep metrics out of scope without leaving broken reads.
 
-- **Decision (U3):** record the chosen action (repoint reads to new state path
-  **or** quarantine metrics effects behind `evolution.enabled`).
-- **Red:** a test pinning the chosen behavior (e.g., metrics effect is a no-op
-  when evolution disabled, and does not read removed `.inquiry/state.yaml`).
-- **Green:** apply the minimal change to `effect_executor` and
-  `assets/fsm/states/evolution.yaml`.
+- **Decision (U3):** defer metrics by design. Do not repoint or redesign the
+  metrics surfaces in this refactor; keep the existing `.inquiry/metrics*.yaml`
+  behavior until Inquiry has a real consumer, a stable schema, and a clear scope
+  decision (project-scoped vs cycle-scoped).
+- **Red:** bounded evidence only — confirm the current repo still has writers /
+  prompts / contracts for metrics, but no new cycle-root requirement that forces
+  a design decision here.
+- **Green:** record the deferral explicitly in the hypothesis ledger and phase
+  log; leave runtime code unchanged.
 
-**Verification:** test green; full suite green.
-**Commit:** `chore(cli): quarantine deferred metrics surfaces (#209)`
+**Verification:** ledger + plan updated consistently; runtime code unchanged.
+**Commit:** `chore(cli): defer metrics surfaces by design (#209)`
 
 ---
 

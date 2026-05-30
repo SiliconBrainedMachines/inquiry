@@ -50,7 +50,9 @@ hypothesis ledger (H1–H7) as evidence accumulates.
     file records *why* the cycle left an active phase. A `blocked` cycle is **not closed**
     (its branch still resolves and its cleanroom artifacts remain on disk for resumption),
     but its derived FSM phase is IDLE — consistent with the transition contract.
-- U3 (metrics action): PENDING — Phase 8.
+- U3 (metrics action): DECIDED — deferred by design. Keep `.inquiry/metrics*.yaml`
+  unchanged for now; do not repoint or redesign metrics until Inquiry has a real
+  consumer, a stable schema, and a clear scope decision.
 
 ## Phase log
 
@@ -182,3 +184,24 @@ hypothesis ledger (H1–H7) as evidence accumulates.
   real git cycle workspace via new `createCycleWorkspace` helper, +1 case (completed→IDLE in bar).
   Unit suite **74 green**; integration **13 green**; `tsc` clean.
 - **H7 CONFIRMED** (extension resolves cycle state exactly like the CLI; degrades to IDLE at the edges).
+
+### Phase 8 — Metrics surfaces explicitly deferred by design
+
+- Bounded evidence review for this refactor:
+  - Metrics still exist as current runtime surfaces in `effect_executor.dart`
+    (`snapshotMetrics`, `collectMetrics`), prompt context (`prompt.dart`), and
+    FSM assets / evolution instructions.
+  - No new consumer or cycle-root contract in this issue forced a metrics
+    redesign; the cycle-local refactor was fully closed by Phases 1–7.
+- Decision (U3): do **not** repoint metrics into `cleanrooms/<branch>/` and do
+  **not** quarantine or expand them further in #209. They remain at
+  `.inquiry/metrics*.yaml` until Inquiry reaches a more mature stage with:
+  1. a real consumer,
+  2. a stable schema,
+  3. and an explicit scope choice (project-scoped vs cycle-scoped).
+- Implementation: no runtime code changes in Phase 8. The work here is to make
+  the deferral explicit rather than leaving it as accidental ambiguity.
+- Verification: repo search confirmed metrics are still writers/prompts/assets,
+  but no new production consumer in this issue requires redesign before closing
+  the canonical cleanroom-root refactor.
+- **U3 DECIDED** (deferred by design; revisit only when metrics stop being speculative).
