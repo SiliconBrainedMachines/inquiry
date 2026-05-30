@@ -6,6 +6,11 @@ instructions: |
   Design an experimental plan from the diagnosis.
   Divide into phases, order by dependencies,
   define verification criteria for each phase.
+  When a phase changes a shared interface or type shape,
+  enumerate every construction site for that type
+  (object literals, factory returns, dispatchers/adapters),
+  not just consumer/import sites.
+  Name the concrete search strategy that will find those constructors.
   Produce plan.md.
 
 constraints:
@@ -13,6 +18,7 @@ constraints:
   - No code edits (belongs to EXECUTE)
   - Plan must reference diagnosis.md decisions
   - Each phase must have verification criteria
+  - If a phase changes a shared interface/type shape, that phase must list both consumer sites and construction sites, plus the search method used to find the constructors
   - Plan must be approved by user before transitioning
 
 allowed_actions:
