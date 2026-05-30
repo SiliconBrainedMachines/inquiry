@@ -189,8 +189,17 @@ void main() {
     expect(contract.promptFragments.keys, contains('plan_to_execute'));
     final fragment = contract.promptFragments['plan_to_execute']!;
     expect(fragment.role, 'BASHO');
-    expect(fragment.instructions, ['issue-start']);
+    expect(fragment.instructions, isEmpty);
     expect(fragment.template, 'execute.phase');
+  });
+
+  test('EXECUTE continuation prompt fragment does not inherit startup protocol', () {
+    expect(contract.promptFragments.keys, contains('execute_continue'));
+    final fragment = contract.promptFragments['execute_continue']!;
+
+    expect(fragment.role, 'BASHO');
+    expect(fragment.instructions, isEmpty);
+    expect(fragment.template, 'execute.continue');
   });
 
   test('prompt fragments are limited to transition-owned runtime protocols', () {
@@ -200,7 +209,7 @@ void main() {
 
     expect(
       runtimeProtocols,
-      equals({'doc-read', 'doc-write', 'issue-start', 'issue-end'}),
+      equals({'doc-read', 'doc-write', 'issue-end'}),
     );
     expect(runtimeProtocols, isNot(contains('issue-create')));
     expect(runtimeProtocols, isNot(contains('inquiry-install')));

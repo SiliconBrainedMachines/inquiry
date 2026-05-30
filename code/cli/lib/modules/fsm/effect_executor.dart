@@ -66,7 +66,11 @@ class EffectExecutor {
     if (ape != null) {
       apeName = ape;
       if (currentState.apeName == ape && currentState.apeState != null) {
-        apeInitialState = currentState.apeState;
+        if (currentState.state == newState && currentState.apeState == '_DONE') {
+          apeInitialState = _resolveInitialState(ape);
+        } else {
+          apeInitialState = currentState.apeState;
+        }
       } else {
         apeInitialState = _resolveInitialState(ape);
       }
