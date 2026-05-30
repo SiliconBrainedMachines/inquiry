@@ -99,12 +99,6 @@ void main() {
     test('fails closed when ANALYZE -> PLAN cannot create boundary commit',
         () async {
       const branch = '51-idle-execution-guardrails';
-      final diagnosisPath = p.posix.join(
-        'cleanrooms',
-        branch,
-        'analyze',
-        'diagnosis.md',
-      );
 
       _initGitRepo(tempDir.path, branch: branch);
       _writeAnalyzeIndex(tempDir.path, branch);
