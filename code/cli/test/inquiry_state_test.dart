@@ -212,6 +212,15 @@ void main() {
       expect(loaded.state, equals('IDLE'));
     });
 
+    test('load returns IDLE when cycle status is blocked', () {
+      setupCycle(tmpDir.path, branch: '209-foo');
+      const state = InquiryState(state: 'ANALYZE', status: 'blocked');
+      state.save(tmpDir.path);
+
+      final loaded = InquiryState.load(tmpDir.path);
+      expect(loaded.state, equals('IDLE'));
+    });
+
     test('save throws when no cycle resolves (IDLE is derived)', () {
       const state = InquiryState(state: 'ANALYZE');
       expect(() => state.save(tmpDir.path), throwsA(isA<StateError>()));

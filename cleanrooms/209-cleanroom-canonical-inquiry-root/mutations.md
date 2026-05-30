@@ -17,7 +17,7 @@ hypothesis ledger (H1–H7) as evidence accumulates.
 | H2 | State can be cycle-local with IDLE derived | CONFIRMED | Phase 2: state at `cleanrooms/<branch>/.iq.state.yaml`, IDLE derived from `status: completed`/no-cycle, never persisted; full suite green (393) |
 | H3 | IDLE→ANALYZE is a sufficient bootstrap | CONFIRMED | Phase 3: transition materializes analyze/index.md + confirmations.md + issue.md mirror + `.iq.state.yaml` (status active, state ANALYZE); freshly created cycle resolves as active; suite green (397) |
 | H4 | Cycle runtime and CLI config separate cleanly | CONFIRMED | Phase 4: cycle-scoped `mutations.md` moves to `cleanrooms/<branch>/`; project-scoped `config.yaml` stays at `.inquiry/` (U1); CLI + VS Code extension both resolve cycle-local mutations; metrics writers made dir-self-sufficient; CLI suite green (397) + extension unit suite green (69) |
-| H5 | status lifecycle expressible without persisting IDLE | PENDING | Phase 5 |
+| H5 | status lifecycle expressible without persisting IDLE | CONFIRMED | Phase 5: `active` (update_state non-IDLE), `completed` (update_state→IDLE), `blocked` (pause_analysis/pause_plan effects) fully cover the lifecycle; centralized in `_markStatus`; `load()` derives IDLE for completed+blocked; full suite green (400) |
 | H6 | Discovery degrades safely at the edges | CONFIRMED | Phase 2: no-cycle (non-git / detached HEAD) resolves to derived IDLE without error; load returns IDLE on missing/malformed state |
 | H7 | Extension can follow CLI resolution | PENDING | Phase 7 |
 
@@ -33,7 +33,23 @@ hypothesis ledger (H1–H7) as evidence accumulates.
   keeping that path yields **zero special cases** and the fewest moving parts, which
   is the deciding criterion. `inquiryCliRoot` remains `project_root`; only
   *cycle-scoped* `mutations.md` moves to `cleanrooms/<branch>/`.
-- U2 (status ownership): PENDING — Phase 5.
+- U2 (status ownership): **DECIDED — one effect owns each `status` write.**
+  - `active`: owned by `update_state` — every non-IDLE transition writes `status: active`
+    (already in place since Phase 2).
+  - `completed`: owned by `update_state` when the target is IDLE — `updateState('IDLE')`
+    → `_markCompleted()` (END→IDLE `pr_ready`/`pr_ready_no_evolution`, EVOLUTION→IDLE
+    `finish_evolution` via `close_cycle`). Already in place since Phase 2.
+  - `blocked`: owned by the **`pause_analysis` / `pause_plan`** effects (the CLI side of the
+    `block` event, ANALYZE→IDLE and PLAN→IDLE). These run *after* `update_state` in
+    `executeAll`, so `_markBlocked()` overrides the default `completed` that
+    `updateState('IDLE')` writes. The pause effect is the single owner of the `blocked` write.
+  - Refactor: `_markCompleted`/`_markBlocked` share a private `_markStatus(status)` helper
+    (centralized status mutation, one place).
+  - `load()` derives IDLE for BOTH `completed` and `blocked` (the FSM target of every
+    closing/pausing transition is IDLE; IDLE is never persisted). The `status` value in the
+    file records *why* the cycle left an active phase. A `blocked` cycle is **not closed**
+    (its branch still resolves and its cleanroom artifacts remain on disk for resumption),
+    but its derived FSM phase is IDLE — consistent with the transition contract.
 - U3 (metrics action): PENDING — Phase 8.
 
 ## Phase log
@@ -114,3 +130,21 @@ hypothesis ledger (H1–H7) as evidence accumulates.
 - Tests: `effect_executor_test` reset_mutations/executeAll repointed cycle-local;
   `ape_prompt_test` darwin assertions repointed. CLI suite: **397 green**. `dart analyze` clean.
 - **H4 CONFIRMED**.
+
+### Phase 5 — status lifecycle wiring (active / completed / blocked)
+
+- Decision U2 recorded above (single owner per status write).
+- `lib/modules/ape/inquiry_state.dart`: `load()` now derives IDLE for `status: blocked`
+  as well as `completed` (both target IDLE; IDLE never persisted).
+- `lib/modules/fsm/effect_executor.dart`:
+  - Refactored `_markCompleted()` and new `_markBlocked()` to share a private
+    `_markStatus(status)` (centralized terminal-status write; clears APE; no-op when already
+    at that status).
+  - `executeAll` now handles the `pause_analysis` / `pause_plan` effects (block event,
+    ANALYZE→IDLE / PLAN→IDLE) → `_markBlocked()`. These run *after* `update_state`, so they
+    override the default `completed` that `updateState('IDLE')` writes — the pause effect is
+    the single owner of the `blocked` write.
+- Tests: `inquiry_state_test` "load returns IDLE when cycle status is blocked"; 2
+  `effect_executor_test` block cases (pause_analysis / pause_plan → blocked + derived IDLE).
+  CLI suite: **400 green**. `dart analyze` clean.
+- **H5 CONFIRMED**.

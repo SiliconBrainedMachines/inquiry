@@ -146,6 +146,36 @@ void main() {
       });
     });
 
+    group('block', () {
+      test('pause_analysis effect marks cycle blocked and derives IDLE', () {
+        File(
+          stateFilePath,
+        ).writeAsStringSync('state: ANALYZE\nissue: "145"\nstatus: active\n');
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.executeAll(effects: ['pause_analysis'], newState: 'IDLE');
+
+        final raw = InquiryState.loadFrom(stateFilePath);
+        expect(raw.status, 'blocked');
+        final derived = InquiryState.load(tempDir.path);
+        expect(derived.state, 'IDLE');
+      });
+
+      test('pause_plan effect marks cycle blocked and derives IDLE', () {
+        File(
+          stateFilePath,
+        ).writeAsStringSync('state: PLAN\nissue: "145"\nstatus: active\n');
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.executeAll(effects: ['pause_plan'], newState: 'IDLE');
+
+        final raw = InquiryState.loadFrom(stateFilePath);
+        expect(raw.status, 'blocked');
+        final derived = InquiryState.load(tempDir.path);
+        expect(derived.state, 'IDLE');
+      });
+    });
+
     group('collect_metrics', () {
       test('appends cycle entry to metrics.yaml', () {
         File(
