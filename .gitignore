@@ -7,3 +7,6 @@
 
 # Inquiry — cleanroom versioning opt-in (this repo tracks cleanrooms as research artifacts)
 !cleanrooms/
+
+# Inquiry — cycle-local runtime state is derived, never tracked
+cleanrooms/**/.iq.state.yaml

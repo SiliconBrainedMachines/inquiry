@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.0]
+### Breaking changes
+- **Canonical cycle runtime root**: active cycle state now persists at `cleanrooms/<branch>/.iq.state.yaml`, and cycle mutations now resolve to `cleanrooms/<branch>/mutations.md`; repo-level `.inquiry/state.yaml` is no longer the canonical runtime state surface (#209)
+- **`iq init` cycle-local alignment**: init no longer scaffolds repo-level `.inquiry/state.yaml` or `.inquiry/mutations.md`; it keeps project-scoped `.inquiry/config.yaml`, deploys the repo agent, and ensures `cleanrooms/**/.iq.state.yaml` stays ignored (#209)
+
+### Changed
+- **Explicit cycle status lifecycle**: cycle state now records `active`, `completed`, or `blocked`, while `IDLE` remains derived; completed and blocked cycles reload as derived `IDLE` instead of persisting `IDLE` directly (#209)
+- **VS Code extension cycle resolution**: activation/status handling now follows cleanroom-local cycle resolution and watches `cleanrooms/**/.iq.state.yaml` instead of the old repo-level state path (#209)
+- **Metrics scope decision**: metrics surfaces remain at `.inquiry/metrics*.yaml` for now and are explicitly deferred by design until Inquiry has a real consumer, a stable schema, and an explicit scope choice (#209)
+
 ## [0.5.3]
 ### Changed
 - **ANALYZE contract ownership**: ANALYZE now owns visibility, participation, required artifacts, and completion proof through the FSM state contract instead of leaking those responsibilities into SOCRATES or generic scheduler assumptions (#180)

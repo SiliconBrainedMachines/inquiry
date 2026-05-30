@@ -6,6 +6,7 @@ import { withGuard } from './command-guard';
 import { inquiryInit } from './init';
 import { installInquiryCli } from './installer';
 import { getInquiryBinDir, shellExec } from './guard';
+import { resolveMutationsDir } from './cycle';
 
 export function activate(context: vscode.ExtensionContext): void {
   // Inject inquiry bin dir into terminal PATH so `inquiry` and `iq` work
@@ -54,7 +55,7 @@ export function activate(context: vscode.ExtensionContext): void {
       withGuard(workspaceFolder, {}, () => toggleEvolution(inquiryFolderPath)),
     ),
     vscode.commands.registerCommand('inquiry.addMutation', () =>
-      withGuard(workspaceFolder, {}, () => addMutation(inquiryFolderPath)),
+      withGuard(workspaceFolder, {}, () => addMutation(resolveMutationsDir(workspaceFolder))),
     ),
   );
 }
