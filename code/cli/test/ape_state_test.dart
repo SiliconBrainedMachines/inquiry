@@ -1,22 +1,27 @@
 import 'dart:io';
 
 import 'package:inquiry_cli/modules/ape/commands/state.dart';
+import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 void main() {
   late Directory tmpDir;
 
+  const branch = '145-test-branch';
+
   setUp(() {
     tmpDir = Directory.systemTemp.createTempSync('ape_state_test_');
     Directory(p.join(tmpDir.path, '.inquiry')).createSync(recursive: true);
+    _initGitRepo(tmpDir.path, branch: branch);
 
     // Copy APE YAML assets
     final apesDir = Directory(p.join(tmpDir.path, 'assets', 'apes'));
     apesDir.createSync(recursive: true);
     for (final name in ['socrates', 'descartes', 'basho', 'darwin']) {
-      File('assets/apes/$name.yaml')
-          .copySync(p.join(apesDir.path, '$name.yaml'));
+      File(
+        'assets/apes/$name.yaml',
+      ).copySync(p.join(apesDir.path, '$name.yaml'));
     }
   });
 
@@ -40,17 +45,16 @@ void main() {
     } else {
       buf.writeln('ape: null');
     }
-    File(p.join(tmpDir.path, '.inquiry', 'state.yaml'))
-        .writeAsStringSync(buf.toString());
+    File(p.join(tmpDir.path, 'cleanrooms', branch, kStateFileName))
+      ..createSync(recursive: true)
+      ..writeAsStringSync(buf.toString());
   }
 
   group('ApeStateCommand', () {
     test('returns null ape when no APE active', () async {
       writeState(state: 'IDLE');
 
-      final cmd = ApeStateCommand(
-        ApeStateInput(workingDirectory: tmpDir.path),
-      );
+      final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
 
       expect(result.apeName, isNull);
@@ -66,9 +70,7 @@ void main() {
         apeState: 'clarification',
       );
 
-      final cmd = ApeStateCommand(
-        ApeStateInput(workingDirectory: tmpDir.path),
-      );
+      final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
 
       expect(result.apeName, equals('socrates'));
@@ -88,9 +90,7 @@ void main() {
         apeState: '_DONE',
       );
 
-      final cmd = ApeStateCommand(
-        ApeStateInput(workingDirectory: tmpDir.path),
-      );
+      final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
 
       expect(result.apeName, equals('socrates'));
@@ -106,9 +106,7 @@ void main() {
         apeState: 'implement',
       );
 
-      final cmd = ApeStateCommand(
-        ApeStateInput(workingDirectory: tmpDir.path),
-      );
+      final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
 
       expect(result.apeName, equals('basho'));
@@ -125,9 +123,7 @@ void main() {
         apeState: 'decomposition',
       );
 
-      final cmd = ApeStateCommand(
-        ApeStateInput(workingDirectory: tmpDir.path),
-      );
+      final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
       final text = result.toText()!;
 
@@ -144,9 +140,7 @@ void main() {
         apeState: 'observe',
       );
 
-      final cmd = ApeStateCommand(
-        ApeStateInput(workingDirectory: tmpDir.path),
-      );
+      final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
       final json = result.toJson();
 
@@ -158,8 +152,7 @@ void main() {
 
     test('handles missing APE YAML gracefully', () async {
       // Delete the YAML file
-      File(p.join(tmpDir.path, 'assets', 'apes', 'socrates.yaml'))
-          .deleteSync();
+      File(p.join(tmpDir.path, 'assets', 'apes', 'socrates.yaml')).deleteSync();
 
       writeState(
         state: 'ANALYZE',
@@ -168,9 +161,7 @@ void main() {
         apeState: 'clarification',
       );
 
-      final cmd = ApeStateCommand(
-        ApeStateInput(workingDirectory: tmpDir.path),
-      );
+      final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
 
       expect(result.apeName, equals('socrates'));
@@ -178,4 +169,21 @@ void main() {
       expect(result.transitions, isEmpty);
     });
   });
+}
+
+void _initGitRepo(String root, {required String branch}) {
+  void git(List<String> args) {
+    final result = Process.runSync('git', args, workingDirectory: root);
+    if (result.exitCode != 0) {
+      throw StateError('git ${args.join(' ')} failed: ${result.stderr}');
+    }
+  }
+
+  git(['init']);
+  git(['config', 'user.email', 'test@test.com']);
+  git(['config', 'user.name', 'Test']);
+  File(p.join(root, '.gitkeep')).writeAsStringSync('');
+  git(['add', '.']);
+  git(['commit', '-m', 'init']);
+  git(['checkout', '-b', branch]);
 }
