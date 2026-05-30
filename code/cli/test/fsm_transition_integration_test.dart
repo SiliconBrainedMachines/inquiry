@@ -86,6 +86,40 @@ void main() {
       },
     );
 
+    test('IDLE→ANALYZE bootstraps the full cycle', () async {
+      const branch = '51-idle-execution-guardrails';
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'start_analyze',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+
+      expect(output.allowed, isTrue);
+      expect(output.nextState, 'ANALYZE');
+
+      final cycleDir = p.join(tempDir.path, 'cleanrooms', branch);
+      expect(
+        File(p.join(cycleDir, 'analyze', 'index.md')).existsSync(),
+        isTrue,
+      );
+      expect(
+        File(p.join(cycleDir, 'analyze', 'confirmations.md')).existsSync(),
+        isTrue,
+      );
+      expect(File(p.join(cycleDir, 'issue.md')).existsSync(), isTrue);
+
+      final state = InquiryState.loadFrom(p.join(cycleDir, kStateFileName));
+      expect(state.state, 'ANALYZE');
+      expect(state.status, 'active');
+
+      // The freshly created cycle resolves as active (not derived IDLE).
+      expect(InquiryState.load(tempDir.path).state, 'ANALYZE');
+    });
+
     test('full cycle uses transition command on each step', () async {
       String current = 'IDLE';
       final branch = '51-idle-execution-guardrails';
