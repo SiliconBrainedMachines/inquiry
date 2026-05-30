@@ -51,6 +51,14 @@ void main() {
       expect(content, contains('iq fsm transition'));
     });
 
+    test('does not declare one universal user-interaction rule for all states', () {
+      expect(content, isNot(contains('the ONLY user interaction point')));
+    });
+
+    test('documents visible ANALYZE interaction behavior', () {
+      expect(content, contains('ANALYZE must remain visible to the user'));
+    });
+
     test('is thin: under 90 lines (excluding frontmatter)', () {
       final lines = content.split('\n');
       // Skip YAML frontmatter (between --- markers)

@@ -14,6 +14,8 @@ class OperationalContract {
   final String instructions;
   final List<String> constraints;
   final List<String> allowedActions;
+  final List<String> requiredArtifacts;
+  final Map<String, dynamic> interaction;
   final Map<String, Map<String, Map<String, String>>> inquiryContext;
 
   const OperationalContract({
@@ -21,6 +23,8 @@ class OperationalContract {
     required this.instructions,
     required this.constraints,
     required this.allowedActions,
+    this.requiredArtifacts = const [],
+    this.interaction = const {},
     this.inquiryContext = const {},
   });
 
@@ -29,6 +33,8 @@ class OperationalContract {
     'instructions': instructions,
     'constraints': constraints,
     'allowed_actions': allowedActions,
+    if (requiredArtifacts.isNotEmpty) 'required_artifacts': requiredArtifacts,
+    if (interaction.isNotEmpty) 'interaction': interaction,
     if (inquiryContext.isNotEmpty) 'inquiry_context': inquiryContext,
   };
 
@@ -110,6 +116,15 @@ class OperationalContractLoader {
       fieldName: 'allowed_actions',
       stateName: stateName,
     );
+    final requiredArtifacts = _readOptionalStringListField(
+      yaml,
+      fieldName: 'required_artifacts',
+      stateName: stateName,
+    );
+    final interaction = _readInteractionField(
+      yaml,
+      stateName: stateName,
+    );
     final inquiryContext = _readInquiryContextField(
       yaml,
       stateName: stateName,
@@ -120,6 +135,8 @@ class OperationalContractLoader {
       instructions: instructions.trim(),
       constraints: constraints,
       allowedActions: allowedActions,
+      requiredArtifacts: requiredArtifacts,
+      interaction: interaction,
       inquiryContext: inquiryContext,
     );
   }
@@ -160,6 +177,50 @@ class OperationalContractLoader {
       return value.cast<String>().toList(growable: false);
     }
     throw _malformedStateYaml(stateName, fieldName);
+  }
+
+  List<String> _readOptionalStringListField(
+    YamlMap yaml, {
+    required String fieldName,
+    required String stateName,
+  }) {
+    final value = yaml[fieldName];
+    if (value == null) {
+      return const [];
+    }
+    if (value is YamlList) {
+      return value.cast<String>().toList(growable: false);
+    }
+    throw _malformedStateYaml(stateName, fieldName);
+  }
+
+  Map<String, dynamic> _readInteractionField(
+    YamlMap yaml, {
+    required String stateName,
+  }) {
+    final value = yaml['interaction'];
+    if (value == null) {
+      return const {};
+    }
+    if (value is! YamlMap) {
+      throw _malformedStateYaml(stateName, 'interaction');
+    }
+
+    final interaction = <String, dynamic>{};
+    for (final entry in value.entries) {
+      final key = entry.key;
+      final fieldValue = entry.value;
+      if (key is! String) {
+        throw _malformedStateYaml(stateName, 'interaction');
+      }
+      if (fieldValue is String || fieldValue is bool || fieldValue is int) {
+        interaction[key] = fieldValue;
+        continue;
+      }
+      throw _malformedStateYaml(stateName, 'interaction');
+    }
+
+    return interaction;
   }
 
   Map<String, Map<String, Map<String, String>>> _readInquiryContextField(

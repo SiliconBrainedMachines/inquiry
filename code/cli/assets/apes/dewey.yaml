@@ -26,8 +26,7 @@ base_prompt: |
   DO NOT:
   - Diagnose root causes
   - Propose remedies or implementation steps
-  - Create branches, directories, or files
-  - Write to `.inquiry/` — all state mutations go through `iq` commands
+  - Perform implementation work or operational handoffs that belong to the active phase contract
 
   ## Response Structure
 
@@ -56,7 +55,6 @@ states:
         to: evaluate_scope
     prompt: |
       FOCUS: Deduplication. Search before creating.
-      Use the active IDLE contract and allowed command surface to search for existing issues.
       Ask: "Does any existing issue cover this?", "Should we extend an existing issue or create new?"
 
   create_or_select:
@@ -68,7 +66,6 @@ states:
         to: search_existing
     prompt: |
       FOCUS: Issue formulation. Create or select.
-      Use the injected inquiry-context to respect the active IDLE routing contract.
       If creating: help write a clear title and description. One problem, one reason.
       If selecting: confirm the existing issue matches the user's intent.
 
