@@ -3,7 +3,7 @@ import { execSync } from 'child_process';
 import * as fs from 'fs';
 import * as os from 'os';
 import * as path from 'path';
-import { resolveBranch, resolveMutationsDir } from '../../src/cycle';
+import { resolveBranch, resolveMutationsDir, resolveStatePath } from '../../src/cycle';
 
 function git(cwd: string, args: string): void {
   execSync(`git ${args}`, { cwd, stdio: 'ignore' });
@@ -55,5 +55,17 @@ describe('cycle resolution', () => {
       resolveMutationsDir(tmpDir),
       path.join(tmpDir, '.inquiry'),
     );
+  });
+
+  it('resolveStatePath points at cleanrooms/<branch>/.iq.state.yaml on a valid branch', () => {
+    initRepo(tmpDir, '209-test-branch');
+    assert.strictEqual(
+      resolveStatePath(tmpDir),
+      path.join(tmpDir, 'cleanrooms', '209-test-branch', '.iq.state.yaml'),
+    );
+  });
+
+  it('resolveStatePath returns null outside a git repo', () => {
+    assert.strictEqual(resolveStatePath(tmpDir), null);
   });
 });

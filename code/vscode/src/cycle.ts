@@ -37,3 +37,17 @@ export function resolveMutationsDir(workspaceFolder: string): string {
   }
   return path.join(workspaceFolder, 'cleanrooms', branch);
 }
+
+/**
+ * Resolve the cycle-local FSM state file for the given workspace folder.
+ * Returns `<workspaceFolder>/cleanrooms/<branch>/.iq.state.yaml` on a valid
+ * branch, or null when no cycle resolves (no git repo / unborn / detached /
+ * slashed branch) — the caller derives IDLE in that case.
+ */
+export function resolveStatePath(workspaceFolder: string): string | null {
+  const branch = resolveBranch(workspaceFolder);
+  if (branch === null) {
+    return null;
+  }
+  return path.join(workspaceFolder, 'cleanrooms', branch, '.iq.state.yaml');
+}
