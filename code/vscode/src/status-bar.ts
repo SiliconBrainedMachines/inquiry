@@ -1,8 +1,8 @@
 import type * as vscode from 'vscode';
 import type { ApeState, StatusBarData } from './types';
 import { parseState } from './parsers';
+import { resolveStatePath } from './cycle';
 import { readFile } from 'node:fs/promises';
-import { join } from 'node:path';
 
 const PHASE_ICONS: Record<string, string> = {
   'IDLE': '$(circle-outline)',
@@ -40,10 +40,14 @@ export function createStatusBar(
     100,
   );
 
-  const stateFile = '.inquiry/state.yaml';
-  const absPath = join(workspaceFolder, stateFile);
+  const stateFilePattern = 'cleanrooms/**/.iq.state.yaml';
 
   async function refresh(): Promise<void> {
+    const absPath = resolveStatePath(workspaceFolder);
+    if (absPath === null) {
+      applyState(item, { phase: 'IDLE', task: '' });
+      return;
+    }
     try {
       const content = await readFile(absPath, 'utf-8');
       const state = parseState(content);
@@ -63,7 +67,7 @@ export function createStatusBar(
     bar.show();
   }
 
-  const pattern = new vs.RelativePattern(workspaceFolder, stateFile);
+  const pattern = new vs.RelativePattern(workspaceFolder, stateFilePattern);
   const watcher = vs.workspace.createFileSystemWatcher(pattern);
 
   watcher.onDidChange(() => refresh());

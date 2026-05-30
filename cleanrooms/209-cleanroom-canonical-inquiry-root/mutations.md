@@ -19,7 +19,7 @@ hypothesis ledger (H1–H7) as evidence accumulates.
 | H4 | Cycle runtime and CLI config separate cleanly | CONFIRMED | Phase 4: cycle-scoped `mutations.md` moves to `cleanrooms/<branch>/`; project-scoped `config.yaml` stays at `.inquiry/` (U1); CLI + VS Code extension both resolve cycle-local mutations; metrics writers made dir-self-sufficient; CLI suite green (397) + extension unit suite green (69) |
 | H5 | status lifecycle expressible without persisting IDLE | CONFIRMED | Phase 5: `active` (update_state non-IDLE), `completed` (update_state→IDLE), `blocked` (pause_analysis/pause_plan effects) fully cover the lifecycle; centralized in `_markStatus`; `load()` derives IDLE for completed+blocked; full suite green (400) |
 | H6 | Discovery degrades safely at the edges | CONFIRMED | Phase 2: no-cycle (non-git / detached HEAD) resolves to derived IDLE without error; load returns IDLE on missing/malformed state |
-| H7 | Extension can follow CLI resolution | PENDING | Phase 7 |
+| H7 | Extension can follow CLI resolution | CONFIRMED | Phase 7: VS Code extension drives off cycle resolution — `resolveStatePath` → `cleanrooms/<branch>/.iq.state.yaml` (null→IDLE); status bar watches `cleanrooms/**/.iq.state.yaml` and re-resolves per refresh; `parseState` derives IDLE for `status: completed`/`blocked`; activationEvents add `workspaceContains:cleanrooms/`; unit suite green (74) + integration green (13) |
 
 ## Decisions
 
@@ -166,3 +166,19 @@ hypothesis ledger (H1–H7) as evidence accumulates.
   (no repo-level state.yaml / mutations.md); idempotency test trimmed to gitignore+config.
   CLI suite: **399 green**. `dart analyze` clean.
 - **H4 CONFIRMED** (init alignment — nothing cycle-scoped scaffolded at repo-level `.inquiry/`).
+
+### Phase 7 — VS Code extension follows cycle resolution
+
+- `src/cycle.ts`: new `resolveStatePath(workspaceFolder)` → `cleanrooms/<branch>/.iq.state.yaml`
+  on a valid branch, else `null` (no git / unborn / detached / slashed branch → caller IDLE).
+- `src/parsers.ts`: `parseState` now reads `status` and derives IDLE for `completed`/`blocked`,
+  mirroring the CLI's `InquiryState.load()` (IDLE never persisted).
+- `src/status-bar.ts`: no longer hardcodes `.inquiry/state.yaml`. `refresh()` re-resolves the
+  cycle state path each time (IDLE when `null`); the `FileSystemWatcher` follows the cycle
+  pattern `cleanrooms/**/.iq.state.yaml`. `toggleEvolution` stays on `.inquiry/config.yaml` (U1).
+- `package.json`: `activationEvents` adds `workspaceContains:cleanrooms/` (keeps `.inquiry/` for config).
+- Tests: `state-parser` +3 (active keeps phase; completed/blocked derive IDLE); `cycle` +2
+  (`resolveStatePath` valid branch / null outside git); status-bar integration repointed to a
+  real git cycle workspace via new `createCycleWorkspace` helper, +1 case (completed→IDLE in bar).
+  Unit suite **74 green**; integration **13 green**; `tsc` clean.
+- **H7 CONFIRMED** (extension resolves cycle state exactly like the CLI; degrades to IDLE at the edges).

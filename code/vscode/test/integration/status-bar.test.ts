@@ -1,22 +1,21 @@
 import { strict as assert } from 'node:assert';
 import * as fs from 'node:fs';
-import * as path from 'node:path';
 import type * as vscode from 'vscode';
 import { afterEach, beforeEach, describe, it } from 'mocha';
 
 import { createStatusBar } from '../../src/status-bar';
-import { createTempWorkspace, delay, removeTempWorkspace, waitFor } from './helpers';
+import { createCycleWorkspace, delay, removeTempWorkspace, waitFor } from './helpers';
 
 describe('StatusBar integration', function () {
   this.timeout(5000);
 
   let root = '';
-  let inquiryPath = '';
+  let statePath = '';
 
   beforeEach(() => {
-    const temp = createTempWorkspace('inquiry-vscode-status-bar-');
+    const temp = createCycleWorkspace('inquiry-vscode-status-bar-', '209-status-bar');
     root = temp.root;
-    inquiryPath = temp.inquiryPath;
+    statePath = temp.statePath;
   });
 
   afterEach(() => {
@@ -38,7 +37,6 @@ describe('StatusBar integration', function () {
   });
 
   it('updateStatusBar con ApeState actualiza text y tooltip del item', async () => {
-    const statePath = path.join(inquiryPath, 'state.yaml');
     fs.writeFileSync(statePath, 'state: PLAN\nissue: "042"\n', 'utf-8');
     const context = { subscriptions: [] as vscode.Disposable[] } as unknown as vscode.ExtensionContext;
     const [item, watcher] = createStatusBar(context, root) as [vscode.StatusBarItem, vscode.FileSystemWatcher];
@@ -52,8 +50,21 @@ describe('StatusBar integration', function () {
     item.dispose();
   });
 
+  it('status completed deriva IDLE en la barra', async () => {
+    fs.writeFileSync(statePath, 'state: EVOLUTION\nissue: "209"\nstatus: completed\n', 'utf-8');
+    const context = { subscriptions: [] as vscode.Disposable[] } as unknown as vscode.ExtensionContext;
+    const [item, watcher] = createStatusBar(context, root) as [vscode.StatusBarItem, vscode.FileSystemWatcher];
+
+    await waitFor(() => item.text.includes('Inquiry: IDLE'));
+
+    assert.match(item.text, /Inquiry: IDLE/);
+    assert.strictEqual(String(item.tooltip), 'Inquiry: IDLE');
+
+    watcher.dispose();
+    item.dispose();
+  });
+
   it('dispose limpia el item y el watcher', async () => {
-    const statePath = path.join(inquiryPath, 'state.yaml');
     fs.writeFileSync(statePath, 'state: ANALYZE\nissue: "042"\n', 'utf-8');
     const context = { subscriptions: [] as vscode.Disposable[] } as unknown as vscode.ExtensionContext;
     const [item, watcher] = createStatusBar(context, root) as [vscode.StatusBarItem, vscode.FileSystemWatcher];
