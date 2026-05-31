@@ -168,6 +168,14 @@ void main() {
       expect(t4.allowed, isTrue);
       expect(t4.nextState, 'END');
       expect(t4.promptFragmentId, isNotNull);
+      final inspectionTemplate = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'pre_pr_inspection.md'),
+      );
+      expect(inspectionTemplate.existsSync(), isTrue);
+      final templateText = inspectionTemplate.readAsStringSync();
+      expect(templateText, contains('## Pass 1 — Consistency'));
+      expect(templateText, contains('## Pass 2 — Completeness'));
+      expect(templateText, contains('## Pass 3 — Traceability'));
       current = t4.nextState!;
 
       _writePrePrInspection(tempDir.path, branch, verdict: 'APPROVED');
@@ -211,6 +219,22 @@ void _copyContractFromWorkspace(String root) {
   );
   destination.createSync(recursive: true);
   destination.writeAsStringSync(source.readAsStringSync());
+
+  final inspectionTemplateSource = File(
+    p.join(
+      Directory.current.path,
+      'assets',
+      'inspection',
+      'pre_pr_inspection_template.md',
+    ),
+  );
+  final inspectionTemplateDestination = File(
+    p.join(root, 'assets', 'inspection', 'pre_pr_inspection_template.md'),
+  );
+  inspectionTemplateDestination.createSync(recursive: true);
+  inspectionTemplateDestination.writeAsStringSync(
+    inspectionTemplateSource.readAsStringSync(),
+  );
 }
 
 void _writeDiagnosis(String root, String branch, String content) {

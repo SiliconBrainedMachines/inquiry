@@ -528,6 +528,35 @@ void main() {
       );
     });
 
+    test('blocks END pr_ready when FAIL check lacks file line citation', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'BLOCKED',
+        consistencyChecks: const ['FAIL: asset parity mismatch without citation'],
+        completenessChecks: const ['PASS: changed behavior covered by tests'],
+        traceabilityChecks: const ['PASS: every code change maps to plan.md'],
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID'),
+      );
+      expect(output.message, contains('file:line'));
+    });
+
     test('persists --issue flag in state.yaml on transition', () async {
       const branch = '31-feature-branch';
       _initGitRepo(tempDir.path, branch: branch);
@@ -794,4 +823,20 @@ void _writeContract(String root) {
   final file = File(p.join(root, 'assets', 'fsm', 'transition_contract.yaml'));
   file.createSync(recursive: true);
   file.writeAsStringSync(source.readAsStringSync());
+
+  final inspectionTemplateSource = File(
+    p.join(
+      Directory.current.path,
+      'assets',
+      'inspection',
+      'pre_pr_inspection_template.md',
+    ),
+  );
+  final inspectionTemplateFile = File(
+    p.join(root, 'assets', 'inspection', 'pre_pr_inspection_template.md'),
+  );
+  inspectionTemplateFile.createSync(recursive: true);
+  inspectionTemplateFile.writeAsStringSync(
+    inspectionTemplateSource.readAsStringSync(),
+  );
 }

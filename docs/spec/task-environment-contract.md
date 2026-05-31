@@ -79,7 +79,7 @@ These fields live alongside the older phase-specific runtime paths such as `outp
 - `expected_outputs`: bounded project changes plus cycle-local artifacts
 - `editable_surfaces`: project working tree under `project_root`, subject to plan constraints
 - `read_only_surfaces`: `plan.md` as the governing execution contract
-- `pre_pr_inspection_report`: `cleanrooms/<branch>/pre_pr_inspection.md` on the closure path into END, with `Consistency`, `Completeness`, and `Traceability` passes plus overall verdict
+- `pre_pr_inspection_report`: `cleanrooms/<branch>/pre_pr_inspection.md` on the closure path into END, auto-seeded on `finish_execute`, with `Consistency`, `Completeness`, and `Traceability` passes, overall verdict, and `file:line` citations for `FAIL` findings
 - `done_criteria`: implementation stays bounded by plan and completes required validation before END
 
 ### DARWIN
