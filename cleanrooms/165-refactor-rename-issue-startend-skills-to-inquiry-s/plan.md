@@ -48,26 +48,26 @@ If execution first classifies every old-name hit as live, preserved, or historic
 
 **Execution steps:**
 
-- [ ] Run a filename inventory for live surfaces that still expose the old names.
+- [x] Run a filename inventory for live surfaces that still expose the old names.
   - Search strategy: `rg --files -g "*issue-start*" -g "*issue-end*" code .github docs README.md code/site`
-- [ ] Run a content inventory across live repository surfaces.
+- [x] Run a content inventory across live repository surfaces.
   - Search strategy: `rg -n "issue-start|issue-end|inquiry-start|inquiry-end|issue-create" code/cli .github README.md docs code/site`
-- [ ] Classify every hit into exactly one bucket before any rename work starts.
+- [x] Classify every hit into exactly one bucket before any rename work starts.
   - `rename`: active runtime, test, prompt, site, or maintainership-facing surface that must adopt `inquiry-start` or `inquiry-end`
   - `preserve`: live `issue-create` references that describe the distinct IDLE triage skill and must remain unchanged
   - `freeze`: historical or archived material that remains out of scope
-- [ ] Mark mixed files hit by the search as either current-contract text or retrospective text section by section; do not assume an entire file is in or out of scope because one match appears there.
-- [ ] Explicitly record that [issue.md](issue.md) is stale for planning purposes where it asks for a new github-issue-create skill; the approved diagnosis supersedes that acceptance criterion for this cycle.
-- [ ] Define the exclusion set up front so the final search does not confuse expected historical residue with live regressions.
+- [x] Mark mixed files hit by the search as either current-contract text or retrospective text section by section; do not assume an entire file is in or out of scope because one match appears there.
+- [x] Explicitly record that [issue.md](issue.md) is stale for planning purposes where it asks for a new github-issue-create skill; the approved diagnosis supersedes that acceptance criterion for this cycle.
+- [x] Define the exclusion set up front so the final search does not confuse expected historical residue with live regressions.
   - Expected exclusions: `cleanrooms/**`, `code/cli/assets/archive/**`, `code/cli/build/assets/archive/**`, and genuinely retrospective timeline or changelog history entries
 
 **Verification:**
 
-- [ ] Every old-name hit found by the inventory has a recorded disposition and a rationale grounded in diagnosis decision 1, 2, or 3.
-- [ ] Mixed files are classified at section granularity rather than by whole-file guesswork.
-- [ ] No `issue-create` hit is scheduled for rename.
-- [ ] No live current-contract hit is left unclassified.
-- [ ] The exclusion set is explicit enough to explain any final residual old-name matches.
+- [x] Every old-name hit found by the inventory has a recorded disposition and a rationale grounded in diagnosis decision 1, 2, or 3.
+- [x] Mixed files are classified at section granularity rather than by whole-file guesswork.
+- [x] No `issue-create` hit is scheduled for rename.
+- [x] No live current-contract hit is left unclassified.
+- [x] The exclusion set is explicit enough to explain any final residual old-name matches.
 
 **Test Definitions (Pseudocode):**
 
