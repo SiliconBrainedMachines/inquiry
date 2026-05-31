@@ -7,6 +7,7 @@ import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../src/git_utils.dart';
 import '../../../targets/deployer.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
@@ -60,8 +61,9 @@ class TargetCleanCommand
   }
 
   void _cleanRepoScopedAgent() {
+    final projectRoot = getProjectRoot(_workingDirectory) ?? _workingDirectory;
     final agentFile = File(
-      p.join(_workingDirectory, '.github', 'agents', 'inquiry.agent.md'),
+      p.join(projectRoot, '.github', 'agents', 'inquiry.agent.md'),
     );
     if (agentFile.existsSync()) agentFile.deleteSync();
   }
