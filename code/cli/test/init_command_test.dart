@@ -164,6 +164,25 @@ void main() {
         ).readAsStringSync();
         expect(content, contains('enabled: true'));
       });
+
+      test('initializes repo root when invoked from nested subdir', () async {
+        _initGitRepo(tempDir.path);
+        final nestedDir = Directory(
+          p.join(tempDir.path, 'docs', 'deep'),
+        )..createSync(recursive: true);
+
+        final command = InitCommand(
+          InitInput(workingDirectory: nestedDir.path),
+        );
+        await command.execute();
+
+        expect(File('${tempDir.path}/.inquiry/config.yaml').existsSync(), isTrue);
+        expect(Directory('${tempDir.path}/cleanrooms').existsSync(), isTrue);
+        expect(
+          File('${nestedDir.path}/.inquiry/config.yaml').existsSync(),
+          isFalse,
+        );
+      });
     });
 
     // ─── Step 6: .inquiry/mutations.md ──────────────────────────────────
@@ -304,4 +323,20 @@ void main() {
       });
     });
   });
+}
+
+void _initGitRepo(String root) {
+  void git(List<String> args) {
+    final result = Process.runSync('git', args, workingDirectory: root);
+    if (result.exitCode != 0) {
+      throw StateError('git ${args.join(' ')} failed: ${result.stderr}');
+    }
+  }
+
+  git(['init', '-q']);
+  git(['config', 'user.email', 'test@example.com']);
+  git(['config', 'user.name', 'test']);
+  File(p.join(root, 'README.md')).writeAsStringSync('# test\n');
+  git(['add', '.']);
+  git(['commit', '-q', '-m', 'init']);
 }
