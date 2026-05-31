@@ -10,6 +10,7 @@ import 'package:yaml/yaml.dart';
 
 import '../../../assets.dart';
 import '../../../fsm_contract.dart';
+import '../../../src/cycle_context.dart';
 import '../../ape/ape_definition.dart';
 import '../../ape/inquiry_state.dart';
 import '../../ape/operational_contract.dart';
@@ -157,7 +158,8 @@ class FsmStateCommand implements Command<FsmStateInput, FsmStateOutput> {
   }
 
   bool _readEvolutionEnabled(String workingDirectory) {
-    final configFile = File(p.join(workingDirectory, '.inquiry', 'config.yaml'));
+    final inquiryCliRoot = _resolveInquiryCliRoot(workingDirectory);
+    final configFile = File(p.join(inquiryCliRoot, '.inquiry', 'config.yaml'));
     if (!configFile.existsSync()) return false;
     try {
       final yaml = loadYaml(configFile.readAsStringSync());
@@ -171,6 +173,14 @@ class FsmStateCommand implements Command<FsmStateInput, FsmStateOutput> {
       // If config is malformed, default to no evolution
     }
     return false;
+  }
+
+  String _resolveInquiryCliRoot(String workingDirectory) {
+    try {
+      return CycleContext.resolve(workingDirectory).inquiryCliRoot;
+    } on CycleResolutionException {
+      return workingDirectory;
+    }
   }
 
   static const _stateApes = <FsmState, List<Map<String, String>>>{

@@ -11,7 +11,7 @@ instructions: |
   - diagnosis.md (what was analyzed)
   - plan.md (what was planned, with checkbox state and deviation annotations)
   - retrospective.md (what went well, what deviated, what surprised, spawn issues)
-  - .inquiry/mutations.md (human observations about APE's process performance during this cycle)
+  - cleanrooms/<branch>/mutations.md (human observations about APE's process performance during this cycle)
   - Commit history (what was actually built)
   - Any deviation notes
 
@@ -48,7 +48,7 @@ constraints:
   - Omit any metric field you cannot reliably determine
 
 allowed_actions:
-  - Review cycle artifacts (diagnosis.md, plan.md, retrospective.md, commit history, .inquiry/mutations.md)
+  - Review cycle artifacts (diagnosis.md, plan.md, retrospective.md, commit history, cleanrooms/<branch>/mutations.md)
   - Search existing issues with gh issue list
   - Comment on matching issues with gh issue comment
   - Create new issues with gh issue create
