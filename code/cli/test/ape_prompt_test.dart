@@ -180,6 +180,7 @@ void main() {
 
           expect(instructionIndex, greaterThan(stateIndex));
           expect(contractIndex, greaterThan(instructionIndex));
+          expect(result.prompt, isNot(contains('## When to Use')));
         },
       );
 
