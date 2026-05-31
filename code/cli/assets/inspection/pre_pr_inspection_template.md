@@ -7,7 +7,7 @@ branch: "{{BRANCH}}"
 generated_at: "{{GENERATED_AT}}"
 
 ## Pass 1 — Consistency
-- WARN: replace this placeholder with a concrete consistency finding before approval
+- WARN: consistency findings are auto-generated from source/build parity when END is entered and refreshed again at pr_ready
 
 ## Pass 2 — Completeness
 - WARN: replace this placeholder with a concrete completeness finding before approval
