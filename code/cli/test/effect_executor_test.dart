@@ -100,6 +100,26 @@ void main() {
           isTrue,
         );
       });
+
+      test('writes mutations.md at repo cleanroom from nested subdir', () {
+        final nestedDir = Directory(
+          p.join(tempDir.path, 'sub', 'deep'),
+        )..createSync(recursive: true);
+
+        final executor = EffectExecutor(workingDirectory: nestedDir.path);
+        executor.resetMutations();
+
+        expect(
+          File('${tempDir.path}/cleanrooms/$branch/mutations.md').existsSync(),
+          isTrue,
+        );
+        expect(
+          File(
+            '${nestedDir.path}/cleanrooms/$branch/mutations.md',
+          ).existsSync(),
+          isFalse,
+        );
+      });
     });
 
     group('snapshot_metrics', () {
@@ -126,6 +146,24 @@ void main() {
         ).readAsStringSync();
         expect(content, contains('state: ANALYZE'));
         expect(content, contains('issue: "99"'));
+      });
+
+      test('writes metrics_snapshot.yaml at repo root from nested subdir', () {
+        final nestedDir = Directory(
+          p.join(tempDir.path, 'sub', 'deep'),
+        )..createSync(recursive: true);
+
+        final executor = EffectExecutor(workingDirectory: nestedDir.path);
+        executor.snapshotMetrics();
+
+        expect(
+          File('${tempDir.path}/.inquiry/metrics_snapshot.yaml').existsSync(),
+          isTrue,
+        );
+        expect(
+          File('${nestedDir.path}/.inquiry/metrics_snapshot.yaml').existsSync(),
+          isFalse,
+        );
       });
     });
 
@@ -342,6 +380,27 @@ void main() {
         executor.openAnalysisContext();
 
         expect(issueFile.readAsStringSync(), 'CUSTOM CONTENT');
+      });
+
+      test('creates analyze bootstrap at repo cleanroom from nested subdir', () {
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+        final nestedDir = Directory(
+          p.join(tempDir.path, 'sub', 'deep'),
+        )..createSync(recursive: true);
+
+        final executor = EffectExecutor(workingDirectory: nestedDir.path);
+        executor.openAnalysisContext();
+
+        expect(
+          File('${tempDir.path}/cleanrooms/$branch/analyze/index.md')
+              .existsSync(),
+          isTrue,
+        );
+        expect(
+          File('${nestedDir.path}/cleanrooms/$branch/analyze/index.md')
+              .existsSync(),
+          isFalse,
+        );
       });
     });
 
