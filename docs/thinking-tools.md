@@ -25,7 +25,7 @@ The current model uses Thinking Tools through five active operators and one orch
 | EXECUTE | BASHŌ | Techne + yō no bi | Implements under constraints with emphasis on functional elegance |
 | EVOLUTION | DARWIN | Natural selection | Compares outcomes and proposes fitter process mutations |
 
-APE remains the scheduler and closure gate. DEWEY does not prepare branches or perform downstream phases; `issue-start` owns the explicit handoff into ANALYZE.
+APE remains the scheduler and closure gate. DEWEY does not prepare branches or perform downstream phases; `inquiry-start` owns the explicit handoff into ANALYZE.
 
 At prompt-delivery time, Inquiry CLI assembles the effective sub-agent prompt as thinking-tool identity from the APE YAML, phase-owned operational contract from the active FSM state asset, and runtime inquiry-context. `iq ape prompt` remains the inspectable surface for that exact assembly. DARWIN is the only bounded exception: it keeps the abstract observe/compare/select methodology, while EVOLUTION owns repository procedure such as issue search/comment/create and metrics mechanics.
 
