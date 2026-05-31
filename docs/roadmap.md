@@ -6,7 +6,7 @@
 
 > Where APE is going next. For where APE is today, see [../README.md](../README.md).
 
-> Live roster note: DEWEY now owns bounded IDLE triage in the current contract; `issue-start` remains the explicit handoff into ANALYZE.
+> Live roster note: DEWEY now owns bounded IDLE triage in the current contract; `inquiry-start` remains the explicit handoff into ANALYZE.
 
 This roadmap is **descriptive, not prescriptive**: it reflects the open issues currently in the backlog and the long-running theses that motivate the project. Anything not backed by an issue is exploratory.
 
@@ -75,7 +75,7 @@ This section is intentionally selective. It groups the open issues that most cle
 - **#167** — Collapse BASHO into a simpler single-phase execution surface once the current transition boundaries are revalidated
 
 ### Workflow and cycle discipline
-- **#165** — Revisit `issue-start` / `issue-end` naming so the skill surfaces match the methodology-first vocabulary
+- **#165** — Revisit `inquiry-start` / `inquiry-end` naming so the skill surfaces match the methodology-first vocabulary
 - **#163** — Add a formal pre-PR inspection gate in END instead of treating PR creation as the only closing ritual
 - **#127** — Tighten the EXECUTE contract so version bump and release proposal are always surfaced before completion
 - **#49** — Enforce the single-task-per-cycle rule in IDLE and ANALYZE to prevent scope drift
@@ -152,7 +152,7 @@ The original [lore.md](lore.md) sketched 9+ apes. After two months of building A
 
 | Lore agent | Status | What happened |
 |---|---|---|
-| **DEWEY** | ✅ Active | IDLE — bounded issue triage and explicit handoff to `issue-start` |
+| **DEWEY** | ✅ Active | IDLE — bounded issue triage and explicit handoff to `inquiry-start` |
 | **SOCRATES** | ✅ Active | ANALYZE — implemented as the mayéutica agent |
 | **DESCARTES** | ✅ Active | PLAN — replaces SUNZI's strategy + VITRUVIUS's WBS in one Cartesian Method |
 | **BASHŌ** | ✅ Active | EXECUTE — replaces ADA's TDD with techne (functional beauty under constraints) |

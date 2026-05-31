@@ -446,7 +446,7 @@ preconditions:
     description: "Issue selected in current context"
     kind: issue
   feature_branch_selected:
-    description: "issue-start prepared an issue-linked feature branch for the explicit start handoff"
+    description: "inquiry-start prepared an issue-linked feature branch for the explicit start handoff"
     kind: git
   plan_approved:
     description: "User approved plan"
@@ -489,7 +489,7 @@ prompt_fragments:
     template: "plan.pause"
   execute_to_end:
     role: APE
-    instructions: [issue-end]
+    instructions: [inquiry-end]
     template: "end.review"
   execute_continue:
     role: BASHO
@@ -505,11 +505,11 @@ prompt_fragments:
     template: "analyze.reopen"
   end_to_evolution:
     role: DARWIN
-    instructions: [issue-end]
+    instructions: [inquiry-end]
     template: "evolution.from_end"
   end_to_idle:
     role: APE
-    instructions: [issue-end]
+    instructions: [inquiry-end]
     template: "idle.resume"
   evolution_to_idle:
     role: APE
