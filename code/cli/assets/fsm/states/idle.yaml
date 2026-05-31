@@ -9,7 +9,7 @@ instructions: |
   IDLE owns that fast-path routing contract: triage_objective=create_or_select, deterministic_skill=issue-create, allowed_commands=gh issue list, gh issue view, gh issue create, gh issue edit.
   Inquiry CLI injects that routing contract into the assembled prompt as explicit inquiry-context.
   When issue readiness is reached, produce issue_selected_or_created, reset DEWEY, and remain in IDLE.
-  DONE is reached only on explicit start intent; DONE consumes issue-start to prepare feature_branch_selected.
+  DONE is reached only on explicit start intent; DONE consumes inquiry-start to prepare feature_branch_selected.
   Only after that handoff may IDLE fire start_analyze.
   Run 'iq doctor' as first action to validate environment.
 

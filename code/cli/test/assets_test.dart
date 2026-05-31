@@ -97,9 +97,9 @@ void main() {
       expect(content, isNotEmpty);
     });
 
-    test('reads instructions/issue-end.md', () {
-      final content = assets.loadString('instructions/issue-end.md');
-      expect(content, contains('issue-end'));
+    test('reads instructions/inquiry-end.md', () {
+      final content = assets.loadString('instructions/inquiry-end.md');
+      expect(content, contains('inquiry-end'));
       expect(content, contains('EXECUTE'));
       expect(content, isNotEmpty);
     });
@@ -111,8 +111,8 @@ void main() {
       expect(content, isNotEmpty);
     });
 
-    test('reads instructions/issue-start.md as operational handoff only', () {
-      final content = assets.loadString('instructions/issue-start.md');
+    test('reads instructions/inquiry-start.md as operational handoff only', () {
+      final content = assets.loadString('instructions/inquiry-start.md');
       expect(content, contains('issue already exists'));
       expect(content, contains('start_analyze'));
       expect(content, contains('cleanrooms/<NNN>-<slug>/analyze/'));
@@ -189,8 +189,8 @@ void main() {
         'instructions/doc-read.md',
         'instructions/doc-write.md',
         'instructions/issue-create.md',
-        'instructions/issue-end.md',
-        'instructions/issue-start.md',
+        'instructions/inquiry-end.md',
+        'instructions/inquiry-start.md',
       ];
 
       for (final file in instructionFiles) {
