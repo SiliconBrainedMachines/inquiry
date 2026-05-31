@@ -143,6 +143,7 @@ Before pushing or creating the PR, evaluate the minimum END sensor stack:
 - `inferential_optional`: any review concerns are recorded, but they do not block by themselves
 
 Record the local END gate result in `cleanrooms/{slug}/pre_pr_inspection.md`.
+`iq fsm transition --event finish_execute` now seeds this report automatically from the END inspection template so the gate starts from a structured scaffold instead of a blank file.
 The report must include a top-level verdict and the three formal inspection passes:
 
 ```md
@@ -159,9 +160,10 @@ verdict: APPROVED
 ```
 
 Each pass must contain one or more `- PASS:`, `- FAIL:`, or `- WARN:` checks.
+Every `FAIL` check must include a repo-relative `file:line` citation such as `code/cli/lib/modules/fsm/commands/transition.dart:355`.
 Allowed verdicts for this gate are `APPROVED` and `BLOCKED`.
 `APPROVED` is only valid when no pass contains a `FAIL` check.
-`iq fsm transition --event pr_ready` refuses to create the PR when the report is missing, lacks the required pass structure, declares any non-`APPROVED` verdict, or claims `APPROVED` while still containing a `FAIL` check.
+`iq fsm transition --event pr_ready` refuses to create the PR when the report is missing, lacks the required pass structure, contains any `FAIL` without `file:line`, declares any non-`APPROVED` verdict, or claims `APPROVED` while still containing a `FAIL` check.
 
 If any blocking `pre_pr` or `runtime` sensor fails, abort PR creation and return to the failing evidence.
 

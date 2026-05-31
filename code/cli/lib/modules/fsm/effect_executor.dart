@@ -23,6 +23,7 @@ const cliEffects = {
   'close_cycle',
   'collect_metrics',
   'open_analysis_context',
+  'seed_pre_pr_inspection_template',
 };
 
 /// Resolves the body of a GitHub issue for the `issue.md` mirror.
@@ -343,6 +344,44 @@ class EffectExecutor {
     }
   }
 
+  void seedPrePrInspectionTemplate() {
+    final branch = _branch;
+    final cleanroomRoot = _cleanroomRoot;
+    if (branch == null || cleanroomRoot == null) return;
+
+    final file = File(p.join(cleanroomRoot, 'pre_pr_inspection.md'));
+    if (file.existsSync()) return;
+
+    final current = InquiryState.load(workingDirectory);
+    final issue = current.issue ?? '';
+    final template = _loadPrePrInspectionTemplate()
+        .replaceAll('{{ISSUE}}', issue.isEmpty ? 'unassigned' : issue)
+        .replaceAll('{{BRANCH}}', branch)
+        .replaceAll(
+          '{{GENERATED_AT}}',
+          DateTime.now().toUtc().toIso8601String(),
+        );
+
+    file.parent.createSync(recursive: true);
+    file.writeAsStringSync(template);
+  }
+
+  String _loadPrePrInspectionTemplate() {
+    if (_assets != null) {
+      return _assets.loadString('inspection/pre_pr_inspection_template.md');
+    }
+
+    final file = File(
+      p.join(
+        _projectRoot,
+        'assets',
+        'inspection',
+        'pre_pr_inspection_template.md',
+      ),
+    );
+    return file.readAsStringSync();
+  }
+
   /// Execute all CLI-side effects for a transition.
   ///
   /// Always executes `update_state` first (every valid transition updates state).
@@ -378,6 +417,9 @@ class EffectExecutor {
           executed.add(effect);
         case 'collect_metrics':
           collectMetrics();
+          executed.add(effect);
+        case 'seed_pre_pr_inspection_template':
+          seedPrePrInspectionTemplate();
           executed.add(effect);
         case 'pause_analysis':
         case 'pause_plan':
