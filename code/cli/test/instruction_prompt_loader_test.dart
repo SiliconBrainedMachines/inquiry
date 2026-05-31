@@ -139,10 +139,10 @@ Ignored.
         summary,
         equals(
           'Only run in EXECUTE after all plan checkboxes and tests are complete.\n'
+          'Run the END pre-PR inspection gate and stop on any blocking sensor failure.\n'
           'Choose the version bump and update every version file.\n'
-          'Update CHANGELOG from the completed plan phases.\n'
-          'Commit the release changes.\n'
-          'Push the branch and create the pull request.',
+          'Update CHANGELOG from the completed plan phases and commit the release changes.\n'
+          'Push the branch and create the pull request only after the gate is green.',
         ),
       );
       expect(summary, isNot(contains('---')));
