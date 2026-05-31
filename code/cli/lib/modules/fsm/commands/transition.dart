@@ -25,6 +25,15 @@ const _requiredInspectionPasses = <String>[
   'Traceability',
 ];
 
+final RegExp _inspectionCheckPattern = RegExp(
+  r'^-\s+(PASS|FAIL|WARN):\s+(.+)$',
+  caseSensitive: false,
+);
+
+final RegExp _fileLineCitationPattern = RegExp(
+  r'(^|[\s(])([A-Za-z0-9._/-]+):(\d+)(?=$|[\s)])',
+);
+
 class _BoundaryCommitSpec {
   final String label;
   final String path;
@@ -48,10 +57,21 @@ class _BoundaryCommitResult {
     : operationsExecuted = const [];
 }
 
+class _PrePrInspectionCheck {
+  final String status;
+  final String detail;
+
+  const _PrePrInspectionCheck({required this.status, required this.detail});
+
+  bool get requiresFileLineCitation => status == 'FAIL';
+
+  bool get hasFileLineCitation => _fileLineCitationPattern.hasMatch(detail);
+}
+
 class _PrePrInspectionReport {
   final bool exists;
   final String? verdict;
-  final Map<String, List<String>> checksByPass;
+  final Map<String, List<_PrePrInspectionCheck>> checksByPass;
 
   const _PrePrInspectionReport({
     required this.exists,
@@ -61,12 +81,19 @@ class _PrePrInspectionReport {
 
   bool get hasRequiredPassStructure =>
       _requiredInspectionPasses.every(
-        (pass) => (checksByPass[pass] ?? const <String>[]).isNotEmpty,
+        (pass) => (checksByPass[pass] ?? const <_PrePrInspectionCheck>[]).isNotEmpty,
       );
 
   bool get hasFailChecks => checksByPass.values
       .expand((checks) => checks)
-      .any((status) => status == 'FAIL');
+      .any((check) => check.status == 'FAIL');
+
+  bool get hasMissingRequiredCitations => checksByPass.values
+      .expand((checks) => checks)
+      .any(
+        (check) =>
+            check.requiresFileLineCitation && !check.hasFileLineCitation,
+      );
 }
 
 class StateTransitionInput extends Input {
@@ -354,6 +381,9 @@ class StateTransitionCommand
       if (!report.hasRequiredPassStructure) {
         return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID: pre_pr_inspection.md must contain Consistency, Completeness, and Traceability sections with PASS, FAIL, or WARN checks';
       }
+      if (report.hasMissingRequiredCitations) {
+        return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID: FAIL checks in pre_pr_inspection.md must include repo-relative file:line citations';
+      }
       if (report.verdict == 'APPROVED' && report.hasFailChecks) {
         return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID: pre_pr_inspection.md cannot declare APPROVED while any pass contains FAIL checks';
       }
@@ -501,7 +531,7 @@ class StateTransitionCommand
       return const _PrePrInspectionReport(
         exists: false,
         verdict: null,
-        checksByPass: <String, List<String>>{},
+        checksByPass: <String, List<_PrePrInspectionCheck>>{},
       );
     }
 
@@ -517,7 +547,7 @@ class StateTransitionCommand
       return const _PrePrInspectionReport(
         exists: false,
         verdict: null,
-        checksByPass: <String, List<String>>{},
+        checksByPass: <String, List<_PrePrInspectionCheck>>{},
       );
     }
 
@@ -528,24 +558,29 @@ class StateTransitionCommand
       multiLine: true,
     ).firstMatch(content);
 
-    final checksByPass = <String, List<String>>{};
+    final checksByPass = <String, List<_PrePrInspectionCheck>>{};
     String? currentPass;
     for (final rawLine in content.split('\n')) {
       final line = rawLine.trim();
       if (line.startsWith('## ')) {
         currentPass = _normalizeInspectionPass(line.substring(3).trim());
         if (currentPass != null) {
-          checksByPass.putIfAbsent(currentPass, () => <String>[]);
+          checksByPass.putIfAbsent(
+            currentPass,
+            () => <_PrePrInspectionCheck>[],
+          );
         }
         continue;
       }
 
-      final checkMatch = RegExp(
-        r'^-\s+(PASS|FAIL|WARN):\s+.+$',
-        caseSensitive: false,
-      ).firstMatch(line);
+      final checkMatch = _inspectionCheckPattern.firstMatch(line);
       if (checkMatch != null && currentPass != null) {
-        checksByPass[currentPass]!.add(checkMatch.group(1)!.toUpperCase());
+        checksByPass[currentPass]!.add(
+          _PrePrInspectionCheck(
+            status: checkMatch.group(1)!.toUpperCase(),
+            detail: checkMatch.group(2)!.trim(),
+          ),
+        );
       }
     }
 

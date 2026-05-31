@@ -189,6 +189,10 @@ void main() {
     expect(finishExecution.allowed, isTrue);
     expect(finishExecution.to, FsmState.end);
     expect(finishExecution.operations!.promptFragmentId, 'execute_to_end');
+    expect(
+      finishExecution.operations!.effects,
+      contains('seed_pre_pr_inspection_template'),
+    );
 
     expect(createPr.allowed, isTrue);
     expect(createPr.to, FsmState.evolution);

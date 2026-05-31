@@ -266,7 +266,7 @@ transitions:
     allowed: true
     operations:
       prechecks: [issue_selected, feature_branch_selected]
-      effects: [finalize_execution]
+      effects: [finalize_execution, seed_pre_pr_inspection_template]
       artifacts: [execution_summary.md]
       commit_policy: stage_only
       prompt_fragment_id: execute_to_end
@@ -449,7 +449,7 @@ preconditions:
     description: "inquiry-start prepared an issue-linked feature branch for the explicit start handoff"
     kind: git
   pre_pr_inspection_approved:
-    description: "pre_pr_inspection.md exists for the current issue branch and carries verdict: APPROVED"
+    description: "pre_pr_inspection.md exists for the current issue branch as a structured 3-pass report, FAIL findings cite file:line, and the final verdict is APPROVED"
     kind: filesystem
   plan_approved:
     description: "User approved plan"
