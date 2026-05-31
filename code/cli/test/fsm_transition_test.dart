@@ -372,7 +372,7 @@ void main() {
       expect(output.nextState, 'END');
       expect(output.promptFragmentId, 'execute_to_end');
       expect(output.requiredRole, 'APE');
-      expect(output.requiredInstructions, ['issue-end']);
+      expect(output.requiredInstructions, ['inquiry-end']);
     });
 
     test('allows END to create PR and enter EVOLUTION', () async {
@@ -392,7 +392,7 @@ void main() {
       expect(output.nextState, 'EVOLUTION');
       expect(output.promptFragmentId, 'end_to_evolution');
       expect(output.requiredRole, 'DARWIN');
-      expect(output.requiredInstructions, ['issue-end']);
+      expect(output.requiredInstructions, ['inquiry-end']);
     });
 
     test('persists --issue flag in state.yaml on transition', () async {

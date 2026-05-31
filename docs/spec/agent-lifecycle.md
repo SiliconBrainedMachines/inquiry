@@ -28,7 +28,7 @@ IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION
 
 ### State descriptions
 
-**IDLE** — This document is explanatory architecture, not the sole normative source. The canonical runtime contract for IDLE lives in `code/cli/assets/fsm/transition_contract.yaml` for the outer IDLE boundary and `code/cli/assets/fsm/states/idle.yaml` for internal IDLE behavior. Within that boundary, DEWEY owns bounded issue triage. The user converses freely while DEWEY determines whether the indeterminate situation merits a formal cycle, whether an issue already exists, and whether TRIAGE should use `issue-create` to create or confirm one. When issue readiness is reached, IDLE produces `issue_selected_or_created`, resets DEWEY to TRIAGE, and remains in IDLE. DONE is reserved for explicit start intent alone. Only then does `issue-start` prepare `feature_branch_selected`, after which the outer `start_analyze` transition may leave IDLE.
+**IDLE** — This document is explanatory architecture, not the sole normative source. The canonical runtime contract for IDLE lives in `code/cli/assets/fsm/transition_contract.yaml` for the outer IDLE boundary and `code/cli/assets/fsm/states/idle.yaml` for internal IDLE behavior. Within that boundary, DEWEY owns bounded issue triage. The user converses freely while DEWEY determines whether the indeterminate situation merits a formal cycle, whether an issue already exists, and whether TRIAGE should use `issue-create` to create or confirm one. When issue readiness is reached, IDLE produces `issue_selected_or_created`, resets DEWEY to TRIAGE, and remains in IDLE. DONE is reserved for explicit start intent alone. Only then does `inquiry-start` prepare `feature_branch_selected`, after which the outer `start_analyze` transition may leave IDLE.
 
 **ANALYZE** — SOCRATES conducts Socratic analysis. Explores the problem through questions, challenges assumptions, documents findings. Produces `diagnosis.md` — a rigorous technical document (paper-style, with references) that serves as the sole input for the planning phase. The user approves the diagnosis before transitioning.
 
@@ -107,7 +107,7 @@ All APE state transitions are mechanical, executed via skill → CLI chain:
 
 | Transition | Event | Effects |
 |-----------|-------|---------|
-| IDLE → ANALYZE | `start_analyze` | TRIAGE must already have produced `issue_selected_or_created`; explicit start then runs `issue-start`, which prepares `feature_branch_selected` before the transition fires |
+| IDLE → ANALYZE | `start_analyze` | TRIAGE must already have produced `issue_selected_or_created`; explicit start then runs `inquiry-start`, which prepares `feature_branch_selected` before the transition fires |
 | ANALYZE → PLAN | `complete_analysis` | `git commit` analysis docs |
 | PLAN → EXECUTE | `approve_plan` | `git commit` plan-boundary artifacts |
 | EXECUTE → END | `finish_execute` | `git commit` execution artifacts |

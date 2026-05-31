@@ -297,7 +297,7 @@ void main() {
           expect(result.toJson()['instructions'], contains('create_or_select'));
           expect(result.toJson()['instructions'], contains('issue-create'));
           expect(result.toJson()['instructions'], contains('gh issue create'));
-          expect(result.toJson()['instructions'], contains('issue-start'));
+          expect(result.toJson()['instructions'], contains('inquiry-start'));
           expect(result.toJson()['instructions'], contains('start_analyze'));
         },
       );

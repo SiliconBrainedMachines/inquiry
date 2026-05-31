@@ -104,7 +104,7 @@ void main() {
 
     test('documents the explicit-start handoff sequence', () {
       expect(content, contains('explicit start intent'));
-      expect(content, contains('issue-start'));
+      expect(content, contains('inquiry-start'));
       expect(content, contains('start_analyze'));
       final issueReadyIndex = content.indexOf('issue_selected_or_created');
       final branchReadyIndex = content.indexOf('feature_branch_selected');
@@ -119,7 +119,7 @@ void main() {
       );
       expect(
         content,
-        contains('only explicit start intent triggers issue-start plus start_analyze'),
+        contains('only explicit start intent triggers inquiry-start plus start_analyze'),
       );
     });
 

@@ -12,7 +12,7 @@ issue: 152
 
 > Superseded for canonical IDLE behavior. This document remains useful as historical architecture and for the encapsulation principle, but the normative runtime contract now lives in `code/cli/assets/fsm/transition_contract.yaml` for the outer IDLE boundary and `code/cli/assets/fsm/states/idle.yaml` for internal IDLE behavior.
 >
-> Runtime terminology has since stabilized: DEWEY is the live TRIAGE operator, `issue-create` owns GitHub issue creation or confirmation, issue readiness produces `issue_selected_or_created` and resets DEWEY while the main FSM remains in IDLE, and DONE is reserved for explicit start intent, after which `issue-start` prepares `feature_branch_selected` before `start_analyze`.
+> Runtime terminology has since stabilized: DEWEY is the live TRIAGE operator, `issue-create` owns GitHub issue creation or confirmation, issue readiness produces `issue_selected_or_created` and resets DEWEY while the main FSM remains in IDLE, and DONE is reserved for explicit start intent, after which `inquiry-start` prepares `feature_branch_selected` before `start_analyze`.
 >
 > Historical note: the operator naming below, the proposed TRIAGE flow ending at `_DONE`, and the older handoff semantics are preserved as context only and should be read against the live runtime mapping above.
 
@@ -161,14 +161,14 @@ classify_intent → scope_problem → search_issues → create_or_select → con
 | `search_issues` | `gh issue list --search "..."` — does an issue already exist for this? |
 | `create_or_select` | Use the TRIAGE issue surface to create or confirm the issue, then present it for user confirmation. |
 | `confirm` | Present the selected/created issue to the user. User confirms readiness. |
-| `_DONE` | Historical terminal proposal only. In the live runtime, issue readiness already produced `issue_selected_or_created` and returned to TRIAGE; explicit start intent alone reaches DONE, then `issue-start` prepares `feature_branch_selected` before `start_analyze`. |
+| `_DONE` | Historical terminal proposal only. In the live runtime, issue readiness already produced `issue_selected_or_created` and returned to TRIAGE; explicit start intent alone reaches DONE, then `inquiry-start` prepares `feature_branch_selected` before `start_analyze`. |
 
 ### Completion authority compatibility
 
 IDLE still has `completion_authority: user`, but the live runtime applies that gate to explicit start rather than to issue readiness alone. This means:
 - TRIAGE may produce `issue_selected_or_created` and reset to DEWEY's initial state without leaving IDLE
 - Only when the user explicitly wants to begin resolving the issue does IDLE reach DONE
-- `issue-start` then prepares `feature_branch_selected`, after which `start_analyze` may transition the main FSM
+- `inquiry-start` then prepares `feature_branch_selected`, after which `start_analyze` may transition the main FSM
 
 This preserves the encapsulation principle: issue readiness does not auto-transition the main FSM, and explicit operational start remains a separate user-gated handoff.
 
