@@ -1,9 +1,9 @@
 ---
-name: issue-start
+name: inquiry-start
 description: 'Protocol for starting work on an existing GitHub issue. Verifies the issue, prepares the branch and cleanroom, and transitions to ANALYZE state.'
 ---
 
-# issue-start - Operational Start Protocol
+# inquiry-start - Operational Start Protocol
 
 ## Prompt Summary
 

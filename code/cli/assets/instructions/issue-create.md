@@ -9,7 +9,7 @@ description: 'Protocol for deterministically selecting or creating a GitHub issu
 
 - When the scheduler APE is in IDLE/TRIAGE
 - When work needs a GitHub issue to be confirmed or created
-- Before explicit start intent and before issue-start
+- Before explicit start intent and before inquiry-start
 
 ## Prerequisites
 
@@ -69,7 +69,7 @@ Use this response as the canonical issue identity for the later operational hand
 
 Report `issue_selected_or_created` with the confirmed issue number and title.
 Do not create a branch or cleanroom.
-Do not fire `start_analyze`; that belongs to `issue-start` after explicit start intent.
+Do not fire `start_analyze`; that belongs to `inquiry-start` after explicit start intent.
 
 ## Verification
 

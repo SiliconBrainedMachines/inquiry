@@ -16,7 +16,7 @@ The current APE cycle uses five active operators, each embodying a thinking tool
 IDLE ──→ ANALYZE ──→ PLAN ──→ EXECUTE ──→ END ──→ EVOLUTION
 ```
 
-APE is NOT an ape — it is the Finite APE Machine, the scheduler, the RTOS event loop. It has no personality and no namesake. It governs the END gate; the five named operators below are the thinking tools it dispatches across the active states. In IDLE, DEWEY stays bounded to issue triage and hands off through `issue-start`.
+APE is NOT an ape — it is the Finite APE Machine, the scheduler, the RTOS event loop. It has no personality and no namesake. It governs the END gate; the five named operators below are the thinking tools it dispatches across the active states. In IDLE, DEWEY stays bounded to issue triage and hands off through `inquiry-start`.
 
 ---
 
@@ -28,9 +28,9 @@ APE is NOT an ape — it is the Finite APE Machine, the scheduler, the RTOS even
 
 **The allegory.** John Dewey (1859–1952) defined inquiry as the controlled transformation of an indeterminate situation into a determinate unified whole. Before explanation, design, or implementation can begin, the situation itself has to be rendered precise enough to deserve formal work.
 
-**The ape.** DEWEY owns bounded issue triage. It clarifies whether the situation merits a formal cycle, searches for existing issues, creates or selects the issue when needed, and gets that issue ready for explicit handoff. DEWEY does not prepare branches, write `diagnosis.md`, design the plan, or code. That handoff belongs to `issue-start`.
+**The ape.** DEWEY owns bounded issue triage. It clarifies whether the situation merits a formal cycle, searches for existing issues, creates or selects the issue when needed, and gets that issue ready for explicit handoff. DEWEY does not prepare branches, write `diagnosis.md`, design the plan, or code. That handoff belongs to `inquiry-start`.
 
-**Key artifact:** Selected issue + `issue-start` handoff
+**Key artifact:** Selected issue + `inquiry-start` handoff
 
 ---
 
@@ -177,7 +177,7 @@ mizu no oto          sound of water
 
 | Name | State | Thinking Tool | Era/Culture | Key Artifact |
 |------|-------|--------------|-------------|-------------|
-| DEWEY | IDLE | Problematization | United States, 1859 | Selected issue + `issue-start` handoff |
+| DEWEY | IDLE | Problematization | United States, 1859 | Selected issue + `inquiry-start` handoff |
 | SOCRATES | ANALYZE | Mayéutica | Greece, 470 BC | `diagnosis.md` |
 | DESCARTES | PLAN | Scientific Method | France, 1596 | `plan.md` |
 | BASHŌ | EXECUTE | Techne / 用の美 | Japan, 1644 | Code + commits |

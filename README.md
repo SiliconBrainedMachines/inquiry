@@ -28,14 +28,14 @@ The insight: **AI capability only becomes trustworthy when governed by rigorous 
 
 | State | Agent | Method | Artifact |
 |---|---|---|---|
-| **IDLE** | DEWEY | Deweyan problematization — scope, deduplicate, prepare issue handoff | selected issue + `issue-start` handoff |
+| **IDLE** | DEWEY | Deweyan problematization — scope, deduplicate, prepare issue handoff | selected issue + `inquiry-start` handoff |
 | **ANALYZE** | SOCRATES | Socratic questioning — clarify, challenge, evidence | `confirmed.md` → `diagnosis.md` |
 | **PLAN** | DESCARTES | Scientific method — divide, order, verify, enumerate | `plan.md` |
 | **EXECUTE** | BASHŌ | Wabi-sabi — minimal, beautiful implementation under tests | code + commits |
 | **END** | — | PR gate — review, merge | merged PR |
 | **EVOLUTION** | DARWIN | Natural selection — propose methodology mutations | issues on this repo |
 
-DEWEY stays bounded to issue triage in IDLE. Branch preparation and the `start_analyze` transition remain in the `issue-start` protocol.
+DEWEY stays bounded to issue triage in IDLE. Branch preparation and the `start_analyze` transition remain in the `inquiry-start` protocol.
 
 Each agent receives a prompt assembled by the CLI that includes:
 - Its philosophical mandate (from YAML definitions)
@@ -94,7 +94,7 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 - **CLI:** Dart, single cross-platform binary, built on [`modular_cli_sdk`](https://github.com/ccisnedev/modular_cli_sdk)
 - **FSM:** declarative `transition_contract.yaml` — every (state, event) pair is total
 - **Context injection:** `iq ape prompt` assembles base prompt + sub-state + dynamic paths as fenced YAML
-- **Skills:** operational protocols such as `issue-create`, `issue-start`, `issue-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
+- **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
 - **Memory:** `.inquiry/` (runtime state), `cleanrooms/` (per-cycle artifacts), `docs/spec/` (specifications)
 - **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
 - **Target:** Copilot only at present. Multi-target deferred until reactivation

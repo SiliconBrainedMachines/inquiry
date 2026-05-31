@@ -1,9 +1,9 @@
 ---
-name: issue-end
+name: inquiry-end
 description: 'Protocol for ending an APE cycle. Use when: all plan.md checkboxes are complete, ready to release. Guides: version bump, changelog, END gate, PR, and EVOLUTION transition.'
 ---
 
-# issue-end — Cycle Completion Protocol
+# inquiry-end — Cycle Completion Protocol
 
 ## Prompt Summary
 
@@ -107,7 +107,7 @@ git commit -m "vX.Y.Z: {summary from issue title}"
 Commit message format: `vX.Y.Z: <issue-title-summary>`
 
 **Examples:**
-- `v0.0.9: fix version inconsistency + skill issue-end + TUI ape`
+- `v0.0.9: fix version inconsistency + inquiry-end + TUI ape`
 - `v0.1.0: add authentication module`
 
 ### Step 7: Transition to END
