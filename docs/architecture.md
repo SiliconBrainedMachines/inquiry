@@ -30,7 +30,7 @@ Inquiry is best read here as an **outer harness** around the host coding tool. T
 │  │  state.yaml  │    │                                          │   │
 │  │  config.yaml │    │  iq target get → copies to ~/.copilot/   │   │
 │  │  mutations.md│    │    agents/inquiry.agent.md               │   │
-│  └──────────────┘    │    skills/{issue-create,issue-start,...} │   │
+│  └──────────────┘    │    skills/{issue-create,inquiry-start,...} │  │
 │                      └──────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
                                    │
@@ -54,8 +54,8 @@ Inquiry is best read here as an **outer harness** around the host coding tool. T
 │  │                                                               │  │
 │  │  Invokes skills as needed:                                    │  │
 │  │    issue-create → IDLE create-or-confirm issue                │  │
-│  │    issue-start  → explicit handoff into ANALYZE               │  │
-│  │    issue-end    → EXECUTE / END completion protocol           │  │
+│  │    inquiry-start → explicit handoff into ANALYZE              │  │
+│  │    inquiry-end  → EXECUTE / END completion protocol           │  │
 │  │    doc-read     → structured doc retrieval                    │  │
 │  │    doc-write    → structured doc creation                     │  │
 │  │    skills       → research / legion / kritik                  │  │
@@ -137,7 +137,7 @@ The scheduler does not inline each phase runbook itself. It reads state, inspect
 ```
 inquiry.agent.md
 ├── Reads .inquiry/state.yaml → determines active phase
-├── IDLE: becomes DEWEY (bounded issue triage; handoff via issue-start)
+├── IDLE: becomes DEWEY (bounded issue triage; handoff via inquiry-start)
 ├── ANALYZE: becomes SOCRATES (asks questions, writes diagnosis.md)
 ├── PLAN: becomes DESCARTES (decomposes, writes plan.md with phases)
 ├── EXECUTE: becomes BASHŌ (implements, tests, commits)
@@ -145,11 +145,11 @@ inquiry.agent.md
 └── EVOLUTION: becomes DARWIN (reads mutations.md, proposes issues)
 ```
 
-DEWEY determines whether the situation is ready to become or select a GitHub issue. It does not prepare branches, write `diagnosis.md`, or anticipate downstream phases; `issue-start` owns that explicit handoff.
+DEWEY determines whether the situation is ready to become or select a GitHub issue. It does not prepare branches, write `diagnosis.md`, or anticipate downstream phases; `inquiry-start` owns that explicit handoff.
 
 The agent **never decides** state transitions on its own. Transitions are authorized by:
 1. The human (explicitly)
-2. A skill protocol (`issue-create`, `issue-start`, `issue-end`)
+2. A skill protocol (`issue-create`, `inquiry-start`, `inquiry-end`)
 3. The CLI contract (prechecks must pass)
 
 ## Skills as protocols
@@ -161,8 +161,8 @@ Skills are **step-by-step protocols** invoked by the agent at specific moments. 
 | Skill | When | Does |
 |---|---|---|
 | `issue-create` | IDLE triage needs to create or confirm the operative GitHub issue | Deterministic issue selection/creation during bounded triage |
-| `issue-start` | Human says "start working on issue #N" | Creates branch, reads issue, transitions IDLE → ANALYZE |
-| `issue-end` | All plan checkboxes complete | Pushes, creates PR, merges, transitions → END → IDLE |
+| `inquiry-start` | Human says "start working on issue #N" | Creates branch, reads issue, transitions IDLE → ANALYZE |
+| `inquiry-end` | All plan checkboxes complete | Pushes, creates PR, merges, transitions → END → IDLE |
 | `doc-read` | Agent needs project context | Index scan → filter → partial read → full read |
 | `doc-write` | Agent produces documentation | YAML frontmatter, one topic per doc, index maintenance |
 | `inquiry-install` | First-time setup | Bootstraps `.inquiry/` workspace structure |
@@ -189,8 +189,8 @@ iq target get
     ├── Copies inquiry.agent.md → ~/.copilot/agents/
     └── Copies skills/ → ~/.copilot/skills/
          ├── issue-create/SKILL.md
-         ├── issue-start/SKILL.md
-         ├── issue-end/SKILL.md
+         ├── inquiry-start/SKILL.md
+         ├── inquiry-end/SKILL.md
          ├── doc-read/SKILL.md
          ├── doc-write/SKILL.md
          ├── inquiry-install/SKILL.md
@@ -207,14 +207,14 @@ A complete APE cycle from issue to merge:
 
 ```
 1. Human and DEWEY clarify/select the GitHub issue in IDLE, using `issue-create` when the issue must be created or confirmed
-2. Human invokes issue-start skill
+2. Human invokes inquiry-start skill
 3. CLI: IDLE → ANALYZE (start_analyze event)
 4. Agent (SOCRATES): asks clarifying questions, produces diagnosis.md
 5. Human authorizes: ANALYZE → PLAN (complete_analysis)
 6. Agent (DESCARTES): writes plan.md with phased checkboxes
 7. Human authorizes: PLAN → EXECUTE (approve_plan)
 8. Agent (BASHŌ): implements phase by phase, commits, marks checkboxes
-9. Human invokes issue-end skill when plan complete
+9. Human invokes inquiry-end skill when plan complete
 10. CLI: EXECUTE → END (finish_execute) → git push + gh pr create
 11. PR merged → END → EVOLUTION or END → IDLE (per config)
 12. If EVOLUTION: DARWIN reads mutations.md, proposes improvement issues

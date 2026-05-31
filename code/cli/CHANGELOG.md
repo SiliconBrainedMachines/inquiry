@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.5]
+### Changed
+- **Instruction contract naming**: live start/end instruction surfaces now use `inquiry-start` and `inquiry-end` across assets, FSM contracts, prompt assembly, and explanatory docs, while preserving `issue-create` as the distinct IDLE triage instruction (#165)
+
 ## [0.6.4]
 ### Fixed
 - **Transition text contract visibility**: `iq fsm transition` now exposes `required_role`, `required_instructions`, and `prompt_fragment_id` in human-readable output for instruction-bearing transitions, while keeping long-form instruction summary transport owned by `iq ape prompt` (#208)

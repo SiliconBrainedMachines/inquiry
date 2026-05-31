@@ -71,9 +71,9 @@ Triage determines:
 - Whether `issue-create` must create or confirm the GitHub issue
 - Whether explicit start intent has been given after issue readiness
 
-Infrastructure preparation remains external to DEWEY: only explicit start intent reaches DONE, `issue-start` assumes the issue already exists, prepares the branch and cleanroom folder, produces `feature_branch_selected`, and then the outer `start_analyze` transition may fire.
+Infrastructure preparation remains external to DEWEY: only explicit start intent reaches DONE, `inquiry-start` assumes the issue already exists, prepares the branch and cleanroom folder, produces `feature_branch_selected`, and then the outer `start_analyze` transition may fire.
 
-The gate to exit IDLE is therefore split across two moments: TRIAGE first produces `issue_selected_or_created` while remaining in IDLE, then explicit start runs `issue-start` to prepare `feature_branch_selected` and transition readiness.
+The gate to exit IDLE is therefore split across two moments: TRIAGE first produces `issue_selected_or_created` while remaining in IDLE, then explicit start runs `inquiry-start` to prepare `feature_branch_selected` and transition readiness.
 
 ## Relationship to Existing Specs
 

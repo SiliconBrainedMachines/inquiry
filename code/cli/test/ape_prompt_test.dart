@@ -61,8 +61,8 @@ void main() {
       'doc-read',
       'doc-write',
       'issue-create',
-      'issue-end',
-      'issue-start',
+      'inquiry-end',
+      'inquiry-start',
     ]) {
       File(
         'assets/instructions/$name.md',

@@ -108,8 +108,8 @@ Ignored.
       expect(summary, isNot(contains('`')));
     });
 
-    test('loads prompt-ready summary for issue-start', () {
-      final summary = loader.load('issue-start');
+    test('loads prompt-ready summary for inquiry-start', () {
+      final summary = loader.load('inquiry-start');
 
       expect(
         summary,
@@ -127,8 +127,8 @@ Ignored.
       expect(summary, isNot(contains('`')));
     });
 
-    test('loads prompt-ready summary for issue-end', () {
-      final summary = loader.load('issue-end');
+    test('loads prompt-ready summary for inquiry-end', () {
+      final summary = loader.load('inquiry-end');
 
       expect(
         summary,
