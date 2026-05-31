@@ -91,13 +91,13 @@ These fields live alongside the older phase-specific runtime paths such as `outp
 
 ## Non-goals
 
-This contract does not yet solve the full sensor architecture, context policy, or harness observability story. It is the foundation those later layers depend on.
+This contract does not replace the separate context-policy layer or the future sensor and observability layers. It is the foundation those later layers depend on.
 
 In particular:
 
 - it does not replace phase-owned operational contracts
 - it does not yet encode the full sensor stack
-- it does not by itself solve duplicate rereads
-- it does not decide whether a phase should ask the user or run research first
+- it does not by itself solve duplicate rereads without the paired context policy in `context-policy.md`
+- it does not, on its own, decide retrieval discipline or handoff authority semantics
 
 Those concerns are layered on top of this contract in later 0.6.x work.

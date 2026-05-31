@@ -252,6 +252,25 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       case 'socrates':
         return {
           ...baseContext,
+          ..._contextPolicy(
+            contextPolicy: 'progressive-disclosure',
+            authorityMode: 'build-authoritative-analysis',
+            upfrontContext: [
+              '${cleanroomRoot}issue.md',
+              '${analyzeDir}index.md',
+            ],
+            retrievalContext: [
+              '${analyzeDir}index.md',
+              '${analyzeDir}confirmations.md',
+              cycleContext.projectRoot,
+            ],
+            deferredContext: const [
+              'broad repository rereads not justified by the active uncertainty',
+            ],
+            authoritativeHandoff: '${analyzeDir}diagnosis.md',
+            authorityRule:
+                'diagnosis.md becomes the authoritative handoff to PLAN once written',
+          ),
           'input_artifacts': _yamlList([
             '${cleanroomRoot}issue.md',
             '${analyzeDir}index.md',
@@ -275,6 +294,21 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       case 'descartes':
         return {
           ...baseContext,
+          ..._contextPolicy(
+            contextPolicy: 'authoritative-handoff',
+            authorityMode: 'trust-diagnosis-first',
+            upfrontContext: ['${analyzeDir}diagnosis.md'],
+            retrievalContext: [
+              '${analyzeDir}index.md',
+              cycleContext.projectRoot,
+            ],
+            deferredContext: const [
+              'reconstructing ANALYZE from broad rereads when diagnosis.md is already authoritative',
+            ],
+            authoritativeHandoff: '${analyzeDir}diagnosis.md',
+            authorityRule:
+                'trust diagnosis.md as the planning baseline unless a concrete gap requires targeted retrieval',
+          ),
           'input_artifacts': _yamlList(['${analyzeDir}diagnosis.md']),
           'expected_outputs': _yamlList(['${cleanroomRoot}plan.md']),
           'editable_surfaces': _yamlList(['${cleanroomRoot}plan.md']),
@@ -292,6 +326,18 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       case 'basho':
         return {
           ...baseContext,
+          ..._contextPolicy(
+            contextPolicy: 'authoritative-handoff',
+            authorityMode: 'trust-plan-first',
+            upfrontContext: ['${cleanroomRoot}plan.md'],
+            retrievalContext: [cycleContext.projectRoot, cleanroomRoot],
+            deferredContext: const [
+              're-reading broad analysis artifacts when plan.md already defines the bounded execution contract',
+            ],
+            authoritativeHandoff: '${cleanroomRoot}plan.md',
+            authorityRule:
+                'trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
+          ),
           'input_artifacts': _yamlList(['${cleanroomRoot}plan.md']),
           'expected_outputs': _yamlList([
             cycleContext.projectRoot,
@@ -370,6 +416,26 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
   String _yamlList(List<String> values) {
     if (values.isEmpty) return '[]';
     return '[${values.map(_yamlScalar).join(', ')}]';
+  }
+
+  Map<String, String> _contextPolicy({
+    required String contextPolicy,
+    required String authorityMode,
+    required List<String> upfrontContext,
+    required List<String> retrievalContext,
+    required List<String> deferredContext,
+    required String authoritativeHandoff,
+    required String authorityRule,
+  }) {
+    return {
+      'context_policy': contextPolicy,
+      'authority_mode': authorityMode,
+      'upfront_context': _yamlList(upfrontContext),
+      'retrieval_context': _yamlList(retrievalContext),
+      'deferred_context': _yamlList(deferredContext),
+      'authoritative_handoff': authoritativeHandoff,
+      'authority_rule': authorityRule,
+    };
   }
 
   String _yamlScalar(String value) {
