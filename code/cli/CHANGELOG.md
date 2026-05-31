@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.4]
+### Fixed
+- **Transition text contract visibility**: `iq fsm transition` now exposes `required_role`, `required_instructions`, and `prompt_fragment_id` in human-readable output for instruction-bearing transitions, while keeping long-form instruction summary transport owned by `iq ape prompt` (#208)
+
 ## [0.6.3]
 ### Fixed
 - **EVOLUTION cycle-root alignment**: repo-scoped `config.yaml`, metrics files, and repo agent cleanup now resolve from the git root instead of raw cwd, so running Inquiry from nested subdirectories no longer silently skips EVOLUTION or writes cycle artifacts into the wrong tree (#150)
