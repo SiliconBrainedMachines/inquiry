@@ -175,6 +175,30 @@ void main() {
             'Ask the user only for unresolved facts, hidden constraints, or human judgments that evidence cannot supply.',
           ),
         );
+        expect(
+          def.basePrompt,
+          contains(
+            'Before asking a question, decide whether it would materially change the diagnosis, scope, or uncertainty of the problem.',
+          ),
+        );
+        expect(
+          def.basePrompt,
+          contains(
+            'Ask fewer than 2-3 questions when fewer are justified; diagnostic value matters more than question count.',
+          ),
+        );
+        expect(
+          def.basePrompt,
+          contains(
+            'If the problem is already sufficiently bounded, stop widening the interrogation and move toward synthesis.',
+          ),
+        );
+        expect(
+          def.basePrompt,
+          contains(
+            'When discussing methods, approaches, or tradeoffs, propose concrete candidate alternatives before asking the user to evaluate them.',
+          ),
+        );
         expect(def.basePrompt, isNot(contains('diagnosis.md')));
         expect(def.basePrompt, isNot(contains('output_dir')));
         expect(def.basePrompt, isNot(contains('confirmations_doc')));

@@ -16,6 +16,8 @@ constraints:
   - Analysis interaction must remain visible to the user
   - The active APE does not define repository artifact names or completion gates
   - Unsupported inference is not sufficient basis for diagnosis
+  - Questions must materially reduce uncertainty, sharpen scope, or test a live assumption
+  - If the problem is already sufficiently bounded, analysis should shift from interrogation to synthesis
   - No solution proposals (belongs to PLAN)
   - No code edits (belongs to EXECUTE)
   - No branch creation (already on feature branch)
@@ -26,6 +28,7 @@ allowed_actions:
   - Investigate with the active analysis methodology
   - Run targeted external research when local evidence is insufficient
   - Ask the user questions or otherwise elicit analysis input for unresolved facts or human judgments
+  - Propose concrete candidate alternatives when comparing methods, approaches, or tradeoffs
   - Create and update analyze/ documents
   - Synthesize diagnosis.md
 

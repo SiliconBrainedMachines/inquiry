@@ -826,6 +826,30 @@ void main() {
             'Ask the user only for unresolved facts, hidden constraints, or human judgments that evidence cannot recover.',
           ),
         );
+        expect(
+          result.prompt,
+          contains(
+            'Before asking a question, decide whether it would materially change the diagnosis, scope, or uncertainty of the problem.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Ask fewer than 2-3 questions when fewer are justified; diagnostic value matters more than question count.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'If the problem is already sufficiently bounded, stop widening the interrogation and move toward synthesis.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'When discussing methods, approaches, or tradeoffs, propose concrete candidate alternatives before asking the user to evaluate them.',
+          ),
+        );
         expect(result.prompt, contains('# --- inquiry-context ---'));
         expect(
           result.prompt,
