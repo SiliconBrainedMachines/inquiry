@@ -13,6 +13,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../assets.dart';
 import '../../../fsm_contract.dart';
+import '../../../src/cycle_context.dart';
 import '../../../src/git_utils.dart';
 import '../ape_definition.dart';
 import '../instruction_prompt_loader.dart';
@@ -101,6 +102,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
   @override
   String? validate() => null;
 
+  late final CycleContext? _cycleContext = _tryResolveCycleContext();
+
   @override
   Future<ApePromptOutput> execute() async {
     if (input.name == null || input.name!.trim().isEmpty) {
@@ -148,6 +151,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     final context = _resolveContext(
       input.name!,
       resolvedSubState,
+      inquiry: inquiry,
       operationalContract: operationalContract,
     );
 
@@ -177,7 +181,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     final contractPath = _assets != null
         ? _assets.path('fsm/transition_contract.yaml')
         : p.join(
-            input.workingDirectory,
+            _resolvedProjectRoot,
             'assets',
             'fsm',
             'transition_contract.yaml',
@@ -204,6 +208,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
   Map<String, String>? _resolveContext(
     String apeName,
     String? subState, {
+    required InquiryState inquiry,
     required OperationalContract operationalContract,
   }) {
     final context = <String, String>{};
@@ -216,7 +221,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       context.addAll(stateOwnedContext);
     }
 
-    final runtimeContext = _resolveRuntimeContext(apeName);
+    final runtimeContext = _resolveRuntimeContext(apeName, inquiry);
     if (runtimeContext != null) {
       context.addAll(runtimeContext);
     }
@@ -224,15 +229,44 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     return context.isEmpty ? null : context;
   }
 
-  Map<String, String>? _resolveRuntimeContext(String apeName) {
-    final branch = getCurrentBranch(input.workingDirectory);
-    if (branch.isEmpty) return null;
+  Map<String, String>? _resolveRuntimeContext(
+    String apeName,
+    InquiryState inquiry,
+  ) {
+    final cycleContext = _cycleContext;
+    final branch = cycleContext?.branch;
+    if (cycleContext == null || branch == null) return null;
 
+    final cleanroomRoot = 'cleanrooms/$branch/';
     final analyzeDir = 'cleanrooms/$branch/analyze/';
+    final taskId = (inquiry.issue != null && inquiry.issue!.trim().isNotEmpty)
+        ? inquiry.issue!.trim()
+        : branch;
+
+    final baseContext = <String, String>{
+      'project_root': cycleContext.projectRoot,
+      'task_id': taskId,
+    };
 
     switch (apeName) {
       case 'socrates':
         return {
+          ...baseContext,
+          'input_artifacts': _yamlList([
+            '${cleanroomRoot}issue.md',
+            '${analyzeDir}index.md',
+          ]),
+          'expected_outputs': _yamlList([
+            '${analyzeDir}confirmations.md',
+            '${analyzeDir}diagnosis.md',
+          ]),
+          'editable_surfaces': _yamlList([analyzeDir]),
+          'read_only_surfaces': _yamlList(['${cleanroomRoot}issue.md']),
+          'validation_commands': _yamlList(const []),
+          'done_criteria': _yamlList([
+            '${analyzeDir}diagnosis.md is written',
+            '${analyzeDir}confirmations.md captures the bounded analysis corpus',
+          ]),
           'output_dir': analyzeDir,
           'index_file': '${analyzeDir}index.md',
           'confirmations_doc': '${analyzeDir}confirmations.md',
@@ -240,38 +274,112 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
         };
       case 'descartes':
         return {
+          ...baseContext,
+          'input_artifacts': _yamlList(['${analyzeDir}diagnosis.md']),
+          'expected_outputs': _yamlList(['${cleanroomRoot}plan.md']),
+          'editable_surfaces': _yamlList(['${cleanroomRoot}plan.md']),
+          'read_only_surfaces': _yamlList(['${analyzeDir}diagnosis.md']),
+          'validation_commands': _yamlList(const []),
+          'done_criteria': _yamlList([
+            '${cleanroomRoot}plan.md defines ordered phases',
+            '${cleanroomRoot}plan.md includes verification criteria for each phase',
+          ]),
           'analysis_input': '${analyzeDir}diagnosis.md',
-          'output_dir': 'cleanrooms/$branch/',
-          'plan_file': 'cleanrooms/$branch/plan.md',
+          'output_dir': cleanroomRoot,
+          'plan_file': '${cleanroomRoot}plan.md',
           'doc_protocol': 'doc-read',
         };
       case 'basho':
         return {
-          'plan_file': 'cleanrooms/$branch/plan.md',
-          'output_dir': 'cleanrooms/$branch/',
+          ...baseContext,
+          'input_artifacts': _yamlList(['${cleanroomRoot}plan.md']),
+          'expected_outputs': _yamlList([
+            cycleContext.projectRoot,
+            cleanroomRoot,
+          ]),
+          'editable_surfaces': _yamlList([
+            cycleContext.projectRoot,
+            cleanroomRoot,
+          ]),
+          'read_only_surfaces': _yamlList(['${cleanroomRoot}plan.md']),
+          'validation_commands': _yamlList(const []),
+          'done_criteria': _yamlList([
+            'implementation remains bounded by ${cleanroomRoot}plan.md',
+            'required validations complete before END',
+          ]),
+          'plan_file': '${cleanroomRoot}plan.md',
+          'output_dir': cleanroomRoot,
           'doc_protocol': 'doc-read',
         };
       case 'darwin':
         return {
+          ...baseContext,
+          'input_artifacts': _yamlList([
+            '${analyzeDir}diagnosis.md',
+            '${cleanroomRoot}plan.md',
+            '${cleanroomRoot}retrospective.md',
+            '${cleanroomRoot}mutations.md',
+            '.inquiry/metrics.yaml',
+            '.inquiry/metrics_snapshot.yaml',
+          ]),
+          'expected_outputs': _yamlList([cleanroomRoot]),
+          'editable_surfaces': _yamlList([
+            '${cleanroomRoot}mutations.md',
+            cleanroomRoot,
+          ]),
+          'read_only_surfaces': _yamlList([
+            '${analyzeDir}diagnosis.md',
+            '${cleanroomRoot}plan.md',
+            '${cleanroomRoot}.iq.state.yaml',
+            '.inquiry/metrics.yaml',
+            '.inquiry/metrics_snapshot.yaml',
+          ]),
+          'validation_commands': _yamlList(const []),
+          'done_criteria': _yamlList([
+            'evolution findings stay grounded in cycle artifacts',
+            'proposed mutations are traceable to observed evidence',
+          ]),
           'analyze_dir': analyzeDir,
           'diagnosis_file': '${analyzeDir}diagnosis.md',
-          'plan_file': 'cleanrooms/$branch/plan.md',
-          'retrospective_file': 'cleanrooms/$branch/retrospective.md',
-          'mutations_file': 'cleanrooms/$branch/mutations.md',
-          'state_file': 'cleanrooms/$branch/.iq.state.yaml',
+          'plan_file': '${cleanroomRoot}plan.md',
+          'retrospective_file': '${cleanroomRoot}retrospective.md',
+          'mutations_file': '${cleanroomRoot}mutations.md',
+          'state_file': '${cleanroomRoot}.iq.state.yaml',
           'metrics_snapshot_file': '.inquiry/metrics_snapshot.yaml',
           'metrics_file': '.inquiry/metrics.yaml',
-          'output_dir': 'cleanrooms/$branch/',
+          'output_dir': cleanroomRoot,
         };
       default:
         return null;
     }
   }
 
+  CycleContext? _tryResolveCycleContext() {
+    try {
+      return CycleContext.resolve(input.workingDirectory);
+    } on CycleResolutionException {
+      return null;
+    }
+  }
+
+  String get _resolvedProjectRoot =>
+      _cycleContext?.projectRoot ??
+      getProjectRoot(input.workingDirectory) ??
+      input.workingDirectory;
+
+  String _yamlList(List<String> values) {
+    if (values.isEmpty) return '[]';
+    return '[${values.map(_yamlScalar).join(', ')}]';
+  }
+
+  String _yamlScalar(String value) {
+    return "'${value.replaceAll("'", "''")}'";
+  }
+
   String _resolveApePath(String name) {
     if (_assets != null) {
       return _assets.path('apes/$name.yaml');
     }
-    return p.join(input.workingDirectory, 'assets', 'apes', '$name.yaml');
+    return p.join(_resolvedProjectRoot, 'assets', 'apes', '$name.yaml');
   }
 }
