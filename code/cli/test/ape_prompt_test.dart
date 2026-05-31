@@ -808,6 +808,24 @@ void main() {
 
         expect(result.prompt, contains('diagnosis.md'));
         expect(result.prompt, contains('Clarification questions'));
+        expect(
+          result.prompt,
+          contains(
+            'Inspect repository state, existing cycle artifacts, project docs, and relevant tests or runtime evidence before asking the user for missing facts.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'If repository evidence is insufficient, run targeted external research before escalating factual gaps to the user.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Ask the user only for unresolved facts, hidden constraints, or human judgments that evidence cannot recover.',
+          ),
+        );
         expect(result.prompt, contains('# --- inquiry-context ---'));
         expect(
           result.prompt,
