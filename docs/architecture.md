@@ -4,7 +4,7 @@
 >
 > How APE orchestrates AI coding agents through a finite state machine.
 
-Inquiry is best read here as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work.
+Inquiry is best read here as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work. In the 0.6.x series, the architectural priority is harness consolidation before optimization: cut avoidable context duplication across orchestrator, sub-agents, artifacts, and rereads; make evidence gathering precede user questioning; and surface overhead as an auditable system property.
 
 ## The system in one diagram
 
@@ -126,7 +126,17 @@ Viewed through the current research taxonomy, Inquiry spans all four agent-engin
 - **Eval Engineering**: PR gates, transition prechecks, state-owned artifact expectations, and cycle metrics provide partial but real evaluation structure.
 - **Harness Engineering**: the CLI, FSM, deployer, state files, skills, and human authorization rules form the actual control system around the host agent.
 
-That distinction matters because it clarifies what Inquiry already is and what still remains incomplete. Inquiry is no longer just a methodology described in markdown or a pack of prompts deployed into Copilot. It already functions as a repository-local harness. The unfinished work is to deepen that harness with stronger sensors, more explicit context policy, and more formal eval-backed evolution.
+That distinction matters because it clarifies what Inquiry already is and what still remains incomplete. Inquiry is no longer just a methodology described in markdown or a pack of prompts deployed into Copilot. It already functions as a repository-local harness. The unfinished work for 0.6.x is to deepen that harness with stronger sensors, more explicit context policy, evidence-first retrieval before user questioning, lower duplication across orchestrator/sub-agents/handoff artifacts, explicit overhead observability, and more formal eval-backed evolution.
+
+## 0.6.x harness priorities
+
+Before 0.7.0, Inquiry should tighten the current outer harness around five operational rules:
+
+- **Evidence before inference.** Repository state, cleanroom artifacts, docs, tests, and targeted web research are authoritative. Model inference is provisional until grounded in evidence.
+- **Research before interrogation.** SOCRATES should ask the user only for facts or judgments that cannot be recovered from repo state, existing artifacts, or external research. When comparing approaches, it should propose candidate alternatives instead of delegating ideation entirely to the user.
+- **Context is a budget.** The harness should reduce duplication between the orchestrator, sub-agents, durable artifacts, and repeated reads. Handoff documents should become authoritative references, not material each phase re-derives from scratch.
+- **Clear stop conditions.** Once the problem is sufficiently bounded, ANALYZE should shift from questioning to synthesis instead of continuing a ritual Socratic loop.
+- **Overhead is part of the architecture.** Tool volume, wall-clock time, token load, cached share, and context-repetition cost belong to the harness surface because they determine whether Inquiry stays practical to delegate.
 
 ## Agent architecture
 

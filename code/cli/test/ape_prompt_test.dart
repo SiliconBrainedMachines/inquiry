@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:inquiry_cli/assets.dart';
 import 'package:inquiry_cli/modules/ape/commands/prompt.dart';
 import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
@@ -695,6 +696,28 @@ void main() {
         );
       }
 
+      void expectContextFieldOnlyInInquiryContext(String prompt, String key) {
+        final contextIndex = prompt.indexOf('# --- inquiry-context ---');
+        final keyToken = '$key:';
+        final keyIndex = prompt.indexOf(keyToken);
+
+        expect(
+          contextIndex,
+          greaterThanOrEqualTo(0),
+          reason: 'Missing inquiry-context block for field: $key',
+        );
+        expect(
+          keyIndex,
+          greaterThan(contextIndex),
+          reason: '$key should be owned by inquiry-context, not prompt prose',
+        );
+        expect(
+          prompt.indexOf(keyToken, keyIndex + keyToken.length),
+          equals(-1),
+          reason: '$key should appear only once in the assembled prompt',
+        );
+      }
+
       setUp(() {
         gitTmpDir = Directory.systemTemp.createTempSync('ape_ctx_test_');
         Directory(p.join(gitTmpDir.path, '.inquiry')).createSync();
@@ -788,6 +811,11 @@ void main() {
         expect(result.prompt, contains('# --- inquiry-context ---'));
         expect(
           result.prompt,
+          contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+        );
+        expect(result.prompt, contains('task_id: 152'));
+        expect(
+          result.prompt,
           contains('output_dir: cleanrooms/152-test-branch/analyze/'),
         );
         expect(
@@ -809,6 +837,11 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
+          'project_root: ${p.normalize(gitTmpDir.path)}',
+        );
+        expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
           'confirmations_doc: cleanrooms/152-test-branch/analyze/confirmations.md',
         );
         expectContextKeyOnlyInInquiryContext(
@@ -819,6 +852,16 @@ void main() {
           result.prompt,
           'doc_protocol: doc-write',
         );
+        for (final key in [
+          'input_artifacts',
+          'expected_outputs',
+          'editable_surfaces',
+          'read_only_surfaces',
+          'validation_commands',
+          'done_criteria',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
         expectExplicitContextAfter(result.prompt, 'Clarification questions');
       });
 
@@ -854,6 +897,11 @@ void main() {
           result.prompt,
           contains('plan_file: cleanrooms/152-test-branch/plan.md'),
         );
+        expect(
+          result.prompt,
+          contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+        );
+        expect(result.prompt, contains('task_id: 152'));
         expect(result.prompt, contains('doc_protocol: doc-read'));
         expect(result.prompt, isNot(contains('Commit:')));
         expectContextKeyOnlyInInquiryContext(
@@ -868,8 +916,64 @@ void main() {
           result.prompt,
           'doc_protocol: doc-read',
         );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'project_root: ${p.normalize(gitTmpDir.path)}',
+        );
+        expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
+        for (final key in [
+          'input_artifacts',
+          'expected_outputs',
+          'editable_surfaces',
+          'read_only_surfaces',
+          'validation_commands',
+          'done_criteria',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
         expectExplicitContextAfter(result.prompt, 'FOCUS: Division.');
       });
+
+      test(
+        'task contract stays anchored to project root when invoked from a subdirectory',
+        () async {
+          File(
+            p.join(
+              gitTmpDir.path,
+              'cleanrooms',
+              '152-test-branch',
+              kStateFileName,
+            ),
+          ).writeAsStringSync('state: ANALYZE\nissue: "152"\n');
+
+          final nestedDir = Directory(
+            p.join(gitTmpDir.path, 'lib', 'nested', 'deeper'),
+          )..createSync(recursive: true);
+
+          final cmd = ApePromptCommand(
+            ApePromptInput(
+              name: 'socrates',
+              subState: 'clarification',
+              workingDirectory: nestedDir.path,
+            ),
+            assets: Assets(root: gitTmpDir.path),
+          );
+          final result = await cmd.execute();
+
+          expect(
+            result.prompt,
+            contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+          );
+          expect(result.prompt, contains('task_id: 152'));
+          expectContextKeyOnlyInInquiryContext(
+            result.prompt,
+            'project_root: ${p.normalize(gitTmpDir.path)}',
+          );
+          expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
+          expectContextFieldOnlyInInquiryContext(result.prompt, 'editable_surfaces');
+          expectContextFieldOnlyInInquiryContext(result.prompt, 'done_criteria');
+        },
+      );
 
       test('basho prompt includes plan contract in assembled prompt', () async {
         File(
