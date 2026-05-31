@@ -374,6 +374,10 @@ class StateTransitionCommand
     }
 
     if (prechecks.contains('pre_pr_inspection_approved')) {
+      EffectExecutor(
+        workingDirectory: workingDirectory,
+        assets: _assets,
+      ).refreshPrePrInspectionConsistency();
       final report = _prePrInspectionReport(branch, workingDirectory);
       if (!report.exists || report.verdict == null) {
         return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_MISSING: pre_pr_inspection.md missing or verdict not found for current issue branch';

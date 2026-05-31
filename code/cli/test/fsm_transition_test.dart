@@ -373,6 +373,56 @@ void main() {
       expect(output.promptFragmentId, 'execute_to_end');
       expect(output.requiredRole, 'APE');
       expect(output.requiredInstructions, ['inquiry-end']);
+      final inspectionReport = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'pre_pr_inspection.md',
+        ),
+      ).readAsStringSync();
+      expect(
+        inspectionReport,
+        contains('PASS: asset parity source/build reviewed'),
+      );
+    });
+
+    test('seeded END inspection report records automatic consistency failures', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'EXECUTE', issue: '51');
+      File(
+        p.join(
+          tempDir.path,
+          'build',
+          'assets',
+          'fsm',
+          'transition_contract.yaml',
+        ),
+      ).writeAsStringSync('mismatch\n');
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'finish_execute',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isTrue);
+      final inspectionReport = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'pre_pr_inspection.md',
+        ),
+      ).readAsStringSync();
+      expect(inspectionReport, contains('FAIL: mirrored asset content diverges'));
+      expect(
+        inspectionReport,
+        contains('assets/fsm/transition_contract.yaml:1'),
+      );
     });
 
     test('allows END to create PR and enter EVOLUTION', () async {
@@ -535,9 +585,9 @@ void main() {
         tempDir.path,
         '51-idle-execution-guardrails',
         verdict: 'BLOCKED',
-        consistencyChecks: const ['FAIL: asset parity mismatch without citation'],
+        consistencyChecks: const ['PASS: asset parity source/build reviewed'],
         completenessChecks: const ['PASS: changed behavior covered by tests'],
-        traceabilityChecks: const ['PASS: every code change maps to plan.md'],
+        traceabilityChecks: const ['FAIL: undocumented change without citation'],
       );
 
       final output = await StateTransitionCommand(
@@ -555,6 +605,56 @@ void main() {
         contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID'),
       );
       expect(output.message, contains('file:line'));
+    });
+
+    test('blocks END pr_ready when automatic consistency check detects mirror divergence', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'APPROVED',
+        consistencyChecks: const ['PASS: asset parity source/build reviewed'],
+        completenessChecks: const ['PASS: changed behavior covered by tests'],
+        traceabilityChecks: const ['PASS: every code change maps to plan.md'],
+      );
+      File(
+        p.join(
+          tempDir.path,
+          'build',
+          'assets',
+          'fsm',
+          'transition_contract.yaml',
+        ),
+      ).writeAsStringSync('mismatch\n');
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID'),
+      );
+      final inspectionReport = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'pre_pr_inspection.md',
+        ),
+      ).readAsStringSync();
+      expect(inspectionReport, contains('FAIL: mirrored asset content diverges'));
+      expect(
+        inspectionReport,
+        contains('assets/fsm/transition_contract.yaml:1'),
+      );
     });
 
     test('persists --issue flag in state.yaml on transition', () async {
@@ -823,6 +923,11 @@ void _writeContract(String root) {
   final file = File(p.join(root, 'assets', 'fsm', 'transition_contract.yaml'));
   file.createSync(recursive: true);
   file.writeAsStringSync(source.readAsStringSync());
+  final buildMirror = File(
+    p.join(root, 'build', 'assets', 'fsm', 'transition_contract.yaml'),
+  );
+  buildMirror.createSync(recursive: true);
+  buildMirror.writeAsStringSync(source.readAsStringSync());
 
   final inspectionTemplateSource = File(
     p.join(
@@ -837,6 +942,13 @@ void _writeContract(String root) {
   );
   inspectionTemplateFile.createSync(recursive: true);
   inspectionTemplateFile.writeAsStringSync(
+    inspectionTemplateSource.readAsStringSync(),
+  );
+  final buildInspectionTemplateFile = File(
+    p.join(root, 'build', 'assets', 'inspection', 'pre_pr_inspection_template.md'),
+  );
+  buildInspectionTemplateFile.createSync(recursive: true);
+  buildInspectionTemplateFile.writeAsStringSync(
     inspectionTemplateSource.readAsStringSync(),
   );
 }

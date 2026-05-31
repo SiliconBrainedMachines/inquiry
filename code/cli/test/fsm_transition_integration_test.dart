@@ -173,6 +173,10 @@ void main() {
       );
       expect(inspectionTemplate.existsSync(), isTrue);
       final templateText = inspectionTemplate.readAsStringSync();
+      expect(
+        templateText,
+        contains('PASS: asset parity source/build reviewed'),
+      );
       expect(templateText, contains('## Pass 1 — Consistency'));
       expect(templateText, contains('## Pass 2 — Completeness'));
       expect(templateText, contains('## Pass 3 — Traceability'));
@@ -219,6 +223,11 @@ void _copyContractFromWorkspace(String root) {
   );
   destination.createSync(recursive: true);
   destination.writeAsStringSync(source.readAsStringSync());
+  final buildDestination = File(
+    p.join(root, 'build', 'assets', 'fsm', 'transition_contract.yaml'),
+  );
+  buildDestination.createSync(recursive: true);
+  buildDestination.writeAsStringSync(source.readAsStringSync());
 
   final inspectionTemplateSource = File(
     p.join(
@@ -233,6 +242,13 @@ void _copyContractFromWorkspace(String root) {
   );
   inspectionTemplateDestination.createSync(recursive: true);
   inspectionTemplateDestination.writeAsStringSync(
+    inspectionTemplateSource.readAsStringSync(),
+  );
+  final buildInspectionTemplateDestination = File(
+    p.join(root, 'build', 'assets', 'inspection', 'pre_pr_inspection_template.md'),
+  );
+  buildInspectionTemplateDestination.createSync(recursive: true);
+  buildInspectionTemplateDestination.writeAsStringSync(
     inspectionTemplateSource.readAsStringSync(),
   );
 }
