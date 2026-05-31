@@ -854,9 +854,17 @@ The CLI resolves all operational paths and injects them into the APE prompt. The
 
 ```yaml
 # --- inquiry-context ---
+project_root: <absolute repo root>
+task_id: <issue-or-branch>
+input_artifacts: ['cleanrooms/<branch>/issue.md', 'cleanrooms/<branch>/analyze/index.md']
+expected_outputs: ['cleanrooms/<branch>/analyze/confirmations.md', 'cleanrooms/<branch>/analyze/diagnosis.md']
+editable_surfaces: ['cleanrooms/<branch>/analyze/']
+read_only_surfaces: ['cleanrooms/<branch>/issue.md']
+validation_commands: []
+done_criteria: ['diagnosis.md written', 'confirmations.md grounded in the bounded analysis corpus']
 output_dir: cleanrooms/<branch>/analyze/
 index_file: cleanrooms/<branch>/analyze/index.md
-confirmed_doc: cleanrooms/<branch>/analyze/confirmed.md
+confirmations_doc: cleanrooms/<branch>/analyze/confirmations.md
 doc_protocol: doc-write
 ```
 
@@ -864,17 +872,18 @@ Fields vary by APE:
 
 | APE | Fields |
 |-----|--------|
-| SOCRATES | `output_dir`, `index_file`, `confirmed_doc`, `doc_protocol` |
-| DESCARTES | `analysis_input`, `output_dir`, `plan_file`, `doc_protocol` |
-| BASHO | `plan_file`, `output_dir`, `doc_protocol` |
-| DARWIN | `analyze_dir`, `plan_file`, `output_dir` |
+| Common task contract | `project_root`, `task_id`, `input_artifacts`, `expected_outputs`, `editable_surfaces`, `read_only_surfaces`, `validation_commands`, `done_criteria` |
+| SOCRATES | common task contract + `output_dir`, `index_file`, `confirmations_doc`, `doc_protocol` |
+| DESCARTES | common task contract + `analysis_input`, `output_dir`, `plan_file`, `doc_protocol` |
+| BASHO | common task contract + `plan_file`, `output_dir`, `doc_protocol` |
+| DARWIN | common task contract + `analyze_dir`, `diagnosis_file`, `plan_file`, `retrospective_file`, `mutations_file`, `state_file`, `metrics_snapshot_file`, `metrics_file`, `output_dir` |
 
 ### 11.3 Per-Cycle Investigation Material
 
 During ANALYZE, SOCRATES writes to `cleanrooms/<branch>/analyze/`:
 
 - `index.md` — primary index (created by CLI on transition)
-- `confirmed.md` — mandatory living document (template created by CLI)
+- `confirmations.md` — mandatory living document (template created by CLI)
 - `*.md` — additional investigation documents (one topic each)
 - `diagnosis.md` — final synthesis (references confirmed findings)
 
