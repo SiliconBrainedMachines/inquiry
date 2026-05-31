@@ -19,6 +19,12 @@ typedef GitCommandRunner =
       List<String> arguments,
     );
 
+const _requiredInspectionPasses = <String>[
+  'Consistency',
+  'Completeness',
+  'Traceability',
+];
+
 class _BoundaryCommitSpec {
   final String label;
   final String path;
@@ -40,6 +46,27 @@ class _BoundaryCommitResult {
 
   const _BoundaryCommitResult.failure(this.errorMessage)
     : operationsExecuted = const [];
+}
+
+class _PrePrInspectionReport {
+  final bool exists;
+  final String? verdict;
+  final Map<String, List<String>> checksByPass;
+
+  const _PrePrInspectionReport({
+    required this.exists,
+    required this.verdict,
+    required this.checksByPass,
+  });
+
+  bool get hasRequiredPassStructure =>
+      _requiredInspectionPasses.every(
+        (pass) => (checksByPass[pass] ?? const <String>[]).isNotEmpty,
+      );
+
+  bool get hasFailChecks => checksByPass.values
+      .expand((checks) => checks)
+      .any((status) => status == 'FAIL');
 }
 
 class StateTransitionInput extends Input {
@@ -320,12 +347,18 @@ class StateTransitionCommand
     }
 
     if (prechecks.contains('pre_pr_inspection_approved')) {
-      final verdict = _prePrInspectionVerdict(branch, workingDirectory);
-      if (verdict == null) {
+      final report = _prePrInspectionReport(branch, workingDirectory);
+      if (!report.exists || report.verdict == null) {
         return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_MISSING: pre_pr_inspection.md missing or verdict not found for current issue branch';
       }
-      if (verdict != 'APPROVED') {
-        return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_BLOCKED: pre_pr_inspection.md verdict is $verdict';
+      if (!report.hasRequiredPassStructure) {
+        return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID: pre_pr_inspection.md must contain Consistency, Completeness, and Traceability sections with PASS, FAIL, or WARN checks';
+      }
+      if (report.verdict == 'APPROVED' && report.hasFailChecks) {
+        return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID: pre_pr_inspection.md cannot declare APPROVED while any pass contains FAIL checks';
+      }
+      if (report.verdict != 'APPROVED') {
+        return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_BLOCKED: pre_pr_inspection.md verdict is ${report.verdict}';
       }
     }
 
@@ -460,8 +493,18 @@ class StateTransitionCommand
     return File(confirmationsPath).existsSync();
   }
 
-  String? _prePrInspectionVerdict(String branch, String workingDirectory) {
-    if (branch.isEmpty) return null;
+  _PrePrInspectionReport _prePrInspectionReport(
+    String branch,
+    String workingDirectory,
+  ) {
+    if (branch.isEmpty) {
+      return const _PrePrInspectionReport(
+        exists: false,
+        verdict: null,
+        checksByPass: <String, List<String>>{},
+      );
+    }
+
     final projectRoot = getProjectRoot(workingDirectory) ?? workingDirectory;
     final reportPath = p.join(
       projectRoot,
@@ -470,14 +513,57 @@ class StateTransitionCommand
       'pre_pr_inspection.md',
     );
     final file = File(reportPath);
-    if (!file.existsSync()) return null;
+    if (!file.existsSync()) {
+      return const _PrePrInspectionReport(
+        exists: false,
+        verdict: null,
+        checksByPass: <String, List<String>>{},
+      );
+    }
+
+    final content = file.readAsStringSync();
 
     final match = RegExp(
       r'^verdict:\s*([A-Za-z_\-]+)\s*$',
       multiLine: true,
-    ).firstMatch(file.readAsStringSync());
-    if (match == null) return null;
-    return match.group(1)?.trim().toUpperCase();
+    ).firstMatch(content);
+
+    final checksByPass = <String, List<String>>{};
+    String? currentPass;
+    for (final rawLine in content.split('\n')) {
+      final line = rawLine.trim();
+      if (line.startsWith('## ')) {
+        currentPass = _normalizeInspectionPass(line.substring(3).trim());
+        if (currentPass != null) {
+          checksByPass.putIfAbsent(currentPass, () => <String>[]);
+        }
+        continue;
+      }
+
+      final checkMatch = RegExp(
+        r'^-\s+(PASS|FAIL|WARN):\s+.+$',
+        caseSensitive: false,
+      ).firstMatch(line);
+      if (checkMatch != null && currentPass != null) {
+        checksByPass[currentPass]!.add(checkMatch.group(1)!.toUpperCase());
+      }
+    }
+
+    return _PrePrInspectionReport(
+      exists: true,
+      verdict: match?.group(1)?.trim().toUpperCase(),
+      checksByPass: checksByPass,
+    );
+  }
+
+  String? _normalizeInspectionPass(String heading) {
+    final normalizedHeading = heading.toLowerCase();
+    for (final pass in _requiredInspectionPasses) {
+      if (normalizedHeading.contains(pass.toLowerCase())) {
+        return pass;
+      }
+    }
+    return null;
   }
 
   bool _planExists(String branch, String workingDirectory) {

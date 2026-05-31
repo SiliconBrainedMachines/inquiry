@@ -143,14 +143,25 @@ Before pushing or creating the PR, evaluate the minimum END sensor stack:
 - `inferential_optional`: any review concerns are recorded, but they do not block by themselves
 
 Record the local END gate result in `cleanrooms/{slug}/pre_pr_inspection.md`.
-At minimum, the report must include a top-level verdict line:
+The report must include a top-level verdict and the three formal inspection passes:
 
-```yaml
+```md
 verdict: APPROVED
+
+## Pass 1 — Consistency
+- PASS: asset parity source/build reviewed
+
+## Pass 2 — Completeness
+- PASS: changed behavior covered by tests
+
+## Pass 3 — Traceability
+- PASS: every code change maps to the approved issue/plan
 ```
 
+Each pass must contain one or more `- PASS:`, `- FAIL:`, or `- WARN:` checks.
 Allowed verdicts for this gate are `APPROVED` and `BLOCKED`.
-`iq fsm transition --event pr_ready` refuses to create the PR when the report is missing or its verdict is not `APPROVED`.
+`APPROVED` is only valid when no pass contains a `FAIL` check.
+`iq fsm transition --event pr_ready` refuses to create the PR when the report is missing, lacks the required pass structure, declares any non-`APPROVED` verdict, or claims `APPROVED` while still containing a `FAIL` check.
 
 If any blocking `pre_pr` or `runtime` sensor fails, abort PR creation and return to the failing evidence.
 
