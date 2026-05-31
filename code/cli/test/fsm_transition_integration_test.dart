@@ -40,6 +40,7 @@ void main() {
         final output = await command.execute();
         expect(output.allowed, isFalse);
         expect(output.exitCode, 64);
+        expect(output.toText(), equals(output.message));
       },
     );
 
@@ -59,6 +60,7 @@ void main() {
 
         expect(blocked.allowed, isFalse);
         expect(blocked.nextState, isNull);
+        expect(blocked.toText(), equals(blocked.message));
         expect(
           File(
             p.join(
@@ -83,6 +85,9 @@ void main() {
         expect(allowed.allowed, isTrue);
         expect(allowed.nextState, 'ANALYZE');
         expect(allowed.promptFragmentId, 'idle_to_analyze');
+        expect(allowed.requiredInstructions, ['doc-read']);
+        expect(allowed.toText(), contains('doc-read'));
+        expect(allowed.toText(), contains('idle_to_analyze'));
       },
     );
 
