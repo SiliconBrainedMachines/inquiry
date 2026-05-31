@@ -160,6 +160,7 @@ verdict: APPROVED
 ```
 
 Each pass must contain one or more `- PASS:`, `- FAIL:`, or `- WARN:` checks.
+Pass 1 is no longer a freeform manual section: Inquiry seeds it automatically from deterministic source/build parity checks when END begins and refreshes it again at `pr_ready`.
 Every `FAIL` check must include a repo-relative `file:line` citation such as `code/cli/lib/modules/fsm/commands/transition.dart:355`.
 Allowed verdicts for this gate are `APPROVED` and `BLOCKED`.
 `APPROVED` is only valid when no pass contains a `FAIL` check.
