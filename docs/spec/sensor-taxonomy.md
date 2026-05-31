@@ -111,6 +111,7 @@ Current enforcement surface:
 
 - local END gate authority is materialized in `cleanrooms/<branch>/pre_pr_inspection.md`
 - entering END seeds `cleanrooms/<branch>/pre_pr_inspection.md` from the inspection template when the report does not yet exist
+- Pass 1 (`Consistency`) is auto-generated from deterministic source/build parity checks and refreshed again immediately before `pr_ready`
 - the report must include `Consistency`, `Completeness`, and `Traceability` passes with `PASS`, `FAIL`, or `WARN` checks in each pass
 - every `FAIL` finding must cite repo-relative `file:line`
 - `verdict: APPROVED` is only valid when no pass contains `FAIL`
