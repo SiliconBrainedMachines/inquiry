@@ -890,7 +890,7 @@ Fields vary by APE:
 | Sensor layer | `sensor_policy`, `minimum_sensor_stack`, `blocking_sensor_stack`, `advisory_sensor_stack`, `sensor_gate`, `sensor_authority_rule` |
 | SOCRATES | common task contract + context policy layer + `output_dir`, `index_file`, `confirmations_doc`, `doc_protocol` |
 | DESCARTES | common task contract + context policy layer + `analysis_input`, `output_dir`, `plan_file`, `doc_protocol` |
-| BASHO | common task contract + context policy layer + sensor layer + `plan_file`, `output_dir`, `doc_protocol` |
+| BASHO | common task contract + context policy layer + sensor layer + `plan_file`, `pre_pr_inspection_report`, `output_dir`, `doc_protocol` |
 | DARWIN | common task contract + `analyze_dir`, `diagnosis_file`, `plan_file`, `retrospective_file`, `mutations_file`, `state_file`, `metrics_snapshot_file`, `metrics_file`, `output_dir` |
 
 ### 11.3 Per-Cycle Investigation Material

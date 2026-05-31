@@ -388,6 +388,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
             'implementation remains bounded by ${cleanroomRoot}plan.md',
             'required validations complete before END',
           ]),
+          'pre_pr_inspection_report': '${cleanroomRoot}pre_pr_inspection.md',
           'plan_file': '${cleanroomRoot}plan.md',
           'output_dir': cleanroomRoot,
           'doc_protocol': 'doc-read',
