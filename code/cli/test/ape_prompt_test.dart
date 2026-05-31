@@ -1187,6 +1187,30 @@ void main() {
           ),
         );
         expect(result.prompt, contains('Follow plan.md phases in order'));
+        expect(
+          result.prompt,
+          contains(
+            'Treat validation as a named sensor stack, not as an informal checklist.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Minimum EXECUTE sensor stack: local_fast, pre_transition, pre_pr, runtime.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'local_fast and pre_transition sensor failures block phase completion or phase advance',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'END handoff is blocked until the pre_pr sensor stack is complete',
+          ),
+        );
         expect(result.prompt, contains('Allowed actions:'));
         expect(result.prompt, contains('Edit code files'));
         expect(result.prompt, contains('# --- inquiry-context ---'));
@@ -1286,6 +1310,56 @@ void main() {
           contractFragment:
               'Implement the plan phase by phase under its formal constraints.',
         );
+      });
+
+      test('basho in END includes pre-PR sensor gate contract', () async {
+        File(
+          p.join(
+            gitTmpDir.path,
+            'cleanrooms',
+            '152-test-branch',
+            kStateFileName,
+          ),
+        ).writeAsStringSync('state: END\nissue: "152"\n');
+
+        final cmd = ApePromptCommand(
+          ApePromptInput(
+            name: 'basho',
+            subState: 'commit',
+            workingDirectory: gitTmpDir.path,
+          ),
+        );
+        final result = await cmd.execute();
+
+        expect(result.prompt, contains('NOTHING WASTED'));
+        expect(result.prompt, contains('## Phase-Owned Operational Contract'));
+        expect(result.prompt, contains('State: END'));
+        expect(
+          result.prompt,
+          contains('END owns the pre-PR inspection gate before push or PR creation'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Minimum END sensor stack: pre_pr, ci_required, runtime, inferential_optional.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('Blocking pre_pr or runtime failures stop PR creation'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'ci_required sensors remain authoritative after PR creation and may still block merge',
+          ),
+        );
+        expect(
+          result.prompt,
+          isNot(contains('No review or re-validation (basho already did that)')),
+        );
+        expect(result.prompt, contains('Allowed actions:'));
+        expect(result.prompt, contains('Run pre-PR inspection sensors'));
       });
 
       test(
