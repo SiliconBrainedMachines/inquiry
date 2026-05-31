@@ -17,6 +17,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../assets.dart';
+import '../../../src/git_utils.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -69,7 +70,7 @@ class InitCommand implements Command<InitInput, InitOutput> {
 
   @override
   Future<InitOutput> execute() async {
-    final root = input.workingDirectory;
+    final root = _resolveProjectRoot(input.workingDirectory);
     final steps = <String>[];
 
     // Step 1: Create cleanrooms/ at project root if missing
@@ -98,6 +99,10 @@ class InitCommand implements Command<InitInput, InitOutput> {
     }
 
     return InitOutput(message: steps.join('\n'), isCreated: true);
+  }
+
+  String _resolveProjectRoot(String workingDirectory) {
+    return getProjectRoot(workingDirectory) ?? workingDirectory;
   }
 
   void _deployAgent(String root, Assets assets, List<String> steps) {
