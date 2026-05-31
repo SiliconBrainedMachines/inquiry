@@ -871,6 +871,44 @@ void main() {
           contains('index_file: cleanrooms/152-test-branch/analyze/index.md'),
         );
         expect(result.prompt, contains('doc_protocol: doc-write'));
+        expect(
+          result.prompt,
+          contains('context_policy: progressive-disclosure'),
+        );
+        expect(
+          result.prompt,
+          contains('authority_mode: build-authoritative-analysis'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "upfront_context: ['cleanrooms/152-test-branch/issue.md', 'cleanrooms/152-test-branch/analyze/index.md']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${p.normalize(gitTmpDir.path)}']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "deferred_context: ['broad repository rereads not justified by the active uncertainty']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once written',
+          ),
+        );
         expect(result.prompt, isNot(contains('confirmed_doc')));
         expect(result.prompt, isNot(contains('confirmed.md')));
         expectContextKeyOnlyInInquiryContext(
@@ -894,6 +932,34 @@ void main() {
           result.prompt,
           'doc_protocol: doc-write',
         );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'context_policy: progressive-disclosure',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_mode: build-authoritative-analysis',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "upfront_context: ['cleanrooms/152-test-branch/issue.md', 'cleanrooms/152-test-branch/analyze/index.md']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${p.normalize(gitTmpDir.path)}']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "deferred_context: ['broad repository rereads not justified by the active uncertainty']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once written',
+        );
         for (final key in [
           'input_artifacts',
           'expected_outputs',
@@ -901,6 +967,9 @@ void main() {
           'read_only_surfaces',
           'validation_commands',
           'done_criteria',
+          'upfront_context',
+          'retrieval_context',
+          'deferred_context',
         ]) {
           expectContextFieldOnlyInInquiryContext(result.prompt, key);
         }
@@ -945,6 +1014,44 @@ void main() {
         );
         expect(result.prompt, contains('task_id: 152'));
         expect(result.prompt, contains('doc_protocol: doc-read'));
+        expect(
+          result.prompt,
+          contains('context_policy: authoritative-handoff'),
+        );
+        expect(
+          result.prompt,
+          contains('authority_mode: trust-diagnosis-first'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "upfront_context: ['cleanrooms/152-test-branch/analyze/diagnosis.md']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${p.normalize(gitTmpDir.path)}']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "deferred_context: ['reconstructing ANALYZE from broad rereads when diagnosis.md is already authoritative']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authority_rule: trust diagnosis.md as the planning baseline unless a concrete gap requires targeted retrieval',
+          ),
+        );
         expect(result.prompt, isNot(contains('Commit:')));
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
@@ -960,6 +1067,34 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
+          'context_policy: authoritative-handoff',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_mode: trust-diagnosis-first',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "upfront_context: ['cleanrooms/152-test-branch/analyze/diagnosis.md']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${p.normalize(gitTmpDir.path)}']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "deferred_context: ['reconstructing ANALYZE from broad rereads when diagnosis.md is already authoritative']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_rule: trust diagnosis.md as the planning baseline unless a concrete gap requires targeted retrieval',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
           'project_root: ${p.normalize(gitTmpDir.path)}',
         );
         expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
@@ -970,6 +1105,9 @@ void main() {
           'read_only_surfaces',
           'validation_commands',
           'done_criteria',
+          'upfront_context',
+          'retrieval_context',
+          'deferred_context',
         ]) {
           expectContextFieldOnlyInInquiryContext(result.prompt, key);
         }
@@ -1061,6 +1199,44 @@ void main() {
           contains('output_dir: cleanrooms/152-test-branch/'),
         );
         expect(result.prompt, contains('doc_protocol: doc-read'));
+        expect(
+          result.prompt,
+          contains('context_policy: authoritative-handoff'),
+        );
+        expect(
+          result.prompt,
+          contains('authority_mode: trust-plan-first'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "upfront_context: ['cleanrooms/152-test-branch/plan.md']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "deferred_context: ['re-reading broad analysis artifacts when plan.md already defines the bounded execution contract']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authoritative_handoff: cleanrooms/152-test-branch/plan.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authority_rule: trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
+          ),
+        );
         expect(result.prompt, isNot(contains('Run tests, lint, build')));
         expect(result.prompt, isNot(contains('retrospective.md')));
         expectContextKeyOnlyInInquiryContext(
@@ -1074,6 +1250,34 @@ void main() {
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'doc_protocol: doc-read',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'context_policy: authoritative-handoff',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_mode: trust-plan-first',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "upfront_context: ['cleanrooms/152-test-branch/plan.md']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "deferred_context: ['re-reading broad analysis artifacts when plan.md already defines the bounded execution contract']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authoritative_handoff: cleanrooms/152-test-branch/plan.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_rule: trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
         );
         expectOperationalContractBetween(
           result.prompt,
