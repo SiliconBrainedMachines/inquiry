@@ -230,7 +230,21 @@ void _writePlan(String root, String branch, String content) {
 void _writePrePrInspection(String root, String branch, {required String verdict}) {
   final file = File(p.join(root, 'cleanrooms', branch, 'pre_pr_inspection.md'));
   file.createSync(recursive: true);
-  file.writeAsStringSync('verdict: $verdict\n');
+  file.writeAsStringSync(
+    [
+      'verdict: $verdict',
+      '',
+      '## Pass 1 — Consistency',
+      '- PASS: asset parity source/build reviewed',
+      '',
+      '## Pass 2 — Completeness',
+      '- PASS: changed behavior covered by tests',
+      '',
+      '## Pass 3 — Traceability',
+      '- PASS: every code change maps to plan.md',
+      '',
+    ].join('\n'),
+  );
 }
 
 void _initGitRepo(String root, {required String branch}) {
