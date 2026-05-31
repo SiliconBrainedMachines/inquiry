@@ -68,6 +68,9 @@ void main() {
         expect(output.promptFragmentId, 'analyze_to_plan');
         expect(output.requiredRole, 'DESCARTES');
         expect(output.requiredInstructions, ['doc-write']);
+        expect(output.toText(), contains('DESCARTES'));
+        expect(output.toText(), contains('doc-write'));
+        expect(output.toText(), contains('analyze_to_plan'));
         expect(_commitCount(tempDir.path), commitsBefore + 1);
 
         // Verify state was actually updated
@@ -281,6 +284,7 @@ void main() {
         expect(output.nextState, 'EXECUTE');
         expect(output.promptFragmentId, 'plan_to_execute');
         expect(output.requiredInstructions, isEmpty);
+        expect(output.toText(), equals(output.message));
         expect(_commitCount(tempDir.path), commitsBefore + 1);
 
         final stateContent = File(
@@ -449,6 +453,81 @@ void main() {
       ).readAsStringSync();
       expect(stateContent, contains('issue: "31"'));
       expect(stateContent, contains('prompt_fragment_id: analyze_to_plan'));
+    });
+  });
+
+  group('StateTransitionOutput.toText()', () {
+    test('keeps message-only output when requiredInstructions is null or empty', () {
+      final nullInstructionsOutput = StateTransitionOutput(
+        allowed: false,
+        currentState: 'IDLE',
+        event: 'go_execute',
+        nextState: null,
+        operationsExecuted: const ['validate_transition'],
+        promptFragmentId: null,
+        requiredRole: null,
+        requiredInstructions: null,
+        message: 'Transition IDLE --go_execute--> EXECUTE forbidden',
+        code: 64,
+      );
+
+      final emptyInstructionsOutput = StateTransitionOutput(
+        allowed: true,
+        currentState: 'PLAN',
+        event: 'approve_plan',
+        nextState: 'EXECUTE',
+        operationsExecuted: const ['validate_transition'],
+        promptFragmentId: 'plan_to_execute',
+        requiredRole: 'BASHO',
+        requiredInstructions: const [],
+        message: 'Transition PLAN --approve_plan--> EXECUTE',
+        code: 0,
+      );
+
+      expect(
+        nullInstructionsOutput.toText(),
+        equals('Transition IDLE --go_execute--> EXECUTE forbidden'),
+      );
+      expect(
+        emptyInstructionsOutput.toText(),
+        equals('Transition PLAN --approve_plan--> EXECUTE'),
+      );
+    });
+
+    test('surfaces structured metadata for instruction-bearing transitions', () {
+      final output = StateTransitionOutput(
+        allowed: true,
+        currentState: 'ANALYZE',
+        event: 'complete_analysis',
+        nextState: 'PLAN',
+        operationsExecuted: const [
+          'validate_transition',
+          'validate_prechecks',
+        ],
+        promptFragmentId: 'analyze_to_plan',
+        requiredRole: 'DESCARTES',
+        requiredInstructions: const ['doc-write'],
+        message: 'Transition ANALYZE --complete_analysis--> PLAN',
+        code: 0,
+      );
+
+      final text = output.toText();
+
+      expect(text, contains('Transition ANALYZE --complete_analysis--> PLAN'));
+      expect(text, contains('required_role'));
+      expect(text, contains('DESCARTES'));
+      expect(text, contains('required_instructions'));
+      expect(text, contains('doc-write'));
+      expect(text, contains('prompt_fragment_id'));
+      expect(text, contains('analyze_to_plan'));
+      expect(
+        text,
+        isNot(
+          contains(
+            'Write inside the CLI-created template and keep frontmatter unchanged.',
+          ),
+        ),
+      );
     });
   });
 }
