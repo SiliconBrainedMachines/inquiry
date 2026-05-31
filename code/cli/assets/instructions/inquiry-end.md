@@ -8,10 +8,10 @@ description: 'Protocol for ending an APE cycle. Use when: all plan.md checkboxes
 ## Prompt Summary
 
 Only run in EXECUTE after all plan checkboxes and tests are complete.
+Run the END pre-PR inspection gate and stop on any blocking sensor failure.
 Choose the version bump and update every version file.
-Update CHANGELOG from the completed plan phases.
-Commit the release changes.
-Push the branch and create the pull request.
+Update CHANGELOG from the completed plan phases and commit the release changes.
+Push the branch and create the pull request only after the gate is green.
 
 ## When to Use
 
@@ -26,6 +26,15 @@ Push the branch and create the pull request.
 - All plan.md checkboxes must be complete
 - All tests must pass
 - Static analysis must pass with no errors
+
+## Sensor Model
+
+END is not just a final mechanical push. It is the pre-PR gate where the harness evaluates the minimum closure sensor stack:
+
+- `pre_pr` — blocking release-discipline checks before push or PR creation
+- `ci_required` — merge-authoritative remote checks that remain binding after PR creation
+- `runtime` — blocking checks when repo, branch, CLI, or target state looks inconsistent
+- `inferential_optional` — non-blocking review findings unless stronger evidence upgrades them
 
 ## Steps
 
@@ -124,13 +133,24 @@ version: X.Y.Z
 Announce state change:
 > `[APE: END]`
 
-### Step 8: Push Branch
+### Step 8: Run END Pre-PR Inspection Gate
+
+Before pushing or creating the PR, evaluate the minimum END sensor stack:
+
+- `pre_pr`: version files updated, CHANGELOG updated, release commit present, no declared execution work left unfinished
+- `runtime`: branch, issue, FSM state, and target tool state are coherent
+- `ci_required`: required remote checks are identified even though they will run after PR creation
+- `inferential_optional`: any review concerns are recorded, but they do not block by themselves
+
+If any blocking `pre_pr` or `runtime` sensor fails, abort PR creation and return to the failing evidence.
+
+### Step 9: Push Branch
 
 ```bash
 git push -u origin {branch}
 ```
 
-### Step 9: Create Pull Request
+### Step 10: Create Pull Request
 
 ```bash
 gh pr create \
@@ -147,7 +167,7 @@ gh pr create \
 "
 ```
 
-**Important:** PR creation completes the explicit END gate.
+**Important:** PR creation happens only after the END gate is green.
 
 - PR merge is an **external event** (happens later, possibly with CI checks)
 - Do not wait for PR merge to leave END
@@ -170,7 +190,8 @@ When the PR is merged:
 5. Update CHANGELOG.md
 6. Commit: git add -A && git commit -m "vX.Y.Z: ..."
 7. Transition to END
-8. Push: git push -u origin {branch}
-9. Create PR: gh pr create --title "vX.Y.Z: ..."
-10. Scheduler transitions automatically after PR creation
+8. Run END pre-PR inspection gate
+9. Push: git push -u origin {branch}
+10. Create PR: gh pr create --title "vX.Y.Z: ..."
+11. Scheduler transitions automatically after PR creation
 ```
