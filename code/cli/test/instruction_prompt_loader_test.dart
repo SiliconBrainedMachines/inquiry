@@ -82,7 +82,9 @@ Ignored.
           'Use the index to filter candidate documents.\n'
           'If needed read frontmatter before a full document read.\n'
           'Stop as soon as you have enough evidence.\n'
-          'Never scan a directory file by file.',
+          'Never scan a directory file by file.\n'
+          'Trust authoritative_handoff first when the context policy says it is authoritative.\n'
+          'Use retrieval_context only for concrete gaps that the authoritative artifact does not resolve.',
         ),
       );
       expect(summary, isNot(contains('---')));
@@ -100,7 +102,10 @@ Ignored.
           'Store documents in output_dir.\n'
           'Update index_file after every write.\n'
           'Keep one topic per document.\n'
-          'Use confirmations_doc for confirmations when it applies.',
+          'Use confirmations_doc for confirmations when it applies.\n'
+          'Treat upfront_context as your bounded starting context.\n'
+          'Use retrieval_context only when the current uncertainty requires more evidence.\n'
+          'Build authoritative_handoff so later phases do not need to reconstruct ANALYZE from scratch.',
         ),
       );
       expect(summary, isNot(contains('---')));

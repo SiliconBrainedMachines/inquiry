@@ -862,6 +862,13 @@ editable_surfaces: ['cleanrooms/<branch>/analyze/']
 read_only_surfaces: ['cleanrooms/<branch>/issue.md']
 validation_commands: []
 done_criteria: ['diagnosis.md written', 'confirmations.md grounded in the bounded analysis corpus']
+context_policy: progressive-disclosure
+authority_mode: build-authoritative-analysis
+upfront_context: ['cleanrooms/<branch>/issue.md', 'cleanrooms/<branch>/analyze/index.md']
+retrieval_context: ['cleanrooms/<branch>/analyze/index.md', 'cleanrooms/<branch>/analyze/confirmations.md', '<project_root>']
+deferred_context: ['broad repository rereads not justified by the active uncertainty']
+authoritative_handoff: cleanrooms/<branch>/analyze/diagnosis.md
+authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once written
 output_dir: cleanrooms/<branch>/analyze/
 index_file: cleanrooms/<branch>/analyze/index.md
 confirmations_doc: cleanrooms/<branch>/analyze/confirmations.md
@@ -873,9 +880,10 @@ Fields vary by APE:
 | APE | Fields |
 |-----|--------|
 | Common task contract | `project_root`, `task_id`, `input_artifacts`, `expected_outputs`, `editable_surfaces`, `read_only_surfaces`, `validation_commands`, `done_criteria` |
-| SOCRATES | common task contract + `output_dir`, `index_file`, `confirmations_doc`, `doc_protocol` |
-| DESCARTES | common task contract + `analysis_input`, `output_dir`, `plan_file`, `doc_protocol` |
-| BASHO | common task contract + `plan_file`, `output_dir`, `doc_protocol` |
+| Context policy layer | `context_policy`, `authority_mode`, `upfront_context`, `retrieval_context`, `deferred_context`, `authoritative_handoff`, `authority_rule` |
+| SOCRATES | common task contract + context policy layer + `output_dir`, `index_file`, `confirmations_doc`, `doc_protocol` |
+| DESCARTES | common task contract + context policy layer + `analysis_input`, `output_dir`, `plan_file`, `doc_protocol` |
+| BASHO | common task contract + context policy layer + `plan_file`, `output_dir`, `doc_protocol` |
 | DARWIN | common task contract + `analyze_dir`, `diagnosis_file`, `plan_file`, `retrospective_file`, `mutations_file`, `state_file`, `metrics_snapshot_file`, `metrics_file`, `output_dir` |
 
 ### 11.3 Per-Cycle Investigation Material
@@ -893,6 +901,12 @@ During ANALYZE, SOCRATES writes to `cleanrooms/<branch>/analyze/`:
 |-------|---------|
 | `doc-write` | Protocol for writing investigation material. Teaches index maintenance, frontmatter rules, one-topic-per-doc |
 | `doc-read` | Protocol for reading investigation material. Implements query planner: index → filter → partial → full |
+
+### 11.5 Context Policy Layer
+
+The task contract is necessary but not sufficient. Inquiry now pairs it with a lightweight context-policy layer so phases know what belongs in the initial working set, what should be retrieved only on demand, and what should remain outside the prompt window unless a concrete gap justifies wider rereads.
+
+This layer makes duplicate rereads an explicit harness defect rather than an invisible cost.
 
 ### 11.5 Schema Enforcement
 
