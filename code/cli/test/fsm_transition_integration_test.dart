@@ -170,6 +170,7 @@ void main() {
       expect(t4.promptFragmentId, isNotNull);
       current = t4.nextState!;
 
+      _writePrePrInspection(tempDir.path, branch, verdict: 'APPROVED');
       final t5 = await transition('pr_ready');
       expect(t5.allowed, isTrue);
       expect(t5.nextState, 'EVOLUTION');
@@ -224,6 +225,12 @@ void _writePlan(String root, String branch, String content) {
   final file = File(p.join(root, 'cleanrooms', branch, 'plan.md'));
   file.createSync(recursive: true);
   file.writeAsStringSync(content);
+}
+
+void _writePrePrInspection(String root, String branch, {required String verdict}) {
+  final file = File(p.join(root, 'cleanrooms', branch, 'pre_pr_inspection.md'));
+  file.createSync(recursive: true);
+  file.writeAsStringSync('verdict: $verdict\n');
 }
 
 void _initGitRepo(String root, {required String branch}) {

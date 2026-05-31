@@ -107,6 +107,12 @@ Runtime mapping:
 - `sensor_gate`: `end-pre-pr-inspection`
 - `sensor_authority_rule`: `ci_required` remains merge-authoritative after PR creation even when the local END gate is green
 
+Current enforcement surface:
+
+- local END gate authority is materialized in `cleanrooms/<branch>/pre_pr_inspection.md`
+- `verdict: APPROVED` is currently required before `pr_ready` or `pr_ready_no_evolution`
+- missing report or any non-`APPROVED` verdict blocks PR creation
+
 ## Relationship to current contracts
 
 - `execute.yaml` should name the EXECUTE minimum sensor stack and its blocking behavior

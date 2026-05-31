@@ -335,7 +335,7 @@ transitions:
     to: EVOLUTION
     allowed: true
     operations:
-      prechecks: [issue_selected, feature_branch_selected]
+      prechecks: [issue_selected, feature_branch_selected, pre_pr_inspection_approved]
       effects: [push_branch, create_pull_request]
       artifacts: [pull_request.md]
       commit_policy: push_and_pr
@@ -346,7 +346,7 @@ transitions:
     to: IDLE
     allowed: true
     operations:
-      prechecks: [issue_selected, feature_branch_selected]
+      prechecks: [issue_selected, feature_branch_selected, pre_pr_inspection_approved]
       effects: [push_branch, create_pull_request]
       artifacts: [pull_request.md]
       commit_policy: push_and_pr
@@ -448,6 +448,9 @@ preconditions:
   feature_branch_selected:
     description: "inquiry-start prepared an issue-linked feature branch for the explicit start handoff"
     kind: git
+  pre_pr_inspection_approved:
+    description: "pre_pr_inspection.md exists for the current issue branch and carries verdict: APPROVED"
+    kind: filesystem
   plan_approved:
     description: "User approved plan"
     kind: user-approval
