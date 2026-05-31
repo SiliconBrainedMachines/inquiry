@@ -36,6 +36,19 @@ This taxonomy exists so the harness can say, explicitly:
 | `runtime` | Detect harness, state, config, or tool incoherence | low to medium | high | Blocking when the harness itself cannot be trusted |
 | `inferential_optional` | Human or agent review findings not yet backed by stronger evidence | variable | low | Informative only unless upgraded by stronger sensors |
 
+## Runtime fields
+
+The runtime exposes the active phase's minimum sensor model inside `inquiry-context` with these fields:
+
+| Field | Meaning |
+|---|---|
+| `sensor_policy` | Named sensor policy mode for the current phase |
+| `minimum_sensor_stack` | The minimum sensor categories expected for the phase |
+| `blocking_sensor_stack` | Sensor categories that can currently block progress |
+| `advisory_sensor_stack` | Sensor categories that inform review without blocking on their own |
+| `sensor_gate` | The named gate this sensor stack currently serves |
+| `sensor_authority_rule` | Human-readable rule describing which sensors remain authoritative at this boundary |
+
 ## Rules
 
 - **Mechanical evidence outranks narration.** Hard failures from stronger sensors overrule weak heuristic confidence.
@@ -61,6 +74,15 @@ EXECUTE gate semantics:
 - incomplete `pre_pr` evidence blocks handoff into END
 - `inferential_optional` findings can inform caution, but do not override stronger blocking sensors alone
 
+Runtime mapping:
+
+- `sensor_policy`: `minimum-phase-stack`
+- `minimum_sensor_stack`: `local_fast`, `pre_transition`, `pre_pr`, `runtime`
+- `blocking_sensor_stack`: `local_fast`, `pre_transition`, `runtime`
+- `advisory_sensor_stack`: `inferential_optional`
+- `sensor_gate`: `handoff-to-end`
+- `sensor_authority_rule`: `pre_pr` evidence must be complete before END handoff even when phase-local checks are green
+
 ### END
 
 END is the explicit pre-PR gate. Its minimum stack is:
@@ -75,6 +97,15 @@ END gate semantics:
 - failing `pre_pr` or `runtime` sensors stop PR creation
 - passing END locally does not cancel `ci_required` authority
 - review observations without stronger evidence remain informative, not blocking
+
+Runtime mapping:
+
+- `sensor_policy`: `minimum-phase-stack`
+- `minimum_sensor_stack`: `pre_pr`, `ci_required`, `runtime`, `inferential_optional`
+- `blocking_sensor_stack`: `pre_pr`, `runtime`
+- `advisory_sensor_stack`: `inferential_optional`
+- `sensor_gate`: `end-pre-pr-inspection`
+- `sensor_authority_rule`: `ci_required` remains merge-authoritative after PR creation even when the local END gate is green
 
 ## Relationship to current contracts
 
