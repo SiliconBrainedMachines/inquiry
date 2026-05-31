@@ -1290,6 +1290,12 @@ void main() {
             'sensor_authority_rule: pre_pr evidence must be complete before END handoff even when phase-local checks are green',
           ),
         );
+        expect(
+          result.prompt,
+          contains(
+            'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
+          ),
+        );
         expect(result.prompt, isNot(contains('Run tests, lint, build')));
         expect(result.prompt, isNot(contains('retrospective.md')));
         expectContextKeyOnlyInInquiryContext(
@@ -1355,6 +1361,10 @@ void main() {
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'sensor_authority_rule: pre_pr evidence must be complete before END handoff even when phase-local checks are green',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
         );
         for (final key in [
           'minimum_sensor_stack',
@@ -1445,6 +1455,12 @@ void main() {
         );
         expect(
           result.prompt,
+          contains(
+            'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
+          ),
+        );
+        expect(
+          result.prompt,
           isNot(contains('No review or re-validation (basho already did that)')),
         );
         expect(result.prompt, contains('Allowed actions:'));
@@ -1473,6 +1489,10 @@ void main() {
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'sensor_authority_rule: ci_required remains merge-authoritative after PR creation even when the local END gate is green',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
         );
         for (final key in [
           'minimum_sensor_stack',

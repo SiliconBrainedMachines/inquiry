@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../assets.dart';
 import '../../../fsm_contract.dart';
+import '../../../src/git_utils.dart';
 import '../../ape/inquiry_state.dart';
 import '../effect_executor.dart';
 
@@ -164,10 +165,11 @@ class StateTransitionCommand
       );
     }
 
+    final projectRoot = getProjectRoot(input.workingDirectory) ?? input.workingDirectory;
     final contractPath = _assets != null
         ? _assets.path('fsm/transition_contract.yaml')
         : p.join(
-            input.workingDirectory,
+        projectRoot,
             'assets',
             'fsm',
             'transition_contract.yaml',
@@ -317,6 +319,16 @@ class StateTransitionCommand
       return 'ERROR_PRECONDITION_PLAN_MISSING: plan.md missing for current issue branch';
     }
 
+    if (prechecks.contains('pre_pr_inspection_approved')) {
+      final verdict = _prePrInspectionVerdict(branch, workingDirectory);
+      if (verdict == null) {
+        return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_MISSING: pre_pr_inspection.md missing or verdict not found for current issue branch';
+      }
+      if (verdict != 'APPROVED') {
+        return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_BLOCKED: pre_pr_inspection.md verdict is $verdict';
+      }
+    }
+
     return null;
   }
 
@@ -446,6 +458,26 @@ class StateTransitionCommand
       'confirmations.md',
     );
     return File(confirmationsPath).existsSync();
+  }
+
+  String? _prePrInspectionVerdict(String branch, String workingDirectory) {
+    if (branch.isEmpty) return null;
+    final projectRoot = getProjectRoot(workingDirectory) ?? workingDirectory;
+    final reportPath = p.join(
+      projectRoot,
+      'cleanrooms',
+      branch,
+      'pre_pr_inspection.md',
+    );
+    final file = File(reportPath);
+    if (!file.existsSync()) return null;
+
+    final match = RegExp(
+      r'^verdict:\s*([A-Za-z_\-]+)\s*$',
+      multiLine: true,
+    ).firstMatch(file.readAsStringSync());
+    if (match == null) return null;
+    return match.group(1)?.trim().toUpperCase();
   }
 
   bool _planExists(String branch, String workingDirectory) {

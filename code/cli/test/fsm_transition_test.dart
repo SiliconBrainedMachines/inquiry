@@ -378,6 +378,11 @@ void main() {
     test('allows END to create PR and enter EVOLUTION', () async {
       _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
       _writeState(tempDir.path, 'END', issue: '51');
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'APPROVED',
+      );
 
       final output = await StateTransitionCommand(
         StateTransitionInput(
@@ -393,6 +398,77 @@ void main() {
       expect(output.promptFragmentId, 'end_to_evolution');
       expect(output.requiredRole, 'DARWIN');
       expect(output.requiredInstructions, ['inquiry-end']);
+    });
+
+    test('allows END pr_ready from a nested working directory when inspection is approved', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'APPROVED',
+      );
+      final nestedDir = Directory(
+        p.join(tempDir.path, 'subdir', 'deep'),
+      )..createSync(recursive: true);
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: nestedDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isTrue);
+      expect(output.nextState, 'EVOLUTION');
+      expect(output.promptFragmentId, 'end_to_evolution');
+    });
+
+    test('blocks END pr_ready when pre-PR inspection report is missing', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_MISSING'),
+      );
+    });
+
+    test('blocks END pr_ready when pre-PR inspection verdict is BLOCKED', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'BLOCKED',
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_BLOCKED'),
+      );
     });
 
     test('persists --issue flag in state.yaml on transition', () async {
@@ -558,6 +634,12 @@ void _writePlan(String root, String branch, String content) {
   final file = File(p.join(root, 'cleanrooms', branch, 'plan.md'));
   file.createSync(recursive: true);
   file.writeAsStringSync(content);
+}
+
+void _writePrePrInspection(String root, String branch, {required String verdict}) {
+  final file = File(p.join(root, 'cleanrooms', branch, 'pre_pr_inspection.md'));
+  file.createSync(recursive: true);
+  file.writeAsStringSync('verdict: $verdict\n');
 }
 
 void _initGitRepo(String root, {required String branch}) {
