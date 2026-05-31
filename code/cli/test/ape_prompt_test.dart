@@ -1261,6 +1261,35 @@ void main() {
             'authority_rule: trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
           ),
         );
+        expect(
+          result.prompt,
+          contains('sensor_policy: minimum-phase-stack'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "minimum_sensor_stack: ['local_fast', 'pre_transition', 'pre_pr', 'runtime']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "blocking_sensor_stack: ['local_fast', 'pre_transition', 'runtime']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "advisory_sensor_stack: ['inferential_optional']",
+          ),
+        );
+        expect(result.prompt, contains('sensor_gate: handoff-to-end'));
+        expect(
+          result.prompt,
+          contains(
+            'sensor_authority_rule: pre_pr evidence must be complete before END handoff even when phase-local checks are green',
+          ),
+        );
         expect(result.prompt, isNot(contains('Run tests, lint, build')));
         expect(result.prompt, isNot(contains('retrospective.md')));
         expectContextKeyOnlyInInquiryContext(
@@ -1303,6 +1332,37 @@ void main() {
           result.prompt,
           'authority_rule: trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
         );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_policy: minimum-phase-stack',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "minimum_sensor_stack: ['local_fast', 'pre_transition', 'pre_pr', 'runtime']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "blocking_sensor_stack: ['local_fast', 'pre_transition', 'runtime']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "advisory_sensor_stack: ['inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_gate: handoff-to-end',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_authority_rule: pre_pr evidence must be complete before END handoff even when phase-local checks are green',
+        );
+        for (final key in [
+          'minimum_sensor_stack',
+          'blocking_sensor_stack',
+          'advisory_sensor_stack',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
         expectOperationalContractBetween(
           result.prompt,
           identityFragment:
@@ -1354,12 +1414,73 @@ void main() {
             'ci_required sensors remain authoritative after PR creation and may still block merge',
           ),
         );
+        expect(result.prompt, contains('sensor_policy: minimum-phase-stack'));
+        expect(
+          result.prompt,
+          contains(
+            "minimum_sensor_stack: ['pre_pr', 'ci_required', 'runtime', 'inferential_optional']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "blocking_sensor_stack: ['pre_pr', 'runtime']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "advisory_sensor_stack: ['inferential_optional']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('sensor_gate: end-pre-pr-inspection'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'sensor_authority_rule: ci_required remains merge-authoritative after PR creation even when the local END gate is green',
+          ),
+        );
         expect(
           result.prompt,
           isNot(contains('No review or re-validation (basho already did that)')),
         );
         expect(result.prompt, contains('Allowed actions:'));
         expect(result.prompt, contains('Run pre-PR inspection sensors'));
+        expect(result.prompt, contains('# --- inquiry-context ---'));
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_policy: minimum-phase-stack',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "minimum_sensor_stack: ['pre_pr', 'ci_required', 'runtime', 'inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "blocking_sensor_stack: ['pre_pr', 'runtime']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "advisory_sensor_stack: ['inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_gate: end-pre-pr-inspection',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_authority_rule: ci_required remains merge-authoritative after PR creation even when the local END gate is green',
+        );
+        for (final key in [
+          'minimum_sensor_stack',
+          'blocking_sensor_stack',
+          'advisory_sensor_stack',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
       });
 
       test(
