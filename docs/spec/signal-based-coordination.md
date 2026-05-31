@@ -83,7 +83,7 @@ The scheduler only invokes READY agents. IDLE and WAITING agents are skipped —
 ```
 IDLE:
   APE uses triage skill → user defines problem
-  Issue-start protocol prepares branch + cleanroom folder
+  inquiry-start protocol prepares branch + cleanroom folder
   Signal: issue_ready → transition to ANALYZE
 
 ANALYZE:

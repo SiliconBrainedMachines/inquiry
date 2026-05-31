@@ -167,7 +167,7 @@ void main() {
     final issueReady = contract.preconditions['issue_selected_or_created']!;
     final branchReady = contract.preconditions['feature_branch_selected']!;
     expect(issueReady.description, contains('IDLE TRIAGE'));
-    expect(branchReady.description, contains('issue-start'));
+    expect(branchReady.description, contains('inquiry-start'));
 
     final fragment = contract.promptFragments['idle_to_analyze']!;
     expect(fragment.role, 'SOCRATES');
@@ -229,7 +229,7 @@ void main() {
 
     expect(
       runtimeProtocols,
-      equals({'doc-read', 'doc-write', 'issue-end'}),
+      equals({'doc-read', 'doc-write', 'inquiry-end'}),
     );
     expect(runtimeProtocols, isNot(contains('issue-create')));
     expect(runtimeProtocols, isNot(contains('inquiry-install')));

@@ -75,7 +75,7 @@ La decisión no es sobre implementación. Es sobre naming: si `kritik` nombra bi
 
 - **Second-order warrant structure.** Like `legion`, Kritik is epistemologically second-order. Abduction, deduction, and induction produce knowledge directly; Kritik audits whether those outputs meet their own evidentiary standards.
 
-- **Naming convention risk.** Existing skills tend to use operational names (`legion`, `research`, `doc-read`, `issue-start`). APEs carry stronger philosophical identity. `kritik` risks sounding like a thinking tool with autonomous warrant rather than a skill-level auditing capability.
+- **Naming convention risk.** Existing skills tend to use operational names (`legion`, `research`, `doc-read`, `inquiry-start`). APEs carry stronger philosophical identity. `kritik` risks sounding like a thinking tool with autonomous warrant rather than a skill-level auditing capability.
 
 - **Confusion surface.** A reader may infer from the name that Kritik is an APE-like method rather than a composable skill.
 

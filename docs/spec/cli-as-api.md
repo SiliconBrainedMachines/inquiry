@@ -57,7 +57,7 @@ The current Inquiry CLI already enforces the runtime FSM and deployment operatio
 | Skill | CLI Command | Primary surface | APE State |
 |-------|-------------|-----------------|-----------|
 | issue-create | `gh issue list`, `gh issue view`, `gh issue create` (via skill protocol) | GitHub issue tracker during bounded IDLE triage | IDLE |
-| issue-start | `git` workflow + `iq fsm transition --event start_analyze` | Branch preparation, cleanroom scaffolding, and `.inquiry/state.yaml` handoff | IDLE |
+| inquiry-start | `git` workflow + `iq fsm transition --event start_analyze` | Branch preparation, cleanroom scaffolding, and `.inquiry/state.yaml` handoff | IDLE |
 | doc-write | `iq memory write` (planned) | `docs/` and other validated documentation surfaces | ANALYZE |
 | doc-read | `iq memory query` (planned) | stdout query results and targeted repository reads | ANALYZE |
 | planning | (via DESCARTES sub-agent) | `cleanrooms/{task}/plan.md` | PLAN |

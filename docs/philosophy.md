@@ -34,7 +34,7 @@ This is not a metaphor. It is an isomorphism:
 
 The three modes of inference — abduction, deduction, induction — are not optional stages. They are **epistemically necessary**. You cannot plan what you have not understood (abduction before deduction). You cannot verify what you have not planned (deduction before induction). You cannot understand without questioning what you assume (abduction requires Socratic humility). Peirce proved this cycle is the structure of all scientific inquiry. We apply it to software.
 
-Before formal inquiry begins, DEWEY owns bounded IDLE triage. DEWEY determines whether the indeterminate situation is ready to become or select a GitHub issue, then hands off through the explicit `issue-start` protocol. DEWEY does not analyze, plan, or execute.
+Before formal inquiry begins, DEWEY owns bounded IDLE triage. DEWEY determines whether the indeterminate situation is ready to become or select a GitHub issue, then hands off through the explicit `inquiry-start` protocol. DEWEY does not analyze, plan, or execute.
 
 ## The five convictions
 
