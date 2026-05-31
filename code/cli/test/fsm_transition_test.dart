@@ -446,6 +446,32 @@ void main() {
       );
     });
 
+    test('blocks END pr_ready when inspection report lacks required pass sections', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'APPROVED',
+        rawContent: 'verdict: APPROVED\n',
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID'),
+      );
+    });
+
     test('blocks END pr_ready when pre-PR inspection verdict is BLOCKED', () async {
       _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
       _writeState(tempDir.path, 'END', issue: '51');
@@ -453,6 +479,9 @@ void main() {
         tempDir.path,
         '51-idle-execution-guardrails',
         verdict: 'BLOCKED',
+        consistencyChecks: const ['PASS: asset parity source/build reviewed'],
+        completenessChecks: const ['PASS: changed behavior covered by tests'],
+        traceabilityChecks: const ['FAIL: undocumented change in lib/foo.dart:10'],
       );
 
       final output = await StateTransitionCommand(
@@ -468,6 +497,34 @@ void main() {
       expect(
         output.message,
         contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_BLOCKED'),
+      );
+    });
+
+    test('blocks END pr_ready when APPROVED report still contains FAIL checks', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'APPROVED',
+        consistencyChecks: const ['PASS: asset parity source/build reviewed'],
+        completenessChecks: const ['PASS: changed behavior covered by tests'],
+        traceabilityChecks: const ['FAIL: undocumented change in lib/foo.dart:10'],
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID'),
       );
     });
 
@@ -636,10 +693,49 @@ void _writePlan(String root, String branch, String content) {
   file.writeAsStringSync(content);
 }
 
-void _writePrePrInspection(String root, String branch, {required String verdict}) {
+void _writePrePrInspection(
+  String root,
+  String branch, {
+  required String verdict,
+  List<String>? consistencyChecks,
+  List<String>? completenessChecks,
+  List<String>? traceabilityChecks,
+  String? rawContent,
+}) {
   final file = File(p.join(root, 'cleanrooms', branch, 'pre_pr_inspection.md'));
   file.createSync(recursive: true);
-  file.writeAsStringSync('verdict: $verdict\n');
+  if (rawContent != null) {
+    file.writeAsStringSync(rawContent);
+    return;
+  }
+
+  final consistency =
+      consistencyChecks ?? const ['PASS: asset parity source/build reviewed'];
+  final completeness =
+      completenessChecks ?? const ['PASS: changed behavior covered by tests'];
+  final traceability =
+      traceabilityChecks ?? const ['PASS: every code change maps to plan.md'];
+
+  String renderSection(String title, List<String> checks) {
+    final buffer = StringBuffer()..writeln('## $title');
+    for (final check in checks) {
+      buffer.writeln('- $check');
+    }
+    return buffer.toString().trimRight();
+  }
+
+  file.writeAsStringSync(
+    [
+      'verdict: $verdict',
+      '',
+      renderSection('Consistency', consistency),
+      '',
+      renderSection('Completeness', completeness),
+      '',
+      renderSection('Traceability', traceability),
+      '',
+    ].join('\n'),
+  );
 }
 
 void _initGitRepo(String root, {required String branch}) {

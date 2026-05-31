@@ -110,8 +110,9 @@ Runtime mapping:
 Current enforcement surface:
 
 - local END gate authority is materialized in `cleanrooms/<branch>/pre_pr_inspection.md`
-- `verdict: APPROVED` is currently required before `pr_ready` or `pr_ready_no_evolution`
-- missing report or any non-`APPROVED` verdict blocks PR creation
+- the report must include `Consistency`, `Completeness`, and `Traceability` passes with `PASS`, `FAIL`, or `WARN` checks in each pass
+- `verdict: APPROVED` is only valid when no pass contains `FAIL`
+- missing report, missing pass structure, or any non-`APPROVED`/contradictory report blocks PR creation
 
 ## Relationship to current contracts
 
