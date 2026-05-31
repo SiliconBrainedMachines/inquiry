@@ -27,7 +27,7 @@ curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 | Command | Purpose |
 |---|---|
 | `iq` | TUI banner with current FSM state |
-| `iq init` | Scaffold `.inquiry/` (state.yaml, config.yaml, mutations.md) |
+| `iq init` | Scaffold `cleanrooms/` and repo-scoped `.inquiry/config.yaml` |
 | `iq doctor` | Verify prerequisites: `inquiry`, `git`, `gh`, `gh auth` |
 | `iq version` | Print CLI version |
 | `iq upgrade` | Download and install latest release |

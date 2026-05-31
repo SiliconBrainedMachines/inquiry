@@ -9,6 +9,7 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import '../../src/cycle_context.dart';
 import '../../src/git_utils.dart';
 
 import '../ape/ape_definition.dart';
@@ -43,7 +44,18 @@ class EffectExecutor {
   }) : _assets = assets,
        _issueBodyProvider = issueBodyProvider ?? _defaultIssueBodyProvider;
 
-  String get _inquiryDir => p.join(workingDirectory, '.inquiry');
+  late final CycleContext? _cycleContext = _tryResolveCycleContext();
+
+  String get _projectRoot => _cycleContext?.projectRoot ?? workingDirectory;
+
+  String get _inquiryDir => p.join(
+    _cycleContext?.inquiryCliRoot ?? _projectRoot,
+    '.inquiry',
+  );
+
+  String? get _branch => _cycleContext?.branch;
+
+  String? get _cleanroomRoot => _cycleContext?.inquiryRoot;
 
   /// Maps FSM states to their active sub-agent names.
   static const _stateApes = <String, String>{
@@ -125,16 +137,12 @@ class EffectExecutor {
 
   /// Create `cleanrooms/<branch>/analyze/index.md` and `confirmations.md` for ANALYZE phase.
   void openAnalysisContext() {
-    final branch = _getCurrentBranch();
-    if (branch.isEmpty) return;
+    final branch = _branch;
+    final cleanroomRoot = _cleanroomRoot;
+    if (branch == null || cleanroomRoot == null) return;
 
     final issue = InquiryState.load(workingDirectory).issue ?? '';
-    final cleanroomDir = p.join(
-      workingDirectory,
-      'cleanrooms',
-      branch,
-      'analyze',
-    );
+    final cleanroomDir = p.join(cleanroomRoot, 'analyze');
     final dir = Directory(cleanroomDir);
     if (!dir.existsSync()) {
       dir.createSync(recursive: true);
@@ -180,23 +188,26 @@ class EffectExecutor {
       );
     }
 
-    _writeIssueMirror(branch, issue, today);
+    _writeIssueMirror(cleanroomRoot, branch, issue, today);
   }
 
   /// Best-effort `cleanrooms/<branch>/issue.md` mirror of the GitHub issue.
   ///
   /// Idempotent: never clobbers an existing mirror. A failed/empty body fetch
   /// is non-fatal — the mirror is still written with the available metadata.
-  void _writeIssueMirror(String branch, String issue, String today) {
-    final issueFile = File(
-      p.join(workingDirectory, 'cleanrooms', branch, 'issue.md'),
-    );
+  void _writeIssueMirror(
+    String cleanroomRoot,
+    String branch,
+    String issue,
+    String today,
+  ) {
+    final issueFile = File(p.join(cleanroomRoot, 'issue.md'));
     if (issueFile.existsSync()) return;
 
     String? body;
     if (issue.isNotEmpty) {
       try {
-        body = _issueBodyProvider(issue, workingDirectory);
+        body = _issueBodyProvider(issue, _projectRoot);
       } catch (_) {
         body = null;
       }
@@ -246,8 +257,12 @@ class EffectExecutor {
     }
   }
 
-  String _getCurrentBranch() {
-    return getCurrentBranch(workingDirectory);
+  CycleContext? _tryResolveCycleContext() {
+    try {
+      return CycleContext.resolve(workingDirectory);
+    } on CycleResolutionException {
+      return null;
+    }
   }
 
   /// Reset the cycle-local `cleanrooms/<branch>/mutations.md` to empty template.
@@ -267,11 +282,11 @@ class EffectExecutor {
   /// Falls back to repo-level `.inquiry/mutations.md` only when no cycle
   /// resolves (derived IDLE / not a git repo).
   String _mutationsPath() {
-    final branch = _getCurrentBranch();
-    if (branch.isEmpty) {
+    final cleanroomRoot = _cleanroomRoot;
+    if (cleanroomRoot == null) {
       return p.join(_inquiryDir, 'mutations.md');
     }
-    return p.join(workingDirectory, 'cleanrooms', branch, 'mutations.md');
+    return p.join(cleanroomRoot, 'mutations.md');
   }
 
   /// Resolve the initial_state for an APE by loading its YAML definition.

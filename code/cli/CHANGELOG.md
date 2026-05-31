@@ -4,6 +4,11 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.6.3]
+### Fixed
+- **EVOLUTION cycle-root alignment**: repo-scoped `config.yaml`, metrics files, and repo agent cleanup now resolve from the git root instead of raw cwd, so running Inquiry from nested subdirectories no longer silently skips EVOLUTION or writes cycle artifacts into the wrong tree (#150)
+- **DARWIN mutations contract**: EVOLUTION assets and public docs now point to the canonical cycle-local `cleanrooms/<branch>/mutations.md` instead of the stale repo-level `.inquiry/mutations.md` reference (#150)
+
 ## [0.6.2]
 ### Fixed
 - **PLAN-owned constructor enumeration**: when a plan phase changes a shared interface or type shape, the PLAN contract now requires enumerating construction sites and naming the search strategy used to find them; this fix lives in PLAN, not in DESCARTES (#139)

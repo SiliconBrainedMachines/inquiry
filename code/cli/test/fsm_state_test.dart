@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:inquiry_cli/assets.dart';
 import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:inquiry_cli/modules/fsm/commands/state.dart';
 import 'package:path/path.dart' as p;
@@ -318,6 +319,14 @@ void main() {
         expect(result.toJson()['instructions'], contains('gh issue create'));
         expect(
           result.toJson()['instructions'],
+          contains('cleanrooms/<branch>/mutations.md'),
+        );
+        expect(
+          result.toJson()['instructions'],
+          isNot(contains('.inquiry/mutations.md')),
+        );
+        expect(
+          result.toJson()['instructions'],
           contains('.inquiry/metrics.yaml'),
         );
       });
@@ -538,6 +547,28 @@ void main() {
 
         final command = FsmStateCommand(
           FsmStateInput(workingDirectory: tempDir.path),
+        );
+        final result = await command.execute();
+        final transitions = result.toJson()['transitions'] as List;
+        final events = transitions.map((t) => t['event']).toList();
+
+        expect(events, contains('pr_ready'));
+        expect(events, isNot(contains('pr_ready_no_evolution')));
+      });
+
+      test('END from nested subdir still reads repo-root config.yaml', () async {
+        setupWorkspace(state: 'END', issue: '145');
+        File(
+          '${tempDir.path}/.inquiry/config.yaml',
+        ).writeAsStringSync('evolution:\n  enabled: true\n');
+
+        final nestedDir = Directory(
+          p.join(tempDir.path, 'sub', 'deep'),
+        )..createSync(recursive: true);
+
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: nestedDir.path),
+          assets: Assets(root: tempDir.path),
         );
         final result = await command.execute();
         final transitions = result.toJson()['transitions'] as List;
