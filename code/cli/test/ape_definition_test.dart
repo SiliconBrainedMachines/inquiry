@@ -157,6 +157,24 @@ void main() {
         expect(def.basePrompt, contains('SOCRATES'));
         expect(def.basePrompt, contains('Socratic method'));
         expect(def.basePrompt, contains('EPISTEMIC HUMILITY'));
+        expect(
+          def.basePrompt,
+          contains(
+            'Before asking the user for missing facts, inspect the repository, the active cycle artifacts, and any adjacent executable evidence first.',
+          ),
+        );
+        expect(
+          def.basePrompt,
+          contains(
+            'If local evidence is insufficient, use targeted external research before escalating factual gaps to the user.',
+          ),
+        );
+        expect(
+          def.basePrompt,
+          contains(
+            'Ask the user only for unresolved facts, hidden constraints, or human judgments that evidence cannot supply.',
+          ),
+        );
         expect(def.basePrompt, isNot(contains('diagnosis.md')));
         expect(def.basePrompt, isNot(contains('output_dir')));
         expect(def.basePrompt, isNot(contains('confirmations_doc')));
