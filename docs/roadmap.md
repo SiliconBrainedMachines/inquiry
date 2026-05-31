@@ -2,7 +2,9 @@
 
 > Status note: This roadmap is a strategic and partially historical planning document. It preserves backlog framing from earlier releases and should not be used as the authoritative description of the current operational model. For the current canonical explanation, see [architecture.md](architecture.md), [spec/finite-ape-machine.md](spec/finite-ape-machine.md), and [thinking-tools.md](thinking-tools.md).
 
-> Version note: the live CLI source currently tracks `0.5.2` in [../code/cli/pubspec.yaml](../code/cli/pubspec.yaml). Public-facing version markers elsewhere in the repository may lag until the next coordinated release pass.
+> Execution note: the canonical actionable backlog for the `0.6.x` harness-consolidation series lives in [0.6.x-harness-backlog.md](0.6.x-harness-backlog.md).
+
+> Version note: the live CLI source currently tracks `0.6.5` in [../code/cli/pubspec.yaml](../code/cli/pubspec.yaml). Public-facing version markers elsewhere in the repository may lag until the next coordinated release pass.
 
 > Where APE is going next. For where APE is today, see [../README.md](../README.md).
 
@@ -31,7 +33,7 @@ Recent research in [research/harness_engineering.md](research/harness_engineerin
 - 131 tests, cross-platform (Windows + Linux), 12 GitHub releases
 - Empirical bootstrap underway: APE is being built using APE (see [bootstrap-validation](research/ape_builds_ape/bootstrap-validation.md))
 
-## Current runtime snapshot (v0.5.2)
+## Current runtime snapshot (v0.6.5)
 
 The current CLI surface is still intentionally small. The live source tree exposes four active modules:
 
@@ -54,45 +56,62 @@ This matters because it marks the real baseline: Inquiry is already operating as
 
 ## Strategic reading of the current frontier
 
-Read through the current harness taxonomy, Inquiry's unfinished work clusters into four gaps:
+Read through the current harness taxonomy, Inquiry's unfinished work clusters into six gaps:
 
 1. **Sensor depth** — the methodology is explicit, but the catalog of local, CI, continuous, and runtime sensors is still thinner than the control model wants.
-2. **Context policy** — Memory as Code is real, but progressive disclosure, compaction, and retrieval policy are still more implicit than formal.
-3. **Eval discipline** — the project has gates and metrics, but not yet a full eval-engineering layer that systematically turns recurring failures into reusable benchmarks and graders.
-4. **Task environments** — Inquiry already assembles prompts and paths, but it still has room to become more contract-first about bounded task inputs, outputs, and validation surfaces.
+2. **Context policy and duplication control** — Memory as Code is real, but progressive disclosure, authoritative handoffs, and deduplication between orchestrator, sub-agents, durable artifacts, and rereads are still too implicit.
+3. **Evidence discipline** — ANALYZE and source gathering still need stronger repo-first and web-assisted rules so questioning and planning do not get ahead of observable facts.
+4. **Eval discipline** — the project has gates and metrics, but not yet a full eval-engineering layer that systematically turns recurring failures into reusable benchmarks and graders.
+5. **Task environments** — Inquiry already assembles prompts and paths, but it still has room to become more contract-first about bounded task inputs, outputs, and validation surfaces.
+6. **Overhead observability** — the project needs repeatable measurement of tool volume, wall-clock time, cached versus uncached tokens, and process overhead so harness cost is visible and improvable.
 
 This section is strategic framing, not a substitute for the issue tracker. The issue-backed frontier remains below.
 
-## Current frontier (post-v0.5.2)
+## 0.6.x completion program (0.6.5 -> 0.6.99)
+
+The 0.6.x line should be treated as a harness-consolidation release train, not as an optimization pass. Before 0.7.0, the priority is to remove base defects, tighten evidence discipline, and reduce structural overhead in how Inquiry assembles and reuses context.
+
+1. **Evidence-first ANALYZE.** Repo state, cleanroom artifacts, docs, tests, and targeted web research should be the default evidence base before the user is questioned.
+2. **Context economy and authoritative handoffs.** Inquiry should reduce duplication between the orchestrator, sub-agents, durable artifacts, and rereads by making handoff documents authoritative instead of repeatedly reconstructing the same context.
+3. **Adaptive SOCRATES quality.** ANALYZE should ask fewer but higher-value questions, stop when the problem is already sufficiently bounded, and propose concrete alternatives instead of outsourcing ideation back to the user.
+4. **Harness completion over new knobs.** The main work before 0.7.0 is task contracts, sensors, context policy, and evidence-grounded behavior, not configurable depth modes or phase budgets.
+5. **Overhead audit as first-class evidence.** Inquiry should measure tool volume, wall-clock time, token consumption, cached share, and process overhead as explicit inputs to EVOLUTION and future harness tuning.
+
+Deferred until after these base corrections land: configurable depth modes and explicit per-phase budgets. Those are optimization levers, not the main 0.6.x bottlenecks.
+
+## Current frontier for 0.6.x (post-v0.6.5)
 
 This section is intentionally selective. It groups the open issues that most clearly define the next iterations of Inquiry; it is not a full dump of every issue in the tracker.
 
-### Runtime and scheduler correctness
+### Harness correctness and context control
 - **#181** — Scheduler dispatches the active APE name as `agentName` instead of the thinking-tool identity expected by the host
-- **#180** — SOCRATES must not auto-complete analysis without an explicit boundary crossing
 - **#178** — Persist the project root inside inquiry-context so prompt delivery remains stable across working directories
 - **#174** — Linux install can leave `iq` unavailable after a nominally successful install
-- **#167** — Collapse BASHO into a simpler single-phase execution surface once the current transition boundaries are revalidated
+- **#149** — Improve VS Code workspace discovery for multi-root and non-trivial repository layouts
+- **#185** — Introduce an `iq skill` module to manage Inquiry CLI private skills instead of leaving Inquiry-specific skills as static deployed markdown only
 
-### Workflow and cycle discipline
-- **#165** — Revisit `inquiry-start` / `inquiry-end` naming so the skill surfaces match the methodology-first vocabulary
-- **#163** — Add a formal pre-PR inspection gate in END instead of treating PR creation as the only closing ritual
-- **#127** — Tighten the EXECUTE contract so version bump and release proposal are always surfaced before completion
+### ANALYZE quality and evidence discipline
+- **#180** — SOCRATES must not auto-complete analysis without an explicit boundary crossing
+- **#218** — Refine SOCRATES question relevance and self-service analysis
+- **#147** — Extend deep research beyond the current standalone `research` skill into a broader source-gathering capability
 - **#49** — Enforce the single-task-per-cycle rule in IDLE and ANALYZE to prevent scope drift
 - **#60** — Support explicit cross-repo dependency chains when one cycle depends on upstream work in another repo
-- **#50** — Support dual-language configuration for user-facing outputs
+
+### END and execution discipline
+- **#163** — Add a formal pre-PR inspection gate in END instead of treating PR creation as the only closing ritual
+- **#127** — Tighten the EXECUTE contract so version bump and release proposal are always surfaced before completion
+- **#167** — Collapse BASHO into a simpler single-phase execution surface once the current transition boundaries are revalidated
 
 ### Product and platform surfaces
-- **#185** — Introduce an `iq skill` module to manage Inquiry CLI private skills instead of leaving Inquiry-specific skills as static deployed markdown only
 - **#183** — Publish Inquiry CLI to WinGet
 - **#170** — Add `--version` / `-v` on bare `iq`
 - **#153** — Redesign the Inquiry website around the current product identity
 - **#151** — Add `iq auth` with GitHub-backed user profile and authentication context
-- **#149** — Improve VS Code workspace discovery for multi-root and non-trivial repository layouts
+- **#50** — Support dual-language configuration for user-facing outputs
 
 ### Research and measurement
+- **#216** — Model a direct-use skill for inquiry cycle audit and LLM usage analysis
 - **#156** — Add GitHub platform usage metrics to the research dataset
-- **#147** — Extend deep research beyond the current standalone `research` skill into a broader source-gathering capability
 - **#141** — Centralize metrics in a database-backed store once the current file-based evidence stops being sufficient
 
 ## Foundations already landed
@@ -106,7 +125,7 @@ Several roadmap items from the early v0.0.x planning era are no longer near-term
 - **Metrics foundation landed**: `metrics.yaml` collection exists and is no longer a speculative near-term item (#72)
 - **Research delegation groundwork landed**: the original ANALYZE delegation concern from #46 is now complemented by the standalone `research` skill introduced later in the project
 
-## Mid-term (v0.1.x → v0.5.0)
+## Mid-term (late 0.6.x -> pre-0.7.0)
 
 Larger features that require infrastructure from the near-term to land first. Not yet split into discrete issues.
 
