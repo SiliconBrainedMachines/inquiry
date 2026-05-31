@@ -236,6 +236,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     final cycleContext = _cycleContext;
     final branch = cycleContext?.branch;
     if (cycleContext == null || branch == null) return null;
+    final currentState = FsmState.fromValue(inquiry.state.trim().toUpperCase());
 
     final cleanroomRoot = 'cleanrooms/$branch/';
     final analyzeDir = 'cleanrooms/$branch/analyze/';
@@ -324,6 +325,39 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'doc_protocol': 'doc-read',
         };
       case 'basho':
+        final sensorContext = currentState == FsmState.end
+            ? _sensorContext(
+                sensorPolicy: 'minimum-phase-stack',
+                minimumSensorStack: const [
+                  'pre_pr',
+                  'ci_required',
+                  'runtime',
+                  'inferential_optional',
+                ],
+                blockingSensorStack: const ['pre_pr', 'runtime'],
+                advisorySensorStack: const ['inferential_optional'],
+                sensorGate: 'end-pre-pr-inspection',
+                sensorAuthorityRule:
+                    'ci_required remains merge-authoritative after PR creation even when the local END gate is green',
+              )
+            : _sensorContext(
+                sensorPolicy: 'minimum-phase-stack',
+                minimumSensorStack: const [
+                  'local_fast',
+                  'pre_transition',
+                  'pre_pr',
+                  'runtime',
+                ],
+                blockingSensorStack: const [
+                  'local_fast',
+                  'pre_transition',
+                  'runtime',
+                ],
+                advisorySensorStack: const ['inferential_optional'],
+                sensorGate: 'handoff-to-end',
+                sensorAuthorityRule:
+                    'pre_pr evidence must be complete before END handoff even when phase-local checks are green',
+              );
         return {
           ...baseContext,
           ..._contextPolicy(
@@ -338,6 +372,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
             authorityRule:
                 'trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
           ),
+          ...sensorContext,
           'input_artifacts': _yamlList(['${cleanroomRoot}plan.md']),
           'expected_outputs': _yamlList([
             cycleContext.projectRoot,
@@ -435,6 +470,24 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       'deferred_context': _yamlList(deferredContext),
       'authoritative_handoff': authoritativeHandoff,
       'authority_rule': authorityRule,
+    };
+  }
+
+  Map<String, String> _sensorContext({
+    required String sensorPolicy,
+    required List<String> minimumSensorStack,
+    required List<String> blockingSensorStack,
+    required List<String> advisorySensorStack,
+    required String sensorGate,
+    required String sensorAuthorityRule,
+  }) {
+    return {
+      'sensor_policy': sensorPolicy,
+      'minimum_sensor_stack': _yamlList(minimumSensorStack),
+      'blocking_sensor_stack': _yamlList(blockingSensorStack),
+      'advisory_sensor_stack': _yamlList(advisorySensorStack),
+      'sensor_gate': sensorGate,
+      'sensor_authority_rule': sensorAuthorityRule,
     };
   }
 
