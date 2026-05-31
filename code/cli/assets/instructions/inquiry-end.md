@@ -142,6 +142,16 @@ Before pushing or creating the PR, evaluate the minimum END sensor stack:
 - `ci_required`: required remote checks are identified even though they will run after PR creation
 - `inferential_optional`: any review concerns are recorded, but they do not block by themselves
 
+Record the local END gate result in `cleanrooms/{slug}/pre_pr_inspection.md`.
+At minimum, the report must include a top-level verdict line:
+
+```yaml
+verdict: APPROVED
+```
+
+Allowed verdicts for this gate are `APPROVED` and `BLOCKED`.
+`iq fsm transition --event pr_ready` refuses to create the PR when the report is missing or its verdict is not `APPROVED`.
+
 If any blocking `pre_pr` or `runtime` sensor fails, abort PR creation and return to the failing evidence.
 
 ### Step 9: Push Branch
