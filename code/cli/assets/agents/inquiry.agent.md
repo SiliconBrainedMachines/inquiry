@@ -61,8 +61,8 @@ iq fsm transition --event <event>
 ## IDLE Handoff
 - explicit create/select intent only changes TRIAGE routing inside IDLE; issue readiness stays in IDLE/TRIAGE and produces `issue_selected_or_created`
 - only explicit start intent reaches `_DONE`
-- only explicit start intent triggers issue-start plus start_analyze
-- `issue-start` first produces `feature_branch_selected`, then `iq fsm transition --event start_analyze` may leave IDLE
+- only explicit start intent triggers inquiry-start plus start_analyze
+- `inquiry-start` first produces `feature_branch_selected`, then `iq fsm transition --event start_analyze` may leave IDLE
 
 ## ANALYZE Visibility Rule
 ANALYZE must remain visible to the user. While the FSM state is ANALYZE, the scheduler must surface the active dialogue in chat, let the user answer and refine the investigation in real time, and must not hide analysis interaction behind the Completion Gate.

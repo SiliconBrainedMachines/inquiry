@@ -53,7 +53,7 @@ La Skill no modifica el FSM. No requiere transiciones nuevas. No tiene sub-estad
 | **Skill** | Desplegada al target permanentemente (`.github/copilot/skills/`) | Siempre disponible | Ninguna — funciona con o sin Inquiry |
 | **Private skill** | NO en el target | Bajo demanda via `iq skill get <name>` | Requiere FSM, cleanrooms, CLI `iq` |
 
-Las private skills de Inquiry CLI (`doc-read`, `issue-create`, `issue-start`, `issue-end`) solo tienen sentido con el runtime de Inquiry activo. Registrarlas en el target contamina el namespace del agente con capacidades que no funcionan fuera de un ciclo APE.
+Las private skills de Inquiry CLI (`doc-read`, `issue-create`, `inquiry-start`, `inquiry-end`) solo tienen sentido con el runtime de Inquiry activo. Registrarlas en el target contamina el namespace del agente con capacidades que no funcionan fuera de un ciclo APE.
 
 `legion` en cambio vive permanentemente en el target porque es útil siempre, con o sin Inquiry. Ver issue [#185](https://github.com/ccisnedev/inquiry/issues/185) para el módulo `iq skill`.
 

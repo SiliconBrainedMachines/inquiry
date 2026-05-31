@@ -112,8 +112,8 @@ void main() {
       'legion',
       'research',
       'issue-create',
-      'issue-start',
-      'issue-end',
+      'inquiry-start',
+      'inquiry-end',
     ];
 
     Assets seedAssets(Directory root, {required List<String> apes}) {
@@ -393,8 +393,8 @@ void main() {
           'kritik',
           'legion',
           'research',
-          'issue-start',
-          'issue-end',
+          'inquiry-start',
+          'inquiry-end',
         ]) {
           fs.setFileExists(
             p.join(homeDir, '.copilot', 'skills', skill, 'SKILL.md'),

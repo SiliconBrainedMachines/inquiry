@@ -1,6 +1,6 @@
 ---
 title: "Plan: Rename issue-start / issue-end to inquiry-start / inquiry-end"
-status: active
+status: complete
 tags: [plan, rename, instructions, nomenclature]
 ---
 
@@ -101,23 +101,23 @@ assert no hit has disposition == undecided
 
 **Execution steps:**
 
-- [ ] Update narrow test expectations to encode the target contract names before renaming runtime assets.
+- [x] Update narrow test expectations to encode the target contract names before renaming runtime assets.
   - Candidate files already evidenced in diagnosis-adjacent reads: `code/cli/test/instruction_prompt_loader_test.dart`, `code/cli/test/assets_test.dart`, `code/cli/test/ape_prompt_test.dart`, `code/cli/test/fsm_contract_test.dart`, `code/cli/test/fsm_state_test.dart`, `code/cli/test/fsm_transition_test.dart`, `code/cli/test/firmware_agent_test.dart`, and `code/cli/test/doctor_test.dart`
-- [ ] Update both kinds of shared identifier sites inside those tests.
+- [x] Update both kinds of shared identifier sites inside those tests.
   - Construction sites: seeded skill/instruction lists such as `testSkills`, expected instruction arrays, and `requiredInstructions` expectations
   - Consumer sites: `loader.load(...)`, asset path strings such as `instructions/issue-start.md`, and human-facing text assertions that still mention the old names
-- [ ] Use one concrete search strategy to enumerate those test constructors and consumers before editing.
+- [x] Use one concrete search strategy to enumerate those test constructors and consumers before editing.
   - Search strategy: `rg -n "testSkills|requiredInstructions|issue-start|issue-end|issue-create|instructions/issue-(start|end)\\.md|loader\\.load\\(" code/cli/test`
-- [ ] Add or preserve explicit assertions that `issue-create` remains present and semantically distinct where tests already encode that boundary.
-- [ ] Run only the touched tests to establish RED before the runtime assets are renamed.
+- [x] Add or preserve explicit assertions that `issue-create` remains present and semantically distinct where tests already encode that boundary.
+- [x] Run only the touched tests to establish RED before the runtime assets are renamed.
   - Narrow command pattern: `dart test test/<touched_file>.dart ...`
 
 **Verification:**
 
-- [ ] The RED command exits non-zero before any runtime/build asset rename.
-- [ ] Every observed failure belongs to the touched rename-sensitive test slice and points at old-name mismatch, asset-path drift, or adjacent wording changed by the rename.
-- [ ] Tests that guard the `issue-create` distinction still pass or fail only where the start/end rename legitimately changes adjacent wording.
-- [ ] The RED failures identify the concrete runtime surfaces that still need the rename.
+- [x] The RED command exits non-zero before any runtime/build asset rename.
+- [x] Every observed failure belongs to the touched rename-sensitive test slice and points at old-name mismatch, asset-path drift, or adjacent wording changed by the rename.
+- [x] Tests that guard the `issue-create` distinction still pass or fail only where the start/end rename legitimately changes adjacent wording.
+- [x] The RED failures identify the concrete runtime surfaces that still need the rename.
 
 **Test Definitions (Pseudocode):**
 
@@ -149,50 +149,52 @@ assert expected_runtime_contract still_contains("issue-create")
 
 **Execution steps:**
 
-- [ ] Treat this as a shared identifier contract rename even though no behavior changes.
-- [ ] Enumerate every construction site before editing.
+- [x] Treat this as a shared identifier contract rename even though no behavior changes.
+- [x] Enumerate every construction site before editing.
   - Instruction filenames in committed source assets
   - Instruction filenames in committed build assets
   - Frontmatter `name:` fields inside the instruction documents
   - FSM `instructions:` arrays and other YAML fields that emit the instruction identifiers
   - Any non-test fixture, adapter, or generated list in live runtime/build assets that still emits the old identifiers after the Phase 2 RED slice is fixed
-- [ ] Enumerate every consumer site before editing.
+- [x] Enumerate every consumer site before editing.
   - Asset path lookups such as `instructions/issue-start.md` and `instructions/issue-end.md`
   - `loader.load(...)` call sites and prompt-summary lookups
   - Firmware or agent text that tells operators which instruction to invoke
   - Runtime descriptions and transition text that still expose the old names
-- [ ] Keep the dependency boundary explicit while executing GREEN.
+- [x] Keep the dependency boundary explicit while executing GREEN.
   - Phase 2 already owns direct test-constructor and expectation renames so RED can fail on the intended contract drift.
   - Phase 3 updates runtime/build emitters and consumers, then reuses the Phase 2 slice only as the GREEN confirmation pass.
-- [ ] Use one concrete search strategy to keep those enumerations exhaustive.
+- [x] Use one concrete search strategy to keep those enumerations exhaustive.
   - Search strategy: `rg -n "name: issue-(start|end)|issue-start|issue-end|instructions/issue-(start|end)\\.md|load\('issue-(start|end)'\)|requiredInstructions|testSkills|instructions: \[.*issue-(start|end)" code/cli .github README.md docs code/site`
-- [ ] Rename the canonical source instruction files.
+- [x] Rename the canonical source instruction files.
   - `code/cli/assets/instructions/issue-start.md` -> `code/cli/assets/instructions/inquiry-start.md`
   - `code/cli/assets/instructions/issue-end.md` -> `code/cli/assets/instructions/inquiry-end.md`
-- [ ] Rename the committed build mirrors to keep distributed assets aligned.
+- [x] Rename the committed build mirrors to keep distributed assets aligned.
   - `code/cli/build/assets/instructions/issue-start.md` -> `code/cli/build/assets/instructions/inquiry-start.md`
   - `code/cli/build/assets/instructions/issue-end.md` -> `code/cli/build/assets/instructions/inquiry-end.md`
-- [ ] Update the renamed documents' internal metadata and headings.
+- [x] Update the renamed documents' internal metadata and headings.
   - Frontmatter `name:` values
   - H1 titles and prompt-ready summaries
-- [ ] Update source runtime contract surfaces already evidenced by the analysis.
+- [x] Update source runtime contract surfaces already evidenced by the analysis.
   - `code/cli/assets/fsm/states/idle.yaml`
   - `code/cli/assets/fsm/transition_contract.yaml`
   - `code/cli/assets/agents/inquiry.agent.md`
-- [ ] Update the matching committed build/runtime mirrors.
+- [x] Update the matching committed build/runtime mirrors.
   - `code/cli/build/assets/fsm/states/idle.yaml`
   - `code/cli/build/assets/fsm/transition_contract.yaml`
   - `code/cli/build/assets/agents/inquiry.agent.md`
-- [ ] Keep `issue-create` unchanged in filenames, content, semantics, and contract references.
-- [ ] Re-run the same narrow tests from Phase 2 until they turn GREEN.
+- [x] Keep `issue-create` unchanged in filenames, content, semantics, and contract references.
+- [x] Re-run the same narrow tests from Phase 2 until they turn GREEN.
+
+**Execution note:** The committed build mirrors were already aligned to `inquiry-start` / `inquiry-end` in the verified branch state at closure time, so this commit did not require additional edits under `code/cli/build/assets/`.
 
 **Verification:**
 
-- [ ] The targeted tests from Phase 2 pass GREEN.
-- [ ] The canonical source and committed build assets contain `inquiry-start` and `inquiry-end` in the relevant runtime surfaces.
-- [ ] A constructor-focused search over live source/build emitters returns zero old-name hits outside the Phase 1 freeze set.
-- [ ] A consumer-focused search over loaders, agents, FSM surfaces, and prompt/help text returns zero old-name hits outside the Phase 1 freeze set.
-- [ ] `issue-create` remains present only where the distinct IDLE triage contract requires it.
+- [x] The targeted tests from Phase 2 pass GREEN.
+- [x] The canonical source and committed build assets contain `inquiry-start` and `inquiry-end` in the relevant runtime surfaces.
+- [x] A constructor-focused search over live source/build emitters returns zero old-name hits outside the Phase 1 freeze set.
+- [x] A consumer-focused search over loaders, agents, FSM surfaces, and prompt/help text returns zero old-name hits outside the Phase 1 freeze set.
+- [x] `issue-create` remains present only where the distinct IDLE triage contract requires it.
 
 **Test Definitions (Pseudocode):**
 
@@ -229,7 +231,7 @@ assert green.exit_code == 0
 
 **Execution steps:**
 
-- [ ] Update maintainership-facing and public explanatory surfaces that describe the current live contract.
+- [x] Update maintainership-facing and public explanatory surfaces that describe the current live contract.
   - `README.md`
   - `docs/architecture.md`
   - `docs/lore.md`
@@ -244,23 +246,23 @@ assert green.exit_code == 0
   - `docs/spec/signal-based-coordination.md`
   - `code/site/methodology.html`
   - `.github/agents/inquiry.agent.md`
-- [ ] Re-run the Phase 1 search over `docs/**`, `.github/**`, `README.md`, and `code/site/**` to catch any additional live explanatory hits not listed above.
-- [ ] Handle mixed historical/current documents carefully.
+- [x] Re-run the Phase 1 search over `docs/**`, `.github/**`, `README.md`, and `code/site/**` to catch any additional live explanatory hits not listed above.
+- [x] Handle mixed historical/current documents carefully.
   - Update current runtime descriptions that still instruct or describe the active contract.
   - Do not rewrite retrospective entries whose job is to preserve historical chronology.
-- [ ] Leave all frozen historical buckets unchanged.
+- [x] Leave all frozen historical buckets unchanged.
   - `cleanrooms/**`
   - `code/cli/assets/archive/**`
   - `code/cli/build/assets/archive/**`
   - retrospective timeline, changelog, and release-history entries that are not active runtime/help text
-- [ ] Confirm that any surviving `issue-create` references still describe the distinct issue creation/selection behavior in IDLE and were not swept into the start/end rename.
+- [x] Confirm that any surviving `issue-create` references still describe the distinct issue creation/selection behavior in IDLE and were not swept into the start/end rename.
 
 **Verification:**
 
-- [ ] A search over live docs, site, and deployment-facing explanatory surfaces returns zero old-name hits outside the documented freeze set.
-- [ ] Every touched current-contract document either rewrites the active concept to `inquiry-start` / `inquiry-end` or removes the stale section entirely; no mixed active terminology remains.
-- [ ] Current docs that still mention `issue-create` do so only to describe the distinct IDLE triage behavior preserved by diagnosis decision 2.
-- [ ] No doc or site update changes the diagnosed behavior boundary; the rename remains nomenclature-only.
+- [x] A search over live docs, site, and deployment-facing explanatory surfaces returns zero old-name hits outside the documented freeze set.
+- [x] Every touched current-contract document either rewrites the active concept to `inquiry-start` / `inquiry-end` or removes the stale section entirely; no mixed active terminology remains.
+- [x] Current docs that still mention `issue-create` do so only to describe the distinct IDLE triage behavior preserved by diagnosis decision 2.
+- [x] No doc or site update changes the diagnosed behavior boundary; the rename remains nomenclature-only.
 
 **Test Definitions (Pseudocode):**
 
@@ -290,26 +292,26 @@ assert every hit in issue_create_hits still describes triage_or_issue_selection
 
 **Execution steps:**
 
-- [ ] Re-run the narrow rename-sensitive tests touched in Phases 2 and 3 if any additional doc or prompt surface edits altered prompt content.
-- [ ] Run a final absence search across live surfaces.
+- [x] Re-run the narrow rename-sensitive tests touched in Phases 2 and 3 if any additional doc or prompt surface edits altered prompt content.
+- [x] Run a final absence search across live surfaces.
   - Search strategy: `rg -n "issue-start|issue-end" code/cli .github README.md docs code/site`
-- [ ] Interpret any remaining hits against the Phase 1 freeze set; if a hit is not clearly historical, treat it as a regression and return to analysis/execution rather than declaring completion.
-- [ ] Run a positive search to prove the new names are now the live contract.
+- [x] Interpret any remaining hits against the Phase 1 freeze set; if a hit is not clearly historical, treat it as a regression and return to analysis/execution rather than declaring completion.
+- [x] Run a positive search to prove the new names are now the live contract.
   - Search strategy: `rg -n "inquiry-start|inquiry-end" code/cli .github README.md docs code/site`
-- [ ] Run a preservation search to confirm `issue-create` survived unchanged where the diagnosis says it must.
+- [x] Run a preservation search to confirm `issue-create` survived unchanged where the diagnosis says it must.
   - Search strategy: `rg -n "issue-create" code/cli .github README.md docs code/site`
-- [ ] If an existing smoke path is available, run one deployment-facing sanity check such as doctor or prompt assembly to ensure the renamed instructions are the ones surfaced to operators.
-- [ ] Run the full project test suite required by the PLAN contract as the terminal closure gate after the residual searches are clean; completion without this command is invalid.
+- [x] If an existing smoke path is available, run one deployment-facing sanity check such as doctor or prompt assembly to ensure the renamed instructions are the ones surfaced to operators.
+- [x] Run the full project test suite required by the PLAN contract as the terminal closure gate after the residual searches are clean; completion without this command is invalid.
   - Command: `cd code/cli && dart test`
 
 **Verification:**
 
-- [ ] No live non-historical `issue-start` or `issue-end` hits remain.
-- [ ] `inquiry-start` and `inquiry-end` appear across the expected live runtime surfaces and at least one Phase 4 explanatory surface.
-- [ ] `issue-create` remains present and unchanged where its distinct semantics are required.
-- [ ] Any available smoke path used in this cycle succeeds against the renamed assets.
-- [ ] `dart test` passes for the full project suite as the mandatory final closure gate.
-- [ ] The finished diff reflects a nomenclature refactor only, not a behavior change.
+- [x] No live non-historical `issue-start` or `issue-end` hits remain.
+- [x] `inquiry-start` and `inquiry-end` appear across the expected live runtime surfaces and at least one Phase 4 explanatory surface.
+- [x] `issue-create` remains present and unchanged where its distinct semantics are required.
+- [x] Any available smoke path used in this cycle succeeds against the renamed assets.
+- [x] `dart test` passes for the full project suite as the mandatory final closure gate.
+- [x] The finished diff reflects a nomenclature refactor only, not a behavior change.
 
 **Test Definitions (Pseudocode):**
 
