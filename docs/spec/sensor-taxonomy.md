@@ -110,7 +110,9 @@ Runtime mapping:
 Current enforcement surface:
 
 - local END gate authority is materialized in `cleanrooms/<branch>/pre_pr_inspection.md`
+- entering END seeds `cleanrooms/<branch>/pre_pr_inspection.md` from the inspection template when the report does not yet exist
 - the report must include `Consistency`, `Completeness`, and `Traceability` passes with `PASS`, `FAIL`, or `WARN` checks in each pass
+- every `FAIL` finding must cite repo-relative `file:line`
 - `verdict: APPROVED` is only valid when no pass contains `FAIL`
 - missing report, missing pass structure, or any non-`APPROVED`/contradictory report blocks PR creation
 
