@@ -164,6 +164,28 @@ void main() {
           reason: 'iq target clean must remove repo-scoped agent');
     });
 
+    test('removes repo-scoped agent when invoked from nested subdir', () async {
+      _initGitRepo(tempDir.path);
+      final agentFile = File(
+        p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
+      );
+      agentFile.parent.createSync(recursive: true);
+      agentFile.writeAsStringSync('# APE Agent');
+
+      final nestedDir = Directory(p.join(tempDir.path, 'sub', 'deep'))
+        ..createSync(recursive: true);
+
+      final command = TargetCleanCommand(
+        TargetCleanInput(),
+        deployer: deployer,
+        workingDirectory: nestedDir.path,
+      );
+
+      await command.execute();
+
+      expect(agentFile.existsSync(), isFalse);
+    });
+
     test('does not fail if .github/agents/inquiry.agent.md does not exist',
         () async {
       final command = TargetCleanCommand(
@@ -175,4 +197,20 @@ void main() {
       await expectLater(command.execute(), completes);
     });
   });
+}
+
+void _initGitRepo(String root) {
+  void git(List<String> args) {
+    final result = Process.runSync('git', args, workingDirectory: root);
+    if (result.exitCode != 0) {
+      throw StateError('git ${args.join(' ')} failed: ${result.stderr}');
+    }
+  }
+
+  git(['init', '-q']);
+  git(['config', 'user.email', 'test@example.com']);
+  git(['config', 'user.name', 'test']);
+  File(p.join(root, 'README.md')).writeAsStringSync('# test\n');
+  git(['add', '.']);
+  git(['commit', '-q', '-m', 'init']);
 }
