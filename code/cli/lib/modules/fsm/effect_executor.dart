@@ -10,7 +10,6 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../../src/cycle_context.dart';
-import '../../src/git_utils.dart';
 
 import '../ape/ape_definition.dart';
 import '../ape/inquiry_state.dart';

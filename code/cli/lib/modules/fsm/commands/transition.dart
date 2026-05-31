@@ -114,7 +114,24 @@ class StateTransitionOutput extends Output {
   int get exitCode => code;
 
   @override
-  String? toText() => message;
+  String? toText() {
+    final instructions = requiredInstructions;
+    if (instructions == null || instructions.isEmpty) {
+      return message;
+    }
+
+    final buffer = StringBuffer()..writeln(message);
+    buffer.writeln(
+      requiredRole != null ? 'required_role: $requiredRole' : 'required_role: null',
+    );
+    buffer.writeln('required_instructions: ${instructions.join(', ')}');
+    buffer.write(
+      promptFragmentId != null
+          ? 'prompt_fragment_id: $promptFragmentId'
+          : 'prompt_fragment_id: null',
+    );
+    return buffer.toString();
+  }
 }
 
 class StateTransitionCommand
