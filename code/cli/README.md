@@ -32,10 +32,12 @@ curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 | `iq version` | Print CLI version |
 | `iq upgrade` | Download and install latest release |
 | `iq uninstall` | Remove `inquiry` binary and deployed assets |
-| `iq target get` | Deploy Inquiry agent and skills to active AI tool |
-| `iq target clean` | Remove deployed Inquiry files from all known targets |
+| `iq host get` | Deploy Inquiry skills to the active AI host |
+| `iq host clean` | Remove deployed Inquiry skills from all known hosts |
 | `iq fsm transition --event <e>` | Execute a deterministic FSM transition |
 | `iq fsm state [--json]` | Show current FSM state, transitions, and active APE |
 | `iq ape prompt --name <name>` | Assemble sub-agent prompt from YAML + current state |
 | `iq ape state` | Show active APE sub-state and valid transitions |
 | `iq ape transition --event <e>` | Advance the active APE's internal FSM |
+
+Legacy aliases `iq target get` and `iq target clean` remain supported for backward compatibility.

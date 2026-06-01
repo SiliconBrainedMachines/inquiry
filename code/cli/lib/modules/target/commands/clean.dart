@@ -1,4 +1,4 @@
-/// `ape target clean` — removes deployed APE files from all targets.
+/// `iq host clean` — removes deployed Inquiry files from all hosts.
 library;
 
 import 'dart:io';
@@ -8,7 +8,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../src/git_utils.dart';
-import '../../../targets/deployer.dart';
+import '../../../hosts/deployer.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -41,7 +41,7 @@ class TargetCleanCommand
     implements Command<TargetCleanInput, TargetCleanOutput> {
   @override
   final TargetCleanInput input;
-  final TargetDeployer deployer;
+  final HostDeployer deployer;
   final String _workingDirectory;
 
   TargetCleanCommand(
@@ -57,7 +57,7 @@ class TargetCleanCommand
   Future<TargetCleanOutput> execute() async {
     deployer.clean();
     _cleanRepoScopedAgent();
-    return TargetCleanOutput(message: 'Inquiry cleaned from all targets');
+    return TargetCleanOutput(message: 'Inquiry cleaned from all hosts');
   }
 
   void _cleanRepoScopedAgent() {
