@@ -2,7 +2,7 @@
   "name": "inquiry",
   "displayName": "Inquiry — Analyze. Plan. Execute.",
   "publisher": "ccisnedev",
-  "version": "0.4.0",
+  "version": "0.4.1",
   "description": "Structured AI-aided development for GitHub Copilot.",
   "license": "MIT",
   "icon": "assets/icon.png",

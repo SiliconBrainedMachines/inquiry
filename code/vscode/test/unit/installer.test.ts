@@ -1,6 +1,5 @@
 import * as assert from 'assert';
-import * as path from 'path';
-import { getAssetName, getInstallDir, installInquiryCli, InstallerDeps } from '../../src/installer';
+import { getAssetName, getInstallDir, installInquiryCli, InstallerDeps, selectReleaseForAsset } from '../../src/installer';
 
 describe('getAssetName', () => {
   it('returns zip on win32', () => {
@@ -32,6 +31,34 @@ describe('getInstallDir', () => {
   });
 });
 
+describe('selectReleaseForAsset', () => {
+  it('returns the newest published release that includes the asset', () => {
+    const release = selectReleaseForAsset([
+      { tag_name: 'v1.1.0', assets: [] },
+      { tag_name: 'v1.0.0', assets: [{ name: 'inquiry-windows-x64.zip', browser_download_url: 'https://github.com/dl/win.zip' }] },
+    ], 'inquiry-windows-x64.zip');
+
+    assert.strictEqual(release.tag_name, 'v1.0.0');
+  });
+
+  it('ignores draft and prerelease entries when selecting an asset', () => {
+    const release = selectReleaseForAsset([
+      { tag_name: 'v1.2.0', draft: true, assets: [{ name: 'inquiry-windows-x64.zip', browser_download_url: 'https://github.com/dl/draft.zip' }] },
+      { tag_name: 'v1.1.0', prerelease: true, assets: [{ name: 'inquiry-windows-x64.zip', browser_download_url: 'https://github.com/dl/pre.zip' }] },
+      { tag_name: 'v1.0.0', assets: [{ name: 'inquiry-windows-x64.zip', browser_download_url: 'https://github.com/dl/win.zip' }] },
+    ], 'inquiry-windows-x64.zip');
+
+    assert.strictEqual(release.tag_name, 'v1.0.0');
+  });
+
+  it('throws when no published release contains the asset', () => {
+    assert.throws(
+      () => selectReleaseForAsset([{ tag_name: 'v1.1.0', assets: [] }], 'inquiry-windows-x64.zip'),
+      /No inquiry-windows-x64.zip asset found in published releases/,
+    );
+  });
+});
+
 describe('installInquiryCli', () => {
   const tick = () => new Promise(r => setTimeout(r, 0));
 
@@ -39,13 +66,15 @@ describe('installInquiryCli', () => {
     return {
       platform,
       tmpdir: () => (platform === 'win32' ? 'C:\\temp' : '/tmp'),
-      fetchJson: async () => ({
-        tag_name: 'v1.0.0',
-        assets: [
-          { name: 'inquiry-windows-x64.zip', browser_download_url: 'https://github.com/dl/win.zip' },
-          { name: 'inquiry-linux-x64.tar.gz', browser_download_url: 'https://github.com/dl/linux.tar.gz' },
-        ],
-      }),
+      fetchJson: async () => ([
+        {
+          tag_name: 'v1.0.0',
+          assets: [
+            { name: 'inquiry-windows-x64.zip', browser_download_url: 'https://github.com/dl/win.zip' },
+            { name: 'inquiry-linux-x64.tar.gz', browser_download_url: 'https://github.com/dl/linux.tar.gz' },
+          ],
+        },
+      ]),
       downloadFile: async () => {},
       extractZip: async () => {},
       extractTarGz: async () => {},
@@ -114,13 +143,28 @@ describe('installInquiryCli', () => {
     assert.ok(symlinkTargets.some(l => l.includes('iq')));
   });
 
-  it('throws when asset not found in release', async () => {
+  it('falls back to the newest published release that has the platform asset', async () => {
+    let downloadedUrl = '';
     const deps: InstallerDeps = {
       ...baseDeps('win32'),
-      fetchJson: async () => ({ tag_name: 'v1.0.0', assets: [] }),
+      fetchJson: async () => ([
+        { tag_name: 'v1.1.0', assets: [] },
+        { tag_name: 'v1.0.0', assets: [{ name: 'inquiry-windows-x64.zip', browser_download_url: 'https://github.com/dl/fallback.zip' }] },
+      ]),
+      downloadFile: async (url) => { downloadedUrl = url; },
     };
 
-    await assert.rejects(() => installInquiryCli(deps), /No inquiry-windows-x64.zip asset found/);
+    await installInquiryCli(deps);
+    assert.strictEqual(downloadedUrl, 'https://github.com/dl/fallback.zip');
+  });
+
+  it('throws when no published release contains the asset', async () => {
+    const deps: InstallerDeps = {
+      ...baseDeps('win32'),
+      fetchJson: async () => ([{ tag_name: 'v1.1.0', assets: [] }]),
+    };
+
+    await assert.rejects(() => installInquiryCli(deps), /No inquiry-windows-x64.zip asset found in published releases/);
   });
 
   it('rejects on download failure', async () => {
@@ -138,7 +182,7 @@ describe('installInquiryCli', () => {
       ...baseDeps('win32'),
       fetchJson: async () => {
         cancelFn!();
-        return { tag_name: 'v1.0.0', assets: [{ name: 'inquiry-windows-x64.zip', browser_download_url: 'x' }] };
+        return [{ tag_name: 'v1.0.0', assets: [{ name: 'inquiry-windows-x64.zip', browser_download_url: 'x' }] }];
       },
       withProgress: async (_opts, task) => {
         const progress = { report: () => {} };
