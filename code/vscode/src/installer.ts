@@ -2,7 +2,7 @@ import * as path from 'path';
 import * as os from 'os';
 
 const GITHUB_REPO = 'ccisnedev/inquiry';
-const RELEASES_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
+const RELEASES_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases`;
 
 export function getAssetName(platform: string): string {
   if (platform === 'win32') { return 'inquiry-windows-x64.zip'; }
@@ -18,6 +18,36 @@ export function getInstallDir(platform: string): string {
     return path.join(os.homedir(), '.inquiry');
   }
   throw new Error(`Unsupported platform: ${platform}`);
+}
+
+export interface ReleaseAsset {
+  name: string;
+  browser_download_url: string;
+}
+
+export interface ReleaseInfo {
+  tag_name: string;
+  draft?: boolean;
+  prerelease?: boolean;
+  assets?: ReleaseAsset[];
+}
+
+export function selectReleaseForAsset(releases: ReleaseInfo[], assetName: string): ReleaseInfo {
+  const publishedReleases = releases.filter((release) => !release.draft && !release.prerelease);
+  const matchingRelease = publishedReleases.find((release) =>
+    release.assets?.some((asset) => asset.name === assetName),
+  );
+
+  if (matchingRelease) {
+    return matchingRelease;
+  }
+
+  const newestTag = publishedReleases[0]?.tag_name;
+  if (newestTag) {
+    throw new Error(`No ${assetName} asset found in published releases (newest checked: ${newestTag})`);
+  }
+
+  throw new Error(`No published Inquiry releases available for ${assetName}`);
 }
 
 interface CancellationTokenLike {
@@ -160,10 +190,15 @@ export async function installInquiryCli(deps?: Partial<InstallerDeps>): Promise<
 
       // 1. Fetch latest release
       progress.report({ message: 'Fetching latest release...' });
-      const release = await fetchJson(RELEASES_URL);
+      const releases = await fetchJson(RELEASES_URL);
+      if (!Array.isArray(releases)) {
+        throw new Error('Invalid GitHub releases response');
+      }
+
+      const release = selectReleaseForAsset(releases, assetName);
       const asset = release.assets?.find((a: any) => a.name === assetName);
       if (!asset) {
-        throw new Error(`No ${assetName} asset found in release ${release.tag_name}`);
+        throw new Error(`No ${assetName} asset found in selected release ${release.tag_name}`);
       }
       if (cancelled) { throw new Error('Installation cancelled'); }
 
