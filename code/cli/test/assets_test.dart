@@ -158,7 +158,12 @@ void main() {
       final disallowedMarkers = {
         'socrates': ['output_dir', 'confirmed_doc', 'index_file', 'doc-write'],
         'descartes': ['analysis_input', 'plan_file', 'Commit:'],
-        'basho': ['retrospective.md'],
+        'ada': [
+          'plan_file',
+          'pre_pr_inspection_report',
+          'release_gate',
+          'result_metrics_surface',
+        ],
         'darwin': [
           'gh issue list',
           'gh issue comment',
@@ -188,6 +193,7 @@ void main() {
       final instructionFiles = [
         'instructions/doc-read.md',
         'instructions/doc-write.md',
+        'instructions/coding-manifesto-review.md',
         'instructions/issue-create.md',
         'instructions/inquiry-end.md',
         'instructions/inquiry-start.md',

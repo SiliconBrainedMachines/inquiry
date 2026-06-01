@@ -1,7 +1,7 @@
 /// `inquiry upgrade` — downloads and installs the latest Inquiry release.
 ///
 /// Fetches the latest release from GitHub, downloads the zip,
-/// extracts it over the current installation, and redeploys targets.
+/// extracts it over the current installation, and redeploys hosts.
 library;
 
 import 'dart:convert';
@@ -11,7 +11,7 @@ import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
-import '../../../targets/platform_ops.dart';
+import '../../../hosts/platform_ops.dart';
 import 'version.dart';
 
 const String _repo = 'ccisnedev/inquiry';
@@ -192,8 +192,8 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
 
       tempDir.deleteSync(recursive: true);
 
-      // 5. Redeploy targets using the new binary
-      stderr.writeln('Deploying targets...');
+      // 5. Redeploy hosts using the new binary
+      stderr.writeln('Deploying hosts...');
       await platformOps.runPostInstall(installDir);
       stderr.writeln('Upgrade completed successfully.');
 

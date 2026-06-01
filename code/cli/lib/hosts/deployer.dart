@@ -3,15 +3,15 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../assets.dart';
-import 'target_adapter.dart';
+import 'host_adapter.dart';
 
-/// Orchestrates deploying skills to target tool directories.
-class TargetDeployer {
+/// Orchestrates deploying skills to host tool directories.
+class HostDeployer {
   final Assets assets;
-  final List<TargetAdapter> adapters;
+  final List<HostAdapter> adapters;
   final String homeDir;
 
-  TargetDeployer({
+  HostDeployer({
     required this.assets,
     required this.adapters,
     required this.homeDir,
@@ -19,19 +19,19 @@ class TargetDeployer {
 
   /// Deploys skills exclusively to the named adapter, cleaning all adapters first.
   ///
-  /// Only one target is active at a time — all other adapter directories are
+  /// Only one host is active at a time — all other adapter directories are
   /// cleaned before deploying to the selected one.
   ///
-  /// Throws [ArgumentError] if [targetName] is not in [adapters].
-  void deployExclusive(String targetName) {
+  /// Throws [ArgumentError] if [hostName] is not in [adapters].
+  void deployExclusive(String hostName) {
     final validNames = adapters.map((a) => a.name).toSet();
-    if (!validNames.contains(targetName)) {
+    if (!validNames.contains(hostName)) {
       throw ArgumentError(
-        'Unknown target: "$targetName". Valid targets: ${validNames.join(", ")}',
+        'Unknown host: "$hostName". Valid hosts: ${validNames.join(", ")}',
       );
     }
     clean();
-    final selected = adapters.firstWhere((a) => a.name == targetName);
+    final selected = adapters.firstWhere((a) => a.name == hostName);
     _deploySkills(selected);
   }
 
@@ -43,15 +43,15 @@ class TargetDeployer {
     }
   }
 
-  void _deploySkills(TargetAdapter adapter) {
+  void _deploySkills(HostAdapter adapter) {
     final skillNames = assets.listDirectory('skills');
-    final targetSkillsDir = adapter.skillsDirectory(homeDir);
+    final hostSkillsDir = adapter.skillsDirectory(homeDir);
 
     for (final skillName in skillNames) {
       final content = assets.loadString('skills/$skillName/SKILL.md');
-      final targetFile = File(p.join(targetSkillsDir, skillName, 'SKILL.md'));
-      targetFile.parent.createSync(recursive: true);
-      targetFile.writeAsStringSync(content);
+      final hostFile = File(p.join(hostSkillsDir, skillName, 'SKILL.md'));
+      hostFile.parent.createSync(recursive: true);
+      hostFile.writeAsStringSync(content);
     }
   }
 

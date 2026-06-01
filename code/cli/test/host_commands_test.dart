@@ -5,12 +5,12 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'package:inquiry_cli/assets.dart';
-import 'package:inquiry_cli/modules/target/commands/get.dart';
-import 'package:inquiry_cli/modules/target/commands/clean.dart';
-import 'package:inquiry_cli/targets/deployer.dart';
-import 'package:inquiry_cli/targets/target_adapter.dart';
+import 'package:inquiry_cli/modules/host/commands/get.dart';
+import 'package:inquiry_cli/modules/host/commands/clean.dart';
+import 'package:inquiry_cli/hosts/deployer.dart';
+import 'package:inquiry_cli/hosts/host_adapter.dart';
 
-class _FakeAdapter extends TargetAdapter {
+class _FakeAdapter extends HostAdapter {
   @override
   String get name => 'fake';
 
@@ -27,10 +27,10 @@ class _FakeAdapter extends TargetAdapter {
 void main() {
   late Directory tempDir;
   late Directory homeDir;
-  late TargetDeployer deployer;
+  late HostDeployer deployer;
 
   setUp(() {
-    tempDir = Directory.systemTemp.createTempSync('ape_target_cmd_test_');
+    tempDir = Directory.systemTemp.createTempSync('ape_host_cmd_test_');
     homeDir = Directory(p.join(tempDir.path, 'home'))..createSync();
 
     // Create asset files
@@ -46,7 +46,7 @@ void main() {
       p.join(agentDir.path, 'inquiry.agent.md'),
     ).writeAsStringSync('# APE Agent');
 
-    deployer = TargetDeployer(
+    deployer = HostDeployer(
       assets: Assets(root: tempDir.path),
       adapters: [_FakeAdapter()],
       homeDir: homeDir.path,
@@ -57,10 +57,10 @@ void main() {
     if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
   });
 
-  group('ape target get', () {
-    test('exits 0 and deploys skills (not agent) to selected target', () async {
-      final command = TargetGetCommand(
-        TargetGetInput(target: 'fake'),
+  group('iq host get', () {
+    test('exits 0 and deploys skills (not agent) to selected host', () async {
+      final command = HostGetCommand(
+        HostGetInput(host: 'fake'),
         deployer: deployer,
       );
 
@@ -73,7 +73,7 @@ void main() {
         ).existsSync(),
         isTrue,
       );
-      // agent deploy is repo-scoped via iq init — NOT via target get
+      // agent deploy is repo-scoped via iq init — NOT via host get
       expect(
         File(
           p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'),
@@ -82,29 +82,29 @@ void main() {
       );
     });
 
-    test('TargetGetInput defaults target to copilot', () {
-      expect(TargetGetInput().target, equals('copilot'));
+    test('HostGetInput defaults host to copilot', () {
+      expect(HostGetInput().host, equals('copilot'));
     });
 
-    test('validate() returns error for unknown target', () {
-      final command = TargetGetCommand(
-        TargetGetInput(target: 'vscode'),
+    test('validate() returns error for unknown host', () {
+      final command = HostGetCommand(
+        HostGetInput(host: 'vscode'),
         deployer: deployer,
       );
       expect(command.validate(), isNotNull);
     });
 
-    test('validate() returns null for valid target', () {
-      final command = TargetGetCommand(
-        TargetGetInput(target: 'fake'),
+    test('validate() returns null for valid host', () {
+      final command = HostGetCommand(
+        HostGetInput(host: 'fake'),
         deployer: deployer,
       );
       expect(command.validate(), isNull);
     });
 
     test('exits 0 on idempotent re-run', () async {
-      final command = TargetGetCommand(
-        TargetGetInput(target: 'fake'),
+      final command = HostGetCommand(
+        HostGetInput(host: 'fake'),
         deployer: deployer,
       );
 
@@ -115,13 +115,13 @@ void main() {
     });
   });
 
-  group('ape target clean', () {
+  group('iq host clean', () {
     test('exits 0 and removes deployed files', () async {
       // Deploy first using deployExclusive
       deployer.deployExclusive('fake');
 
-      final command = TargetCleanCommand(
-        TargetCleanInput(),
+      final command = HostCleanCommand(
+        HostCleanInput(),
         deployer: deployer,
       );
 
@@ -135,8 +135,8 @@ void main() {
     });
 
     test('exits 0 when nothing to clean', () async {
-      final command = TargetCleanCommand(
-        TargetCleanInput(),
+      final command = HostCleanCommand(
+        HostCleanInput(),
         deployer: deployer,
       );
 
@@ -152,8 +152,8 @@ void main() {
       agentFile.parent.createSync(recursive: true);
       agentFile.writeAsStringSync('# APE Agent');
 
-      final command = TargetCleanCommand(
-        TargetCleanInput(),
+      final command = HostCleanCommand(
+        HostCleanInput(),
         deployer: deployer,
         workingDirectory: tempDir.path,
       );
@@ -161,7 +161,7 @@ void main() {
       await command.execute();
 
       expect(agentFile.existsSync(), isFalse,
-          reason: 'iq target clean must remove repo-scoped agent');
+      reason: 'iq host clean must remove repo-scoped agent');
     });
 
     test('removes repo-scoped agent when invoked from nested subdir', () async {
@@ -175,8 +175,8 @@ void main() {
       final nestedDir = Directory(p.join(tempDir.path, 'sub', 'deep'))
         ..createSync(recursive: true);
 
-      final command = TargetCleanCommand(
-        TargetCleanInput(),
+      final command = HostCleanCommand(
+        HostCleanInput(),
         deployer: deployer,
         workingDirectory: nestedDir.path,
       );
@@ -188,8 +188,8 @@ void main() {
 
     test('does not fail if .github/agents/inquiry.agent.md does not exist',
         () async {
-      final command = TargetCleanCommand(
-        TargetCleanInput(),
+      final command = HostCleanCommand(
+        HostCleanInput(),
         deployer: deployer,
         workingDirectory: tempDir.path,
       );

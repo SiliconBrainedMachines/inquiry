@@ -83,7 +83,7 @@ class WindowsPlatformOps implements PlatformOps {
   @override
   Future<void> runPostInstall(String installDir) async {
     await Process.run(p.join(installDir, 'bin', binaryName), [
-      'target',
+      'host',
       'get',
     ]);
   }

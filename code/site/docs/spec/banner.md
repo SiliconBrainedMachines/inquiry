@@ -30,7 +30,7 @@ The banner system has two related but separate deliverables:
 1. `Ascent of Method`
    - The animated CLI / site banner.
    - Shows the lineage from early primate to human, then through the thinking
-     tools of Socrates, Descartes, and Basho, ending with the user assisted by
+   tools of Socrates, Descartes, and Ada, ending with the user assisted by
      AI.
 
 2. `Illuminated Operator`
@@ -72,7 +72,7 @@ instructional text:
    - APE is the operational cycle: Analyze, Plan, Execute.
 
 3. Philosophy as tooling
-   - Socrates, Descartes, and Basho are not decorative historical references.
+   - Socrates, Descartes, and Ada are not decorative historical references.
    - They are thinking tools: questioning, method, and constrained execution.
 
 4. Finite state machine
@@ -94,7 +94,7 @@ The animation uses seven base archetypes and one final transformed state.
 | 3 | Homo Sapiens | Human | Upright human silhouette | Human cognition and agency |
 | 4 | Socrates | Analyze | Questioning philosopher archetype | Inquiry, requirements, mayeutic analysis |
 | 5 | Descartes | Plan | Rational method archetype with geometric/order cues | Method, decomposition, proof, plan |
-| 6 | Basho | Execute | Minimal artisan / poet-coder archetype | Constraint, craft, execution with elegance |
+| 6 | Ada | Execute | Programming architect / computational craft archetype | Intent, structure, execution with explicit construction |
 | 7 | User | Operator | Contemporary developer/user silhouette | The person using APE |
 | 7' | Illuminated Operator | Final mark | User bust with AI Method Halo | Human assisted by finite machine intelligence |
 
@@ -232,7 +232,7 @@ Avoid:
 - Baroque costume detail.
 - Overly academic collage.
 
-### Figure 6: Basho
+### Figure 6: Ada
 
 Use a minimal artisan / poet-coder archetype.
 
@@ -363,8 +363,8 @@ The second phase absorbs the lineage from left to right.
 | B2 | 3' 4 5 6 7 | Figure 2' is absorbed into figure 3 |
 | B3 | 4' 5 6 7 | Figure 3' is absorbed into Socrates |
 | B4 | 5' 6 7 | Socrates is absorbed into Descartes |
-| B5 | 6' 7 | Descartes is absorbed into Basho |
-| B6 | 7' | Basho is absorbed into the user, creating the Illuminated Operator |
+| B5 | 6' 7 | Descartes is absorbed into Ada |
+| B6 | 7' | Ada is absorbed into the user, creating the Illuminated Operator |
 
 Design intent:
 

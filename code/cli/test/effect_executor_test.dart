@@ -593,19 +593,19 @@ void main() {
         expect(content, contains('state: decomposition'));
       });
 
-      test('activates basho when transitioning to EXECUTE', () {
+      test('activates ada when transitioning to EXECUTE', () {
         File(stateFilePath).writeAsStringSync('state: PLAN\nissue: "145"\n');
 
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/basho.yaml').copySync('${apesDir.path}/basho.yaml');
+        File('assets/apes/ada.yaml').copySync('${apesDir.path}/ada.yaml');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('EXECUTE');
 
         final content = File(stateFilePath).readAsStringSync();
-        expect(content, contains('name: basho'));
-        expect(content, contains('state: implement'));
+        expect(content, contains('name: ada'));
+        expect(content, contains('state: frame_intent'));
       });
 
       test('activates darwin when transitioning to EVOLUTION', () {
@@ -636,22 +636,21 @@ void main() {
         // initialState is null when YAML not found — still writes the name
       });
 
-      test('preserves APE sub-state when same APE continues (EXECUTE→END)', () {
+      test('clears the active ape when transitioning from EXECUTE to END', () {
         final apesDir = Directory('${tempDir.path}/assets/apes');
         apesDir.createSync(recursive: true);
-        File('assets/apes/basho.yaml').copySync('${apesDir.path}/basho.yaml');
+        File('assets/apes/ada.yaml').copySync('${apesDir.path}/ada.yaml');
 
-        // basho is at _DONE in EXECUTE
         File(stateFilePath).writeAsStringSync(
-          'state: EXECUTE\nissue: "145"\nape:\n  name: basho\n  state: _DONE\n',
+          'state: EXECUTE\nissue: "145"\nape:\n  name: ada\n  state: _DONE\n',
         );
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
         executor.updateState('END');
 
         final content = File(stateFilePath).readAsStringSync();
-        expect(content, contains('name: basho'));
-        expect(content, contains('state: _DONE'));
+        expect(content, contains('state: END'));
+        expect(content, contains('ape: null'));
       });
 
       test('re-initializes socrates when ANALYZE continues from _DONE', () {

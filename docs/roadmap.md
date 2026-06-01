@@ -51,7 +51,7 @@ DARWIN should continue to propose changes from concrete cycle evidence, not from
 
 These remain real possibilities, but they should land only when the harness earns them:
 
-- multi-target reactivation
+- multi-host reactivation
 - `iq task` and stronger issue/PR wrapping
 - richer host-side telemetry when the platform exposes it
 - more opinionated website and distribution surfaces
@@ -131,7 +131,7 @@ Several roadmap items from the early v0.0.x planning era are no longer near-term
 
 Larger features that require infrastructure from the near-term to land first. Not yet split into discrete issues.
 
-Viewed through the harness framing above, these mid-term items are best understood as **harness completion work**: first-class memory tooling, first-class task orchestration, target reactivation, and comparative validation across hosts.
+Viewed through the harness framing above, these mid-term items are best understood as **harness completion work**: first-class memory tooling, first-class task orchestration, host reactivation, and comparative validation across hosts.
 
 ### `iq memory` CLI
 First-class commands for the Memory-as-Code spec:
@@ -142,21 +142,21 @@ First-class commands for the Memory-as-Code spec:
 ### `iq task` CLI
 Replace the manual `gh issue create / gh pr create / gh pr merge` dance with a single command per FSM transition. Currently the agent calls `gh` directly; `iq task` would wrap that with prechecks such as task existence, branch/task identity coherence, and no scope drift under the single-task rule.
 
-### Multi-target reactivation
-The deferred half of [ADR D20](spec/target-specific-agents.md). Adapters already exist for Claude Code, Crush, Codex, and Gemini — they just aren't wired into `iq target get`. Reactivation requires:
+### Multi-host reactivation
+The deferred half of [ADR D20](spec/host-specific-agents.md). Adapters already exist for Claude Code, Codex, Gemini, and OpenCode — they just aren't wired into `iq host get`. Reactivation requires:
 1. Stable agent prompt API (so the same APE methodology runs identically across hosts)
-2. A test matrix that runs the same APE cycle against multiple targets
+2. A test matrix that runs the same APE cycle against multiple hosts
 3. Comparative metrics on top of the foundation already landed in #72
 
 ### Antifragility validation harness
-A test rig that runs N identical APE cycles against M targets (Copilot, Crush, Claude Code, and similar hosted surfaces) and aggregates `metrics.yaml` to test how well the same philosophical-methodological discipline survives tool changes and operational constraints.
+A test rig that runs N identical APE cycles against M hosts (Copilot, OpenCode, Claude Code, and similar hosted surfaces) and aggregates `metrics.yaml` to test how well the same philosophical-methodological discipline survives tool changes and operational constraints.
 
 ## Long-term (v1.0+)
 
 Theses that take the project beyond a CLI tool.
 
 ### Philosophical and Methodological Consolidation
-A mature statement of Inquiry as a doctrine for AI-assisted software work: sharpen the canonical role of Thinking Tools, clarify the Inquiry / APE / Finite APE Machine distinction, and make the philosophical lineage legible enough that the method survives changes in targets, vendors, and surrounding tooling.
+A mature statement of Inquiry as a doctrine for AI-assisted software work: sharpen the canonical role of Thinking Tools, clarify the Inquiry / APE / Finite APE Machine distinction, and make the philosophical lineage legible enough that the method survives changes in hosts, vendors, and surrounding tooling.
 
 ### Bootstrap-validation paper
 Publish the empirical paper on APE-builds-APE once the project has enough clean comparative cycle evidence and a stable publication plan.
@@ -169,20 +169,20 @@ The semantic risk matrix exists in spec but not yet in CLI behavior. End-state: 
 
 ## Lore vs reality
 
-The original [lore.md](lore.md) sketched 9+ apes. After two months of building APE with APE, the roster collapsed to a smaller live set. In the current contract, DEWEY owns IDLE triage alongside SOCRATES, DESCARTES, BASHŌ, and DARWIN. This is honest accounting, not a roadmap commitment to revive deferred ones — most other roles were absorbed by simpler operators that turned out to do the job better.
+The original [lore.md](lore.md) sketched 9+ apes. After two months of building APE with APE, the roster collapsed to a smaller live set. In the current contract, DEWEY owns IDLE triage alongside SOCRATES, DESCARTES, ADA, and DARWIN. This is honest accounting, not a roadmap commitment to revive deferred ones — most other roles were absorbed by simpler operators that turned out to do the job better.
 
 | Lore agent | Status | What happened |
 |---|---|---|
 | **DEWEY** | ✅ Active | IDLE — bounded issue triage and explicit handoff to `inquiry-start` |
 | **SOCRATES** | ✅ Active | ANALYZE — implemented as the mayéutica agent |
 | **DESCARTES** | ✅ Active | PLAN — replaces SUNZI's strategy + VITRUVIUS's WBS in one Cartesian Method |
-| **BASHŌ** | ✅ Active | EXECUTE — replaces ADA's TDD with techne (functional beauty under constraints) |
+| **ADA** | ✅ Active | EXECUTE — programming-manifesto cognition for bounded construction and review |
 | **DARWIN** | ✅ Active | EVOLUTION — implemented; produces concrete evidence (e.g. issue #54) |
 | **MARCOPOLO** | Absorbed | Document and source gathering are now handled through SOCRATES plus `doc-read` and the direct-use `research` skill |
 | **VITRUVIUS** | Absorbed | WBS / decomposition is part of DESCARTES's plan phase |
 | **SUNZI** | Replaced | DESCARTES's Method is more explicit and testable than strategic prose |
 | **GATSBY** | Absorbed | Test pseudocode lives in `plan.md` written by DESCARTES |
-| **ADA** | Replaced | BASHŌ's techne replaces explicit TDD as a separate phase |
+| **BASHŌ** | Replaced | ADA restores EXECUTE as a cognitive operator while phase contracts keep commits, release gates, and closure |
 | **DIJKSTRA** | Future private skill | Quality-gate becomes a `pre-pr-review` skill inside END, not a separate agent |
 | **BORGES** | Future private skill | Schema validation becomes `iq memory validate`, not a standalone ape |
 | **HERMES** | Materialized | State transitions are now `iq fsm transition` (CLI command, not an agent) |

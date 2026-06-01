@@ -1,4 +1,4 @@
-/// `ape target clean` — removes deployed APE files from all targets.
+/// `iq host clean` — removes deployed Inquiry files from all hosts.
 library;
 
 import 'dart:io';
@@ -8,14 +8,14 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../src/git_utils.dart';
-import '../../../targets/deployer.dart';
+import '../../../hosts/deployer.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
-class TargetCleanInput extends Input {
-  TargetCleanInput();
+class HostCleanInput extends Input {
+  HostCleanInput();
 
-  factory TargetCleanInput.fromCliRequest(CliRequest req) => TargetCleanInput();
+  factory HostCleanInput.fromCliRequest(CliRequest req) => HostCleanInput();
 
   @override
   Map<String, dynamic> toJson() => {};
@@ -23,10 +23,10 @@ class TargetCleanInput extends Input {
 
 // ─── Output ─────────────────────────────────────────────────────────────────
 
-class TargetCleanOutput extends Output {
+class HostCleanOutput extends Output {
   final String message;
 
-  TargetCleanOutput({required this.message});
+  HostCleanOutput({required this.message});
 
   @override
   Map<String, dynamic> toJson() => {'message': message};
@@ -37,14 +37,14 @@ class TargetCleanOutput extends Output {
 
 // ─── Command ────────────────────────────────────────────────────────────────
 
-class TargetCleanCommand
-    implements Command<TargetCleanInput, TargetCleanOutput> {
+class HostCleanCommand
+    implements Command<HostCleanInput, HostCleanOutput> {
   @override
-  final TargetCleanInput input;
-  final TargetDeployer deployer;
+  final HostCleanInput input;
+  final HostDeployer deployer;
   final String _workingDirectory;
 
-  TargetCleanCommand(
+  HostCleanCommand(
     this.input, {
     required this.deployer,
     String? workingDirectory,
@@ -54,10 +54,10 @@ class TargetCleanCommand
   String? validate() => null;
 
   @override
-  Future<TargetCleanOutput> execute() async {
+  Future<HostCleanOutput> execute() async {
     deployer.clean();
     _cleanRepoScopedAgent();
-    return TargetCleanOutput(message: 'Inquiry cleaned from all targets');
+    return HostCleanOutput(message: 'Inquiry cleaned from all hosts');
   }
 
   void _cleanRepoScopedAgent() {
