@@ -39,5 +39,3 @@ curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 | `iq ape prompt --name <name>` | Assemble sub-agent prompt from YAML + current state |
 | `iq ape state` | Show active APE sub-state and valid transitions |
 | `iq ape transition --event <e>` | Advance the active APE's internal FSM |
-
-Legacy aliases `iq target get` and `iq target clean` remain supported for backward compatibility.
