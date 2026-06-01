@@ -59,6 +59,57 @@ The runtime exposes the active phase's minimum sensor model inside `inquiry-cont
 
 ## Minimum phase stack
 
+### ANALYZE
+
+ANALYZE should make its handoff gate explicit instead of treating repository reading and diagnosis assembly as an informal prelude.
+
+Its minimum stack is:
+
+- `runtime` — task identity, issue selection, branch coherence, and harness trust
+- `pre_transition` — bounded analysis corpus and diagnosis prerequisites before PLAN handoff
+- `inferential_optional` — provisional hypotheses or review observations that do not outrank stronger evidence by themselves
+
+ANALYZE gate semantics:
+
+- `runtime` failures block entry into or completion of ANALYZE when task identity or branch policy is incoherent
+- `pre_transition` failures block handoff into PLAN until the bounded analysis corpus is materially complete enough
+- current local enforcement for `complete_analysis` requires `diagnosis.md`, `index.md`, and `confirmations.md`, and also requires `diagnosis.md` to distinguish Evidence, Hypotheses, Constraints, and Open Questions before PLAN handoff
+- `inferential_optional` findings can shape the diagnosis, but they do not overrule stronger blocking sensors on their own
+
+Runtime mapping:
+
+- `sensor_policy`: `minimum-phase-stack`
+- `minimum_sensor_stack`: `runtime`, `pre_transition`, `inferential_optional`
+- `blocking_sensor_stack`: `runtime`, `pre_transition`
+- `advisory_sensor_stack`: `inferential_optional`
+- `sensor_gate`: `handoff-to-plan`
+- `sensor_authority_rule`: `analysis corpus and diagnosis handoff must be complete enough before PLAN handoff can proceed`
+
+### PLAN
+
+PLAN should make the execution handoff explicit instead of relying on informal confidence that planning is "good enough".
+
+Its minimum stack is:
+
+- `runtime` — issue-linked branch and task identity remain coherent while planning
+- `pre_transition` — `plan.md` exists and is authoritative enough for EXECUTE handoff
+- `inferential_optional` — non-blocking planning observations that still need stronger evidence before they can stop progress
+
+PLAN gate semantics:
+
+- `runtime` failures block EXECUTE handoff when branch or task identity no longer support a trustworthy cycle
+- `pre_transition` failures block EXECUTE handoff until `plan.md` exists as the authoritative phase contract
+- `inferential_optional` findings can inform caution or revision, but do not overrule stronger blocking sensors alone
+
+Runtime mapping:
+
+- `sensor_policy`: `minimum-phase-stack`
+- `minimum_sensor_stack`: `runtime`, `pre_transition`, `inferential_optional`
+- `blocking_sensor_stack`: `runtime`, `pre_transition`
+- `advisory_sensor_stack`: `inferential_optional`
+- `sensor_gate`: `handoff-to-execute`
+- `sensor_authority_rule`: `plan.md and issue-linked runtime context must be coherent before EXECUTE handoff`
+
 ### EXECUTE
 
 EXECUTE should not treat validation as a single blob. Its minimum stack is:
@@ -89,7 +140,7 @@ END is the explicit pre-PR gate. Its minimum stack is:
 
 - `pre_pr` — blocking inspection before push or PR creation
 - `ci_required` — merge-authoritative checks that remain binding after PR creation
-- `runtime` — blocking checks when branch, issue, FSM state, or target state looks inconsistent
+- `runtime` — blocking checks when branch, task identity, FSM state, or target state looks inconsistent
 - `inferential_optional` — non-blocking review findings unless strengthened by harder evidence
 
 END gate semantics:
@@ -113,7 +164,7 @@ Current enforcement surface:
 - entering END seeds `cleanrooms/<branch>/pre_pr_inspection.md` from the inspection template when the report does not yet exist
 - Pass 1 (`Consistency`) is auto-generated from deterministic source/build parity checks and refreshed again immediately before `pr_ready`
 - Pass 2 (`Completeness`) now auto-checks `cleanrooms/<branch>/plan.md` for unchecked execution checkboxes and refreshes again immediately before `pr_ready`
-- Pass 3 (`Traceability`) now auto-checks `issue:` and `branch:` metadata inside `cleanrooms/<branch>/pre_pr_inspection.md` and refreshes again immediately before `pr_ready`
+- Pass 3 (`Traceability`) now auto-checks the active task metadata currently materialized as `issue:` and `branch:` inside `cleanrooms/<branch>/pre_pr_inspection.md` and refreshes again immediately before `pr_ready`
 - the report must include `Consistency`, `Completeness`, and `Traceability` passes with `PASS`, `FAIL`, or `WARN` checks in each pass
 - every `FAIL` finding must cite repo-relative `file:line`
 - `verdict: APPROVED` is only valid when no pass contains `FAIL`
@@ -135,6 +186,6 @@ In particular, it does not yet:
 - auto-discover every repo-specific validation command
 - replace CI configuration
 - solve harness observability or cost accounting by itself
-- eliminate the need for later work in #163, #127, #207, or #29
+- eliminate the need for later work in closure, release-gate visibility, transition clarity, or document-level blocking gates
 
 It provides the vocabulary and minimum contract that those later mechanisms should plug into.

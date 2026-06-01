@@ -36,6 +36,32 @@ final RegExp _fileLineCitationPattern = RegExp(
   r'(^|[\s(])([A-Za-z0-9._/-]+):(\d+)(?=$|[\s)])',
 );
 
+final Map<String, RegExp> _diagnosisSectionPatterns = <String, RegExp>{
+  'Evidence': RegExp(
+    r'^##?\s+(Evidence|Evidencia)\b',
+    caseSensitive: false,
+    multiLine: true,
+  ),
+  'Hypotheses': RegExp(
+    r'^##?\s+(Hypotheses|Hypothesis|Hipotesis|Hipótesis)\b',
+    caseSensitive: false,
+    multiLine: true,
+  ),
+  'Constraints': RegExp(
+    r'^##?\s+(Constraints|Restricciones)\b',
+    caseSensitive: false,
+    multiLine: true,
+  ),
+  'Open Questions': RegExp(
+    r'^##?\s+(Open Questions|Open Question|Preguntas Abiertas)\b',
+    caseSensitive: false,
+    multiLine: true,
+  ),
+};
+
+const _diagnosisEvidenceBootstrapPlaceholder =
+    'record observed repo, artifact, test, runtime, or research evidence here.';
+
 class _BoundaryCommitSpec {
   final String label;
   final String path;
@@ -246,9 +272,30 @@ class StateTransitionCommand
         ? FsmState.fromValue(input.currentState!.trim().toUpperCase())
         : _loadCurrentState(input.workingDirectory);
     final event = FsmEvent.fromValue(input.event!.trim().toLowerCase());
+    final resolvedIssue = _resolveIssue(input.workingDirectory, input.issue);
+    final executor = EffectExecutor(
+      workingDirectory: input.workingDirectory,
+      assets: _assets,
+    );
 
     final transition = contract.transitionFor(current, event);
     if (!transition.allowed) {
+      final message = transition.reason ?? 'Illegal transition';
+      _recordBlockedRunTrace(
+        executor,
+        currentState: current.value,
+        event: event.value,
+        nextState: transition.to?.value,
+        operationsExecuted: const ['validate_transition'],
+        issue: resolvedIssue,
+        reason: message,
+        blockingBoundary: 'transition_matrix',
+        authoritativeSurface: p.posix.join(
+          'assets',
+          'fsm',
+          'transition_contract.yaml',
+        ),
+      );
       return StateTransitionOutput(
         allowed: false,
         currentState: current.value,
@@ -258,20 +305,55 @@ class StateTransitionCommand
         promptFragmentId: null,
         requiredRole: null,
         requiredInstructions: null,
-        message: transition.reason ?? 'Illegal transition',
+        message: message,
         code: ExitCode.invalidUsage,
       );
     }
 
     final branch = await branchProvider(input.workingDirectory);
+    final retryContext = executor.retryContextFor(
+      currentState: current.value,
+      event: event.value,
+    );
+    if (retryContext != null) {
+      executor.recordRetryTrace(
+        currentState: current.value,
+        event: event.value,
+        triggeringFailure: retryContext.triggeringFailure,
+        retryCount: retryContext.retryCount,
+        operationsExecuted: const ['validate_transition'],
+        issue: resolvedIssue,
+        promptFragmentId: transition.operations?.promptFragmentId,
+      );
+    }
 
     final precheckResult = await _validatePreconditions(
       transition,
       input.workingDirectory,
       branch: branch,
-      inputIssue: input.issue,
+      issue: resolvedIssue,
+      currentState: current.value,
+      promptFragmentId: transition.operations?.promptFragmentId,
+      executor: executor,
     );
     if (precheckResult != null) {
+      _recordBlockedRunTrace(
+        executor,
+        currentState: current.value,
+        event: event.value,
+        nextState: transition.to?.value,
+        operationsExecuted: const ['validate_transition', 'validate_prechecks'],
+        issue: resolvedIssue,
+        promptFragmentId: transition.operations?.promptFragmentId,
+        reason: precheckResult,
+        blockingBoundary: _blockingBoundaryForFailure(precheckResult),
+        authoritativeSurface: _authoritativeSurfaceForFailure(
+          precheckResult,
+          branch: branch,
+          transition: transition,
+          issue: resolvedIssue,
+        ),
+      );
       return StateTransitionOutput(
         allowed: false,
         currentState: current.value,
@@ -286,13 +368,48 @@ class StateTransitionCommand
       );
     }
 
+    final boundaryCommitSpec = _boundaryCommitSpec(
+      transition.operations?.commitPolicy ?? 'none',
+      branch: branch,
+      issue: resolvedIssue,
+    );
     final boundaryCommitResult = await _executeBoundaryCommit(
       transition,
       input.workingDirectory,
+      executor: executor,
+      currentState: current.value,
+      event: event.value,
       branch: branch,
-      issue: _resolveIssue(input.workingDirectory, input.issue),
+      issue: resolvedIssue,
+      promptFragmentId: transition.operations?.promptFragmentId,
+    );
+    _recordBoundaryCommitSensorTrace(
+      executor,
+      currentState: current.value,
+      transition: transition,
+      spec: boundaryCommitSpec,
+      errorMessage: boundaryCommitResult.errorMessage,
+      issue: resolvedIssue,
     );
     if (boundaryCommitResult.errorMessage != null) {
+      _recordBlockedRunTrace(
+        executor,
+        currentState: current.value,
+        event: event.value,
+        nextState: transition.to?.value,
+        operationsExecuted: const ['validate_transition', 'validate_prechecks'],
+        issue: resolvedIssue,
+        promptFragmentId: transition.operations?.promptFragmentId,
+        reason: boundaryCommitResult.errorMessage!,
+        blockingBoundary: 'boundary_commit',
+        authoritativeSurface: _boundaryCommitSpec(
+              transition.operations?.commitPolicy ?? 'none',
+              branch: branch,
+              issue: resolvedIssue,
+            )
+            ?.path ??
+            'git:commit',
+      );
       return StateTransitionOutput(
         allowed: false,
         currentState: current.value,
@@ -310,19 +427,18 @@ class StateTransitionCommand
     final operations = transition.operations;
     final promptId = operations?.promptFragmentId;
     final prompt = promptId != null ? contract.promptFragments[promptId] : null;
-    final instructionSummary = prompt?.instructions == null || prompt!.instructions.isEmpty
+    final instructions = prompt?.instructions;
+    final instructionSummary = instructions == null || instructions.isEmpty
       ? null
-      : _loadInstructionSummary(prompt.instructions!, projectRoot);
+      : _loadInstructionSummary(instructions, projectRoot);
 
     // Execute CLI-side effects
-    final executor = EffectExecutor(
-      workingDirectory: input.workingDirectory,
-      assets: _assets,
-    );
     final executedEffects = executor.executeAll(
       effects: operations?.effects ?? const <String>[],
       newState: transition.to?.value ?? current.value,
-      issue: input.issue,
+      currentState: current.value,
+      event: event.value,
+      issue: resolvedIssue,
       promptFragmentId: promptId,
     );
 
@@ -347,6 +463,129 @@ class StateTransitionCommand
     );
   }
 
+  void _recordBlockedRunTrace(
+    EffectExecutor executor, {
+    required String currentState,
+    required String event,
+    required String? nextState,
+    required List<String> operationsExecuted,
+    required String reason,
+    required String blockingBoundary,
+    required String authoritativeSurface,
+    String? issue,
+    String? promptFragmentId,
+  }) {
+    executor.recordTransitionTrace(
+      currentState: currentState,
+      event: event,
+      newState: nextState,
+      operationsExecuted: operationsExecuted,
+      outcome: 'blocked',
+      issue: issue,
+      promptFragmentId: promptFragmentId,
+      reason: reason,
+    );
+    executor.recordBlockTrace(
+      currentState: currentState,
+      event: event,
+      blockingBoundary: blockingBoundary,
+      reason: reason,
+      authoritativeSurface: authoritativeSurface,
+      operationsExecuted: operationsExecuted,
+      issue: issue,
+      promptFragmentId: promptFragmentId,
+    );
+  }
+
+  String _prePrInspectionSensorVerdict(_PrePrInspectionReport report) {
+    if (!report.exists || report.verdict == null) {
+      return 'MISSING';
+    }
+    if (!report.hasRequiredPassStructure || report.hasMissingRequiredCitations) {
+      return 'INVALID';
+    }
+    if (report.verdict == 'APPROVED' && report.hasFailChecks) {
+      return 'INVALID';
+    }
+    return report.verdict!;
+  }
+
+  void _recordBoundaryCommitSensorTrace(
+    EffectExecutor executor, {
+    required String currentState,
+    required FsmTransition transition,
+    required _BoundaryCommitSpec? spec,
+    required String? errorMessage,
+    String? issue,
+  }) {
+    if (spec == null) return;
+
+    executor.recordSensorRunTrace(
+      currentState: currentState,
+      sensorCategory: 'pre_transition',
+      gate: _boundaryCommitGate(spec),
+      verdict: errorMessage == null ? 'APPROVED' : 'FAILED',
+      authority: spec.path,
+      operationsExecuted: const ['validate_transition', 'validate_prechecks'],
+      issue: issue,
+      promptFragmentId: transition.operations?.promptFragmentId,
+    );
+  }
+
+  String _boundaryCommitGate(_BoundaryCommitSpec spec) {
+    if (spec.path.endsWith('/analyze')) {
+      return 'commit_analysis_boundary';
+    }
+    if (spec.path.endsWith('/plan.md')) {
+      return 'commit_plan_boundary';
+    }
+    return 'boundary_commit';
+  }
+
+  String _blockingBoundaryForFailure(String message) {
+    if (message.startsWith('ERROR_PRECONDITION_PRE_PR_INSPECTION_')) {
+      return 'end_pre_pr_gate';
+    }
+    return 'precondition_gate';
+  }
+
+  String _authoritativeSurfaceForFailure(
+    String message, {
+    required String branch,
+    required FsmTransition transition,
+    String? issue,
+  }) {
+    if (message.startsWith('ERROR_PRECONDITION_DIAGNOSIS_MISSING')) {
+      return p.posix.join('cleanrooms', branch, 'analyze', 'diagnosis.md');
+    }
+    if (message.startsWith('ERROR_PRECONDITION_ANALYZE_INDEX_MISSING')) {
+      return p.posix.join('cleanrooms', branch, 'analyze', 'index.md');
+    }
+    if (message.startsWith('ERROR_PRECONDITION_CONFIRMATIONS_MISSING')) {
+      return p.posix.join('cleanrooms', branch, 'analyze', 'confirmations.md');
+    }
+    if (message.startsWith('ERROR_PRECONDITION_PLAN_MISSING')) {
+      return p.posix.join('cleanrooms', branch, 'plan.md');
+    }
+    if (message.startsWith('ERROR_PRECONDITION_PRE_PR_INSPECTION_')) {
+      return p.posix.join('cleanrooms', branch, 'pre_pr_inspection.md');
+    }
+    if (message.startsWith('ERROR_PRECONDITION_ISSUE_FIRST')) {
+      return p.posix.join('cleanrooms', branch, kStateFileName);
+    }
+    if (message.startsWith('ERROR_PRECONDITION_BRANCH_POLICY')) {
+      return 'git:branch';
+    }
+
+    return _boundaryCommitSpec(
+          transition.operations?.commitPolicy ?? 'none',
+          branch: branch,
+          issue: issue,
+        )
+        ?.path ??
+        p.posix.join('assets', 'fsm', 'transition_contract.yaml');
+  }
+
   String? _loadInstructionSummary(List<String> instructions, String projectRoot) {
     for (final assets in _instructionAssetCandidates(projectRoot)) {
       if (!_hasInstructionAssets(assets, instructions)) {
@@ -358,8 +597,9 @@ class StateTransitionCommand
   }
 
   Iterable<Assets> _instructionAssetCandidates(String projectRoot) sync* {
-    if (_assets != null) {
-      yield _assets!;
+    final assets = _assets;
+    if (assets != null) {
+      yield assets;
     }
 
     yield Assets(root: projectRoot);
@@ -380,42 +620,229 @@ class StateTransitionCommand
     FsmTransition transition,
     String workingDirectory, {
     required String branch,
-    String? inputIssue,
+    required String currentState,
+    required EffectExecutor executor,
+    String? issue,
+    String? promptFragmentId,
   }) async {
     final prechecks = transition.operations?.prechecks ?? const <String>[];
-    final issueSelected =
-        _isIssueSelected(workingDirectory) ||
-        (inputIssue != null && inputIssue.trim().isNotEmpty);
+    final issueSelected = issue != null && issue.trim().isNotEmpty;
 
-    if ((prechecks.contains('issue_selected') ||
-            prechecks.contains('issue_selected_or_created')) &&
-        !issueSelected) {
-      return 'ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions';
+    if (prechecks.contains('issue_selected_or_created')) {
+      if (!issueSelected) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'issue_selected_or_created',
+          verdict: 'MISSING',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'issue_selected_or_created',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
     }
 
-    if (prechecks.contains('feature_branch_selected') &&
-        (branch == 'main' || branch == 'master' || branch.isEmpty)) {
-      return 'ERROR_PRECONDITION_BRANCH_POLICY: Use issue-linked feature branch, not main';
+    if (prechecks.contains('issue_selected')) {
+      if (!issueSelected) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'issue_selected',
+          verdict: 'MISSING',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'issue_selected',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
     }
 
-    if (prechecks.contains('diagnosis_exists') &&
-        !_analysisDiagnosisExists(branch, workingDirectory)) {
-      return 'ERROR_PRECONDITION_DIAGNOSIS_MISSING: diagnosis.md missing for current issue branch';
+    if (prechecks.contains('feature_branch_selected')) {
+      if (branch == 'main' || branch == 'master' || branch.isEmpty) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'feature_branch_selected',
+          verdict: 'INVALID',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_BRANCH_POLICY: Use issue-linked feature branch, not main';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'feature_branch_selected',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
     }
 
-    if (prechecks.contains('index_exists') &&
-        !_analysisIndexExists(branch, workingDirectory)) {
-      return 'ERROR_PRECONDITION_ANALYZE_INDEX_MISSING: index.md missing for current issue branch';
+    if (prechecks.contains('diagnosis_exists')) {
+      if (!_analysisDiagnosisExists(branch, workingDirectory)) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'diagnosis_exists',
+          verdict: 'MISSING',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_DIAGNOSIS_MISSING: diagnosis.md missing for current issue branch';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'diagnosis_exists',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
     }
 
-    if (prechecks.contains('confirmations_exists') &&
-        !_analysisConfirmationsExists(branch, workingDirectory)) {
-      return 'ERROR_PRECONDITION_CONFIRMATIONS_MISSING: confirmations.md missing for current issue branch';
+    if (prechecks.contains('diagnosis_structured')) {
+      final missingSections = _missingDiagnosisSections(branch, workingDirectory);
+      if (missingSections.isNotEmpty) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'diagnosis_structured',
+          verdict: 'INVALID',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_DIAGNOSIS_STRUCTURE_INVALID: diagnosis.md must contain Evidence, Hypotheses, Constraints, and Open Questions sections for current issue branch; missing: ${missingSections.join(', ')}';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'diagnosis_structured',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
     }
 
-    if (prechecks.contains('plan_approved') &&
-        !_planExists(branch, workingDirectory)) {
-      return 'ERROR_PRECONDITION_PLAN_MISSING: plan.md missing for current issue branch';
+    if (prechecks.contains('diagnosis_evidence_present')) {
+      if (!_diagnosisHasConcreteEvidence(branch, workingDirectory)) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'diagnosis_evidence_present',
+          verdict: 'INVALID',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'diagnosis_evidence_present',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
+    }
+
+    if (prechecks.contains('index_exists')) {
+      if (!_analysisIndexExists(branch, workingDirectory)) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'index_exists',
+          verdict: 'MISSING',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_ANALYZE_INDEX_MISSING: index.md missing for current issue branch';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'index_exists',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
+    }
+
+    if (prechecks.contains('confirmations_exists')) {
+      if (!_analysisConfirmationsExists(branch, workingDirectory)) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'confirmations_exists',
+          verdict: 'MISSING',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_CONFIRMATIONS_MISSING: confirmations.md missing for current issue branch';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'confirmations_exists',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
+    }
+
+    if (prechecks.contains('plan_approved')) {
+      if (!_planExists(branch, workingDirectory)) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'plan_approved',
+          verdict: 'MISSING',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_PLAN_MISSING: plan.md missing for current issue branch';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'plan_approved',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
     }
 
     if (prechecks.contains('pre_pr_inspection_approved')) {
@@ -424,6 +851,16 @@ class StateTransitionCommand
         assets: _assets,
       ).refreshDeterministicPasses();
       final report = _prePrInspectionReport(branch, workingDirectory);
+      final verdict = _prePrInspectionSensorVerdict(report);
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'pre_pr_inspection_approved',
+        verdict: verdict,
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
       if (!report.exists || report.verdict == null) {
         return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_MISSING: pre_pr_inspection.md missing or verdict not found for current issue branch';
       }
@@ -444,11 +881,154 @@ class StateTransitionCommand
     return null;
   }
 
+  void _recordPrecheckSensor(
+    EffectExecutor executor, {
+    required String currentState,
+    required String precheck,
+    required String verdict,
+    required String branch,
+    String? issue,
+    String? promptFragmentId,
+  }) {
+    executor.recordSensorRunTrace(
+      currentState: currentState,
+      sensorCategory: _sensorCategoryForPrecheck(precheck),
+      gate: precheck,
+      verdict: verdict,
+      authority: _authoritySurfaceForPrecheck(precheck, branch),
+      operationsExecuted: const ['validate_transition', 'validate_prechecks'],
+      issue: issue,
+      promptFragmentId: promptFragmentId,
+    );
+  }
+
+  String _sensorCategoryForPrecheck(String precheck) {
+    switch (precheck) {
+      case 'issue_selected':
+      case 'issue_selected_or_created':
+      case 'feature_branch_selected':
+        return 'runtime';
+      case 'pre_pr_inspection_approved':
+        return 'pre_pr';
+      default:
+        return 'pre_transition';
+    }
+  }
+
+  String _authoritySurfaceForPrecheck(String precheck, String branch) {
+    switch (precheck) {
+      case 'issue_selected':
+      case 'issue_selected_or_created':
+        return branch.isEmpty
+            ? kStateFileName
+            : p.posix.join('cleanrooms', branch, kStateFileName);
+      case 'feature_branch_selected':
+        return 'git:branch';
+      case 'diagnosis_exists':
+      case 'diagnosis_structured':
+        return p.posix.join('cleanrooms', branch, 'analyze', 'diagnosis.md');
+      case 'index_exists':
+        return p.posix.join('cleanrooms', branch, 'analyze', 'index.md');
+      case 'confirmations_exists':
+        return p.posix.join('cleanrooms', branch, 'analyze', 'confirmations.md');
+      case 'plan_approved':
+        return p.posix.join('cleanrooms', branch, 'plan.md');
+      case 'pre_pr_inspection_approved':
+        return p.posix.join('cleanrooms', branch, 'pre_pr_inspection.md');
+      default:
+        return p.posix.join('assets', 'fsm', 'transition_contract.yaml');
+    }
+  }
+
+  List<String> _missingDiagnosisSections(String branch, String workingDirectory) {
+    final content = _readDiagnosisContent(branch, workingDirectory);
+    if (content == null) {
+      return _diagnosisSectionPatterns.keys.toList(growable: false);
+    }
+
+    return _diagnosisSectionPatterns.entries
+        .where((entry) => !entry.value.hasMatch(content))
+        .map((entry) => entry.key)
+        .toList(growable: false);
+  }
+
+  bool _diagnosisHasConcreteEvidence(String branch, String workingDirectory) {
+    final content = _readDiagnosisContent(branch, workingDirectory);
+    if (content == null) return false;
+
+    final evidenceBody = _diagnosisSectionBody(
+      content,
+      _diagnosisSectionPatterns['Evidence']!,
+    );
+    if (evidenceBody == null) return false;
+
+    final normalizedLines = evidenceBody
+        .split('\n')
+        .map(_normalizeDiagnosisSectionLine)
+        .where((line) => line.isNotEmpty)
+        .toList(growable: false);
+    if (normalizedLines.isEmpty) return false;
+
+    return normalizedLines.any(
+      (line) => line.toLowerCase() != _diagnosisEvidenceBootstrapPlaceholder,
+    );
+  }
+
+  String? _readDiagnosisContent(String branch, String workingDirectory) {
+    if (branch.isEmpty) return null;
+
+    final diagnosisPath = p.join(
+      workingDirectory,
+      'cleanrooms',
+      branch,
+      'analyze',
+      'diagnosis.md',
+    );
+    final file = File(diagnosisPath);
+    if (!file.existsSync()) return null;
+    return file.readAsStringSync();
+  }
+
+  String? _diagnosisSectionBody(String content, RegExp sectionPattern) {
+    final lines = content.split('\n');
+    final headingPattern = RegExp(r'^##?\s+');
+    final buffer = <String>[];
+    var inSection = false;
+
+    for (final line in lines) {
+      if (!inSection) {
+        if (sectionPattern.hasMatch(line)) {
+          inSection = true;
+        }
+        continue;
+      }
+
+      if (headingPattern.hasMatch(line)) {
+        break;
+      }
+      buffer.add(line);
+    }
+
+    if (!inSection) return null;
+    return buffer.join('\n').trim();
+  }
+
+  String _normalizeDiagnosisSectionLine(String line) {
+    var normalized = line.trim();
+    normalized = normalized.replaceFirst(RegExp(r'^[-*]\s+'), '');
+    normalized = normalized.replaceFirst(RegExp(r'^>\s*'), '');
+    return normalized.trim();
+  }
+
   Future<_BoundaryCommitResult> _executeBoundaryCommit(
     FsmTransition transition,
     String workingDirectory, {
+    required EffectExecutor executor,
+    required String currentState,
+    required String event,
     required String branch,
     String? issue,
+    String? promptFragmentId,
   }) async {
     final policy = transition.operations?.commitPolicy ?? 'none';
     final spec = _boundaryCommitSpec(policy, branch: branch, issue: issue);
@@ -467,6 +1047,18 @@ class StateTransitionCommand
       '--',
       spec.path,
     ]);
+    executor.recordToolActivityTrace(
+      currentState: currentState,
+      event: event,
+      toolClass: 'git',
+      commandFamily: 'add',
+      outcome: stageResult.exitCode == 0 ? 'succeeded' : 'failed',
+      exitCode: stageResult.exitCode,
+      authority: spec.path,
+      operationsExecuted: const ['validate_transition', 'create_boundary_commit'],
+      issue: issue,
+      promptFragmentId: promptFragmentId,
+    );
     if (stageResult.exitCode != 0) {
       return _BoundaryCommitResult.failure(
         'ERROR_BOUNDARY_COMMIT_FAILED: Failed to stage ${spec.label} artifacts: ${_gitError(stageResult)}',
@@ -481,6 +1073,18 @@ class StateTransitionCommand
       '--',
       spec.path,
     ]);
+    executor.recordToolActivityTrace(
+      currentState: currentState,
+      event: event,
+      toolClass: 'git',
+      commandFamily: 'commit',
+      outcome: commitResult.exitCode == 0 ? 'succeeded' : 'failed',
+      exitCode: commitResult.exitCode,
+      authority: spec.path,
+      operationsExecuted: const ['validate_transition', 'create_boundary_commit'],
+      issue: issue,
+      promptFragmentId: promptFragmentId,
+    );
     if (commitResult.exitCode != 0) {
       return _BoundaryCommitResult.failure(
         'ERROR_BOUNDARY_COMMIT_FAILED: Failed to create ${spec.label} commit: ${_gitError(commitResult)}',
@@ -661,10 +1265,6 @@ class StateTransitionCommand
       return inputIssue.trim();
     }
     return InquiryState.load(workingDirectory).issue;
-  }
-
-  bool _isIssueSelected(String workingDirectory) {
-    return InquiryState.load(workingDirectory).issue != null;
   }
 
   FsmState _loadCurrentState(String workingDirectory) {

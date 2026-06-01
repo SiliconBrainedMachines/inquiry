@@ -83,6 +83,25 @@ void main() {
         ).readAsStringSync();
         expect(stateContent, contains('state: PLAN'));
         expect(stateContent, contains('prompt_fragment_id: analyze_to_plan'));
+
+        final runTrace = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        );
+        expect(runTrace.existsSync(), isTrue);
+        final traceContent = runTrace.readAsStringSync();
+        expect(traceContent, contains('event_class: sensor_run'));
+        expect(traceContent, contains('event_class: tool_activity'));
+        expect(traceContent, contains('tool_class: git'));
+        expect(traceContent, contains('command_family: add'));
+        expect(traceContent, contains('command_family: commit'));
+        expect(traceContent, contains('gate: commit_analysis_boundary'));
+        expect(traceContent, contains('verdict: APPROVED'));
+        expect(
+          traceContent,
+          contains(
+            'authority: "cleanrooms/51-idle-execution-guardrails/analyze"',
+          ),
+        );
       },
     );
 
@@ -105,8 +124,163 @@ void main() {
 
         expect(output.allowed, isFalse);
         expect(output.message, contains('ERROR_PRECONDITION'));
+
+        final runTrace = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        );
+        expect(runTrace.existsSync(), isTrue);
+        final traceContent = runTrace.readAsStringSync();
+        expect(traceContent, contains('event_class: sensor_run'));
+        expect(traceContent, contains('gate: diagnosis_exists'));
+        expect(traceContent, contains('gate: index_exists'));
+        expect(traceContent, contains('sensor_category: pre_transition'));
+        expect(traceContent, contains('verdict: APPROVED'));
+        expect(traceContent, contains('verdict: MISSING'));
+        expect(traceContent, contains('transition_event: complete_analysis'));
+        expect(traceContent, contains('outcome: blocked'));
       },
     );
+
+    test('fails precheck when diagnosis lacks evidence-first structure', () async {
+      const branch = '51-idle-execution-guardrails';
+      _initGitRepo(tempDir.path, branch: branch);
+      _writeState(tempDir.path, 'ANALYZE', issue: '51');
+      _writeAnalyzeIndex(tempDir.path, branch);
+      _writeConfirmations(tempDir.path, branch);
+      final diagnosisFile = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'analyze', 'diagnosis.md'),
+      )..createSync(recursive: true);
+      diagnosisFile.writeAsStringSync('# Diagnosis\n\nUnstructured draft\n');
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'complete_analysis',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_DIAGNOSIS_STRUCTURE_INVALID'),
+      );
+      expect(output.message, contains('Evidence'));
+      expect(output.message, contains('Hypotheses'));
+
+      final traceContent = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+      ).readAsStringSync();
+      expect(traceContent, contains('gate: diagnosis_structured'));
+      expect(traceContent, contains('verdict: INVALID'));
+      expect(
+        traceContent,
+        contains(
+          'authority: "cleanrooms/51-idle-execution-guardrails/analyze/diagnosis.md"',
+        ),
+      );
+    });
+
+    test(
+      'fails precheck when diagnosis evidence still contains only bootstrap placeholder',
+      () async {
+        const branch = '51-idle-execution-guardrails';
+        _initGitRepo(tempDir.path, branch: branch);
+        _writeState(tempDir.path, 'ANALYZE', issue: '51');
+        _writeAnalyzeIndex(tempDir.path, branch);
+        _writeConfirmations(tempDir.path, branch);
+        final diagnosisFile = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'analyze', 'diagnosis.md'),
+        )..createSync(recursive: true);
+        diagnosisFile.writeAsStringSync(
+          '# Diagnosis\n\n'
+          '## Evidence\n'
+          '- Record observed repo, artifact, test, runtime, or research evidence here.\n\n'
+          '## Hypotheses\n'
+          '- Working hypothesis\n\n'
+          '## Constraints\n'
+          '- No additional constraints\n\n'
+          '## Open Questions\n'
+          '- None\n',
+        );
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'complete_analysis',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => branch,
+        ).execute();
+
+        expect(output.allowed, isFalse);
+        expect(
+          output.message,
+          contains('ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING'),
+        );
+
+        final traceContent = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        ).readAsStringSync();
+        expect(traceContent, contains('gate: diagnosis_evidence_present'));
+        expect(traceContent, contains('verdict: INVALID'));
+        expect(
+          traceContent,
+          contains(
+            'authority: "cleanrooms/51-idle-execution-guardrails/analyze/diagnosis.md"',
+          ),
+        );
+      },
+    );
+
+    test('records retry trace when a blocked ANALYZE handoff is attempted again', () async {
+      const branch = '51-idle-execution-guardrails';
+      _initGitRepo(tempDir.path, branch: branch);
+      _writeState(tempDir.path, 'ANALYZE', issue: '51');
+      _writeAnalyzeIndex(tempDir.path, branch);
+      _writeConfirmations(tempDir.path, branch);
+      final diagnosisFile = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'analyze', 'diagnosis.md'),
+      )..createSync(recursive: true);
+      diagnosisFile.writeAsStringSync('# Diagnosis\n\nUnstructured draft\n');
+
+      final first = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'complete_analysis',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+      expect(first.allowed, isFalse);
+
+      _writeDiagnosis(tempDir.path, branch, 'diagnosis repaired');
+
+      final second = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'complete_analysis',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+      expect(second.allowed, isTrue);
+
+      final traceContent = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+      ).readAsStringSync();
+      expect(traceContent, contains('event_class: retry'));
+      expect(traceContent, contains('phase: ANALYZE'));
+      expect(traceContent, contains('transition_event: complete_analysis'));
+      expect(traceContent, contains('retry_count: 1'));
+      expect(
+        traceContent,
+        contains(
+          'triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_STRUCTURE_INVALID: diagnosis.md must contain Evidence, Hypotheses, Constraints, and Open Questions sections for current issue branch; missing: Evidence, Hypotheses, Constraints, Open Questions"',
+        ),
+      );
+    });
 
     test(
       'fails closed when ANALYZE -> PLAN cannot create boundary commit',
@@ -151,6 +325,21 @@ void main() {
           _cycleStatePath(tempDir.path, branch),
         ).readAsStringSync();
         expect(stateContent, contains('state: ANALYZE'));
+
+        final runTrace = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        );
+        expect(runTrace.existsSync(), isTrue);
+        final traceContent = runTrace.readAsStringSync();
+        expect(traceContent, contains('event_class: sensor_run'));
+        expect(traceContent, contains('gate: commit_analysis_boundary'));
+        expect(traceContent, contains('verdict: FAILED'));
+        expect(
+          traceContent,
+          contains(
+            'authority: "cleanrooms/51-idle-execution-guardrails/analyze"',
+          ),
+        );
       },
     );
 
@@ -243,6 +432,28 @@ void main() {
       expect(output.nextState, 'ANALYZE');
       expect(output.promptFragmentId, 'idle_to_analyze');
       expect(output.requiredInstructions, ['doc-read']);
+
+      final runTrace = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '152-feature-branch',
+          'run_trace.yaml',
+        ),
+      );
+      expect(runTrace.existsSync(), isTrue);
+      final traceContent = runTrace.readAsStringSync();
+      expect(traceContent, contains('task_id: "152"'));
+      expect(traceContent, contains('event_class: sensor_run'));
+      expect(traceContent, contains('event_class: tool_activity'));
+      expect(traceContent, contains('gate: issue_selected_or_created'));
+      expect(traceContent, contains('gate: feature_branch_selected'));
+      expect(traceContent, contains('sensor_category: runtime'));
+      expect(traceContent, contains('verdict: APPROVED'));
+      expect(traceContent, contains('transition_event: start_analyze'));
+      expect(traceContent, contains('tool_class: gh'));
+      expect(traceContent, contains('command_family: issue_view'));
+      expect(traceContent, contains('outcome: allowed'));
     });
 
     test('blocks commitment transition on main branch', () async {
@@ -296,6 +507,30 @@ void main() {
         ).readAsStringSync();
         expect(stateContent, contains('state: EXECUTE'));
         expect(stateContent, contains('prompt_fragment_id: plan_to_execute'));
+
+        final runTrace = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        );
+        expect(runTrace.existsSync(), isTrue);
+        final traceContent = runTrace.readAsStringSync();
+        expect(traceContent, contains('task_id: "51"'));
+        expect(traceContent, contains('event_class: sensor_run'));
+        expect(traceContent, contains('event_class: tool_activity'));
+        expect(traceContent, contains('tool_class: git'));
+        expect(traceContent, contains('command_family: add'));
+        expect(traceContent, contains('command_family: commit'));
+        expect(traceContent, contains('gate: plan_approved'));
+        expect(traceContent, contains('gate: commit_plan_boundary'));
+        expect(traceContent, contains('sensor_category: pre_transition'));
+        expect(traceContent, contains('verdict: APPROVED'));
+        expect(
+          traceContent,
+          contains(
+            'authority: "cleanrooms/51-idle-execution-guardrails/plan.md"',
+          ),
+        );
+        expect(traceContent, contains('transition_event: approve_plan'));
+        expect(traceContent, contains('outcome: allowed'));
       },
     );
 
@@ -337,6 +572,32 @@ void main() {
           _cycleStatePath(tempDir.path, branch),
         ).readAsStringSync();
         expect(stateContent, contains('state: PLAN'));
+
+        final runTrace = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        );
+        expect(runTrace.existsSync(), isTrue);
+        final traceContent = runTrace.readAsStringSync();
+        expect(traceContent, contains('event_class: transition'));
+        expect(traceContent, contains('event_class: sensor_run'));
+        expect(traceContent, contains('event_class: tool_activity'));
+        expect(traceContent, contains('tool_class: git'));
+        expect(traceContent, contains('command_family: add'));
+        expect(traceContent, contains('command_family: commit'));
+        expect(traceContent, contains('outcome: failed'));
+        expect(traceContent, contains('transition_event: approve_plan'));
+        expect(traceContent, contains('gate: commit_plan_boundary'));
+        expect(traceContent, contains('verdict: FAILED'));
+        expect(traceContent, contains('to_state: EXECUTE'));
+        expect(traceContent, contains('outcome: blocked'));
+        expect(traceContent, contains('event_class: block'));
+        expect(traceContent, contains('blocking_boundary: boundary_commit'));
+        expect(
+          traceContent,
+          contains(
+            'authoritative_surface: "cleanrooms/51-idle-execution-guardrails/plan.md"',
+          ),
+        );
       },
     );
 
@@ -400,6 +661,74 @@ void main() {
         contains(
           'PASS: inspection metadata matches active issue "51" and branch "51-idle-execution-guardrails"',
         ),
+      );
+      expect(
+        inspectionReport,
+        contains('PASS: overhead summary event counts transition='),
+      );
+      expect(
+        inspectionReport,
+        contains('PASS: overhead summary found no blocking boundaries before END'),
+      );
+      expect(
+        inspectionReport,
+        contains('WARN: overhead summary attributes host-boundary activity as ['),
+      );
+    });
+
+    test('END inspection report summarizes model-bound prompt input when traced', () async {
+      const branch = '51-idle-execution-guardrails';
+      _initGitRepo(tempDir.path, branch: branch);
+      _writeState(tempDir.path, 'EXECUTE', issue: '51');
+      File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+      ).writeAsStringSync(
+        'events:\n'
+        '  - recorded_at: "2026-05-31T10:00:00.000Z"\n'
+        '    task_id: "51"\n'
+        '    branch: $branch\n'
+        '    event_class: model_activity\n'
+        '    phase: ANALYZE\n'
+        '    ape_name: socrates\n'
+        '    model_surface: prompt_input\n'
+        '    prompt_characters: 840\n'
+        '    estimated_input_tokens: 210\n'
+        '    token_estimate_basis: chars_div_4_ceil\n'
+        '    assembly_duration_seconds: 0.012\n'
+        '  - recorded_at: "2026-05-31T10:00:01.000Z"\n'
+        '    task_id: "51"\n'
+        '    branch: $branch\n'
+        '    event_class: tool_activity\n'
+        '    phase: ANALYZE\n'
+        '    transition_event: start_analyze\n'
+        '    tool_class: gh\n'
+        '    command_family: issue_view\n'
+        '    outcome: succeeded\n',
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'finish_execute',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+
+      expect(output.allowed, isTrue);
+      final inspectionReport = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'pre_pr_inspection.md'),
+      ).readAsStringSync();
+      expect(inspectionReport, contains('model_activity=1'));
+      expect(
+        inspectionReport,
+        contains(
+          'PASS: overhead summary estimates model-bound prompt input as [socrates=210 est_tokens/840 chars/0.012s assembly]',
+        ),
+      );
+      expect(
+        inspectionReport,
+        contains('leaves only remote model runtime/caching cost unattributed'),
       );
     });
 
@@ -476,6 +805,10 @@ void main() {
         inspectionReport,
         contains('cleanrooms/51-idle-execution-guardrails/plan.md:2'),
       );
+      expect(
+        inspectionReport,
+        contains('PASS: overhead summary event counts transition='),
+      );
     });
 
     test('allows END to create PR and enter EVOLUTION', () async {
@@ -501,6 +834,26 @@ void main() {
       expect(output.promptFragmentId, 'end_to_evolution');
       expect(output.requiredRole, 'DARWIN');
       expect(output.requiredInstructions, ['inquiry-end']);
+
+      final runTrace = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'run_trace.yaml',
+        ),
+      );
+      expect(runTrace.existsSync(), isTrue);
+      final traceContent = runTrace.readAsStringSync();
+      expect(traceContent, contains('event_class: sensor_run'));
+      expect(traceContent, contains('gate: pre_pr_inspection_approved'));
+      expect(traceContent, contains('verdict: APPROVED'));
+      expect(
+        traceContent,
+        contains(
+          'authority: "cleanrooms/51-idle-execution-guardrails/pre_pr_inspection.md"',
+        ),
+      );
     });
 
     test('allows END pr_ready from a nested working directory when inspection is approved', () async {
@@ -546,6 +899,32 @@ void main() {
       expect(
         output.message,
         contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_MISSING'),
+      );
+
+      final runTrace = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'run_trace.yaml',
+        ),
+      );
+      expect(runTrace.existsSync(), isTrue);
+      final traceContent = runTrace.readAsStringSync();
+      expect(traceContent, contains('event_class: transition'));
+      expect(traceContent, contains('event_class: sensor_run'));
+      expect(traceContent, contains('transition_event: pr_ready'));
+      expect(traceContent, contains('gate: pre_pr_inspection_approved'));
+      expect(traceContent, contains('verdict: MISSING'));
+      expect(traceContent, contains('to_state: EVOLUTION'));
+      expect(traceContent, contains('outcome: blocked'));
+      expect(traceContent, contains('event_class: block'));
+      expect(traceContent, contains('blocking_boundary: end_pre_pr_gate'));
+      expect(
+        traceContent,
+        contains(
+          'authoritative_surface: "cleanrooms/51-idle-execution-guardrails/pre_pr_inspection.md"',
+        ),
       );
     });
 
@@ -961,7 +1340,21 @@ void _writeDiagnosis(String root, String branch, String content) {
     p.join(root, 'cleanrooms', branch, 'analyze', 'diagnosis.md'),
   );
   file.createSync(recursive: true);
-  file.writeAsStringSync(content);
+  file.writeAsStringSync(
+    '# Diagnosis\n'
+    '\n'
+    '## Evidence\n'
+    '$content\n'
+    '\n'
+    '## Hypotheses\n'
+    '- Hypothesis placeholder\n'
+    '\n'
+    '## Constraints\n'
+    '- Constraint placeholder\n'
+    '\n'
+    '## Open Questions\n'
+    '- None\n',
+  );
 }
 
 void _writeAnalyzeIndex(String root, String branch) {
