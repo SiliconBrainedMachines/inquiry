@@ -10,7 +10,7 @@ generated_at: "{{GENERATED_AT}}"
 - WARN: consistency findings are auto-generated from source/build parity when END is entered and refreshed again at pr_ready
 
 ## Pass 2 — Completeness
-- WARN: replace this placeholder with a concrete completeness finding before approval
+- WARN: completeness findings include automatic plan.md checkbox review when END is entered and refreshed again at pr_ready; replace or complement this with concrete coverage findings before approval
 
 ## Pass 3 — Traceability
 - WARN: replace this placeholder with a concrete traceability finding before approval
