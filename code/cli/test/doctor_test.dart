@@ -268,8 +268,8 @@ void main() {
       expect(json, containsPair('passed', true));
       expect(json['checks'], isList);
       expect((json['checks'] as List).length, 5);
-      expect(json['targetChecks'], isList);
-      expect((json['targetChecks'] as List).length, 1);
+      expect(json['hostChecks'], isList);
+      expect((json['hostChecks'] as List).length, 1);
 
       final firstCheck = (json['checks'] as List).first as Map<String, dynamic>;
       expect(firstCheck, containsPair('name', 'inquiry'));
@@ -427,7 +427,6 @@ void main() {
 
         final json = check.toJson();
         expect(json['hostName'], 'copilot');
-        expect(json['targetName'], 'copilot');
         expect(json['agentExists'], true);
         expect(json['missingSkills'], ['doc-read']);
         expect(json['totalSkills'], 9);

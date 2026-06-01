@@ -23,8 +23,6 @@ const String inquiryHelpText =
     'Modules:\n'
     '  host get           Deploy Inquiry skills to the specified host (default: copilot)\n'
     '  host clean         Remove deployed Inquiry files from all hosts\n'
-    '  target get         Legacy alias for host get\n'
-    '  target clean       Legacy alias for host clean\n'
     '  fsm state          Show current FSM state, valid transitions, and active APEs\n'
     '  fsm transition     Run deterministic FSM transition by --event (optional --state)\n'
     '  ape prompt         Assemble a sub-agent prompt from YAML + current FSM state\n'
