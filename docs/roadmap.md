@@ -25,25 +25,55 @@ The current baseline after 0.7.0 is:
 
 This baseline is not the next project; it is the floor for 0.7.x.
 
+## 0.7.x thesis and paper focus
+
+0.7.x should be treated as the release line where Inquiry stops primarily explaining itself and starts **using itself to produce the paper**.
+
+The central thesis remains the same: **philosophical thinking tools have operational force in AI-assisted software work**. Inquiry exists to test that thesis under real engineering conditions, not merely to package another coding agent workflow.
+
+This changes the priority order for the entire series:
+
+1. **Paper first.** Runtime work in 0.7.x should primarily strengthen the paper's publishability: cleaner evidence, clearer doctrine, tighter reproducibility, and more legible comparative claims.
+2. **Book as sibling output.** The book manuscript remains an important intellectual product, but it is not the same thing as the paper. The book may expand the doctrine; the paper must sharpen and defend the core thesis empirically.
+3. **Product surface in service of the thesis.** The CLI, extension, website, and release machinery matter because they make Inquiry usable enough to generate evidence. They are not, by themselves, the terminal goal of 0.7.x.
+
+If a candidate feature does not materially improve one of these:
+
+- the quality of cycle evidence,
+- the reproducibility of the method,
+- the portability of the harness,
+- or the clarity of the paper's claims,
+
+then it should usually be deferred out of 0.7.x.
+
 ## 0.7.x priorities
 
-### 1. Keep the harness small and explicit
+### 1. Use Inquiry to write the paper
+
+The highest-value outcome for 0.7.x is a publishable paper grounded in real Inquiry cycles. That means:
+
+- using Inquiry in anger rather than mainly refining doctrine about Inquiry
+- producing evidence that can survive external scrutiny, not only internal intuition
+- sharpening the research question, scope, limits, and comparison targets
+- treating cycle artifacts, metrics, and traces as publication inputs rather than only runtime byproducts
+
+### 2. Keep the harness small and explicit
 
 0.7.x should resist speculative surface area. Inquiry should stay legible: few commands, explicit state, inspectable prompts, durable artifacts, and no hidden orchestration magic.
 
-### 2. Strengthen host-boundary portability
+### 3. Strengthen host-boundary portability
 
 The next meaningful frontier is not more doctrine; it is a cleaner adapter contract across hosts so the same Inquiry runtime can be compared and reused with less glue.
 
-### 3. Turn observability into practical tuning
+### 4. Turn observability into practical tuning
 
 0.6.x made overhead visible. 0.7.x should use that evidence to reduce waste: repeated rereads, noisy retries, unclear blocks, and host-boundary cost that can be better separated or reported.
 
-### 4. Clarify product surfaces without reviving the archive
+### 5. Clarify product surfaces without reviving the archive
 
 The repository should emphasize the current runtime, website, extension, and release surfaces. Historical planning material, exploratory doctrine, and completed transition baggage should stay out of the main navigation.
 
-### 5. Keep EVOLUTION evidence-backed
+### 6. Keep EVOLUTION evidence-backed
 
 DARWIN should continue to propose changes from concrete cycle evidence, not from taste, narrative drift, or nostalgia for earlier architecture.
 
@@ -70,7 +100,11 @@ If you want to understand Inquiry today, read [architecture.md](architecture.md)
 
 If you want to understand where Inquiry should go next, read this roadmap.
 
+If you want to understand how 0.7.x should generate a publishable research output, read the research-as-code program in [code/paper/](../code/paper/README.md).
+
 If a historical artifact is not part of those two surfaces or the live code and tests, it should not be treated as current doctrine.
+
+## Historical 0.6.x context (non-canonical)
 
 The 0.6.x line should be treated as a harness-consolidation release train, not as an optimization pass. Before 0.7.0, the priority is to remove base defects, tighten evidence discipline, and reduce structural overhead in how Inquiry assembles and reuses context.
 
@@ -158,8 +192,8 @@ Theses that take the project beyond a CLI tool.
 ### Philosophical and Methodological Consolidation
 A mature statement of Inquiry as a doctrine for AI-assisted software work: sharpen the canonical role of Thinking Tools, clarify the Inquiry / APE / Finite APE Machine distinction, and make the philosophical lineage legible enough that the method survives changes in hosts, vendors, and surrounding tooling.
 
-### Bootstrap-validation paper
-Publish the empirical paper on APE-builds-APE once the project has enough clean comparative cycle evidence and a stable publication plan.
+### Post-paper research agenda
+The first empirical paper on APE-builds-APE should land during 0.7.x. Long-term work should build on that publication with replication, comparative validation across hosts, and follow-on papers rather than treating the first paper as a permanently deferred objective.
 
 ### DARWIN community-level learning
 Currently DARWIN proposes mutations only to *this* repo's APE. The long-term vision is a community-level DARWIN that aggregates evolution issues across many APE-using projects to propose changes upstream to the framework itself.
