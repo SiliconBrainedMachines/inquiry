@@ -1296,6 +1296,18 @@ void main() {
             'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
           ),
         );
+        expect(
+          result.prompt,
+          contains(
+            'release_gate: propose semver bump and get explicit user approval before END handoff',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'semver bump proposal is explicit and user-approved before END handoff',
+          ),
+        );
         expect(result.prompt, isNot(contains('Run tests, lint, build')));
         expect(result.prompt, isNot(contains('retrospective.md')));
         expectContextKeyOnlyInInquiryContext(
@@ -1365,6 +1377,10 @@ void main() {
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'release_gate: propose semver bump and get explicit user approval before END handoff',
         );
         for (final key in [
           'minimum_sensor_stack',
