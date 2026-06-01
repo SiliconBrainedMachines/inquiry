@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:inquiry_cli/assets.dart';
 import 'package:inquiry_cli/modules/ape/commands/prompt.dart';
 import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
+import 'package:inquiry_cli/src/git_utils.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -747,6 +748,9 @@ void main() {
         );
       }
 
+      String expectedProjectRoot() =>
+          getProjectRoot(gitTmpDir.path) ?? p.normalize(gitTmpDir.path);
+
       setUp(() {
         gitTmpDir = Directory.systemTemp.createTempSync('ape_ctx_test_');
         Directory(p.join(gitTmpDir.path, '.inquiry')).createSync();
@@ -882,7 +886,7 @@ void main() {
         expect(result.prompt, contains('# --- inquiry-context ---'));
         expect(
           result.prompt,
-          contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+          contains('project_root: ${expectedProjectRoot()}'),
         );
         expect(result.prompt, contains('task_id: 152'));
         expect(
@@ -917,7 +921,7 @@ void main() {
         expect(
           result.prompt,
           contains(
-            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${p.normalize(gitTmpDir.path)}']",
+            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${expectedProjectRoot()}']",
           ),
         );
         expect(
@@ -1025,7 +1029,7 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          'project_root: ${p.normalize(gitTmpDir.path)}',
+          'project_root: ${expectedProjectRoot()}',
         );
         expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
         expectContextKeyOnlyInInquiryContext(
@@ -1054,7 +1058,7 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${p.normalize(gitTmpDir.path)}']",
+          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${expectedProjectRoot()}']",
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
@@ -1192,7 +1196,7 @@ void main() {
         );
         expect(
           result.prompt,
-          contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+          contains('project_root: ${expectedProjectRoot()}'),
         );
         expect(result.prompt, contains('task_id: 152'));
         expect(result.prompt, contains('doc_protocol: doc-read'));
@@ -1213,7 +1217,7 @@ void main() {
         expect(
           result.prompt,
           contains(
-            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${p.normalize(gitTmpDir.path)}']",
+            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${expectedProjectRoot()}']",
           ),
         );
         expect(
@@ -1315,7 +1319,7 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${p.normalize(gitTmpDir.path)}']",
+          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${expectedProjectRoot()}']",
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
@@ -1375,7 +1379,7 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          'project_root: ${p.normalize(gitTmpDir.path)}',
+          'project_root: ${expectedProjectRoot()}',
         );
         expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
         for (final key in [
@@ -1430,12 +1434,12 @@ void main() {
 
           expect(
             result.prompt,
-            contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+            contains('project_root: ${expectedProjectRoot()}'),
           );
           expect(result.prompt, contains('task_id: 152'));
           expectContextKeyOnlyInInquiryContext(
             result.prompt,
-            'project_root: ${p.normalize(gitTmpDir.path)}',
+            'project_root: ${expectedProjectRoot()}',
           );
           expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
           expectContextFieldOnlyInInquiryContext(result.prompt, 'editable_surfaces');
@@ -1528,7 +1532,7 @@ void main() {
         expect(
           result.prompt,
           contains(
-            "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+            "retrieval_context: ['${expectedProjectRoot()}', 'cleanrooms/152-test-branch/']",
           ),
         );
         expect(
@@ -1693,7 +1697,7 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+          "retrieval_context: ['${expectedProjectRoot()}', 'cleanrooms/152-test-branch/']",
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
