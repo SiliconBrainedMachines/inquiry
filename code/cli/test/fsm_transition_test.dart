@@ -385,6 +385,12 @@ void main() {
         inspectionReport,
         contains('PASS: asset parity source/build reviewed'),
       );
+      expect(
+        inspectionReport,
+        contains(
+          'PASS: inspection metadata matches active issue "51" and branch "51-idle-execution-guardrails"',
+        ),
+      );
     });
 
     test('seeded END inspection report records automatic consistency failures', () async {
@@ -743,6 +749,65 @@ void main() {
       );
     });
 
+    test('blocks END pr_ready when automatic traceability check detects stale report metadata', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePlan(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        '# Plan\n- [x] completed execution step\n',
+      );
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'APPROVED',
+        reportIssue: '99',
+        reportBranch: '99-other-branch',
+        consistencyChecks: const ['PASS: asset parity source/build reviewed'],
+        completenessChecks: const ['PASS: changed behavior covered by tests'],
+        traceabilityChecks: const ['PASS: every code change maps to plan.md'],
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID'),
+      );
+      final inspectionReport = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'pre_pr_inspection.md',
+        ),
+      ).readAsStringSync();
+      expect(
+        inspectionReport,
+        contains('FAIL: inspection issue metadata "99" does not match active issue "51"'),
+      );
+      expect(
+        inspectionReport,
+        contains('FAIL: inspection branch metadata "99-other-branch" does not match active branch "51-idle-execution-guardrails"'),
+      );
+      expect(
+        inspectionReport,
+        contains('cleanrooms/51-idle-execution-guardrails/pre_pr_inspection.md:5'),
+      );
+      expect(
+        inspectionReport,
+        contains('cleanrooms/51-idle-execution-guardrails/pre_pr_inspection.md:6'),
+      );
+    });
+
     test('persists --issue flag in state.yaml on transition', () async {
       const branch = '31-feature-branch';
       _initGitRepo(tempDir.path, branch: branch);
@@ -912,6 +977,8 @@ void _writePrePrInspection(
   String root,
   String branch, {
   required String verdict,
+  String? reportIssue,
+  String? reportBranch,
   List<String>? consistencyChecks,
   List<String>? completenessChecks,
   List<String>? traceabilityChecks,
@@ -924,6 +991,8 @@ void _writePrePrInspection(
     return;
   }
 
+    final issue = reportIssue ?? branch.split('-').first;
+    final branchMetadata = reportBranch ?? branch;
   final consistency =
       consistencyChecks ?? const ['PASS: asset parity source/build reviewed'];
   final completeness =
@@ -942,6 +1011,12 @@ void _writePrePrInspection(
   file.writeAsStringSync(
     [
       'verdict: $verdict',
+      '',
+      '# END Pre-PR Inspection',
+      '',
+      'issue: "$issue"',
+      'branch: "$branchMetadata"',
+      'generated_at: "2026-06-01T00:00:00Z"',
       '',
       renderSection('Consistency', consistency),
       '',
