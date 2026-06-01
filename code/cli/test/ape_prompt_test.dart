@@ -1613,7 +1613,7 @@ void main() {
         expect(
           result.prompt,
           contains(
-            'failure_taxonomy_surface: docs/research/book/analyze/failure-taxonomy.md',
+            'failure_taxonomy_surface: docs/spec/eval-model.md',
           ),
         );
         expect(
@@ -1757,7 +1757,7 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          'failure_taxonomy_surface: docs/research/book/analyze/failure-taxonomy.md',
+          'failure_taxonomy_surface: docs/spec/eval-model.md',
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,

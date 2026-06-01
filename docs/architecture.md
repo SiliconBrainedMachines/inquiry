@@ -4,7 +4,9 @@
 >
 > How APE orchestrates AI coding agents through a finite state machine.
 
-Inquiry is best read here as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work. In the 0.6.x series, the architectural priority is harness consolidation before optimization: make the task environment more explicit, make evidence gathering precede user questioning, cut avoidable context duplication across orchestrator, sub-agents, artifacts, and rereads, formalize sensorized closure, and surface overhead as an auditable system property.
+Inquiry is best read as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work.
+
+The 0.7.x architectural stance is simple: keep the harness small, explicit, and evidence-backed. Inquiry should prefer a narrow core that can survive host changes over a sprawling documentation and feature surface that preserves every historical branch of thought.
 
 ## The system in one diagram
 
@@ -76,8 +78,8 @@ Sub-agent prompt delivery is explicit and inspectable. `iq ape prompt --name <ap
 │  .inquiry/state.yaml        ← current FSM state (IDLE, ANALYZE, etc.)   │
 │  .inquiry/config.yaml       ← cycle config (evolution.enabled, etc.)    │
 │  .inquiry/mutations.md      ← human notes for DARWIN                    │
-│  cleanrooms/NNN-slug/ ← per-cycle artifacts (analyze/, plan.md, metrics.yaml) │
-│  docs/spec/             ← canonical specifications                  │
+│  cleanrooms/NNN-slug/ ← per-cycle artifacts created only for active cycles │
+│  docs/                 ← intentionally minimal doctrine              │
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -126,17 +128,17 @@ Viewed through the current research taxonomy, Inquiry spans all four agent-engin
 - **Eval Engineering**: PR gates, transition prechecks, state-owned artifact expectations, and cycle metrics provide partial but real evaluation structure.
 - **Harness Engineering**: the CLI, FSM, deployer, state files, skills, and human authorization rules form the actual control system around the host agent.
 
-That distinction matters because it clarifies what Inquiry already is and what still remains incomplete. Inquiry is no longer just a methodology described in markdown or a pack of prompts deployed into Copilot. It already functions as a repository-local harness. The unfinished work for 0.6.x is to deepen that harness with more explicit task contracts, evidence-first retrieval before user questioning, lower duplication across orchestrator/sub-agents/handoff artifacts, stronger sensors around closure, explicit overhead observability, and a more formal base for eval-backed evolution.
+That distinction matters because it clarifies what Inquiry already is and what it should not regress into. Inquiry is no longer just a methodology described in markdown or a pack of prompts deployed into Copilot. It already functions as a repository-local harness. The current bar is to keep the live contract explicit in code, assets, tests, and a minimal amount of doctrine instead of carrying every historical explanation forever.
 
-## 0.6.x harness program
+## 0.7.x operating baseline
 
-Before 0.7.0, Inquiry should tighten the current outer harness around five ordered priorities:
+The live 0.7.x baseline is:
 
-- **Task contract first.** The agent should receive a more explicit task environment: bounded inputs, expected outputs, editable surfaces, validation commands, and done criteria.
-- **Evidence-first ANALYZE.** Repository state, cleanroom artifacts, docs, tests, and targeted web research are authoritative. SOCRATES should ask the user only for facts or judgments that cannot be recovered from those sources, and should stop questioning once the problem is sufficiently bounded.
-- **Context policy and authoritative handoffs.** The harness should reduce duplication between the orchestrator, sub-agents, durable artifacts, and repeated reads. Handoff documents should become authoritative references, not material each phase re-derives from scratch.
-- **Sensor stack and END discipline.** Transition checks, pre-PR inspection, release closure, and document-level gates should form a more legible closure path instead of remaining a patchwork of implicit rituals and scattered checks.
-- **Overhead observability and eval foundation.** Tool volume, wall-clock time, token load, cached share, context-repetition cost, and recurring failure classes belong to the harness surface because they determine whether Inquiry stays practical to delegate and improvable over time.
+- **Task contract first.** The runtime injects explicit task identity, bounded surfaces, expected outputs, and done criteria.
+- **Evidence-first ANALYZE.** SOCRATES is expected to gather bounded repo and cycle evidence before questioning the user.
+- **Authoritative handoffs.** `diagnosis.md` and `plan.md` are phase-owned operational authority, not optional narrative summaries.
+- **Sensorized closure.** END is a visible gate with deterministic checks, pre-PR inspection, and release closure discipline.
+- **Observability.** `run_trace.yaml`, `metrics.yaml`, `metrics_snapshot.yaml`, and `pre_pr_inspection.md` provide enough local evidence to explain cost, retries, blocks, and closure state.
 
 ## Agent architecture
 
@@ -209,7 +211,7 @@ iq target get
          └── kritik/SKILL.md
 ```
 
-Only **Copilot** is currently active ([ADR D20](spec/target-specific-agents.md)). Adapters for Claude, Codex, Crush, and Gemini exist but are deferred — they only participate in `iq target clean` (removes orphaned files from previous multi-target deploys).
+Only **Copilot** is currently active. Adapters for other hosts remain deferred until Inquiry has a cleaner host-boundary contract and evidence that reactivation improves the harness instead of diluting it.
 
 ## Cycle lifecycle
 

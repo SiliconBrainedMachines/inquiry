@@ -1,73 +1,76 @@
 # Roadmap
 
-> Status note: This roadmap is a strategic and partially historical planning document. It preserves backlog framing from earlier releases and should not be used as the authoritative description of the current operational model. For the current canonical explanation, see [architecture.md](architecture.md), [spec/finite-ape-machine.md](spec/finite-ape-machine.md), and [thinking-tools.md](thinking-tools.md).
-
-> Execution note: the canonical actionable backlog for the `0.6.x` harness-consolidation series lives in [0.6.x-harness-backlog.md](0.6.x-harness-backlog.md).
-
-> Version note: the live CLI source currently tracks `0.6.5` in [../code/cli/pubspec.yaml](../code/cli/pubspec.yaml). Public-facing version markers elsewhere in the repository may lag until the next coordinated release pass.
-
-> Where APE is going next. For where APE is today, see [../README.md](../README.md).
-
-> Live roster note: DEWEY now owns bounded IDLE triage in the current contract; `inquiry-start` remains the explicit handoff into ANALYZE.
-
-This roadmap is **descriptive, not prescriptive**: it captures strategic direction, selected historical snapshots, and the long-running theses that motivate the project. The canonical current execution program for `0.6.x` lives in [0.6.x-harness-backlog.md](0.6.x-harness-backlog.md). Anything not backed by a current system surface, a concrete program block, or validated repo evidence should be read as exploratory.
+> This roadmap is the forward-looking companion to [architecture.md](architecture.md).
+> The 0.6.x consolidation cycle is complete. 0.7.x should optimize for clarity, leverage, and focused expansion instead of carrying historical planning baggage.
 
 ## Vision
 
-APE aims to be a **methodology for working with AI through explicit thinking tools**, robust across changing AI market conditions. Three theses guide every decision:
+Inquiry aims to be a **small, explicit, repository-local harness for AI-assisted software work**. Three theses guide the 0.7.x line:
 
 1. **Thinking tools make AI usable.** Model quality matters, but raw capability does not solve the core bottleneck by itself. Inquiry's wager is that AI gives renewed practical force to more than 2,500 years of philosophical labor: disciplined questioning, decomposition, inference, verification, and selection become operational tools for software work.
 2. **Memory as code.** Project knowledge belongs in the repo, version-controlled, queryable by any agent — not in a cloud-hosted vector DB.
 3. **Antifragility.** Each cycle should leave APE measurably better. DARWIN turns operational friction into improvements to the framework itself.
 
-The end-state is an **APE that builds APE**: a self-improving framework where every cycle generates evidence (in `metrics.yaml`, in evolution issues, in mutations.md) that feeds the next cycle.
+The end-state is an **Inquiry that compounds operational evidence into a better harness**, without bloating itself into a generic platform too early.
 
-Recent research in [research/harness_engineering.md](research/harness_engineering.md) and [research/agent_engineering_taxonomy.md](research/agent_engineering_taxonomy.md) sharpens how this vision should be read: Inquiry is not only a methodology and not only a prompt packager. It is already becoming a **repository-local outer harness** for coding agents. The next frontier is therefore not just “more CLI features,” but the completion of that harness through better task contracts, evidence-first ANALYZE, clearer context policy, stronger sensors, and more explicit observability.
+## 0.7.x baseline
 
-## Historical planning snapshot (v0.0.14)
+The current baseline after 0.7.0 is:
 
-- 5-state FSM with declarative transition contract (IDLE / ANALYZE / PLAN / EXECUTE / EVOLUTION)
-- 9 working CLI commands across 3 modules (`global`, `target`, `state`)
-- Single-target deployment (Copilot) per [ADR D20](spec/target-specific-agents.md)
-- Active roster at that snapshot: SOCRATES, DESCARTES, BASHŌ, DARWIN
-- 131 tests, cross-platform (Windows + Linux), 12 GitHub releases
-- Empirical bootstrap underway: APE is being built using APE (see [bootstrap-validation](research/ape_builds_ape/bootstrap-validation.md))
+- explicit task contract fields in `inquiry-context`
+- evidence-first ANALYZE with diagnosis structure and evidence gating
+- explicit context-policy and authoritative handoff rules
+- visible sensor stack and deterministic END gate
+- trace and overhead evidence for transitions, retries, host activity, and model-bound prompt assembly
 
-## Current runtime snapshot (v0.6.5)
+This baseline is not the next project; it is the floor for 0.7.x.
 
-The current CLI surface is still intentionally small. The live source tree exposes four active modules:
+## 0.7.x priorities
 
-- **global** — bare `iq`, `init`, `version`, `doctor`, `upgrade`, `uninstall`
-- **target** — `get`, `clean`
-- **fsm** — `state`, `transition`
-- **ape** — `prompt`, `state`, `transition`
+### 1. Keep the harness small and explicit
 
-The deployed runtime still centers on a single active host target, Copilot, with deferred adapters for other hosts retained in the codebase but not yet reactivated in `iq target get`.
+0.7.x should resist speculative surface area. Inquiry should stay legible: few commands, explicit state, inspectable prompts, durable artifacts, and no hidden orchestration magic.
 
-The current persisted control surface is also concrete and live, not aspirational:
+### 2. Strengthen host-boundary portability
 
-- `.inquiry/state.yaml`
-- `.inquiry/config.yaml`
-- `.inquiry/mutations.md`
-- `.inquiry/metrics.yaml`
-- `cleanrooms/<issue>/...` as per-cycle artifact space
+The next meaningful frontier is not more doctrine; it is a cleaner adapter contract across hosts so the same Inquiry runtime can be compared and reused with less glue.
 
-This matters because it marks the real baseline: Inquiry is already operating as a small but substantive harness, not merely as a conceptual FSM described in prose.
+### 3. Turn observability into practical tuning
 
-## Strategic reading of the current frontier
+0.6.x made overhead visible. 0.7.x should use that evidence to reduce waste: repeated rereads, noisy retries, unclear blocks, and host-boundary cost that can be better separated or reported.
 
-Read through the current harness taxonomy, Inquiry's unfinished work clusters into five core `0.6.x` program blocks plus one later extension:
+### 4. Clarify product surfaces without reviving the archive
 
-1. **Task contracts** — Inquiry already assembles prompts and paths, but it still has room to become more contract-first about bounded task inputs, outputs, editable surfaces, and validation commands.
-2. **Evidence-first ANALYZE** — ANALYZE and source gathering still need stronger repo-first and web-assisted rules so questioning and planning do not get ahead of observable facts.
-3. **Context policy and authoritative handoffs** — Memory as Code is real, but progressive disclosure, artifact authority, and deduplication between orchestrator, sub-agents, durable artifacts, and rereads are still too implicit.
-4. **Sensor stack and END discipline** — the methodology is explicit, but the catalog of local, CI, continuous, and runtime sensors is still thinner than the control model wants, especially around closure.
-5. **Overhead observability and eval discipline** — the project needs repeatable measurement of tool volume, wall-clock time, cached versus uncached tokens, and process overhead so harness cost is visible and improvable.
-6. **Host-boundary portability** — after the core harness is tighter, the remaining frontier is a clearer adapter contract for multi-target comparison and reactivation.
+The repository should emphasize the current runtime, website, extension, and release surfaces. Historical planning material, exploratory doctrine, and completed transition baggage should stay out of the main navigation.
 
-This section is strategic framing. The selective traceability snapshot below is historical context, not the canonical operating plan.
+### 5. Keep EVOLUTION evidence-backed
 
-## 0.6.x completion program (0.6.5 -> 0.6.99)
+DARWIN should continue to propose changes from concrete cycle evidence, not from taste, narrative drift, or nostalgia for earlier architecture.
+
+## Deferred work that still matters
+
+These remain real possibilities, but they should land only when the harness earns them:
+
+- multi-target reactivation
+- `iq task` and stronger issue/PR wrapping
+- richer host-side telemetry when the platform exposes it
+- more opinionated website and distribution surfaces
+- durable metrics backends beyond local YAML when a real consumer exists
+
+## Anti-goals for 0.7.x
+
+- carrying historical planning files as if they were still live doctrine
+- reopening already-closed 0.6.x consolidation questions as if they were unresolved
+- inflating the agent roster instead of sharpening the current operators
+- adding infrastructure just because it is architecturally imaginable
+
+## How to read the repo now
+
+If you want to understand Inquiry today, read [architecture.md](architecture.md).
+
+If you want to understand where Inquiry should go next, read this roadmap.
+
+If a historical artifact is not part of those two surfaces or the live code and tests, it should not be treated as current doctrine.
 
 The 0.6.x line should be treated as a harness-consolidation release train, not as an optimization pass. Before 0.7.0, the priority is to remove base defects, tighten evidence discipline, and reduce structural overhead in how Inquiry assembles and reuses context.
 
@@ -156,7 +159,7 @@ Theses that take the project beyond a CLI tool.
 A mature statement of Inquiry as a doctrine for AI-assisted software work: sharpen the canonical role of Thinking Tools, clarify the Inquiry / APE / Finite APE Machine distinction, and make the philosophical lineage legible enough that the method survives changes in targets, vendors, and surrounding tooling.
 
 ### Bootstrap-validation paper
-Publish the empirical paper on APE-builds-APE. Requires the existing metrics foundation from #72 plus at least 30 cycles of clean comparative data. Plan: [research/ape_builds_ape/bootstrap-validation.md](research/ape_builds_ape/bootstrap-validation.md).
+Publish the empirical paper on APE-builds-APE once the project has enough clean comparative cycle evidence and a stable publication plan.
 
 ### DARWIN community-level learning
 Currently DARWIN proposes mutations only to *this* repo's APE. The long-term vision is a community-level DARWIN that aggregates evolution issues across many APE-using projects to propose changes upstream to the framework itself.
@@ -188,9 +191,8 @@ The lesson: **the framework wants fewer, sharper agents, not more**. Each absorp
 
 ## How this roadmap is updated
 
-- The live `0.6.x` execution program is maintained in [0.6.x-harness-backlog.md](0.6.x-harness-backlog.md).
-- This roadmap keeps strategic framing, selected historical snapshots, and medium/long-term direction.
-- Mid-term items mature when they become concrete specs, validated runtime surfaces, or explicit program blocks.
-- Long-term items are theses, not commitments. They move forward only when evidence justifies the investment.
+- Keep this file forward-looking.
+- Move completed work into code, tests, release notes, or the architecture document.
+- Avoid recreating historical planning layers once the runtime has already made the decision concrete.
 
-If you want the absolute current execution state, read [0.6.x-harness-backlog.md](0.6.x-harness-backlog.md), [architecture.md](architecture.md), and the active release surface.
+If you want the absolute current execution state, read [architecture.md](architecture.md), the active release surface, and the live code and tests.

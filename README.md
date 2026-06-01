@@ -4,9 +4,9 @@
 
 A methodology for AI-assisted software development that models coding agents as a cooperative finite state machine — **Analyze → Plan → Execute → End → [Evolution] → Idle** — where the value is in the process, not the model.
 
-**Status:** `v0.4.5` · Windows + Linux · Single-target MVP (Copilot)
+**Status:** `v0.7.0` · Windows + Linux · Copilot-first runtime
 
-This README is the public entry surface. For the repository's canonical documentation map, start at [`docs/index.md`](docs/index.md).
+This README is the public entry surface. The living repository doctrine is intentionally small in `docs/architecture.md` and `docs/roadmap.md`.
 
 Inquiry now also carries its long-form book manuscript inside [`code/book/README.md`](code/book/README.md). The book is the canonical doctrinal treatment of the project; the runtime contract remains governed by the CLI assets, tests, and specifications in this repository.
 
@@ -44,15 +44,15 @@ Each agent receives a prompt assembled by the CLI that includes:
 
 The agent never guesses where things go. The CLI tells it.
 
-## Documentation as investigation
+## Documentation as runtime evidence
 
 During ANALYZE, SOCRATES writes investigation material to `cleanrooms/<branch>/analyze/`:
 
-- **`confirmed.md`** — living document of confirmed findings (mandatory)
-- **Topic documents** — one per investigation thread (`root-cause.md`, `prior-art.md`, etc.)
+- **`confirmations.md`** — bounded analysis corpus and confirmations
+- **Topic documents** — optional bounded evidence threads when needed
 - **`diagnosis.md`** — final synthesis that references all findings
 
-Every document follows a strict YAML frontmatter schema. An index is maintained after every write. DESCARTES reads `diagnosis.md` as its sole input for planning.
+DESCARTES reads `diagnosis.md` as its authoritative planning input. BASHO and END inherit `plan.md`, `pre_pr_inspection.md`, and `run_trace.yaml` as the closure and observability surfaces that now define the 0.7.x baseline.
 
 This ensures that analysis survives context windows, session resets, and model swaps. The investigation is in the files, not in the chat.
 
@@ -87,7 +87,7 @@ iq init                 # scaffold .inquiry/
 iq                      # show current state
 ```
 
-For the full command reference, see [`docs/index.md`](docs/index.md).
+For the current system model, see [`docs/architecture.md`](docs/architecture.md). For forward direction, see [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Architecture
 
@@ -95,7 +95,7 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 - **FSM:** declarative `transition_contract.yaml` — every (state, event) pair is total
 - **Context injection:** `iq ape prompt` assembles base prompt + sub-state + dynamic paths as fenced YAML
 - **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
-- **Memory:** `.inquiry/` (runtime state), `cleanrooms/` (per-cycle artifacts), `docs/spec/` (specifications)
+- **Memory:** `.inquiry/` (runtime state) and `cleanrooms/` (per-cycle artifacts created on demand)
 - **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
 - **Target:** Copilot only at present. Multi-target deferred until reactivation
 
@@ -103,16 +103,10 @@ For the full command reference, see [`docs/index.md`](docs/index.md).
 
 | Document | Purpose |
 |----------|---------|
-| [`docs/index.md`](docs/index.md) | Top-level navigation |
 | [`code/book/README.md`](code/book/README.md) | Canonical long-form book manuscript and editorial surface |
-| [`docs/architecture.md`](docs/architecture.md) | APE as orchestrating methodology |
-| [`docs/spec/finite-ape-machine.md`](docs/spec/finite-ape-machine.md) | Technical FSM specification |
-| [`docs/spec/memory-as-code-spec.md`](docs/spec/memory-as-code-spec.md) | Memory architecture (v0.2.0) |
-| [`docs/thinking-tools.md`](docs/thinking-tools.md) | Thinking Tools in the model |
-| [`docs/research/inquiry/index.md`](docs/research/inquiry/index.md) | Philosophical research base supporting the book and the methodology |
-| [`docs/research/book/index.md`](docs/research/book/index.md) | Imported working notes and support material from the book project |
+| [`docs/architecture.md`](docs/architecture.md) | Current runtime model and operating doctrine |
 | [`docs/roadmap.md`](docs/roadmap.md) | Strategic direction |
-| [`docs/lore.md`](docs/lore.md) | Nomenclature and allegory |
+| `cleanrooms/<branch>/...` | Cycle-local evidence created only when a cycle is active |
 
 ## License
 
