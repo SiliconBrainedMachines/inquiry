@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:inquiry_cli/assets.dart';
 import 'package:inquiry_cli/modules/ape/commands/prompt.dart';
 import 'package:inquiry_cli/modules/ape/inquiry_state.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
@@ -219,6 +220,35 @@ void main() {
         expect(result.apeName, equals('basho'));
         expect(result.fsmState, equals('EXECUTE'));
         expect(result.prompt, contains('BASHŌ'));
+      });
+
+      test('records model_activity with prompt size and assembly time', () async {
+        writeState(
+          'ANALYZE',
+          issue: '145',
+          promptFragmentId: 'idle_to_analyze',
+        );
+
+        final cmd = ApePromptCommand(
+          ApePromptInput(name: 'socrates', workingDirectory: tmpDir.path),
+        );
+        final result = await cmd.execute();
+
+        final traceContent = File(
+          p.join(tmpDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        ).readAsStringSync();
+
+        expect(traceContent, contains('event_class: model_activity'));
+        expect(traceContent, contains('phase: ANALYZE'));
+        expect(traceContent, contains('ape_name: socrates'));
+        expect(traceContent, contains('model_surface: prompt_input'));
+        expect(
+          traceContent,
+          contains('prompt_characters: ${result.prompt.runes.length}'),
+        );
+        expect(traceContent, contains('estimated_input_tokens: '));
+        expect(traceContent, contains('assembly_duration_seconds: '));
+        expect(traceContent, contains('prompt_fragment_id: idle_to_analyze'));
       });
 
       test('basho in END is also active', () async {
@@ -695,6 +725,28 @@ void main() {
         );
       }
 
+      void expectContextFieldOnlyInInquiryContext(String prompt, String key) {
+        final contextIndex = prompt.indexOf('# --- inquiry-context ---');
+        final keyToken = '$key:';
+        final keyIndex = prompt.indexOf(keyToken);
+
+        expect(
+          contextIndex,
+          greaterThanOrEqualTo(0),
+          reason: 'Missing inquiry-context block for field: $key',
+        );
+        expect(
+          keyIndex,
+          greaterThan(contextIndex),
+          reason: '$key should be owned by inquiry-context, not prompt prose',
+        );
+        expect(
+          prompt.indexOf(keyToken, keyIndex + keyToken.length),
+          equals(-1),
+          reason: '$key should appear only once in the assembled prompt',
+        );
+      }
+
       setUp(() {
         gitTmpDir = Directory.systemTemp.createTempSync('ape_ctx_test_');
         Directory(p.join(gitTmpDir.path, '.inquiry')).createSync();
@@ -785,7 +837,54 @@ void main() {
 
         expect(result.prompt, contains('diagnosis.md'));
         expect(result.prompt, contains('Clarification questions'));
+        expect(
+          result.prompt,
+          contains(
+            'Inspect repository state, existing cycle artifacts, project docs, and relevant tests or runtime evidence before asking the user for missing facts.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'If repository evidence is insufficient, run targeted external research before escalating factual gaps to the user.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Ask the user only for unresolved facts, hidden constraints, or human judgments that evidence cannot recover.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Before asking a question, decide whether it would materially change the diagnosis, scope, or uncertainty of the problem.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Ask fewer than 2-3 questions when fewer are justified; diagnostic value matters more than question count.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'If the problem is already sufficiently bounded, stop widening the interrogation and move toward synthesis.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'When discussing methods, approaches, or tradeoffs, propose concrete candidate alternatives before asking the user to evaluate them.',
+          ),
+        );
         expect(result.prompt, contains('# --- inquiry-context ---'));
+        expect(
+          result.prompt,
+          contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+        );
+        expect(result.prompt, contains('task_id: 152'));
         expect(
           result.prompt,
           contains('output_dir: cleanrooms/152-test-branch/analyze/'),
@@ -801,12 +900,134 @@ void main() {
           contains('index_file: cleanrooms/152-test-branch/analyze/index.md'),
         );
         expect(result.prompt, contains('doc_protocol: doc-write'));
+        expect(
+          result.prompt,
+          contains('context_policy: progressive-disclosure'),
+        );
+        expect(
+          result.prompt,
+          contains('authority_mode: build-authoritative-analysis'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "upfront_context: ['cleanrooms/152-test-branch/issue.md', 'cleanrooms/152-test-branch/analyze/index.md']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${p.normalize(gitTmpDir.path)}']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "deferred_context: ['broad repository rereads not justified by the active uncertainty']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once written',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'retrieval_trigger_rule: widen retrieval only when the bounded analysis corpus leaves a named uncertainty unresolved',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'reread_avoidance_rule: do not restart repository-wide discovery when issue.md, index.md, and confirmations.md already bound the active uncertainty',
+          ),
+        );
+        expect(result.prompt, contains('sensor_policy: minimum-phase-stack'));
+        expect(
+          result.prompt,
+          contains(
+            "minimum_sensor_stack: ['runtime', 'pre_transition', 'inferential_optional']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "blocking_sensor_stack: ['runtime', 'pre_transition']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "advisory_sensor_stack: ['inferential_optional']",
+          ),
+        );
+        expect(result.prompt, contains('sensor_gate: handoff-to-plan'));
+        expect(
+          result.prompt,
+          contains(
+            'sensor_authority_rule: analysis corpus and diagnosis handoff must be complete enough before PLAN handoff can proceed',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('observability_policy: minimum-phase-trace'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "trace_targets: ['transition', 'sensor_run', 'block', 'retry', 'phase_timing', 'tool_activity']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "eval_targets: ['evidence_discipline_failure']",
+          ),
+        );
+        expect(result.prompt, contains('evidence_policy: evidence-first'));
+        expect(
+          result.prompt,
+          contains(
+            "evidence_acquisition_order: ['repo', 'cycle_artifacts', 'docs', 'tests', 'runtime_evidence', 'web_research', 'user_questions']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'question_escalation_rule: ask the user only after repo, cycle artifact, docs, tests, runtime evidence, and targeted web research leave a material uncertainty',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "diagnosis_requirements: ['record concrete observed evidence before handoff', 'distinguish observed evidence from hypotheses', 'record constraints explicitly', 'record open questions only when evidence cannot close them']",
+          ),
+        );
         expect(result.prompt, isNot(contains('confirmed_doc')));
         expect(result.prompt, isNot(contains('confirmed.md')));
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'output_dir: cleanrooms/152-test-branch/analyze/',
         );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'project_root: ${p.normalize(gitTmpDir.path)}',
+        );
+        expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
           'confirmations_doc: cleanrooms/152-test-branch/analyze/confirmations.md',
@@ -819,6 +1040,121 @@ void main() {
           result.prompt,
           'doc_protocol: doc-write',
         );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'context_policy: progressive-disclosure',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_mode: build-authoritative-analysis',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "upfront_context: ['cleanrooms/152-test-branch/issue.md', 'cleanrooms/152-test-branch/analyze/index.md']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', 'cleanrooms/152-test-branch/analyze/confirmations.md', '${p.normalize(gitTmpDir.path)}']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "deferred_context: ['broad repository rereads not justified by the active uncertainty']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once written',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'retrieval_trigger_rule: widen retrieval only when the bounded analysis corpus leaves a named uncertainty unresolved',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'reread_avoidance_rule: do not restart repository-wide discovery when issue.md, index.md, and confirmations.md already bound the active uncertainty',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_policy: minimum-phase-stack',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "minimum_sensor_stack: ['runtime', 'pre_transition', 'inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "blocking_sensor_stack: ['runtime', 'pre_transition']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "advisory_sensor_stack: ['inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_gate: handoff-to-plan',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_authority_rule: analysis corpus and diagnosis handoff must be complete enough before PLAN handoff can proceed',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'observability_policy: minimum-phase-trace',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "trace_targets: ['transition', 'sensor_run', 'block', 'retry', 'phase_timing', 'tool_activity']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "eval_targets: ['evidence_discipline_failure']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'evidence_policy: evidence-first',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "evidence_acquisition_order: ['repo', 'cycle_artifacts', 'docs', 'tests', 'runtime_evidence', 'web_research', 'user_questions']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'question_escalation_rule: ask the user only after repo, cycle artifact, docs, tests, runtime evidence, and targeted web research leave a material uncertainty',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "diagnosis_requirements: ['record concrete observed evidence before handoff', 'distinguish observed evidence from hypotheses', 'record constraints explicitly', 'record open questions only when evidence cannot close them']",
+        );
+        for (final key in [
+          'evidence_acquisition_order',
+          'diagnosis_requirements',
+          'input_artifacts',
+          'expected_outputs',
+          'editable_surfaces',
+          'read_only_surfaces',
+          'validation_commands',
+          'done_criteria',
+          'minimum_sensor_stack',
+          'blocking_sensor_stack',
+          'advisory_sensor_stack',
+          'upfront_context',
+          'retrieval_context',
+          'deferred_context',
+          'retrieval_trigger_rule',
+          'reread_avoidance_rule',
+          'trace_targets',
+          'eval_targets',
+          'grader_stack',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
         expectExplicitContextAfter(result.prompt, 'Clarification questions');
       });
 
@@ -854,7 +1190,104 @@ void main() {
           result.prompt,
           contains('plan_file: cleanrooms/152-test-branch/plan.md'),
         );
+        expect(
+          result.prompt,
+          contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+        );
+        expect(result.prompt, contains('task_id: 152'));
         expect(result.prompt, contains('doc_protocol: doc-read'));
+        expect(
+          result.prompt,
+          contains('context_policy: authoritative-handoff'),
+        );
+        expect(
+          result.prompt,
+          contains('authority_mode: trust-diagnosis-first'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "upfront_context: ['cleanrooms/152-test-branch/analyze/diagnosis.md']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${p.normalize(gitTmpDir.path)}']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "deferred_context: ['reconstructing ANALYZE from broad rereads when diagnosis.md is already authoritative']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authority_rule: trust diagnosis.md as the planning baseline unless a concrete gap requires targeted retrieval',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'retrieval_trigger_rule: retrieve adjacent repo evidence only when diagnosis.md leaves a concrete gap that would change plan structure, scope, or verification',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'reread_avoidance_rule: do not reconstruct ANALYZE from broad rereads when diagnosis.md already answers the planning question',
+          ),
+        );
+        expect(result.prompt, contains('sensor_policy: minimum-phase-stack'));
+        expect(
+          result.prompt,
+          contains(
+            "minimum_sensor_stack: ['runtime', 'pre_transition', 'inferential_optional']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "blocking_sensor_stack: ['runtime', 'pre_transition']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "advisory_sensor_stack: ['inferential_optional']",
+          ),
+        );
+        expect(result.prompt, contains('sensor_gate: handoff-to-execute'));
+        expect(
+          result.prompt,
+          contains(
+            'sensor_authority_rule: plan.md and issue-linked runtime context must be coherent before EXECUTE handoff',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('observability_policy: minimum-phase-trace'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "trace_targets: ['transition', 'sensor_run', 'block', 'retry', 'phase_timing', 'tool_activity']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "eval_targets: ['handoff_authority_failure']",
+          ),
+        );
         expect(result.prompt, isNot(contains('Commit:')));
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
@@ -868,8 +1301,147 @@ void main() {
           result.prompt,
           'doc_protocol: doc-read',
         );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'context_policy: authoritative-handoff',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_mode: trust-diagnosis-first',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "upfront_context: ['cleanrooms/152-test-branch/analyze/diagnosis.md']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "retrieval_context: ['cleanrooms/152-test-branch/analyze/index.md', '${p.normalize(gitTmpDir.path)}']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "deferred_context: ['reconstructing ANALYZE from broad rereads when diagnosis.md is already authoritative']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authoritative_handoff: cleanrooms/152-test-branch/analyze/diagnosis.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_rule: trust diagnosis.md as the planning baseline unless a concrete gap requires targeted retrieval',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'retrieval_trigger_rule: retrieve adjacent repo evidence only when diagnosis.md leaves a concrete gap that would change plan structure, scope, or verification',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'reread_avoidance_rule: do not reconstruct ANALYZE from broad rereads when diagnosis.md already answers the planning question',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_policy: minimum-phase-stack',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "minimum_sensor_stack: ['runtime', 'pre_transition', 'inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "blocking_sensor_stack: ['runtime', 'pre_transition']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "advisory_sensor_stack: ['inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_gate: handoff-to-execute',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_authority_rule: plan.md and issue-linked runtime context must be coherent before EXECUTE handoff',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'observability_policy: minimum-phase-trace',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "trace_targets: ['transition', 'sensor_run', 'block', 'retry', 'phase_timing', 'tool_activity']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "eval_targets: ['handoff_authority_failure']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'project_root: ${p.normalize(gitTmpDir.path)}',
+        );
+        expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
+        for (final key in [
+          'input_artifacts',
+          'expected_outputs',
+          'editable_surfaces',
+          'read_only_surfaces',
+          'validation_commands',
+          'done_criteria',
+          'minimum_sensor_stack',
+          'blocking_sensor_stack',
+          'advisory_sensor_stack',
+          'upfront_context',
+          'retrieval_context',
+          'deferred_context',
+          'retrieval_trigger_rule',
+          'reread_avoidance_rule',
+          'trace_targets',
+          'eval_targets',
+          'grader_stack',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
         expectExplicitContextAfter(result.prompt, 'FOCUS: Division.');
       });
+
+      test(
+        'task contract stays anchored to project root when invoked from a subdirectory',
+        () async {
+          File(
+            p.join(
+              gitTmpDir.path,
+              'cleanrooms',
+              '152-test-branch',
+              kStateFileName,
+            ),
+          ).writeAsStringSync('state: ANALYZE\nissue: "152"\n');
+
+          final nestedDir = Directory(
+            p.join(gitTmpDir.path, 'lib', 'nested', 'deeper'),
+          )..createSync(recursive: true);
+
+          final cmd = ApePromptCommand(
+            ApePromptInput(
+              name: 'socrates',
+              subState: 'clarification',
+              workingDirectory: nestedDir.path,
+            ),
+            assets: Assets(root: gitTmpDir.path),
+          );
+          final result = await cmd.execute();
+
+          expect(
+            result.prompt,
+            contains('project_root: ${p.normalize(gitTmpDir.path)}'),
+          );
+          expect(result.prompt, contains('task_id: 152'));
+          expectContextKeyOnlyInInquiryContext(
+            result.prompt,
+            'project_root: ${p.normalize(gitTmpDir.path)}',
+          );
+          expectContextKeyOnlyInInquiryContext(result.prompt, 'task_id: 152');
+          expectContextFieldOnlyInInquiryContext(result.prompt, 'editable_surfaces');
+          expectContextFieldOnlyInInquiryContext(result.prompt, 'done_criteria');
+        },
+      );
 
       test('basho prompt includes plan contract in assembled prompt', () async {
         File(
@@ -903,6 +1475,30 @@ void main() {
           ),
         );
         expect(result.prompt, contains('Follow plan.md phases in order'));
+        expect(
+          result.prompt,
+          contains(
+            'Treat validation as a named sensor stack, not as an informal checklist.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Minimum EXECUTE sensor stack: local_fast, pre_transition, pre_pr, runtime.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'local_fast and pre_transition sensor failures block phase completion or phase advance',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'END handoff is blocked until the pre_pr sensor stack is complete',
+          ),
+        );
         expect(result.prompt, contains('Allowed actions:'));
         expect(result.prompt, contains('Edit code files'));
         expect(result.prompt, contains('# --- inquiry-context ---'));
@@ -915,6 +1511,160 @@ void main() {
           contains('output_dir: cleanrooms/152-test-branch/'),
         );
         expect(result.prompt, contains('doc_protocol: doc-read'));
+        expect(
+          result.prompt,
+          contains('context_policy: authoritative-handoff'),
+        );
+        expect(
+          result.prompt,
+          contains('authority_mode: trust-plan-first'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "upfront_context: ['cleanrooms/152-test-branch/plan.md']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "deferred_context: ['re-reading broad analysis artifacts when plan.md already defines the bounded execution contract']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authoritative_handoff: cleanrooms/152-test-branch/plan.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'authority_rule: trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'retrieval_trigger_rule: retrieve targeted code or cycle-local evidence only when plan.md leaves a concrete implementation or verification ambiguity',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'reread_avoidance_rule: do not re-read broad analysis artifacts when plan.md already defines the bounded execution contract',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('sensor_policy: minimum-phase-stack'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "minimum_sensor_stack: ['local_fast', 'pre_transition', 'pre_pr', 'runtime']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "blocking_sensor_stack: ['local_fast', 'pre_transition', 'runtime']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "advisory_sensor_stack: ['inferential_optional']",
+          ),
+        );
+        expect(result.prompt, contains('sensor_gate: handoff-to-end'));
+        expect(
+          result.prompt,
+          contains(
+            'sensor_authority_rule: pre_pr evidence must be complete before END handoff even when phase-local checks are green',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('observability_policy: minimum-phase-trace'),
+        );
+        expect(
+          result.prompt,
+          contains('result_metrics_surface: .inquiry/metrics.yaml'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "trace_targets: ['transition', 'sensor_run', 'block', 'retry', 'phase_timing', 'tool_activity']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'failure_taxonomy_surface: docs/research/book/analyze/failure-taxonomy.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'observability_authority_rule: execution_trace_surface and pre_pr_inspection_report outrank retrospective summaries when explaining EXECUTE cost or blocking',
+          ),
+        );
+        expect(result.prompt, contains('eval_policy: harness-minimum'));
+        expect(
+          result.prompt,
+          contains(
+            "eval_targets: ['sensor_gate_failure', 'observability_failure']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'failure_classification_mode: classify repeated failures as model, host, inquiry_harness, or mixed',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "grader_stack: ['structure_grader', 'trace_grader', 'artifact_consistency_grader']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'eval_authority_rule: trace and gate artifacts outrank narrative retrospection when evaluating EXECUTE closure behavior',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'release_gate: propose semver bump and get explicit user approval before END handoff',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'semver bump proposal is explicit and user-approved before END handoff',
+          ),
+        );
         expect(result.prompt, isNot(contains('Run tests, lint, build')));
         expect(result.prompt, isNot(contains('retrospective.md')));
         expectContextKeyOnlyInInquiryContext(
@@ -929,6 +1679,130 @@ void main() {
           result.prompt,
           'doc_protocol: doc-read',
         );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'context_policy: authoritative-handoff',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_mode: trust-plan-first',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "upfront_context: ['cleanrooms/152-test-branch/plan.md']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "deferred_context: ['re-reading broad analysis artifacts when plan.md already defines the bounded execution contract']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authoritative_handoff: cleanrooms/152-test-branch/plan.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'authority_rule: trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'retrieval_trigger_rule: retrieve targeted code or cycle-local evidence only when plan.md leaves a concrete implementation or verification ambiguity',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'reread_avoidance_rule: do not re-read broad analysis artifacts when plan.md already defines the bounded execution contract',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_policy: minimum-phase-stack',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "minimum_sensor_stack: ['local_fast', 'pre_transition', 'pre_pr', 'runtime']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "blocking_sensor_stack: ['local_fast', 'pre_transition', 'runtime']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "advisory_sensor_stack: ['inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_gate: handoff-to-end',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_authority_rule: pre_pr evidence must be complete before END handoff even when phase-local checks are green',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'observability_policy: minimum-phase-trace',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'result_metrics_surface: .inquiry/metrics.yaml',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "trace_targets: ['transition', 'sensor_run', 'block', 'retry', 'phase_timing', 'tool_activity']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'failure_taxonomy_surface: docs/research/book/analyze/failure-taxonomy.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'observability_authority_rule: execution_trace_surface and pre_pr_inspection_report outrank retrospective summaries when explaining EXECUTE cost or blocking',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'eval_policy: harness-minimum',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "eval_targets: ['sensor_gate_failure', 'observability_failure']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'failure_classification_mode: classify repeated failures as model, host, inquiry_harness, or mixed',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "grader_stack: ['structure_grader', 'trace_grader', 'artifact_consistency_grader']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'eval_authority_rule: trace and gate artifacts outrank narrative retrospection when evaluating EXECUTE closure behavior',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'release_gate: propose semver bump and get explicit user approval before END handoff',
+        );
+        for (final key in [
+          'retrieval_trigger_rule',
+          'reread_avoidance_rule',
+          'minimum_sensor_stack',
+          'blocking_sensor_stack',
+          'advisory_sensor_stack',
+          'trace_targets',
+          'eval_targets',
+          'grader_stack',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
         expectOperationalContractBetween(
           result.prompt,
           identityFragment:
@@ -936,6 +1810,168 @@ void main() {
           contractFragment:
               'Implement the plan phase by phase under its formal constraints.',
         );
+      });
+
+      test('basho in END includes pre-PR sensor gate contract', () async {
+        File(
+          p.join(
+            gitTmpDir.path,
+            'cleanrooms',
+            '152-test-branch',
+            kStateFileName,
+          ),
+        ).writeAsStringSync('state: END\nissue: "152"\n');
+
+        final cmd = ApePromptCommand(
+          ApePromptInput(
+            name: 'basho',
+            subState: 'commit',
+            workingDirectory: gitTmpDir.path,
+          ),
+        );
+        final result = await cmd.execute();
+
+        expect(result.prompt, contains('NOTHING WASTED'));
+        expect(result.prompt, contains('## Phase-Owned Operational Contract'));
+        expect(result.prompt, contains('State: END'));
+        expect(
+          result.prompt,
+          contains('END owns the pre-PR inspection gate before push or PR creation'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'Minimum END sensor stack: pre_pr, ci_required, runtime, inferential_optional.',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('Blocking pre_pr or runtime failures stop PR creation'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'ci_required sensors remain authoritative after PR creation and may still block merge',
+          ),
+        );
+        expect(result.prompt, contains('sensor_policy: minimum-phase-stack'));
+        expect(
+          result.prompt,
+          contains(
+            "minimum_sensor_stack: ['pre_pr', 'ci_required', 'runtime', 'inferential_optional']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "blocking_sensor_stack: ['pre_pr', 'runtime']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            "advisory_sensor_stack: ['inferential_optional']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains('sensor_gate: end-pre-pr-inspection'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'sensor_authority_rule: ci_required remains merge-authoritative after PR creation even when the local END gate is green',
+          ),
+        );
+        expect(result.prompt, contains('observability_policy: end-gate-trace'));
+        expect(
+          result.prompt,
+          contains('result_metrics_surface: .inquiry/metrics.yaml'),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
+          ),
+        );
+        expect(result.prompt, contains('eval_policy: harness-minimum'));
+        expect(
+          result.prompt,
+          contains(
+            "eval_targets: ['sensor_gate_failure', 'observability_failure']",
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
+            'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
+          ),
+        );
+        expect(
+          result.prompt,
+          isNot(contains('No review or re-validation (basho already did that)')),
+        );
+        expect(result.prompt, contains('Allowed actions:'));
+        expect(result.prompt, contains('Run pre-PR inspection sensors'));
+        expect(result.prompt, contains('# --- inquiry-context ---'));
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_policy: minimum-phase-stack',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "minimum_sensor_stack: ['pre_pr', 'ci_required', 'runtime', 'inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "blocking_sensor_stack: ['pre_pr', 'runtime']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "advisory_sensor_stack: ['inferential_optional']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_gate: end-pre-pr-inspection',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'sensor_authority_rule: ci_required remains merge-authoritative after PR creation even when the local END gate is green',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'observability_policy: end-gate-trace',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'result_metrics_surface: .inquiry/metrics.yaml',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'eval_policy: harness-minimum',
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          "eval_targets: ['sensor_gate_failure', 'observability_failure']",
+        );
+        expectContextKeyOnlyInInquiryContext(
+          result.prompt,
+          'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
+        );
+        for (final key in [
+          'minimum_sensor_stack',
+          'blocking_sensor_stack',
+          'advisory_sensor_stack',
+          'trace_targets',
+          'eval_targets',
+          'grader_stack',
+        ]) {
+          expectContextFieldOnlyInInquiryContext(result.prompt, key);
+        }
       });
 
       test(
@@ -1111,6 +2147,44 @@ void main() {
           expect(
             result.prompt,
             contains('metrics_file: .inquiry/metrics.yaml'),
+          );
+          expect(
+            result.prompt,
+            contains('observability_policy: evolution-audit'),
+          );
+          expect(
+            result.prompt,
+            contains(
+              'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
+            ),
+          );
+          expect(
+            result.prompt,
+            contains(
+              "trace_targets: ['transition', 'sensor_run', 'block', 'retry', 'phase_timing']",
+            ),
+          );
+          expect(
+            result.prompt,
+            contains('eval_policy: harness-evolution-minimum'),
+          );
+          expect(
+            result.prompt,
+            contains(
+              "eval_targets: ['task_contract_failure', 'evidence_discipline_failure', 'handoff_authority_failure', 'sensor_gate_failure', 'observability_failure']",
+            ),
+          );
+          expect(
+            result.prompt,
+            contains(
+              "grader_stack: ['structure_grader', 'trace_grader', 'artifact_consistency_grader', 'human_audit_grader']",
+            ),
+          );
+          expect(
+            result.prompt,
+            contains(
+              'eval_authority_rule: trace and artifact graders outrank narrative retrospection when classifying repeated harness failures',
+            ),
           );
           expect(
             result.prompt,

@@ -115,7 +115,19 @@ void main() {
         File(p.join(cycleDir, 'analyze', 'confirmations.md')).existsSync(),
         isTrue,
       );
+      expect(
+        File(p.join(cycleDir, 'analyze', 'diagnosis.md')).existsSync(),
+        isTrue,
+      );
       expect(File(p.join(cycleDir, 'issue.md')).existsSync(), isTrue);
+
+      final diagnosisContent = File(
+        p.join(cycleDir, 'analyze', 'diagnosis.md'),
+      ).readAsStringSync();
+      expect(diagnosisContent, contains('## Evidence'));
+      expect(diagnosisContent, contains('## Hypotheses'));
+      expect(diagnosisContent, contains('## Constraints'));
+      expect(diagnosisContent, contains('## Open Questions'));
 
       final state = InquiryState.loadFrom(p.join(cycleDir, kStateFileName));
       expect(state.state, 'ANALYZE');
@@ -168,8 +180,29 @@ void main() {
       expect(t4.allowed, isTrue);
       expect(t4.nextState, 'END');
       expect(t4.promptFragmentId, isNotNull);
+      final inspectionTemplate = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'pre_pr_inspection.md'),
+      );
+      expect(inspectionTemplate.existsSync(), isTrue);
+      final templateText = inspectionTemplate.readAsStringSync();
+      expect(
+        templateText,
+        contains('PASS: asset parity source/build reviewed'),
+      );
+      expect(
+        templateText,
+        contains('PASS: overhead summary event counts transition='),
+      );
+      expect(
+        templateText,
+        contains('WARN: overhead summary attributes host-boundary activity as ['),
+      );
+      expect(templateText, contains('## Pass 1 — Consistency'));
+      expect(templateText, contains('## Pass 2 — Completeness'));
+      expect(templateText, contains('## Pass 3 — Traceability'));
       current = t4.nextState!;
 
+      _writePrePrInspection(tempDir.path, branch, verdict: 'APPROVED');
       final t5 = await transition('pr_ready');
       expect(t5.allowed, isTrue);
       expect(t5.nextState, 'EVOLUTION');
@@ -181,6 +214,23 @@ void main() {
       expect(t6.allowed, isTrue);
       expect(t6.nextState, 'IDLE');
       expect(t6.promptFragmentId, isNotNull);
+
+      final runTrace = File(
+        p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+      );
+      expect(runTrace.existsSync(), isTrue);
+      final traceContent = runTrace.readAsStringSync();
+      expect(traceContent, contains('event_class: transition'));
+      expect(traceContent, contains('event_class: sensor_run'));
+      expect(traceContent, contains('event_class: phase_timing'));
+      expect(traceContent, contains('event_class: tool_activity'));
+      expect(traceContent, contains('transition_event: start_analyze'));
+      expect(traceContent, contains('command_family: issue_view'));
+      expect(traceContent, contains('transition_event: complete_analysis'));
+      expect(traceContent, contains('transition_event: approve_plan'));
+      expect(traceContent, contains('transition_event: finish_execute'));
+      expect(traceContent, contains('transition_event: pr_ready'));
+      expect(traceContent, contains('transition_event: finish_evolution'));
     });
   });
 }
@@ -210,6 +260,34 @@ void _copyContractFromWorkspace(String root) {
   );
   destination.createSync(recursive: true);
   destination.writeAsStringSync(source.readAsStringSync());
+  final buildDestination = File(
+    p.join(root, 'build', 'assets', 'fsm', 'transition_contract.yaml'),
+  );
+  buildDestination.createSync(recursive: true);
+  buildDestination.writeAsStringSync(source.readAsStringSync());
+
+  final inspectionTemplateSource = File(
+    p.join(
+      Directory.current.path,
+      'assets',
+      'inspection',
+      'pre_pr_inspection_template.md',
+    ),
+  );
+  final inspectionTemplateDestination = File(
+    p.join(root, 'assets', 'inspection', 'pre_pr_inspection_template.md'),
+  );
+  inspectionTemplateDestination.createSync(recursive: true);
+  inspectionTemplateDestination.writeAsStringSync(
+    inspectionTemplateSource.readAsStringSync(),
+  );
+  final buildInspectionTemplateDestination = File(
+    p.join(root, 'build', 'assets', 'inspection', 'pre_pr_inspection_template.md'),
+  );
+  buildInspectionTemplateDestination.createSync(recursive: true);
+  buildInspectionTemplateDestination.writeAsStringSync(
+    inspectionTemplateSource.readAsStringSync(),
+  );
 }
 
 void _writeDiagnosis(String root, String branch, String content) {
@@ -217,13 +295,54 @@ void _writeDiagnosis(String root, String branch, String content) {
     p.join(root, 'cleanrooms', branch, 'analyze', 'diagnosis.md'),
   );
   file.createSync(recursive: true);
-  file.writeAsStringSync(content);
+  file.writeAsStringSync(
+    '# Diagnosis\n'
+    '\n'
+    '## Evidence\n'
+    '$content\n'
+    '\n'
+    '## Hypotheses\n'
+    '- Working hypothesis\n'
+    '\n'
+    '## Constraints\n'
+    '- No additional constraints\n'
+    '\n'
+    '## Open Questions\n'
+    '- None\n',
+  );
 }
 
 void _writePlan(String root, String branch, String content) {
   final file = File(p.join(root, 'cleanrooms', branch, 'plan.md'));
   file.createSync(recursive: true);
   file.writeAsStringSync(content);
+}
+
+void _writePrePrInspection(String root, String branch, {required String verdict}) {
+  final file = File(p.join(root, 'cleanrooms', branch, 'pre_pr_inspection.md'));
+  file.createSync(recursive: true);
+  final issue = branch.split('-').first;
+  file.writeAsStringSync(
+    [
+      'verdict: $verdict',
+      '',
+      '# END Pre-PR Inspection',
+      '',
+      'issue: "$issue"',
+      'branch: "$branch"',
+      'generated_at: "2026-06-01T00:00:00Z"',
+      '',
+      '## Pass 1 — Consistency',
+      '- PASS: asset parity source/build reviewed',
+      '',
+      '## Pass 2 — Completeness',
+      '- PASS: changed behavior covered by tests',
+      '',
+      '## Pass 3 — Traceability',
+      '- PASS: every code change maps to plan.md',
+      '',
+    ].join('\n'),
+  );
 }
 
 void _initGitRepo(String root, {required String branch}) {

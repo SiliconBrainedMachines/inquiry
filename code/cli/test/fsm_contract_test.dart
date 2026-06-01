@@ -189,20 +189,33 @@ void main() {
     expect(finishExecution.allowed, isTrue);
     expect(finishExecution.to, FsmState.end);
     expect(finishExecution.operations!.promptFragmentId, 'execute_to_end');
+    expect(
+      finishExecution.operations!.effects,
+      contains('seed_pre_pr_inspection_template'),
+    );
 
     expect(createPr.allowed, isTrue);
     expect(createPr.to, FsmState.evolution);
     expect(createPr.operations!.promptFragmentId, 'end_to_evolution');
+    expect(
+      createPr.operations!.prechecks,
+      contains('pre_pr_inspection_approved'),
+    );
 
     expect(skipEvolution.allowed, isTrue);
     expect(skipEvolution.to, FsmState.idle);
     expect(skipEvolution.operations!.promptFragmentId, 'end_to_idle');
+    expect(
+      skipEvolution.operations!.prechecks,
+      contains('pre_pr_inspection_approved'),
+    );
   });
 
   test('preconditions contract exists for irreversible actions', () {
     expect(contract.preconditions.keys, contains('issue_selected'));
     expect(contract.preconditions.keys, contains('feature_branch_selected'));
     expect(contract.preconditions.keys, contains('pr_created'));
+    expect(contract.preconditions.keys, contains('pre_pr_inspection_approved'));
   });
 
   test('prompt fragment contract exists for key transition', () {
