@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.5]
+### Fixed
+- **Release publication automation**: `publish-release` now resolves the GitHub release through explicit repo context, so draft publication no longer fails in a clean job without `checkout`
+
 ## [0.7.4]
 ### Fixed
 - **Root version flags**: `iq --version` and `iq -v` now normalize to the `version` command instead of being dropped by root-command routing
