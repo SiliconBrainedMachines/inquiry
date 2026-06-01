@@ -4,7 +4,7 @@
 
 The `iq` CLI enforces the Inquiry methodology in your repository — scaffolding the FSM state, deploying agents to your AI tool, and validating transitions.
 
-This README is the CLI package entry surface. For the canonical documentation map, see [../../docs/index.md](../../docs/index.md). For the broader public overview, see the [root README](../../README.md).
+This README is the CLI package entry surface. For the current runtime model, see [../../docs/architecture.md](../../docs/architecture.md). For forward direction, see [../../docs/roadmap.md](../../docs/roadmap.md). For the broader public overview, see the [root README](../../README.md).
 
 Inquiry names the cycle-level process. APE names the orchestrating methodology. The Finite APE Machine names the engineered finite-state system that the CLI enforces through explicit transitions and persisted artifacts.
 

@@ -11,9 +11,9 @@ author: descartes
 
 ## Overview
 
-Finite APE Machine is the engineered realization of the Inquiry methodology as a finite-state, signal-aware control system for software work. Inquiry names the cycle-level process. APE names the orchestrating methodology and scheduler. Finite APE Machine names the technical system that operationalizes that methodology through explicit states, governed transitions, artifacts, and phase-specific agent behavior. [1][2][3]
+Finite APE Machine is the engineered realization of the Inquiry methodology as a finite-state, signal-aware control system for software work. Inquiry names the cycle-level process. APE names the orchestrating methodology and scheduler. Finite APE Machine names the technical system that operationalizes that methodology through explicit states, governed transitions, artifacts, and phase-specific agent behavior.
 
-The point of the system is not to multiply agents indefinitely. It is to make responsibility, transition conditions, and outputs explicit enough that AI-assisted work becomes inspectable and reproducible instead of improvisational. [1][4]
+The point of the system is not to multiply agents indefinitely. It is to make responsibility, transition conditions, and outputs explicit enough that AI-assisted work becomes inspectable and reproducible instead of improvisational.
 
 ## Current Cycle Model
 
@@ -50,7 +50,7 @@ The current system uses one primary sub-agent per active work phase:
 - BASHŌ in EXECUTE
 - DARWIN in EVOLUTION
 
-APE still orchestrates every state boundary, and END remains the explicit APE + human closure gate. Earlier multi-agent rosters remain historically relevant, but they are not the active architectural model. Their documentary home is [../lore.md](../lore.md), not this specification. [4][6]
+APE still orchestrates every state boundary, and END remains the explicit APE + human closure gate. Earlier expanded rosters are historical context, not the active architectural model.
 
 ### Transitions are explicit and CLI-governed
 
@@ -70,11 +70,11 @@ The system coordinates through persisted artifacts rather than agent-to-agent hi
 - `cleanrooms/<issue>/analyze/diagnosis.md` as the contract between ANALYZE and PLAN
 - `cleanrooms/<issue>/plan.md` as the contract between PLAN and EXECUTE
 
-This keeps the orchestration inspectable from the repository itself. [2][5][7]
+This keeps the orchestration inspectable from the repository itself.
 
 ### RTOS analogy: signal-aware coordination, not literal operating-system identity
 
-Finite APE Machine borrows the RTOS analogy to explain scheduling, waiting, event signaling, and task dispatch. The analogy is architectural, not literal: the system behaves like a scheduler with event-driven coordination, but it is not an operating-system kernel. [3][5]
+Finite APE Machine borrows the RTOS analogy to explain scheduling, waiting, event signaling, and task dispatch. The analogy is architectural, not literal: the system behaves like a scheduler with event-driven coordination, but it is not an operating-system kernel.
 
 ## Collaboration Model
 
@@ -86,7 +86,7 @@ Finite APE Machine structures collaboration across three recurring perspectives:
 | Agent-Aided Engineering | AAE | PLAN | The work is decomposed, verified, and ordered |
 | Agent-Aided Manufacturing | AAM | EXECUTE + END | The approved plan is carried into implementation and delivery |
 
-DARWIN operates after delivery as the meta-learning layer that evaluates the cycle itself instead of the product alone. [1][2]
+DARWIN operates after delivery as the meta-learning layer that evaluates the cycle itself instead of the product alone.
 
 ## Relationship to Supporting Specifications
 
@@ -96,24 +96,15 @@ This document is the primary technical overview of the current finite-state syst
 - [cooperative-multitasking-model.md](cooperative-multitasking-model.md) explains the scheduler/task analogy and two-level FSM model.
 - [signal-based-coordination.md](signal-based-coordination.md) explains event and signal routing.
 - [../architecture.md](../architecture.md) explains the end-to-end system at repository scale.
-- [../research/inquiry/index.md](../research/inquiry/index.md) provides the philosophical home of Inquiry, which this machine operationalizes.
+- [../roadmap.md](../roadmap.md) explains where the live system should go next.
 
 ## Historical Boundary
 
-Earlier repository documents described a larger and more granular roster including MARCOPOLO, VITRUVIUS, SUNZI, GATSBY, ADA, DIJKSTRA, BORGES, and HERMES as active architectural roles. That material remains valuable as historical or referential context, but it should not be read as the current active model of the Finite APE Machine. The current model is the sharper scheduler-plus-phase-agent structure described above. [4][6]
+Earlier repository documents described a larger and more granular roster including MARCOPOLO, VITRUVIUS, SUNZI, GATSBY, ADA, DIJKSTRA, BORGES, and HERMES as active architectural roles. That material remains historical context, but it should not be read as the current active model of the Finite APE Machine. The current model is the sharper scheduler-plus-phase-agent structure described above.
 
-## References
+## See also
 
-[1] Inquiry repository. "Inquiry as Epistemic Foundation of APE." `docs/research/inquiry/index.md`.
-
-[2] Inquiry repository. "Architecture." `docs/architecture.md`.
-
-[3] Inquiry repository. "Signal-based coordination — RTOS event model for agent communication." `docs/spec/signal-based-coordination.md`.
-
-[4] Inquiry repository. "Agent lifecycle — six-state model and confirmed agent registry." `docs/spec/agent-lifecycle.md`.
-
-[5] Inquiry repository. "Cooperative multitasking model — two-level FSM architecture." `docs/spec/cooperative-multitasking-model.md`.
-
-[6] Inquiry repository. "The Apes — Lore." `docs/lore.md`.
-
-[7] Inquiry repository. "Diagnosis for issue #134: justified documentation status map and canonical-home recommendations." `cleanrooms/134-organize-core-documentation/analyze/diagnosis.md`.
+- [../architecture.md](../architecture.md)
+- [agent-lifecycle.md](agent-lifecycle.md)
+- [cooperative-multitasking-model.md](cooperative-multitasking-model.md)
+- [signal-based-coordination.md](signal-based-coordination.md)
