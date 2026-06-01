@@ -75,8 +75,7 @@ class EffectExecutor {
     'IDLE': 'dewey',
     'ANALYZE': 'socrates',
     'PLAN': 'descartes',
-    'EXECUTE': 'basho',
-    'END': 'basho',
+    'EXECUTE': 'ada',
     'EVOLUTION': 'darwin',
   };
 

@@ -150,7 +150,7 @@ void main() {
       tempDir = Directory.systemTemp.createTempSync('doctor_test_');
       testAssets = seedAssets(
         tempDir,
-        apes: ['socrates', 'dewey', 'descartes', 'basho', 'darwin'],
+        apes: ['socrates', 'dewey', 'descartes', 'ada', 'darwin'],
       );
     });
 
@@ -197,7 +197,7 @@ void main() {
       final cmd = makeCmd(
         assets: seedAssets(
           customDir,
-          apes: ['socrates', 'descartes', 'basho', 'darwin'],
+          apes: ['socrates', 'descartes', 'ada', 'darwin'],
         ),
       );
       final output = await cmd.execute();
@@ -216,7 +216,7 @@ void main() {
       final cmd = makeCmd(
         assets: seedAssets(
           customDir,
-          apes: ['socrates', 'dewey', 'descartes', 'basho', 'darwin'],
+          apes: ['socrates', 'dewey', 'descartes', 'ada', 'darwin'],
         ),
       );
       final output = await cmd.execute();

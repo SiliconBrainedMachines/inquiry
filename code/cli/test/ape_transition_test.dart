@@ -19,7 +19,7 @@ void main() {
     // Copy APE YAML assets
     final apesDir = Directory(p.join(tmpDir.path, 'assets', 'apes'));
     apesDir.createSync(recursive: true);
-    for (final name in ['socrates', 'dewey', 'descartes', 'basho', 'darwin']) {
+    for (final name in ['socrates', 'dewey', 'descartes', 'ada', 'darwin']) {
       File(
         'assets/apes/$name.yaml',
       ).copySync(p.join(apesDir.path, '$name.yaml'));
@@ -49,28 +49,6 @@ void main() {
     File(p.join(tmpDir.path, 'cleanrooms', branch, kStateFileName))
       ..createSync(recursive: true)
       ..writeAsStringSync(buf.toString());
-  }
-
-  void setupGitRepoWithFeatureCommit() {
-    void git(List<String> args) {
-      final result = Process.runSync(
-        'git',
-        args,
-        workingDirectory: tmpDir.path,
-      );
-      if (result.exitCode != 0) {
-        fail(
-          'git ${args.join(' ')} failed: ${result.stderr}\n${result.stdout}',
-        );
-      }
-    }
-
-    // setUp already initialised the repo on the feature branch; add a
-    // feature commit on top.
-    final trackedFile = File(p.join(tmpDir.path, 'README.md'));
-    trackedFile.writeAsStringSync('# Test repo\nfeature change\n');
-    git(['add', 'README.md']);
-    git(['commit', '-m', 'phase commit']);
   }
 
   group('ApeTransitionCommand', () {
@@ -117,12 +95,12 @@ void main() {
         expect(content, contains('issue: "145"'));
       });
 
-      test('basho implement --next--> test', () async {
+      test('ada frame_intent --next--> locate_control_surface', () async {
         writeState(
           state: 'EXECUTE',
           issue: '145',
-          apeName: 'basho',
-          apeState: 'implement',
+          apeName: 'ada',
+          apeState: 'frame_intent',
         );
 
         final cmd = ApeTransitionCommand(
@@ -130,60 +108,53 @@ void main() {
         );
         final result = await cmd.execute();
 
-        expect(result.from, equals('implement'));
-        expect(result.to, equals('test'));
+        expect(result.from, equals('frame_intent'));
+        expect(result.to, equals('locate_control_surface'));
       });
 
-      test('basho test --fail--> implement (loop back)', () async {
+      test('ada manifesto_review --rewrite--> compose_change', () async {
         writeState(
           state: 'EXECUTE',
           issue: '145',
-          apeName: 'basho',
-          apeState: 'test',
+          apeName: 'ada',
+          apeState: 'manifesto_review',
         );
 
         final cmd = ApeTransitionCommand(
-          ApeTransitionInput(event: 'fail', workingDirectory: tmpDir.path),
+          ApeTransitionInput(event: 'rewrite', workingDirectory: tmpDir.path),
         );
         final result = await cmd.execute();
 
-        expect(result.from, equals('test'));
-        expect(result.to, equals('implement'));
+        expect(result.from, equals('manifesto_review'));
+        expect(result.to, equals('compose_change'));
       });
 
-      test(
-        'basho commit --next_phase--> implement preserves outer FSM state',
-        () async {
-          setupGitRepoWithFeatureCommit();
-          writeState(
-            state: 'EXECUTE',
-            issue: '145',
-            apeName: 'basho',
-            apeState: 'commit',
-          );
+      test('ada manifesto_review --complete--> _DONE preserves outer FSM state', () async {
+        writeState(
+          state: 'EXECUTE',
+          issue: '145',
+          apeName: 'ada',
+          apeState: 'manifesto_review',
+        );
 
-          final cmd = ApeTransitionCommand(
-            ApeTransitionInput(
-              event: 'next_phase',
-              workingDirectory: tmpDir.path,
-            ),
-          );
-          final result = await cmd.execute();
+        final cmd = ApeTransitionCommand(
+          ApeTransitionInput(event: 'complete', workingDirectory: tmpDir.path),
+        );
+        final result = await cmd.execute();
 
-          expect(result.from, equals('commit'));
-          expect(result.to, equals('implement'));
+        expect(result.from, equals('manifesto_review'));
+        expect(result.to, equals('_DONE'));
 
-          final content = File(
-            p.join(tmpDir.path, 'cleanrooms', branch, kStateFileName),
-          ).readAsStringSync();
-          expect(content, contains('state: EXECUTE'));
-          expect(content, contains('issue: "145"'));
-          expect(content, contains('name: basho'));
-          expect(content, contains('state: implement'));
-          expect(content, isNot(contains('issue: null')));
-          expect(content, isNot(contains('state: IDLE')));
-        },
-      );
+        final content = File(
+          p.join(tmpDir.path, 'cleanrooms', branch, kStateFileName),
+        ).readAsStringSync();
+        expect(content, contains('state: EXECUTE'));
+        expect(content, contains('issue: "145"'));
+        expect(content, contains('name: ada'));
+        expect(content, contains('state: _DONE'));
+        expect(content, isNot(contains('issue: null')));
+        expect(content, isNot(contains('state: IDLE')));
+      });
 
       test('dewey confirm --complete--> evaluate_scope', () async {
         writeState(state: 'IDLE', apeName: 'dewey', apeState: 'confirm');
@@ -428,8 +399,8 @@ void main() {
         writeState(
           state: 'EXECUTE',
           issue: '145',
-          apeName: 'basho',
-          apeState: 'implement',
+          apeName: 'ada',
+          apeState: 'frame_intent',
         );
 
         final cmd = ApeTransitionCommand(
@@ -437,7 +408,10 @@ void main() {
         );
         final result = await cmd.execute();
 
-        expect(result.toText(), equals('basho: implement --next--> test'));
+        expect(
+          result.toText(),
+          equals('ada: frame_intent --next--> locate_control_surface'),
+        );
       });
     });
   });

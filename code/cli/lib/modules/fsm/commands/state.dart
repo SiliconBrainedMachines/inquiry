@@ -187,7 +187,7 @@ class FsmStateCommand implements Command<FsmStateInput, FsmStateOutput> {
     FsmState.idle: [{'name': 'dewey', 'status': 'RUNNING'}],
     FsmState.analyze: [{'name': 'socrates', 'status': 'RUNNING'}],
     FsmState.plan: [{'name': 'descartes', 'status': 'RUNNING'}],
-    FsmState.execute: [{'name': 'basho', 'status': 'RUNNING'}],
+    FsmState.execute: [{'name': 'ada', 'status': 'RUNNING'}],
     FsmState.end: [],
     FsmState.evolution: [{'name': 'darwin', 'status': 'RUNNING'}],
   };

@@ -498,8 +498,8 @@ void main() {
         expect(output.allowed, isTrue);
         expect(output.nextState, 'EXECUTE');
         expect(output.promptFragmentId, 'plan_to_execute');
-        expect(output.requiredInstructions, isEmpty);
-        expect(output.toText(), equals(output.message));
+        expect(output.requiredInstructions, ['coding-manifesto-review']);
+        expect(output.toText(), startsWith(output.message));
         expect(_commitCount(tempDir.path), commitsBefore + 1);
 
         final stateContent = File(
@@ -601,7 +601,7 @@ void main() {
       },
     );
 
-    test('continuing EXECUTE does not require startup instructions', () async {
+    test('continuing EXECUTE carries the manifesto review instruction', () async {
       _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
       _writeState(tempDir.path, 'EXECUTE', issue: '51');
 
@@ -617,7 +617,7 @@ void main() {
       expect(output.allowed, isTrue);
       expect(output.nextState, 'EXECUTE');
       expect(output.promptFragmentId, 'execute_continue');
-      expect(output.requiredInstructions, isEmpty);
+      expect(output.requiredInstructions, ['coding-manifesto-review']);
     });
 
     test('routes EXECUTE through END before PR creation', () async {
@@ -1280,7 +1280,7 @@ void main() {
         nextState: 'EXECUTE',
         operationsExecuted: const ['validate_transition'],
         promptFragmentId: 'plan_to_execute',
-        requiredRole: 'BASHO',
+        requiredRole: 'ADA',
         requiredInstructions: const [],
         message: 'Transition PLAN --approve_plan--> EXECUTE',
         code: 0,

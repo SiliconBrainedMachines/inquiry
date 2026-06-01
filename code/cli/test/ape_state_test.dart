@@ -18,7 +18,7 @@ void main() {
     // Copy APE YAML assets
     final apesDir = Directory(p.join(tmpDir.path, 'assets', 'apes'));
     apesDir.createSync(recursive: true);
-    for (final name in ['socrates', 'descartes', 'basho', 'darwin']) {
+    for (final name in ['socrates', 'dewey', 'descartes', 'ada', 'darwin']) {
       File(
         'assets/apes/$name.yaml',
       ).copySync(p.join(apesDir.path, '$name.yaml'));
@@ -98,19 +98,19 @@ void main() {
       expect(result.transitions, isEmpty);
     });
 
-    test('basho in implement state has valid transitions', () async {
+    test('ada in frame_intent state has valid transitions', () async {
       writeState(
         state: 'EXECUTE',
         issue: '145',
-        apeName: 'basho',
-        apeState: 'implement',
+        apeName: 'ada',
+        apeState: 'frame_intent',
       );
 
       final cmd = ApeStateCommand(ApeStateInput(workingDirectory: tmpDir.path));
       final result = await cmd.execute();
 
-      expect(result.apeName, equals('basho'));
-      expect(result.apeState, equals('implement'));
+      expect(result.apeName, equals('ada'));
+      expect(result.apeState, equals('frame_intent'));
       final events = result.transitions.map((t) => t['event']).toList();
       expect(events, contains('next'));
     });
