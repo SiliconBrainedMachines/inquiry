@@ -169,20 +169,20 @@ The semantic risk matrix exists in spec but not yet in CLI behavior. End-state: 
 
 ## Lore vs reality
 
-The original [lore.md](lore.md) sketched 9+ apes. After two months of building APE with APE, the roster collapsed to a smaller live set. In the current contract, DEWEY owns IDLE triage alongside SOCRATES, DESCARTES, BASHŌ, and DARWIN. This is honest accounting, not a roadmap commitment to revive deferred ones — most other roles were absorbed by simpler operators that turned out to do the job better.
+The original [lore.md](lore.md) sketched 9+ apes. After two months of building APE with APE, the roster collapsed to a smaller live set. In the current contract, DEWEY owns IDLE triage alongside SOCRATES, DESCARTES, ADA, and DARWIN. This is honest accounting, not a roadmap commitment to revive deferred ones — most other roles were absorbed by simpler operators that turned out to do the job better.
 
 | Lore agent | Status | What happened |
 |---|---|---|
 | **DEWEY** | ✅ Active | IDLE — bounded issue triage and explicit handoff to `inquiry-start` |
 | **SOCRATES** | ✅ Active | ANALYZE — implemented as the mayéutica agent |
 | **DESCARTES** | ✅ Active | PLAN — replaces SUNZI's strategy + VITRUVIUS's WBS in one Cartesian Method |
-| **BASHŌ** | ✅ Active | EXECUTE — replaces ADA's TDD with techne (functional beauty under constraints) |
+| **ADA** | ✅ Active | EXECUTE — programming-manifesto cognition for bounded construction and review |
 | **DARWIN** | ✅ Active | EVOLUTION — implemented; produces concrete evidence (e.g. issue #54) |
 | **MARCOPOLO** | Absorbed | Document and source gathering are now handled through SOCRATES plus `doc-read` and the direct-use `research` skill |
 | **VITRUVIUS** | Absorbed | WBS / decomposition is part of DESCARTES's plan phase |
 | **SUNZI** | Replaced | DESCARTES's Method is more explicit and testable than strategic prose |
 | **GATSBY** | Absorbed | Test pseudocode lives in `plan.md` written by DESCARTES |
-| **ADA** | Replaced | BASHŌ's techne replaces explicit TDD as a separate phase |
+| **BASHŌ** | Replaced | ADA restores EXECUTE as a cognitive operator while phase contracts keep commits, release gates, and closure |
 | **DIJKSTRA** | Future private skill | Quality-gate becomes a `pre-pr-review` skill inside END, not a separate agent |
 | **BORGES** | Future private skill | Schema validation becomes `iq memory validate`, not a standalone ape |
 | **HERMES** | Materialized | State transitions are now `iq fsm transition` (CLI command, not an agent) |
