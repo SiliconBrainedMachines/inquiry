@@ -16,6 +16,13 @@ import 'modules/target/target_builder.dart';
 import 'targets/all_adapters.dart';
 import 'targets/deployer.dart';
 
+List<String> normalizeInquiryArgs(List<String> args) {
+  if (args.length == 1 && (args.first == '--help' || args.first == '-h')) {
+    return const ['help'];
+  }
+  return args;
+}
+
 /// Configures the CLI, registers all commands, and dispatches [args].
 ///
 /// Returns a process exit code.
@@ -49,5 +56,5 @@ Future<int> runInquiry(List<String> args) async {
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
 
-  return cli.run(args);
+  return cli.run(normalizeInquiryArgs(args));
 }

@@ -32,12 +32,13 @@ La tesis de esta propuesta es simple:
 
 > Inquiry debe evolucionar desde “método disciplinado con FSM y Memory as Code” hacia “outer harness explícito, sensorizado, eval-backed y contract-first para trabajo agentic de software”.
 
-Eso implica una evolución en cuatro ejes simultáneos:
+Eso implica una evolución en cinco ejes simultáneos:
 
 1. de **proceso** a **entorno de tarea**
-2. de **artefacto persistido** a **política operacional explícita**
-3. de **gate manual + tests locales** a **arquitectura de sensores**
-4. de **mutación doctrinal** a **mutación respaldada por evidencia estructurada**
+2. de **interrogación reactiva** a **adquisición evidence-first antes de preguntar**
+3. de **artefacto persistido** a **política operacional explícita**
+4. de **gate manual + tests locales** a **arquitectura de sensores**
+5. de **mutación doctrinal** a **mutación respaldada por evidencia estructurada**
 
 ---
 
@@ -46,12 +47,13 @@ Eso implica una evolución en cuatro ejes simultáneos:
 En el contexto de Inquiry, **harness excellence** no significa automatizarlo todo ni añadir más agentes. Significa que el sistema alcance un nivel de madurez donde:
 
 1. el agente siempre sabe con precisión qué tarea tiene, qué puede tocar, qué debe producir y cómo validar su trabajo
-2. el repo ofrece al agente una memoria, contexto y mapa de navegación suficientes sin sobrecargar su ventana de atención
-3. las validaciones están ordenadas por costo, momento y autoridad, desde checks rápidos hasta gates más pesados
-4. el ciclo deja trazas y métricas que sirven no solo para observar el resultado, sino para mejorar el propio método
-5. la diferencia entre lo que aporta el host tool y lo que aporta Inquiry queda explícita y portable entre targets
+2. ANALYZE adquiere evidencia suficiente antes de preguntar al usuario
+3. el repo ofrece al agente una memoria, contexto y mapa de navegación suficientes sin sobrecargar su ventana de atención
+4. las validaciones están ordenadas por costo, momento y autoridad, desde checks rápidos hasta gates más pesados
+5. el ciclo deja trazas y métricas que sirven no solo para observar el resultado, sino para mejorar el propio método
+6. la diferencia entre lo que aporta el host tool y lo que aporta Inquiry queda explícita y portable entre targets
 
-Si estas cinco condiciones se cumplen de forma estable, Inquiry deja de ser solo una metodología desplegada por CLI y pasa a ser un harness sobresaliente.
+Si estas seis condiciones se cumplen de forma estable, Inquiry deja de ser solo una metodología desplegada por CLI y pasa a ser un harness sobresaliente.
 
 ---
 
@@ -78,59 +80,67 @@ Los principales huecos observables hoy son estos:
 1. **Task environment insuficientemente formalizado**  
    Hay contexto y paths, pero todavía no existe un contrato de tarea de primer orden con superficie editable, entradas, salidas y validaciones explícitas.
 
-2. **Sensores poco formalizados**  
+2. **ANALYZE todavía demasiado implícito o interrogativo**  
+   Hay evidencia disponible en repo, artefactos, docs y tests, pero el sistema todavía no expresa con suficiente claridad el orden evidence-first antes de preguntar al usuario.
+
+3. **Sensores poco formalizados**  
    Existen checks y gates, pero no una taxonomía nítida de sensores locales, CI, continuos y runtime.
 
-3. **Política de contexto implícita**  
+4. **Política de contexto implícita**  
    Inquiry tiene memoria como código, pero no una policy explícita de progressive disclosure, compaction y retrieval por fase.
 
-4. **Eval engineering parcial**  
+5. **Eval engineering parcial**  
    Hay métricas y gates, pero todavía no una disciplina robusta para convertir fallos recurrentes en benchmarks, graders y regresiones.
 
-5. **Observabilidad insuficiente del propio harness**  
+6. **Observabilidad insuficiente del propio harness**  
    El sistema produce artefactos, pero aún no produce trazas suficientemente ricas sobre qué hizo el agente, qué validó, dónde falló y qué reglas activó.
 
 ---
 
 ## 5. Principios de diseño propuestos
 
-La propuesta se apoya en ocho principios.
+La propuesta se apoya en nueve principios.
 
 ### 5.1 Menos primitivas, más nítidas
 
 Harness excellence no se logra añadiendo agentes ni proliferando comandos arbitrarios. Se logra con pocas primitivas muy bien definidas:
 
 - task environment
-- sensors
+- evidence-first analyze
 - context policy
+- sensors
 - eval layer
 - observability
 
 ### 5.2 Contract-first execution
 
-Antes de ejecutar, el agente debe ver un contrato explícito de tarea. No basta con “leer el issue y arrancar”.
+Antes de ejecutar, el agente debe ver un contrato explícito de tarea. No basta con leer una consigna informal y arrancar.
 
-### 5.3 Determinismo primero, juicio después
+### 5.3 Research before interrogation
+
+Antes de preguntar al usuario, el sistema debe explotar repo, artefactos, docs, tests y research acotado cuando aplique.
+
+### 5.4 Determinismo primero, juicio después
 
 Los sensores computacionales deben formar la columna vertebral del sistema. Los inferenciales deben complementar, no reemplazar.
 
-### 5.4 Context is a budget
+### 5.5 Context is a budget
 
 La memoria como código es buena; la memoria como código sin política explícita de uso acaba generando ruido. Inquiry debe pasar de “persistimos artefactos” a “sabemos qué artefactos entran cuándo y por qué”.
 
-### 5.5 Repo as system of record
+### 5.6 Repo as system of record
 
 Toda pieza necesaria para operar el harness debe vivir en el repo o ser derivable desde él. Nada crítico debe depender de conocimiento tácito o interfaces mágicas del host.
 
-### 5.6 Shift feedback left
+### 5.7 Shift feedback left
 
 Todo fallo detectable antes de un gate tardío debe detectarse antes. El harness excelente minimiza iteraciones costosas y tardías.
 
-### 5.7 Evolución respaldada por evidencia
+### 5.8 Evolución respaldada por evidencia
 
 DARWIN debe proponer mutaciones del método, pero crecientemente sobre evidencia estructurada, no solo sobre percepción cualitativa.
 
-### 5.8 Portabilidad explícita
+### 5.9 Portabilidad explícita
 
 Inquiry debe describir qué partes pertenecen al host harness y cuáles pertenecen al outer harness de Inquiry. Sin esa distinción, la portabilidad multi-target se vuelve confusa.
 
@@ -189,7 +199,7 @@ pero añade lo que hoy falta para excelencia de harness.
 
 ## 8. Workstreams propuestos
 
-La propuesta se organiza en seis workstreams.
+La propuesta se organiza en seis workstreams. Los primeros cinco forman el núcleo canónico de `0.6.x`; el sexto extiende la propuesta hacia portabilidad comparativa posterior.
 
 ### 8.1 Workstream A — Task Environment Contract
 
@@ -215,49 +225,43 @@ Que cada ciclo y cada fase puedan exponer un entorno de tarea explícito, acotad
 3. Reglas por fase sobre qué campos son obligatorios
 4. Primer diseño de `iq task` como módulo futuro
 
-**Issues ya cercanas**
+**Superficies actuales relacionadas**
 
-- `#178` persistir project root en inquiry-context
-- `#49` single-task-per-cycle
-- `#60` cross-repo dependency chains
-- `#149` workspace discovery
+- `inquiry-context`
+- resolución de `project_root`
+- regla single-task-per-cycle
+- workspace discovery y layouts complejos
 
 **Criterio de éxito**
 
 Un agente puede recibir una tarea y saber, sin inferencia ambigua adicional, qué puede tocar, qué debe producir y cómo demostrar que terminó.
 
-### 8.2 Workstream B — Sensor Architecture
+### 8.2 Workstream B — Evidence-First ANALYZE
 
 **Problema**  
-El sistema tiene checks y gates, pero no una arquitectura explícita de sensores.
+Hay evidencia disponible en repo, artefactos, docs y tests, pero el sistema todavía no expresa con suficiente claridad que ANALYZE debe investigar antes de preguntar al usuario.
 
 **Objetivo**  
-Definir una taxonomía formal de sensores y mover feedback útil hacia las partes más tempranas del ciclo.
+Hacer que ANALYZE adquiera evidencia primero y que la interrogación al usuario quede reservada para incertidumbres reales no resueltas por información disponible.
 
 **Entregables propuestos**
 
-1. Especificación `sensor-taxonomy.md`
-2. Clasificación mínima:
-   - local-fast
-   - pre-transition
-   - pre-PR
-   - CI-required
-   - continuous-drift
-   - runtime
-   - inferential-optional
-3. Declaración por fase de sensores mínimos esperados
-4. Diseño de una primitive futura tipo `iq task check` o equivalente
-5. Integración explícita del gate pre-PR dentro de END
+1. Política explícita de adquisición de evidencia para ANALYZE
+2. Orden claro entre repo, artefactos de ciclo, docs, tests, runtime evidence, web research y preguntas al usuario
+3. Reglas de relevancia para preguntas de SOCRATES
+4. Fortalecimiento de `diagnosis.md` como artefacto que separa observación, hipótesis y dudas abiertas
+5. Source gathering suficientemente amplio para no depender del usuario como primera fuente por defecto
 
-**Issues ya cercanas**
+**Superficies actuales relacionadas**
 
-- `#163` formal pre-PR inspection gate
-- `#127` version bump / release proposal antes de completion
-- `#167` simplificación de EXECUTE una vez revalidados límites
+- prompts e instrucciones de ANALYZE
+- `diagnosis.md`
+- source gathering y research
+- artefactos de cleanroom y evidencia ejecutable
 
 **Criterio de éxito**
 
-Todo cambio pasa por un camino de validación legible, ordenado por costo y sin depender de criterio informal del agente o del humano en cada corrida.
+ANALYZE logra resolver una parte significativa de los ciclos sin interrogación innecesaria, y las preguntas remanentes reducen incertidumbre real en vez de repetir trabajo que el repo ya podía responder.
 
 ### 8.3 Workstream C — Context Policy and Memory Operations
 
@@ -275,72 +279,88 @@ Formalizar qué entra al contexto, qué se recupera on-demand, qué se resume y 
 4. Diseño del módulo futuro `iq memory`
 5. Revisión de `doc-read` bajo la óptica de retrieval policy
 
-**Issues ya cercanas**
+**Superficies actuales relacionadas**
 
-- `iq memory` ya aparece como mid-term en roadmap
-- `#147` extender source gathering más allá de `research`
+- `diagnosis.md`
+- `plan.md`
+- `doc-read`
+- convenciones actuales de Memory as Code
+- módulo futuro `iq memory`
 
 **Criterio de éxito**
 
 El sistema logra más foco y menos ruido sin sacrificar continuidad entre sesiones o fases.
 
-### 8.4 Workstream D — Eval Engineering for Inquiry Itself
+### 8.4 Workstream D — Sensor Architecture and END Discipline
 
 **Problema**  
-Inquiry ya tiene gates y `metrics.yaml`, pero todavía no tiene una capa fuerte de eval engineering aplicada al propio harness.
+El sistema tiene checks y gates, pero no una arquitectura explícita de sensores ni una disciplina suficientemente visible de cierre para EXECUTE y END.
 
 **Objetivo**  
-Que los fallos recurrentes puedan convertirse en pruebas comparables del método y del runtime, no solo en intuiciones o tickets aislados.
+Definir una taxonomía formal de sensores y mover feedback útil hacia las partes más tempranas del ciclo, empezando por los puntos donde Inquiry ya tiene obligaciones claras.
 
 **Entregables propuestos**
 
-1. Especificación `eval-model.md`
-2. Taxonomía de fallos del harness
-3. Conversión de fallos repetidos en datasets o suites mínimas
-4. Graders sencillos para outputs no binarios donde aplique
-5. Política para distinguir:
-   - fallo del modelo
-   - fallo del host harness
-   - fallo del Inquiry harness
+1. Especificación `sensor-taxonomy.md`
+2. Clasificación mínima:
+   - local-fast
+   - pre-transition
+   - pre-PR
+   - CI-required
+   - continuous-drift
+   - runtime
+   - inferential-optional
+3. Declaración por fase de sensores mínimos esperados
+4. Diseño de una primitive futura tipo `iq task check` o equivalente
+5. Integración explícita del gate pre-PR dentro de END
+6. Gate documental o linter inicial para bloquear transiciones con pendientes relevantes aún abiertos
 
-**Issues ya cercanas**
+**Superficies actuales relacionadas**
 
-- `#156` GitHub platform usage metrics
-- `#141` centralización de métricas cuando el archivo deje de alcanzar
+- `pre_pr_inspection`
+- `inquiry-end`
+- salida de transición y summaries operativas
+- release closure visible antes de END
+- validaciones documentales y linter de pendientes
 
 **Criterio de éxito**
 
-Las mutaciones del método pueden compararse con evidencia, aunque sea inicialmente modesta, en lugar de depender solo de lectura narrativa de los ciclos.
+Todo cambio pasa por un camino de validación legible, ordenado por costo y sin depender de criterio informal del agente o del humano en cada corrida.
 
-### 8.5 Workstream E — Harness Observability
+### 8.5 Workstream E — Harness Observability and Eval Foundation
 
 **Problema**  
-Hoy sabemos bastante del resultado del ciclo, pero poco del comportamiento interno del harness durante la ejecución.
+Inquiry ya tiene gates y `metrics.yaml`, pero todavía no ofrece suficiente visibilidad del comportamiento interno del harness ni una base suficientemente clara para comparar mutaciones del método.
 
 **Objetivo**  
-Hacer observable el comportamiento operativo de Inquiry como sistema de control.
+Hacer observable el comportamiento operativo de Inquiry como sistema de control y convertir fallos recurrentes en señales reutilizables para evolución del propio harness.
 
 **Entregables propuestos**
 
 1. Especificación `harness-observability.md`
-2. Registro estructurado por ciclo de:
+2. Especificación `eval-model.md`
+3. Registro estructurado por ciclo de:
    - transiciones
    - skills invocadas
    - sensores corridos
    - fallos detectados
    - retries
    - tiempo por fase
-3. Diferenciación entre `metrics.yaml` de resultado y trazas de ejecución
-4. Primer esquema de `run trace` por ciclo
+4. Diferenciación entre `metrics.yaml` de resultado y trazas de ejecución
+5. Taxonomía inicial de fallos del harness
+6. Primer esquema de evals mínimas o graders del propio harness
+
+**Superficies actuales relacionadas**
+
+- `.inquiry/metrics.yaml`
+- artefactos de ciclo y retrospectives
+- entradas de EVOLUTION
+- failure taxonomy
+- `run trace` o primitive equivalente futura
 
 **Criterio de éxito**
 
-El maintainer puede responder con evidencia preguntas del tipo:
-
-- ¿Dónde se bloquea más el sistema?
-- ¿Qué gates detectan más problemas?
-- ¿Qué skill produce más valor real?
-- ¿Qué tipos de retrabajo son recurrentes?
+Las mutaciones del método pueden compararse con evidencia, aunque sea inicialmente modesta, y el maintainer puede responder con datos dónde se bloquea el sistema, qué gates detectan más problemas y qué retrabajo es recurrente.
 
 ### 8.6 Workstream F — Host Boundary and Multi-Target Portability
 
@@ -358,10 +378,12 @@ Definir un adapter contract claro para que la portabilidad multi-target se apoye
 4. Lista de garantías que Inquiry debe aportar por sí mismo
 5. Harness comparativo multi-target en fase posterior
 
-**Issues ya cercanas**
+**Superficies actuales relacionadas**
 
-- Reactivación multi-target en roadmap
-- `#181` dispatch correcto de identidad esperada por el host
+- `architecture.md`
+- `roadmap.md`
+- documentación de harness engineering y taxonomy
+- futuro `host-adapter-contract`
 
 **Criterio de éxito**
 
@@ -404,20 +426,20 @@ Formalizar el task environment con el menor cambio posible en el runtime actual.
 **Por qué va primero**  
 Porque todo lo demás depende de que la tarea esté bien acotada.
 
-### Fase 2 — Sensor stack mínimo viable
+### Fase 2 — Evidence-First ANALYZE
 
 **Objetivo**  
-Definir y empezar a aplicar una arquitectura de sensores.
+Hacer visible el orden operativo de adquisición de evidencia antes de preguntar al usuario.
 
 **Contenido**
 
-1. taxonomía de sensores
-2. pre-PR gate formal
-3. version/release gate visible
-4. checks locales rápidos claramente nombrados
+1. policy de adquisición de evidencia para ANALYZE
+2. reglas de relevancia para preguntas
+3. fortalecimiento de `diagnosis.md`
+4. ampliación de source gathering cuando el caso lo requiera
 
 **Por qué va segundo**  
-Porque sin sensores explícitos el harness no puede autocorregirse con disciplina.
+Porque antes de optimizar contexto o sensores conviene ordenar cómo se produce el diagnóstico.
 
 ### Fase 3 — Context policy mínima viable
 
@@ -432,9 +454,25 @@ Hacer explícita la política de memoria, retrieval y handoff.
 4. fortalecimiento de handoff artifacts
 
 **Por qué va tercero**  
-Porque con task contract y sensores ya definidos, la política de contexto puede optimizarse contra un objetivo operacional concreto.
+Porque con task contract y ANALYZE mejor fundado, la política de contexto puede optimizarse contra un objetivo operacional concreto.
 
-### Fase 4 — Observability + Eval foundation
+### Fase 4 — Sensor stack y END discipline
+
+**Objetivo**  
+Definir y empezar a aplicar una arquitectura de sensores y cierre explícito.
+
+**Contenido**
+
+1. taxonomía de sensores
+2. pre-PR gate formal
+3. version/release gate visible
+4. checks locales rápidos claramente nombrados
+5. gate documental para pendientes detectables
+
+**Por qué va cuarto**  
+Porque sin task contract, mejor análisis y handoffs claros, los sensores se apoyan en semántica todavía inestable.
+
+### Fase 5 — Observability + Eval foundation
 
 **Objetivo**  
 Hacer visible el comportamiento del harness y convertir fallos en señales reutilizables.
@@ -446,55 +484,75 @@ Hacer visible el comportamiento del harness y convertir fallos en señales reuti
 3. catálogo de fallos recurrentes
 4. primeras suites o graders del propio harness
 
-**Por qué va cuarto**  
+**Por qué va quinto**  
 Porque sin las fases previas, la observabilidad generaría datos antes de que el sistema tenga una semántica suficientemente limpia.
 
-### Fase 5 — Comparative antifragility harness
+### Fase 6 — Comparative antifragility y host boundary
 
 **Objetivo**  
-Comparar hosts y variantes del harness con evidencia acumulada.
+Comparar hosts y variantes del harness con evidencia acumulada y una frontera más explícita entre host y outer harness.
 
 **Contenido**
 
-1. harness comparativo multi-target
-2. experimentos controlados de metodología vs host
-3. evolución respaldada por datos de varias corridas
+1. adapter contract claro
+2. harness comparativo multi-target
+3. experimentos controlados de metodología vs host
+4. evolución respaldada por datos de varias corridas
 
 **Por qué va último**  
 Porque sólo vale la pena cuando el núcleo del harness ya está mínimamente bien especificado.
 
 ---
 
-## 10. Mapa a issues existentes
+## 10. Mapa a superficies actuales del sistema
 
-Esta propuesta no ignora el backlog actual; lo reorganiza.
+Esta propuesta no depende del issue tracker; se apoya en superficies reales del sistema que ya existen o que el repo ya insinúa con claridad.
 
-### Críticos para Fase 1
+### Superficies clave para Fase 1
 
-- `#178` project root en inquiry-context
-- `#49` single-task-per-cycle
-- `#149` workspace discovery
+- `inquiry-context`
+- resolución de `project_root`
+- regla single-task-per-cycle
+- workspace discovery y layouts complejos
 
-### Críticos para Fase 2
+### Superficies clave para Fase 2
 
-- `#163` pre-PR inspection gate
-- `#127` version bump y release proposal antes del cierre
-- `#167` simplificar EXECUTE si el contrato resultante lo permite
+- prompts e instrucciones de ANALYZE
+- `diagnosis.md`
+- source gathering y research
+- artefactos de cleanroom y evidencia ejecutable
 
-### Críticos para Fase 3
+### Superficies clave para Fase 3
 
-- `#185` `iq skill` para gobernar mejor skills privadas
-- `#147` ampliar source-gathering capability
+- `diagnosis.md`
+- `plan.md`
+- `doc-read`
+- convenciones de Memory as Code
+- módulo futuro `iq memory`
 
-### Críticos para Fase 4
+### Superficies clave para Fase 4
 
-- `#156` métricas de uso GitHub
-- `#141` store más robusto cuando file-based evidence no baste
+- `sensor-taxonomy.md`
+- `pre_pr_inspection`
+- `inquiry-end`
+- salida de transición y summaries
+- release closure visible
+- validaciones documentales
 
-### Críticos para Fase 5
+### Superficies clave para Fase 5
 
-- reactivación multi-target del roadmap
-- `#181` corrección de dispatch esperado por el host
+- `.inquiry/metrics.yaml`
+- trazas o artefactos por ciclo
+- EVOLUTION y retrospectives
+- failure taxonomy
+- `eval-model`
+
+### Superficies clave para Fase 6
+
+- `architecture.md`
+- `roadmap.md`
+- documentación de harness engineering
+- futuro `host-adapter-contract`
 
 ---
 
@@ -551,7 +609,7 @@ Cada workstream debe demostrar valor incremental y no solo sofisticación teóri
 La doctrina puede adelantarse demasiado a la implementación.
 
 **Mitigación**  
-Toda nueva spec debe mapear a una issue, comando, asset o protocolo concreto.
+Toda nueva spec debe mapear a una surface real del sistema: comando, asset, prompt, artefacto, contrato o protocolo concreto.
 
 ### 13.3 Riesgo: sensores sin autoridad real
 
@@ -584,13 +642,13 @@ Formalizar el adapter contract antes de reactivar multi-target.
 Si hubiera que reducir esta propuesta a una secuencia mínima de trabajo, yo haría esto:
 
 1. cerrar `project_root` y task contract mínimo en `inquiry-context`
-2. añadir el gate pre-PR formal en END
-3. publicar una taxonomía de sensores y aplicarla al runtime actual
-4. diseñar `iq memory` y la context policy por fase
-5. enriquecer observabilidad y métricas del harness
-6. recién entonces abrir el frente fuerte de eval engineering comparativa
+2. hacer explícito ANALYZE evidence-first y fortalecer `diagnosis.md`
+3. diseñar `iq memory` y la context policy por fase
+4. publicar una taxonomía de sensores y aplicarla al runtime actual
+5. enriquecer observabilidad y métricas del harness con una base mínima de evals
+6. recién entonces abrir el frente fuerte de host boundary comparativo y antifragilidad multi-target
 
-Esta secuencia respeta la lógica del sistema: primero se acota la tarea, luego se ordena la validación, luego se optimiza el contexto, luego se mide la mejora.
+Esta secuencia respeta la lógica del sistema: primero se acota la tarea, luego se ordena cómo se adquiere evidencia, después se optimiza el contexto, luego se consolida la validación y finalmente se mide la mejora.
 
 ---
 
@@ -599,9 +657,9 @@ Esta secuencia respeta la lógica del sistema: primero se acota la tarea, luego 
 Una versión creíble de éxito en el corto plazo sería esta:
 
 1. `inquiry-context` ya expone project root, outputs esperados y validaciones mínimas
-2. END tiene un pre-PR inspection gate explícito
-3. existe una taxonomía formal de sensores y está conectada al menos a EXECUTE y END
-4. hay una policy inicial de contexto por fase, aunque sea austera
+2. ANALYZE sigue un orden evidence-first explícito y sólo pregunta cuando persiste incertidumbre real
+3. hay una policy inicial de contexto por fase y handoffs con autoridad más explícita
+4. END tiene un pre-PR inspection gate explícito y sensores mínimos visibles en el cierre
 5. `metrics.yaml` o un artefacto hermano ya captura algo más que cierre de ciclo: también evidencia de validación o fallo
 
 Si eso se logra, Inquiry pasaría de un Nivel 2 alto / Nivel 3 temprano a un **Nivel 3 sólido**, con base real para un salto posterior a harness sensorizado.

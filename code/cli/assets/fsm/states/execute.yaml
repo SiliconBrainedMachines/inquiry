@@ -9,9 +9,15 @@ instructions: |
   - Version bump (as specified in the plan)
   - CHANGELOG update
   - Final commit with version bump and CHANGELOG
+  Treat validation as a named sensor stack, not as an informal checklist.
+  Minimum EXECUTE sensor stack: local_fast, pre_transition, pre_pr, runtime.
 
 constraints:
   - The full project test suite must pass before any commit, independent of plan.md verification criteria
+  - local_fast and pre_transition sensor failures block phase completion or phase advance
+  - END handoff is blocked until the pre_pr sensor stack is complete
+  - runtime sensor failures block progress when harness state, repo state, or tool state is suspect
+  - inferential_optional findings can sharpen review but do not override stronger blocking sensors on their own
   - Follow plan.md phases in order
   - Each phase must pass its verification criteria before advancing
   - Commits must be atomic (one phase = one commit)
@@ -22,6 +28,7 @@ allowed_actions:
   - Edit code files
   - Create new files as specified in plan
   - Run tests
+  - Run runtime checks when harness behavior looks inconsistent
   - Commit completed phases
   - Read plan.md for guidance
   - Bump version
