@@ -4,10 +4,10 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'package:inquiry_cli/assets.dart';
-import 'package:inquiry_cli/targets/deployer.dart';
-import 'package:inquiry_cli/targets/target_adapter.dart';
+import 'package:inquiry_cli/hosts/deployer.dart';
+import 'package:inquiry_cli/hosts/host_adapter.dart';
 
-class FakeAdapter extends TargetAdapter {
+class FakeAdapter extends HostAdapter {
   @override
   String get name => 'fake';
 
@@ -26,7 +26,7 @@ void main() {
   late Directory homeDir;
   late Assets assets;
   late FakeAdapter adapter;
-  late TargetDeployer deployer;
+  late HostDeployer deployer;
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('ape_deployer_test_');
@@ -55,7 +55,7 @@ void main() {
 
     assets = Assets(root: tempDir.path);
     adapter = FakeAdapter();
-    deployer = TargetDeployer(
+    deployer = HostDeployer(
       assets: assets,
       adapters: [adapter],
       homeDir: homeDir.path,
@@ -66,7 +66,7 @@ void main() {
     if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
   });
 
-  group('TargetDeployer', () {
+  group('HostDeployer', () {
     test('deployExclusive copies skills to selected adapter skillsDirectory',
         () {
       deployer.deployExclusive('fake');
@@ -133,8 +133,8 @@ void main() {
       expect(() => deployer.clean(), returnsNormally);
     });
 
-    test('deployExclusive can target either of two adapters', () {
-      final allDeployer = TargetDeployer(
+    test('deployExclusive can target either of two hosts', () {
+      final allDeployer = HostDeployer(
         assets: assets,
         adapters: [
           FakeAdapter(),
@@ -177,12 +177,12 @@ void main() {
   // ─── deployExclusive() ────────────────────────────────────────────────────
 
   group('deployExclusive()', () {
-    late TargetDeployer multiDeployer;
+    late HostDeployer multiDeployer;
     late _SecondFakeAdapter adapter2;
 
     setUp(() {
       adapter2 = _SecondFakeAdapter();
-      multiDeployer = TargetDeployer(
+      multiDeployer = HostDeployer(
         assets: assets,
         adapters: [adapter, adapter2],
         homeDir: homeDir.path,
@@ -249,7 +249,7 @@ void main() {
       );
     });
 
-    test('throws ArgumentError for unknown target name', () {
+    test('throws ArgumentError for unknown host name', () {
       expect(
         () => multiDeployer.deployExclusive('vscode'),
         throwsA(isA<ArgumentError>()),
@@ -258,7 +258,7 @@ void main() {
   });
 }
 
-class _SecondFakeAdapter extends TargetAdapter {
+class _SecondFakeAdapter extends HostAdapter {
   @override
   String get name => 'fake2';
 

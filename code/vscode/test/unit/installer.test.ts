@@ -207,7 +207,7 @@ describe('installInquiryCli', () => {
     assert.ok(newPath.includes('C:\\existing'));
   });
 
-  it('runs target get and version after install', async () => {
+  it('runs host get and version after install', async () => {
     const commands: string[][] = [];
     const deps: InstallerDeps = {
       ...baseDeps('win32'),
@@ -215,7 +215,7 @@ describe('installInquiryCli', () => {
     };
 
     await installInquiryCli(deps);
-    assert.ok(commands.some(c => c.includes('target') && c.includes('get')));
+    assert.ok(commands.some(c => c.includes('host') && c.includes('get')));
     assert.ok(commands.some(c => c.includes('version')));
   });
 });

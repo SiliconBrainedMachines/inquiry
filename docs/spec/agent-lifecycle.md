@@ -3,7 +3,7 @@ id: agent-lifecycle
 title: "Agent lifecycle — six-state model and confirmed agent registry"
 date: 2026-04-17
 status: active
-tags: [agents, fsm, lifecycle, registry, dewey, socrates, descartes, basho, darwin]
+tags: [agents, fsm, lifecycle, registry, dewey, socrates, descartes, ada, darwin]
 author: socrates
 ---
 
@@ -22,7 +22,7 @@ IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION
 | IDLE | Triage — clarify scope, create or confirm issue, stage explicit start | DEWEY (sub-agent) | Deweyan problematization — transform the indeterminate into an actionable issue |
 | ANALYZE | Deep understanding via Socratic method | SOCRATES (sub-agent) | Mayéutica — draw truth through questions |
 | PLAN | Experimental design, WBS, test definition | DESCARTES (sub-agent) | Method — divide, order, verify, enumerate |
-| EXECUTE | Implementation under constraints | BASHŌ (sub-agent) | Techne + 用の美 (yō no bi) — functional beauty |
+| EXECUTE | Implementation under constraints | ADA (sub-agent) | Programming manifesto — intention-first construction |
 | END | Explicit closure gate before evolution or return to idle | APE + human gate | Human judgment under explicit authorization |
 | EVOLUTION | Evaluate APE process, create improvement issues | DARWIN (sub-agent) | Natural selection — observe, compare, select |
 
@@ -34,7 +34,7 @@ IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION
 
 **PLAN** — DESCARTES applies the scientific method: the plan is an experimental design. Decomposes complexity into phases (WBS), defines tests in pseudocode, sequences by dependencies. Produces `plan.md` as an immutable checklist. The plan must be detailed enough that EXECUTE is mechanical — following instructions, not inventing them. The user approves the plan before transitioning.
 
-**EXECUTE** — This document is explanatory architecture, not the sole normative source. The canonical runtime contract for EXECUTE lives in `code/cli/assets/fsm/states/execute.yaml`. BASHŌ's YAML supplies implementation identity and sub-state modulation, while plan-path/output protocol reaches the operator through the phase-owned operational contract that `iq ape prompt` assembles and exposes. BASHŌ then implements the plan phase by phase, like a haiku master working within formal constraints (the plan's restrictions = the 5-7-5 form). Each phase produces a commit. The final phase includes product retrospective: an implementation report with validation instructions for the user. If a deviation is detected, returns to ANALYZE (like falsifying a hypothesis in the scientific method). The user approves the execution report before transitioning to END.
+**EXECUTE** — This document is explanatory architecture, not the sole normative source. The canonical runtime contract for EXECUTE lives in `code/cli/assets/fsm/states/execute.yaml`. ADA's YAML supplies only the programming-manifesto identity and sub-state modulation, while plan-path/output protocol reaches the operator through the phase-owned operational contract that `iq ape prompt` assembles and exposes. ADA frames the obligation, locates the control surface, composes the smallest correct change, and reviews each changed slice against the manifesto before phase completion. Each phase still produces a commit because the EXECUTE contract requires it, not because the APE identity owns workflow. If a deviation is detected, returns to ANALYZE (like falsifying a hypothesis in the scientific method). The user approves the execution report before transitioning to END.
 
 **END** — APE presents the execution summary and waits for explicit authorization to create the PR and pass into EVOLUTION or return to IDLE if evolution is disabled. This keeps delivery and merge preparation as a distinct closure gate rather than an implicit side effect of EXECUTE.
 
@@ -49,7 +49,7 @@ IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION
 | DEWEY | John Dewey (1859–1952) | IDLE | Problematization | Bounded issue triage, `issue-create` issue readiness, explicit-start gate inside IDLE |
 | SOCRATES | Socrates (470–399 BC) | ANALYZE | Mayeutics | Conversational understanding, produces `diagnosis.md` |
 | DESCARTES | René Descartes (1596–1650) | PLAN | Method | Experimental design, WBS, test pseudocode |
-| BASHŌ | Matsuo Bashō (1644–1694) | EXECUTE | Techne/用の美 | Implementation as functional art under constraints |
+| ADA | Ada Lovelace (1815–1852) | EXECUTE | Programming manifesto | Intention-first construction and rewrite-before-patch discipline |
 | DARWIN | Charles Darwin (1809–1882) | EVOLUTION | Natural selection | Process evaluation, self-improvement issues |
 
 ### APE (the scheduler)
@@ -66,7 +66,7 @@ The [lore](../lore.md) describes additional agents from the original vision. The
 | VITRUVIUS | WBS/decomposition | Absorbed by DESCARTES |
 | SUNZI | Strategic planning | Replaced by DESCARTES |
 | GATSBY | RED tests/@contracts | Absorbed by DESCARTES (test pseudocode in plan) |
-| ADA | TDD implementation | Replaced by BASHŌ |
+| BASHŌ | Poet-coder EXECUTE identity | Replaced by ADA |
 | DIJKSTRA | Quality gate | Future — may be a skill within EXECUTE |
 | BORGES | Schema enforcement | Future — may be a CLI validation layer |
 | HERMES | State updates | Materialized — `iq fsm transition` command |
@@ -94,7 +94,7 @@ From the **agent's perspective**, only three states are visible: idle, working, 
 
 ### Key principle
 
-Agent intelligence lives in prompts assembled explicitly by the CLI, not in state machines. SOCRATES uses Socratic phases (CLARIFICATION → ASSUMPTIONS → EVIDENCE → PERSPECTIVES → IMPLICATIONS → META-REFLECTION) as conversation strategies, not scheduler-tracked states. DESCARTES applies the 4 rules of the Method internally. BASHŌ selects the appropriate domain skill per phase. DARWIN keeps only its abstract-process exception. These methodology details remain opaque to the scheduler, while the phase-owned operational contract stays visible through `iq ape prompt` instead of being buried as repository procedure inside standard APE YAMLs.
+Agent intelligence lives in prompts assembled explicitly by the CLI, not in state machines. SOCRATES uses Socratic phases (CLARIFICATION → ASSUMPTIONS → EVIDENCE → PERSPECTIVES → IMPLICATIONS → META-REFLECTION) as conversation strategies, not scheduler-tracked states. DESCARTES applies the 4 rules of the Method internally. ADA frames intent, locates the control surface, composes the change, and reviews the slice against the coding manifesto. DARWIN keeps only its abstract-process exception. These methodology details remain opaque to the scheduler, while the phase-owned operational contract stays visible through `iq ape prompt` instead of being buried as repository procedure inside standard APE YAMLs.
 
 | Concept | Visible to scheduler | Visible to agent |
 |---------|---------------------|------------------|

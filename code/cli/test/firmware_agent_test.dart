@@ -80,8 +80,8 @@ void main() {
       // These are sub-agent-specific content that should NOT be in firmware
       expect(content, isNot(contains('epistemic humility')),
           reason: 'Firmware should not contain SOCRATES prompt details');
-      expect(content, isNot(contains('用の美')),
-          reason: 'Firmware should not contain BASHŌ prompt details');
+        expect(content, isNot(contains('INTENTION FIRST')),
+          reason: 'Firmware should not contain ADA prompt details');
       expect(content, isNot(contains('Socratic method')),
           reason: 'Firmware should not contain SOCRATES methodology');
       expect(content, isNot(contains('natural selection')),

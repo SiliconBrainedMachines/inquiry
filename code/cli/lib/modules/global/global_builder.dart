@@ -8,11 +8,11 @@ import 'commands/tui.dart';
 import 'commands/uninstall.dart';
 import 'commands/upgrade.dart';
 import 'commands/version.dart';
-import '../../targets/deployer.dart';
+import '../../hosts/deployer.dart';
 
 void buildGlobalModule(
   ModuleBuilder m, {
-  required TargetDeployer cleaner,
+  required HostDeployer cleaner,
   Assets? assets,
 }) {
   m.command<TuiInput, TuiOutput>(

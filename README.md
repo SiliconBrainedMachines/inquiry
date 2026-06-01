@@ -4,7 +4,7 @@
 
 A methodology for AI-assisted software development that models coding agents as a cooperative finite state machine — **Analyze → Plan → Execute → End → [Evolution] → Idle** — where the value is in the process, not the model.
 
-**Status:** `v0.7.0` · Windows + Linux · Copilot-first runtime
+**Status:** `v0.7.2` · Windows + Linux · Copilot-first runtime
 
 This README is the public entry surface. The living repository doctrine is intentionally small in `docs/architecture.md` and `docs/roadmap.md`.
 
@@ -31,7 +31,7 @@ The insight: **AI capability only becomes trustworthy when governed by rigorous 
 | **IDLE** | DEWEY | Deweyan problematization — scope, deduplicate, prepare issue handoff | selected issue + `inquiry-start` handoff |
 | **ANALYZE** | SOCRATES | Socratic questioning — clarify, challenge, evidence | `confirmed.md` → `diagnosis.md` |
 | **PLAN** | DESCARTES | Scientific method — divide, order, verify, enumerate | `plan.md` |
-| **EXECUTE** | BASHŌ | Wabi-sabi — minimal, beautiful implementation under tests | code + commits |
+| **EXECUTE** | ADA | Programming manifesto — intention-first construction and slice review | code + commits |
 | **END** | — | PR gate — review, merge | merged PR |
 | **EVOLUTION** | DARWIN | Natural selection — propose methodology mutations | issues on this repo |
 
@@ -52,7 +52,7 @@ During ANALYZE, SOCRATES writes investigation material to `cleanrooms/<branch>/a
 - **Topic documents** — optional bounded evidence threads when needed
 - **`diagnosis.md`** — final synthesis that references all findings
 
-DESCARTES reads `diagnosis.md` as its authoritative planning input. BASHO and END inherit `plan.md`, `pre_pr_inspection.md`, and `run_trace.yaml` as the closure and observability surfaces that now define the 0.7.x baseline.
+DESCARTES reads `diagnosis.md` as its authoritative planning input. ADA inherits `plan.md` as the execution baseline, while EXECUTE and END rely on `pre_pr_inspection.md` and `run_trace.yaml` as the closure and observability surfaces that now define the 0.7.x baseline.
 
 This ensures that analysis survives context windows, session resets, and model swaps. The investigation is in the files, not in the chat.
 
@@ -81,9 +81,9 @@ curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 
 # Setup
 iq doctor               # verify prerequisites
-iq target get           # deploy agent + skills to Copilot
+iq host get             # deploy skills to Copilot
 cd your-repo
-iq init                 # scaffold .inquiry/
+iq init                 # scaffold .inquiry/ + repo agent
 iq                      # show current state
 ```
 
@@ -97,7 +97,7 @@ For the current system model, see [`docs/architecture.md`](docs/architecture.md)
 - **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
 - **Memory:** `.inquiry/` (runtime state) and `cleanrooms/` (per-cycle artifacts created on demand)
 - **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
-- **Target:** Copilot only at present. Multi-target deferred until reactivation
+- **Host:** Copilot only at present. Multi-host deferred until reactivation
 
 ## Documentation
 
@@ -114,4 +114,4 @@ MIT
 
 ## Related work
 
-The idea of a CLI that **installs prompts and skills** into whatever AI coding agent you use — instead of keeping custom agents and skills scattered across each tool's config — comes from [gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) (Gentleman Programming). Inquiry takes that packaging idea in a different direction: a single-target deterministic FSM contract enforced by the CLI, with the methodology itself as the durable artifact.
+The idea of a CLI that **installs prompts and skills** into whatever AI coding agent you use — instead of keeping custom agents and skills scattered across each tool's config — comes from [gentle-ai](https://github.com/Gentleman-Programming/gentle-ai) (Gentleman Programming). Inquiry takes that packaging idea in a different direction: a single-host deterministic FSM contract enforced by the CLI, with the methodology itself as the durable artifact.

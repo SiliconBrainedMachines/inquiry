@@ -69,7 +69,7 @@ ANALYZE is allowed to widen context, but it should do so intentionally. Its job 
 
 PLAN should not re-run ANALYZE by habit. It may retrieve adjacent evidence to sharpen the plan, but the burden of proof is on the reread, not on the handoff artifact.
 
-### EXECUTE / BASHO
+### EXECUTE / ADA
 
 - `context_policy`: `authoritative-handoff`
 - `authority_mode`: `trust-plan-first`

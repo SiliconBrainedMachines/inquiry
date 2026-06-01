@@ -101,8 +101,8 @@ PLAN:
   Effects: git commit plan.md → transition to EXECUTE
 
 EXECUTE:
-  BASHŌ invoked with plan.md + codebase context
-  BASHŌ implements phase by phase, commit per phase
+  ADA invoked with plan.md + codebase context
+  ADA implements phase by phase and reviews changed slices against the coding manifesto
   Final phase: product retrospective + validation report
   User approves → signal: execution_approved
   Effects: git commit execution artifacts → transition to END
@@ -146,5 +146,5 @@ The signal model replaces polling with events. Instead of checking preconditions
 ## Open Questions
 
 1. **Signal persistence.** If a signal fires while no agent is waiting on it, is it lost? In RTOS, event flags persist until cleared. Should `.inquiry/state.yaml` record pending signals?
-2. **Error signals.** What happens when BASHŌ emits `execute-blocked` instead of completing? The routing table needs error paths that return to ANALYZE.
+2. **Error signals.** What happens when ADA emits `execute-blocked` instead of completing? The routing table needs error paths that return to ANALYZE.
 3. **Human signals.** Beyond approval, what other `iq`-level abort, retry, or skip surfaces should eventually exist?
