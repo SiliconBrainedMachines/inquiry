@@ -9,7 +9,8 @@ description: 'Protocol for ending an APE cycle. Use when: all plan.md checkboxes
 
 Only run in EXECUTE after all plan checkboxes and tests are complete.
 Run the END pre-PR inspection gate and stop on any blocking sensor failure.
-Choose the version bump and update every version file.
+Confirm the already-proposed semver bump and stop if explicit user approval is still missing.
+Update every required version file once that approved bump is clear.
 Update CHANGELOG from the completed plan phases and commit the release changes.
 Push the branch and create the pull request only after the gate is green.
 
@@ -26,6 +27,7 @@ Push the branch and create the pull request only after the gate is green.
 - All plan.md checkboxes must be complete
 - All tests must pass
 - Static analysis must pass with no errors
+- The semver bump proposal must already be explicit and user-approved before END handoff
 
 ## Sensor Model
 
@@ -66,9 +68,11 @@ Expected: 0 incomplete checkboxes.
 
 If incomplete checkboxes remain, list them and abort.
 
-### Step 3: Determine Version Bump
+### Step 3: Confirm Approved Version Bump
 
-If the project uses semantic versioning, ask user to confirm bump type:
+If the project uses semantic versioning, confirm that the bump type was already proposed during EXECUTE and explicitly approved by the user. If that approval is still missing, stop and obtain it before editing release surfaces.
+
+Use these semver categories when validating the approved bump:
 
 | Type | When to Use |
 |------|-------------|

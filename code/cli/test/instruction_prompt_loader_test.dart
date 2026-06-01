@@ -140,7 +140,8 @@ Ignored.
         equals(
           'Only run in EXECUTE after all plan checkboxes and tests are complete.\n'
           'Run the END pre-PR inspection gate and stop on any blocking sensor failure.\n'
-          'Choose the version bump and update every version file.\n'
+          'Confirm the already-proposed semver bump and stop if explicit user approval is still missing.\n'
+          'Update every required version file once that approved bump is clear.\n'
           'Update CHANGELOG from the completed plan phases and commit the release changes.\n'
           'Push the branch and create the pull request only after the gate is green.',
         ),
