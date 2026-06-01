@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 void main() {
   group('ApeDefinition', () {
     group('schema validation', () {
-      for (final apeName in ['socrates', 'dewey', 'descartes', 'basho', 'darwin']) {
+      for (final apeName in ['socrates', 'dewey', 'descartes', 'ada', 'darwin']) {
         test('$apeName.yaml parses into valid ApeDefinition', () {
           final yaml = File('assets/apes/$apeName.yaml').readAsStringSync();
           final def = ApeDefinition.parse(yaml);
@@ -76,13 +76,18 @@ void main() {
         ]));
       });
 
-      test('basho has 3 states', () {
+      test('ada has 4 states', () {
         final def = ApeDefinition.parse(
-          File('assets/apes/basho.yaml').readAsStringSync(),
+          File('assets/apes/ada.yaml').readAsStringSync(),
         );
-        expect(def.states.length, equals(3));
+        expect(def.states.length, equals(4));
         final names = def.states.map((s) => s.name).toList();
-        expect(names, containsAll(['implement', 'test', 'commit']));
+        expect(names, containsAll([
+          'frame_intent',
+          'locate_control_surface',
+          'compose_change',
+          'manifesto_review',
+        ]));
       });
 
       test('darwin has 4 states', () {
@@ -235,17 +240,17 @@ void main() {
         expect(def.basePrompt, isNot(contains('Commit:')));
       });
 
-      test('basho base_prompt contains implementation keywords', () {
+      test('ada base_prompt contains programming manifesto keywords', () {
         final def = ApeDefinition.parse(
-          File('assets/apes/basho.yaml').readAsStringSync(),
+          File('assets/apes/ada.yaml').readAsStringSync(),
         );
-        expect(def.basePrompt, contains('BASHŌ'));
-        expect(def.basePrompt, contains('用の美'));
-        expect(def.basePrompt, contains('NOTHING WASTED'));
-        expect(def.basePrompt, contains('functional art'));
+        expect(def.basePrompt, contains('ADA'));
+        expect(def.basePrompt, contains('INTENTION FIRST'));
+        expect(def.basePrompt, contains("REWRITE, DON'T PATCH"));
+        expect(def.basePrompt, contains('Code is a visible form of thought.'));
         expect(def.basePrompt, isNot(contains('plan.md')));
-        expect(def.basePrompt, isNot(contains('Run tests, lint, build')));
-        expect(def.basePrompt, isNot(contains('retrospective.md')));
+        expect(def.basePrompt, isNot(contains('pre_pr_inspection_report')));
+        expect(def.basePrompt, isNot(contains('result_metrics_surface')));
       });
 
       test('darwin base_prompt contains evolution keywords', () {
@@ -281,11 +286,11 @@ void main() {
         expect(def.initialState, equals('decomposition'));
       });
 
-      test('basho starts at implement', () {
+      test('ada starts at frame_intent', () {
         final def = ApeDefinition.parse(
-          File('assets/apes/basho.yaml').readAsStringSync(),
+          File('assets/apes/ada.yaml').readAsStringSync(),
         );
-        expect(def.initialState, equals('implement'));
+        expect(def.initialState, equals('frame_intent'));
       });
 
       test('darwin starts at observe', () {
@@ -298,7 +303,7 @@ void main() {
 
     group('transitions', () {
       test('_DONE is reachable from every APE', () {
-        for (final apeName in ['socrates', 'dewey', 'descartes', 'basho', 'darwin']) {
+        for (final apeName in ['socrates', 'dewey', 'descartes', 'ada', 'darwin']) {
           final def = ApeDefinition.parse(
             File('assets/apes/$apeName.yaml').readAsStringSync(),
           );
@@ -325,13 +330,15 @@ void main() {
         expect(visited.length, equals(6)); // all 6 states visited
       });
 
-      test('basho has fail loop from test back to implement', () {
+      test('ada has rewrite loop from manifesto_review back to compose_change', () {
         final def = ApeDefinition.parse(
-          File('assets/apes/basho.yaml').readAsStringSync(),
+          File('assets/apes/ada.yaml').readAsStringSync(),
         );
-        final testState = def.findState('test')!;
-        final failTransition = testState.transitions.firstWhere((t) => t.event == 'fail');
-        expect(failTransition.to, equals('implement'));
+        final reviewState = def.findState('manifesto_review')!;
+        final rewriteTransition = reviewState.transitions.firstWhere(
+          (t) => t.event == 'rewrite',
+        );
+        expect(rewriteTransition.to, equals('compose_change'));
       });
 
       test('findState returns null for unknown state', () {

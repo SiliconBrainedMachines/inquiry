@@ -28,7 +28,7 @@ void main() {
     // Copy assets/apes/ from real assets
     final apesDir = Directory(p.join(tmpDir.path, 'assets', 'apes'));
     apesDir.createSync(recursive: true);
-    for (final name in ['socrates', 'dewey', 'descartes', 'basho', 'darwin']) {
+    for (final name in ['socrates', 'dewey', 'descartes', 'ada', 'darwin']) {
       File(
         'assets/apes/$name.yaml',
       ).copySync(p.join(apesDir.path, '$name.yaml'));
@@ -62,6 +62,7 @@ void main() {
     for (final name in [
       'doc-read',
       'doc-write',
+      'coding-manifesto-review',
       'issue-create',
       'inquiry-end',
       'inquiry-start',
@@ -211,16 +212,17 @@ void main() {
         },
       );
 
-      test('basho in EXECUTE returns base prompt', () async {
+      test('ada in EXECUTE returns base prompt', () async {
         writeState('EXECUTE');
         final cmd = ApePromptCommand(
-          ApePromptInput(name: 'basho', workingDirectory: tmpDir.path),
+          ApePromptInput(name: 'ada', workingDirectory: tmpDir.path),
         );
         final result = await cmd.execute();
 
-        expect(result.apeName, equals('basho'));
+        expect(result.apeName, equals('ada'));
         expect(result.fsmState, equals('EXECUTE'));
-        expect(result.prompt, contains('BASHŌ'));
+        expect(result.prompt, contains('ADA'));
+        expect(result.prompt, contains('INTENTION FIRST'));
       });
 
       test('records model_activity with prompt size and assembly time', () async {
@@ -250,17 +252,6 @@ void main() {
         expect(traceContent, contains('estimated_input_tokens: '));
         expect(traceContent, contains('assembly_duration_seconds: '));
         expect(traceContent, contains('prompt_fragment_id: idle_to_analyze'));
-      });
-
-      test('basho in END is also active', () async {
-        writeState('END');
-        final cmd = ApePromptCommand(
-          ApePromptInput(name: 'basho', workingDirectory: tmpDir.path),
-        );
-        final result = await cmd.execute();
-
-        expect(result.apeName, equals('basho'));
-        expect(result.fsmState, equals('END'));
       });
 
       test('darwin in EVOLUTION returns base prompt', () async {
@@ -382,6 +373,26 @@ void main() {
         writeState('ANALYZE');
         final cmd = ApePromptCommand(
           ApePromptInput(name: 'descartes', workingDirectory: tmpDir.path),
+        );
+
+        expect(
+          () => cmd.execute(),
+          throwsA(
+            isA<CommandException>()
+                .having((e) => e.code, 'code', equals('APE_NOT_ACTIVE'))
+                .having(
+                  (e) => e.exitCode,
+                  'exitCode',
+                  equals(ExitCode.conflict),
+                ),
+          ),
+        );
+      });
+
+      test('ada in END throws not active', () async {
+        writeState('END');
+        final cmd = ApePromptCommand(
+          ApePromptInput(name: 'ada', workingDirectory: tmpDir.path),
         );
 
         expect(
@@ -550,20 +561,20 @@ void main() {
         expect(result.prompt, contains('Division'));
       });
 
-      test('basho prompt covers implementation principles', () async {
+      test('ada prompt covers the programming manifesto', () async {
         writeState('EXECUTE');
         final cmd = ApePromptCommand(
           ApePromptInput(
-            name: 'basho',
-            subState: 'implement',
+            name: 'ada',
+            subState: 'compose_change',
             workingDirectory: tmpDir.path,
           ),
         );
         final result = await cmd.execute();
 
-        expect(result.prompt, contains('用の美'));
-        expect(result.prompt, contains('NOTHING WASTED'));
-        expect(result.prompt, contains('Implementation'));
+        expect(result.prompt, contains('INTENTION FIRST'));
+        expect(result.prompt, contains("REWRITE, DON'T PATCH"));
+        expect(result.prompt, contains('FOCUS: Composition.'));
       });
 
       test('darwin prompt covers evolution process', () async {
@@ -631,21 +642,21 @@ void main() {
         expect(result.prompt, contains('Clarification'));
       });
 
-      test('works with basho ape sub-state', () async {
+      test('works with ada ape sub-state', () async {
         writeStateWithApe(
           'EXECUTE',
           issue: '145',
-          apeName: 'basho',
-          apeState: 'test',
+          apeName: 'ada',
+          apeState: 'manifesto_review',
         );
 
         final cmd = ApePromptCommand(
-          ApePromptInput(name: 'basho', workingDirectory: tmpDir.path),
+          ApePromptInput(name: 'ada', workingDirectory: tmpDir.path),
         );
         final result = await cmd.execute();
 
-        expect(result.subState, equals('test'));
-        expect(result.prompt, contains('Verification'));
+        expect(result.subState, equals('manifesto_review'));
+        expect(result.prompt, contains('FOCUS: Manifesto review.'));
       });
     });
 
@@ -790,12 +801,35 @@ void main() {
           'socrates',
           'dewey',
           'descartes',
-          'basho',
+          'ada',
           'darwin',
         ]) {
           File(
             'assets/apes/$name.yaml',
           ).copySync(p.join(apesDir.path, '$name.yaml'));
+        }
+
+        final fsmDir = Directory(p.join(gitTmpDir.path, 'assets', 'fsm'));
+        fsmDir.createSync(recursive: true);
+        File(
+          'assets/fsm/transition_contract.yaml',
+        ).copySync(p.join(fsmDir.path, 'transition_contract.yaml'));
+
+        final instructionsDir = Directory(
+          p.join(gitTmpDir.path, 'assets', 'instructions'),
+        );
+        instructionsDir.createSync(recursive: true);
+        for (final name in [
+          'doc-read',
+          'doc-write',
+          'coding-manifesto-review',
+          'issue-create',
+          'inquiry-end',
+          'inquiry-start',
+        ]) {
+          File(
+            'assets/instructions/$name.md',
+          ).copySync(p.join(instructionsDir.path, '$name.md'));
         }
 
         final statesDir = Directory(
@@ -1447,7 +1481,7 @@ void main() {
         },
       );
 
-      test('basho prompt includes plan contract in assembled prompt', () async {
+      test('ada prompt includes plan contract in assembled prompt', () async {
         File(
           p.join(
             gitTmpDir.path,
@@ -1455,22 +1489,32 @@ void main() {
             '152-test-branch',
             kStateFileName,
           ),
-        ).writeAsStringSync('state: EXECUTE\nissue: "152"\n');
+        ).writeAsStringSync(
+          'state: EXECUTE\nissue: "152"\nprompt_fragment_id: plan_to_execute\n',
+        );
 
         final cmd = ApePromptCommand(
           ApePromptInput(
-            name: 'basho',
-            subState: 'implement',
+            name: 'ada',
+            subState: 'compose_change',
             workingDirectory: gitTmpDir.path,
           ),
         );
         final result = await cmd.execute();
 
-        expect(result.prompt, contains('NOTHING WASTED'));
+        expect(result.prompt, contains('You are ADA'));
+        expect(result.prompt, contains('INTENTION FIRST'));
         expect(
           result.prompt,
-          contains('Implement exactly what the plan says. No more, no less.'),
+          contains('Read the changed slice before calling it complete.'),
         );
+        expect(
+          result.prompt,
+          contains(
+            'If the slice fails the manifesto, rewrite it instead of patching around the defect.',
+          ),
+        );
+        expect(result.prompt, isNot(contains('## When to Use')));
         expect(result.prompt, contains('## Phase-Owned Operational Contract'));
         expect(
           result.prompt,
@@ -1479,6 +1523,12 @@ void main() {
           ),
         );
         expect(result.prompt, contains('Follow plan.md phases in order'));
+        expect(
+          result.prompt,
+          contains(
+            'Review each changed slice against the active programming manifesto before calling the slice complete.',
+          ),
+        );
         expect(
           result.prompt,
           contains(
@@ -1666,6 +1716,12 @@ void main() {
         expect(
           result.prompt,
           contains(
+            'changed slices satisfy the active coding manifesto before phase completion',
+          ),
+        );
+        expect(
+          result.prompt,
+          contains(
             'semver bump proposal is explicit and user-approved before END handoff',
           ),
         );
@@ -1810,172 +1866,10 @@ void main() {
         expectOperationalContractBetween(
           result.prompt,
           identityFragment:
-              'Implement exactly what the plan says. No more, no less.',
+              'You are ADA, a programming assistant that writes code with intention, clarity, and craft.',
           contractFragment:
               'Implement the plan phase by phase under its formal constraints.',
         );
-      });
-
-      test('basho in END includes pre-PR sensor gate contract', () async {
-        File(
-          p.join(
-            gitTmpDir.path,
-            'cleanrooms',
-            '152-test-branch',
-            kStateFileName,
-          ),
-        ).writeAsStringSync('state: END\nissue: "152"\n');
-
-        final cmd = ApePromptCommand(
-          ApePromptInput(
-            name: 'basho',
-            subState: 'commit',
-            workingDirectory: gitTmpDir.path,
-          ),
-        );
-        final result = await cmd.execute();
-
-        expect(result.prompt, contains('NOTHING WASTED'));
-        expect(result.prompt, contains('## Phase-Owned Operational Contract'));
-        expect(result.prompt, contains('State: END'));
-        expect(
-          result.prompt,
-          contains('END owns the pre-PR inspection gate before push or PR creation'),
-        );
-        expect(
-          result.prompt,
-          contains(
-            'Minimum END sensor stack: pre_pr, ci_required, runtime, inferential_optional.',
-          ),
-        );
-        expect(
-          result.prompt,
-          contains('Blocking pre_pr or runtime failures stop PR creation'),
-        );
-        expect(
-          result.prompt,
-          contains(
-            'ci_required sensors remain authoritative after PR creation and may still block merge',
-          ),
-        );
-        expect(result.prompt, contains('sensor_policy: minimum-phase-stack'));
-        expect(
-          result.prompt,
-          contains(
-            "minimum_sensor_stack: ['pre_pr', 'ci_required', 'runtime', 'inferential_optional']",
-          ),
-        );
-        expect(
-          result.prompt,
-          contains(
-            "blocking_sensor_stack: ['pre_pr', 'runtime']",
-          ),
-        );
-        expect(
-          result.prompt,
-          contains(
-            "advisory_sensor_stack: ['inferential_optional']",
-          ),
-        );
-        expect(
-          result.prompt,
-          contains('sensor_gate: end-pre-pr-inspection'),
-        );
-        expect(
-          result.prompt,
-          contains(
-            'sensor_authority_rule: ci_required remains merge-authoritative after PR creation even when the local END gate is green',
-          ),
-        );
-        expect(result.prompt, contains('observability_policy: end-gate-trace'));
-        expect(
-          result.prompt,
-          contains('result_metrics_surface: .inquiry/metrics.yaml'),
-        );
-        expect(
-          result.prompt,
-          contains(
-            'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
-          ),
-        );
-        expect(result.prompt, contains('eval_policy: harness-minimum'));
-        expect(
-          result.prompt,
-          contains(
-            "eval_targets: ['sensor_gate_failure', 'observability_failure']",
-          ),
-        );
-        expect(
-          result.prompt,
-          contains(
-            'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
-          ),
-        );
-        expect(
-          result.prompt,
-          isNot(contains('No review or re-validation (basho already did that)')),
-        );
-        expect(result.prompt, contains('Allowed actions:'));
-        expect(result.prompt, contains('Run pre-PR inspection sensors'));
-        expect(result.prompt, contains('# --- inquiry-context ---'));
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'sensor_policy: minimum-phase-stack',
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          "minimum_sensor_stack: ['pre_pr', 'ci_required', 'runtime', 'inferential_optional']",
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          "blocking_sensor_stack: ['pre_pr', 'runtime']",
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          "advisory_sensor_stack: ['inferential_optional']",
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'sensor_gate: end-pre-pr-inspection',
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'sensor_authority_rule: ci_required remains merge-authoritative after PR creation even when the local END gate is green',
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'observability_policy: end-gate-trace',
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'result_metrics_surface: .inquiry/metrics.yaml',
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'execution_trace_surface: cleanrooms/152-test-branch/run_trace.yaml',
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'eval_policy: harness-minimum',
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          "eval_targets: ['sensor_gate_failure', 'observability_failure']",
-        );
-        expectContextKeyOnlyInInquiryContext(
-          result.prompt,
-          'pre_pr_inspection_report: cleanrooms/152-test-branch/pre_pr_inspection.md',
-        );
-        for (final key in [
-          'minimum_sensor_stack',
-          'blocking_sensor_stack',
-          'advisory_sensor_stack',
-          'trace_targets',
-          'eval_targets',
-          'grader_stack',
-        ]) {
-          expectContextFieldOnlyInInquiryContext(result.prompt, key);
-        }
       });
 
       test(
