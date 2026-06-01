@@ -95,8 +95,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     FsmState.idle: ['dewey'],
     FsmState.analyze: ['socrates'],
     FsmState.plan: ['descartes'],
-    FsmState.execute: ['basho'],
-    FsmState.end: ['basho'],
+    FsmState.execute: ['ada'],
+    FsmState.end: [],
     FsmState.evolution: ['darwin'],
   };
 
@@ -247,7 +247,6 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     final cycleContext = _cycleContext;
     final branch = cycleContext?.branch;
     if (cycleContext == null || branch == null) return null;
-    final currentState = FsmState.fromValue(inquiry.state.trim().toUpperCase());
 
     final cleanroomRoot = 'cleanrooms/$branch/';
     final analyzeDir = 'cleanrooms/$branch/analyze/';
@@ -449,41 +448,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'plan_file': '${cleanroomRoot}plan.md',
           'doc_protocol': 'doc-read',
         };
-      case 'basho':
-        final isEnd = currentState == FsmState.end;
-        final sensorContext = currentState == FsmState.end
-            ? _sensorContext(
-                sensorPolicy: 'minimum-phase-stack',
-                minimumSensorStack: const [
-                  'pre_pr',
-                  'ci_required',
-                  'runtime',
-                  'inferential_optional',
-                ],
-                blockingSensorStack: const ['pre_pr', 'runtime'],
-                advisorySensorStack: const ['inferential_optional'],
-                sensorGate: 'end-pre-pr-inspection',
-                sensorAuthorityRule:
-                    'ci_required remains merge-authoritative after PR creation even when the local END gate is green',
-              )
-            : _sensorContext(
-                sensorPolicy: 'minimum-phase-stack',
-                minimumSensorStack: const [
-                  'local_fast',
-                  'pre_transition',
-                  'pre_pr',
-                  'runtime',
-                ],
-                blockingSensorStack: const [
-                  'local_fast',
-                  'pre_transition',
-                  'runtime',
-                ],
-                advisorySensorStack: const ['inferential_optional'],
-                sensorGate: 'handoff-to-end',
-                sensorAuthorityRule:
-                    'pre_pr evidence must be complete before END handoff even when phase-local checks are green',
-              );
+      case 'ada':
         return {
           ...baseContext,
           ..._contextPolicy(
@@ -502,11 +467,26 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
               'retrieve targeted code or cycle-local evidence only when plan.md leaves a concrete implementation or verification ambiguity',
             'reread_avoidance_rule':
               'do not re-read broad analysis artifacts when plan.md already defines the bounded execution contract',
-          ...sensorContext,
+          ..._sensorContext(
+            sensorPolicy: 'minimum-phase-stack',
+            minimumSensorStack: const [
+              'local_fast',
+              'pre_transition',
+              'pre_pr',
+              'runtime',
+            ],
+            blockingSensorStack: const [
+              'local_fast',
+              'pre_transition',
+              'runtime',
+            ],
+            advisorySensorStack: const ['inferential_optional'],
+            sensorGate: 'handoff-to-end',
+            sensorAuthorityRule:
+                'pre_pr evidence must be complete before END handoff even when phase-local checks are green',
+          ),
           ..._observabilityContext(
-            observabilityPolicy: isEnd
-                ? 'end-gate-trace'
-                : 'minimum-phase-trace',
+            observabilityPolicy: 'minimum-phase-trace',
             resultMetricsSurface: metricsFile,
             executionTraceSurface: runTraceFile,
             traceTargets: const [
@@ -518,9 +498,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
               'tool_activity',
             ],
             failureTaxonomySurface: failureTaxonomySurface,
-            observabilityAuthorityRule: isEnd
-                ? 'execution_trace_surface and pre_pr_inspection_report outrank narrative summaries when judging END closure behavior'
-                : 'execution_trace_surface and pre_pr_inspection_report outrank retrospective summaries when explaining EXECUTE cost or blocking',
+            observabilityAuthorityRule:
+                'execution_trace_surface and pre_pr_inspection_report outrank retrospective summaries when explaining EXECUTE cost or blocking',
           ),
           ..._evalContext(
             evalPolicy: 'harness-minimum',
@@ -534,13 +513,11 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
               'trace_grader',
               'artifact_consistency_grader',
             ],
-            evalAuthorityRule: isEnd
-                ? 'trace and gate artifacts outrank narrative retrospection when evaluating END closure behavior'
-                : 'trace and gate artifacts outrank narrative retrospection when evaluating EXECUTE closure behavior',
+            evalAuthorityRule:
+                'trace and gate artifacts outrank narrative retrospection when evaluating EXECUTE closure behavior',
           ),
-          if (!isEnd)
-            'release_gate':
-                'propose semver bump and get explicit user approval before END handoff',
+          'release_gate':
+              'propose semver bump and get explicit user approval before END handoff',
           'input_artifacts': _yamlList(['${cleanroomRoot}plan.md']),
           'expected_outputs': _yamlList([
             cycleContext.projectRoot,
@@ -554,8 +531,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'validation_commands': _yamlList(const []),
           'done_criteria': _yamlList([
             'implementation remains bounded by ${cleanroomRoot}plan.md',
-            if (!isEnd)
-              'semver bump proposal is explicit and user-approved before END handoff',
+            'changed slices satisfy the active coding manifesto before phase completion',
+            'semver bump proposal is explicit and user-approved before END handoff',
             'required validations complete before END',
           ]),
           'pre_pr_inspection_report': '${cleanroomRoot}pre_pr_inspection.md',

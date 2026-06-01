@@ -489,8 +489,8 @@ prompt_fragments:
     instructions: [doc-read]
     template: "analyze.pause"
   plan_to_execute:
-    role: BASHO
-    instructions: []
+    role: ADA
+    instructions: [coding-manifesto-review]
     template: "execute.phase"
   plan_to_idle:
     role: APE
@@ -501,8 +501,8 @@ prompt_fragments:
     instructions: [inquiry-end]
     template: "end.review"
   execute_continue:
-    role: BASHO
-    instructions: []
+    role: ADA
+    instructions: [coding-manifesto-review]
     template: "execute.continue"
   plan_to_analyze:
     role: SOCRATES
