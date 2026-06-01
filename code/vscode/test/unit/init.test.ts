@@ -1,5 +1,5 @@
 import * as assert from 'assert';
-import { inquiryInit, InitDeps } from '../../src/init';
+import { inquiryInit, InitDeps, InitTerminalOptions } from '../../src/init';
 
 describe('inquiryInit', () => {
   it('shows error when no workspace folder', async () => {
@@ -18,7 +18,7 @@ describe('inquiryInit', () => {
   });
 
   it('runs ONLY inquiry init in terminal — no target get', async () => {
-    let terminalName = '';
+    let terminalOptions: string | InitTerminalOptions | undefined;
     const sentTexts: string[] = [];
     let infoMsg = '';
     const deps: InitDeps = {
@@ -26,8 +26,8 @@ describe('inquiryInit', () => {
       getInquiryBinaryPath: () => '/home/user/.inquiry/bin/inquiry',
       showErrorMessage: () => Promise.resolve(undefined),
       showInformationMessage: (msg) => { infoMsg = msg; return Promise.resolve(undefined); },
-      createTerminal: (name) => {
-        terminalName = name;
+      createTerminal: (options) => {
+        terminalOptions = options;
         return {
           show: () => {},
           sendText: (text) => { sentTexts.push(text); },
@@ -37,7 +37,7 @@ describe('inquiryInit', () => {
     };
 
     await inquiryInit('/workspace', deps);
-    assert.strictEqual(terminalName, 'Inquiry Init');
+    assert.deepStrictEqual(terminalOptions, { name: 'Inquiry Init', cwd: '/workspace' });
     const prefix = process.platform === 'win32' ? '& ' : '';
     const q = '"';
     // Only ONE sendText: iq init — no target get
@@ -66,17 +66,44 @@ describe('inquiryInit', () => {
 
   it('delegates to install flow when CLI missing', async () => {
     let installCalled = false;
+    let installed = false;
+    const sentTexts: string[] = [];
+    const deps: InitDeps = {
+      isInquiryInstalled: () => installed,
+      getInquiryBinaryPath: () => '/usr/bin/inquiry',
+      showErrorMessage: () => Promise.resolve(undefined),
+      showInformationMessage: () => Promise.resolve(undefined),
+      createTerminal: () => ({ show: () => {}, sendText: (text) => { sentTexts.push(text); } }),
+      executeCommand: () => Promise.resolve(undefined),
+    };
+
+    await inquiryInit('/workspace', deps, async () => {
+      installCalled = true;
+      installed = true;
+    });
+    assert.strictEqual(installCalled, true);
+    assert.strictEqual(sentTexts.length, 1);
+  });
+
+  it('shows install error when installer throws', async () => {
+    let errorMsg = '';
     const deps: InitDeps = {
       isInquiryInstalled: () => false,
       getInquiryBinaryPath: () => '/usr/bin/inquiry',
-      showErrorMessage: () => Promise.resolve(undefined),
+      showErrorMessage: (msg) => { errorMsg = msg; return Promise.resolve(undefined); },
       showInformationMessage: () => Promise.resolve(undefined),
       createTerminal: () => ({ show: () => {}, sendText: () => {} }),
       executeCommand: () => Promise.resolve(undefined),
     };
 
-    await inquiryInit('/workspace', deps, async () => { installCalled = true; });
-    assert.strictEqual(installCalled, true);
+    await inquiryInit('/workspace', deps, async () => {
+      throw new Error('No inquiry-windows-x64.zip asset found in release v0.7.0');
+    });
+
+    assert.strictEqual(
+      errorMsg,
+      'Inquiry CLI installation failed: No inquiry-windows-x64.zip asset found in release v0.7.0',
+    );
   });
 
   it('shows info message when CLI missing and no install callback', async () => {

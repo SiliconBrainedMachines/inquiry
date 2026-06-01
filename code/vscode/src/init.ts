@@ -1,11 +1,21 @@
 import { isInquiryInstalled, getInquiryBinaryPath, getPlatform, shellExec } from './guard';
 
+export interface InitTerminal {
+  show: () => void;
+  sendText: (text: string) => void;
+}
+
+export interface InitTerminalOptions {
+  name: string;
+  cwd?: string;
+}
+
 export interface InitDeps {
   isInquiryInstalled: () => boolean;
   getInquiryBinaryPath: () => string;
   showErrorMessage: (msg: string) => Thenable<string | undefined>;
   showInformationMessage: (msg: string, ...items: string[]) => Thenable<string | undefined>;
-  createTerminal: (name: string) => { show: () => void; sendText: (text: string) => void };
+  createTerminal: (options: string | InitTerminalOptions) => InitTerminal;
   executeCommand: (command: string, ...args: any[]) => Thenable<unknown>;
 }
 
@@ -22,7 +32,8 @@ export async function inquiryInit(
     ?? vscode.window.showInformationMessage.bind(vscode.window);
   const installed = deps?.isInquiryInstalled ?? (() => isInquiryInstalled());
   const binaryPath = deps?.getInquiryBinaryPath ?? (() => getInquiryBinaryPath(getPlatform()));
-  const createTerminal = deps?.createTerminal ?? vscode.window.createTerminal.bind(vscode.window);
+  const createTerminal = deps?.createTerminal
+    ?? ((options: string | InitTerminalOptions) => vscode.window.createTerminal(options as any));
   const executeCommand = deps?.executeCommand ?? vscode.commands.executeCommand.bind(vscode.commands);
 
   if (!workspaceFolder) {
@@ -32,14 +43,25 @@ export async function inquiryInit(
 
   if (!installed()) {
     if (onInstallNeeded) {
-      await onInstallNeeded();
+      try {
+        await onInstallNeeded();
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        showErrorMessage(`Inquiry CLI installation failed: ${message}`);
+        return;
+      }
+
+      if (!installed()) {
+        showErrorMessage('Inquiry CLI installation failed. Please install manually.');
+        return;
+      }
     } else {
       showInformationMessage('Inquiry CLI not found. Install it manually or wait for a future update.');
+      return;
     }
-    return;
   }
 
-  const terminal = createTerminal('Inquiry Init');
+  const terminal = createTerminal({ name: 'Inquiry Init', cwd: workspaceFolder });
   terminal.show();
   terminal.sendText(shellExec(binaryPath(), ['init']));
 

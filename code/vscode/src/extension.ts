@@ -5,7 +5,7 @@ import { toggleEvolution, addMutation } from './commands';
 import { withGuard } from './command-guard';
 import { inquiryInit } from './init';
 import { installInquiryCli } from './installer';
-import { getInquiryBinDir, shellExec } from './guard';
+import { getInquiryBinDir } from './guard';
 import { resolveMutationsDir } from './cycle';
 
 export function activate(context: vscode.ExtensionContext): void {
@@ -21,25 +21,7 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     vscode.commands.registerCommand('inquiry.init', () => {
       const folder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-      return inquiryInit(folder, undefined, async () => {
-        await installInquiryCli();
-        const { isInquiryInstalled, getInquiryBinaryPath, getPlatform, shellExec: se } = require('./guard');
-        if (isInquiryInstalled()) {
-          const terminal = vscode.window.createTerminal('Inquiry Init');
-          terminal.show();
-          terminal.sendText(se(getInquiryBinaryPath(getPlatform()), ['init']));
-          terminal.sendText(se(getInquiryBinaryPath(getPlatform()), ['target', 'get']));
-          const action = await vscode.window.showInformationMessage(
-            'Inquiry initialized. Reload window so Copilot detects the @inquiry agent?',
-            'Reload',
-          );
-          if (action === 'Reload') {
-            await vscode.commands.executeCommand('workbench.action.reloadWindow');
-          }
-        } else {
-          vscode.window.showErrorMessage('Inquiry CLI installation failed. Please install manually.');
-        }
-      });
+      return inquiryInit(folder, undefined, () => installInquiryCli());
     }),
   );
 
