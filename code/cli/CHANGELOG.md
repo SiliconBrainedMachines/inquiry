@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.1]
+### Changed
+- **Release publication guardrail**: the release workflow now keeps GitHub releases in draft until both platform archives are uploaded and explicitly verified, so `latest` can no longer point at a partial CLI release
+
+### Fixed
+- **Windows asset resilience for consumers**: the VS Code installer now falls back to the newest published release that actually contains the requested platform asset instead of failing on a transiently incomplete latest release
+
 ## [0.7.0]
 ### Added
 - **Harness observability baseline**: `run_trace.yaml`, END pre-PR inspection, and the new observability/eval specs now give the maintainer durable evidence for transitions, sensor runs, retries, host-boundary tool activity, and model-bound prompt assembly cost
