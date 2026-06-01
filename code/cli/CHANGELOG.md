@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.4]
+### Fixed
+- **Root version flags**: `iq --version` and `iq -v` now normalize to the `version` command instead of being dropped by root-command routing
+
 ## [0.7.3]
 ### Changed
 - **EXECUTE cognitive operator**: ADA now replaces BASHŌ as Inquiry's live EXECUTE thinking tool, keeping programming-manifesto cognition separate from the FSM's operational workflow contract
