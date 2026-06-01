@@ -209,11 +209,11 @@ Skills are **step-by-step protocols** invoked by the agent at specific moments. 
 
 Private skills are tied to Inquiry CLI concepts and only make sense inside the Inquiry runtime. Skills such as `research`, `legion`, and `kritik` are reusable protocols that can be invoked from any phase or directly by the user.
 
-SKILL.md files are **shared across hosts** (same SKILL.md for Copilot, Claude, etc.). The agent file is **host-specific** because prompt format differs per host. Legacy `iq target ...` aliases remain accepted for compatibility, but `host` is the canonical term.
+SKILL.md files are **shared across hosts** (same SKILL.md for Copilot, Claude, etc.). The agent file is **host-specific** because prompt format differs per host.
 
 ## Host deployment model
 
-The canonical command surface is `iq host get`. Legacy `iq target get` remains accepted as a compatibility alias, but the operational model is host-bound.
+The command surface is `iq host get`; the operational model is host-bound.
 
 ```
 iq host get

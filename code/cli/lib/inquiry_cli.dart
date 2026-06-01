@@ -53,7 +53,6 @@ Future<int> runInquiry(List<String> args) async {
 
   cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
   cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
-  cli.module('target', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
 

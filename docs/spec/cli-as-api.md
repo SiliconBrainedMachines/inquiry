@@ -83,8 +83,6 @@ The current Inquiry CLI already enforces the runtime FSM and deployment operatio
 | `iq version` | Show version |
 | `iq uninstall` | Remove Inquiry completely |
 
-Legacy aliases `iq target get` and `iq target clean` remain supported for backward compatibility.
-
 ### Planned
 
 | Command | Description |
