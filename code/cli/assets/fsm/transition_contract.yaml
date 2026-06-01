@@ -110,7 +110,7 @@ transitions:
     to: PLAN
     allowed: true
     operations:
-      prechecks: [issue_selected_or_created, diagnosis_exists, index_exists, confirmations_exists]
+      prechecks: [issue_selected_or_created, diagnosis_exists, diagnosis_structured, diagnosis_evidence_present, index_exists, confirmations_exists]
       effects: [generate_plan]
       artifacts: [plan.md]
       commit_policy: commit_analysis_boundary
@@ -436,6 +436,12 @@ preconditions:
   diagnosis_exists:
     description: "diagnosis.md exists for current issue"
     kind: filesystem
+  diagnosis_structured:
+    description: "diagnosis.md distinguishes evidence, hypotheses, constraints, and open questions before PLAN handoff"
+    kind: document-structure
+  diagnosis_evidence_present:
+    description: "diagnosis.md Evidence section contains concrete observed evidence and not only the bootstrap placeholder before PLAN handoff"
+    kind: document-content
   index_exists:
     description: "index.md exists for current issue analysis corpus"
     kind: filesystem

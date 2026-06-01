@@ -5,6 +5,7 @@
 /// and returns the assembled prompt (base + optional sub-state).
 library;
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:cli_router/cli_router.dart';
@@ -156,12 +157,22 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     );
 
     // Parse and assemble
+    final assemblyStartedAt = DateTime.now().toUtc();
     final definition = ApeDefinition.parse(yamlFile.readAsStringSync());
     final prompt = definition.assemblePrompt(
       stateName: resolvedSubState,
       transitionInstructions: transitionInstructions,
       operationalContract: operationalContract.render(),
       context: context,
+    );
+    _recordModelActivityTrace(
+      currentState: currentState,
+      inquiry: inquiry,
+      apeName: input.name!,
+      subState: resolvedSubState,
+      prompt: prompt,
+      assemblyStartedAt: assemblyStartedAt,
+      assemblyEndedAt: DateTime.now().toUtc(),
     );
 
     return ApePromptOutput(
@@ -240,6 +251,12 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
 
     final cleanroomRoot = 'cleanrooms/$branch/';
     final analyzeDir = 'cleanrooms/$branch/analyze/';
+    final runTraceFile = '${cleanroomRoot}run_trace.yaml';
+    const metricsFile = '.inquiry/metrics.yaml';
+    const failureTaxonomySurface =
+      'docs/research/book/analyze/failure-taxonomy.md';
+    const failureClassificationMode =
+      'classify repeated failures as model, host, inquiry_harness, or mixed';
     final taskId = (inquiry.issue != null && inquiry.issue!.trim().isNotEmpty)
         ? inquiry.issue!.trim()
         : branch;
@@ -272,6 +289,69 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
             authorityRule:
                 'diagnosis.md becomes the authoritative handoff to PLAN once written',
           ),
+          'retrieval_trigger_rule':
+              'widen retrieval only when the bounded analysis corpus leaves a named uncertainty unresolved',
+          'reread_avoidance_rule':
+              'do not restart repository-wide discovery when issue.md, index.md, and confirmations.md already bound the active uncertainty',
+          ..._sensorContext(
+            sensorPolicy: 'minimum-phase-stack',
+            minimumSensorStack: const [
+              'runtime',
+              'pre_transition',
+              'inferential_optional',
+            ],
+            blockingSensorStack: const ['runtime', 'pre_transition'],
+            advisorySensorStack: const ['inferential_optional'],
+            sensorGate: 'handoff-to-plan',
+            sensorAuthorityRule:
+                'analysis corpus and diagnosis handoff must be complete enough before PLAN handoff can proceed',
+          ),
+          ..._observabilityContext(
+            observabilityPolicy: 'minimum-phase-trace',
+            resultMetricsSurface: metricsFile,
+            executionTraceSurface: runTraceFile,
+            traceTargets: const [
+              'transition',
+              'sensor_run',
+              'block',
+              'retry',
+              'phase_timing',
+              'tool_activity',
+            ],
+            failureTaxonomySurface: failureTaxonomySurface,
+            observabilityAuthorityRule:
+                'execution_trace_surface and bounded artifacts outrank retrospective summaries when diagnosing ANALYZE behavior',
+          ),
+          ..._evalContext(
+            evalPolicy: 'harness-minimum',
+            evalTargets: const ['evidence_discipline_failure'],
+            failureClassificationMode: failureClassificationMode,
+            graderStack: const [
+              'structure_grader',
+              'artifact_consistency_grader',
+              'human_audit_grader',
+            ],
+            evalAuthorityRule:
+                'artifact and trace evidence outrank narrative retrospection when evaluating ANALYZE quality',
+          ),
+          'evidence_policy': 'evidence-first',
+          'evidence_acquisition_order': _yamlList([
+            'repo',
+            'cycle_artifacts',
+            'docs',
+            'tests',
+            'runtime_evidence',
+            'web_research',
+            'user_questions',
+          ]),
+          'question_escalation_rule':
+              'ask the user only after repo, cycle artifact, docs, tests, runtime evidence, and targeted web research leave a material uncertainty',
+          'diagnosis_requirements': _yamlList([
+            'record concrete observed evidence before handoff',
+            'distinguish observed evidence from hypotheses',
+            'record constraints explicitly',
+            'record open questions only when evidence cannot close them',
+          ]),
           'input_artifacts': _yamlList([
             '${cleanroomRoot}issue.md',
             '${analyzeDir}index.md',
@@ -309,6 +389,51 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
             authoritativeHandoff: '${analyzeDir}diagnosis.md',
             authorityRule:
                 'trust diagnosis.md as the planning baseline unless a concrete gap requires targeted retrieval',
+          ),
+          'retrieval_trigger_rule':
+              'retrieve adjacent repo evidence only when diagnosis.md leaves a concrete gap that would change plan structure, scope, or verification',
+          'reread_avoidance_rule':
+              'do not reconstruct ANALYZE from broad rereads when diagnosis.md already answers the planning question',
+          ..._sensorContext(
+            sensorPolicy: 'minimum-phase-stack',
+            minimumSensorStack: const [
+              'runtime',
+              'pre_transition',
+              'inferential_optional',
+            ],
+            blockingSensorStack: const ['runtime', 'pre_transition'],
+            advisorySensorStack: const ['inferential_optional'],
+            sensorGate: 'handoff-to-execute',
+            sensorAuthorityRule:
+                'plan.md and issue-linked runtime context must be coherent before EXECUTE handoff',
+          ),
+          ..._observabilityContext(
+            observabilityPolicy: 'minimum-phase-trace',
+            resultMetricsSurface: metricsFile,
+            executionTraceSurface: runTraceFile,
+            traceTargets: const [
+              'transition',
+              'sensor_run',
+              'block',
+              'retry',
+              'phase_timing',
+              'tool_activity',
+            ],
+            failureTaxonomySurface: failureTaxonomySurface,
+            observabilityAuthorityRule:
+                'execution_trace_surface and authoritative handoff artifacts outrank retrospective summaries when diagnosing PLAN behavior',
+          ),
+          ..._evalContext(
+            evalPolicy: 'harness-minimum',
+            evalTargets: const ['handoff_authority_failure'],
+            failureClassificationMode: failureClassificationMode,
+            graderStack: const [
+              'structure_grader',
+              'artifact_consistency_grader',
+              'human_audit_grader',
+            ],
+            evalAuthorityRule:
+                'authoritative artifacts outrank narrative retrospection when evaluating planning handoffs',
           ),
           'input_artifacts': _yamlList(['${analyzeDir}diagnosis.md']),
           'expected_outputs': _yamlList(['${cleanroomRoot}plan.md']),
@@ -373,7 +498,46 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
             authorityRule:
                 'trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
           ),
+            'retrieval_trigger_rule':
+              'retrieve targeted code or cycle-local evidence only when plan.md leaves a concrete implementation or verification ambiguity',
+            'reread_avoidance_rule':
+              'do not re-read broad analysis artifacts when plan.md already defines the bounded execution contract',
           ...sensorContext,
+          ..._observabilityContext(
+            observabilityPolicy: isEnd
+                ? 'end-gate-trace'
+                : 'minimum-phase-trace',
+            resultMetricsSurface: metricsFile,
+            executionTraceSurface: runTraceFile,
+            traceTargets: const [
+              'transition',
+              'sensor_run',
+              'block',
+              'retry',
+              'phase_timing',
+              'tool_activity',
+            ],
+            failureTaxonomySurface: failureTaxonomySurface,
+            observabilityAuthorityRule: isEnd
+                ? 'execution_trace_surface and pre_pr_inspection_report outrank narrative summaries when judging END closure behavior'
+                : 'execution_trace_surface and pre_pr_inspection_report outrank retrospective summaries when explaining EXECUTE cost or blocking',
+          ),
+          ..._evalContext(
+            evalPolicy: 'harness-minimum',
+            evalTargets: const [
+              'sensor_gate_failure',
+              'observability_failure',
+            ],
+            failureClassificationMode: failureClassificationMode,
+            graderStack: const [
+              'structure_grader',
+              'trace_grader',
+              'artifact_consistency_grader',
+            ],
+            evalAuthorityRule: isEnd
+                ? 'trace and gate artifacts outrank narrative retrospection when evaluating END closure behavior'
+                : 'trace and gate artifacts outrank narrative retrospection when evaluating EXECUTE closure behavior',
+          ),
           if (!isEnd)
             'release_gate':
                 'propose semver bump and get explicit user approval before END handoff',
@@ -402,12 +566,46 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       case 'darwin':
         return {
           ...baseContext,
+          ..._observabilityContext(
+            observabilityPolicy: 'evolution-audit',
+            resultMetricsSurface: metricsFile,
+            executionTraceSurface: runTraceFile,
+            traceTargets: const [
+              'transition',
+              'sensor_run',
+              'block',
+              'retry',
+              'phase_timing',
+            ],
+            failureTaxonomySurface: failureTaxonomySurface,
+            observabilityAuthorityRule:
+                'execution traces and result metrics outrank retrospective summaries when evaluating recurring harness failures',
+          ),
+          ..._evalContext(
+            evalPolicy: 'harness-evolution-minimum',
+            evalTargets: const [
+              'task_contract_failure',
+              'evidence_discipline_failure',
+              'handoff_authority_failure',
+              'sensor_gate_failure',
+              'observability_failure',
+            ],
+            failureClassificationMode: failureClassificationMode,
+            graderStack: const [
+              'structure_grader',
+              'trace_grader',
+              'artifact_consistency_grader',
+              'human_audit_grader',
+            ],
+            evalAuthorityRule:
+                'trace and artifact graders outrank narrative retrospection when classifying repeated harness failures',
+          ),
           'input_artifacts': _yamlList([
             '${analyzeDir}diagnosis.md',
             '${cleanroomRoot}plan.md',
             '${cleanroomRoot}retrospective.md',
             '${cleanroomRoot}mutations.md',
-            '.inquiry/metrics.yaml',
+            metricsFile,
             '.inquiry/metrics_snapshot.yaml',
           ]),
           'expected_outputs': _yamlList([cleanroomRoot]),
@@ -418,8 +616,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'read_only_surfaces': _yamlList([
             '${analyzeDir}diagnosis.md',
             '${cleanroomRoot}plan.md',
-            '${cleanroomRoot}.iq.state.yaml',
-            '.inquiry/metrics.yaml',
+            '$cleanroomRoot.iq.state.yaml',
+            metricsFile,
             '.inquiry/metrics_snapshot.yaml',
           ]),
           'validation_commands': _yamlList(const []),
@@ -432,9 +630,9 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'plan_file': '${cleanroomRoot}plan.md',
           'retrospective_file': '${cleanroomRoot}retrospective.md',
           'mutations_file': '${cleanroomRoot}mutations.md',
-          'state_file': '${cleanroomRoot}.iq.state.yaml',
+          'state_file': '$cleanroomRoot.iq.state.yaml',
           'metrics_snapshot_file': '.inquiry/metrics_snapshot.yaml',
-          'metrics_file': '.inquiry/metrics.yaml',
+          'metrics_file': metricsFile,
           'output_dir': cleanroomRoot,
         };
       default:
@@ -448,6 +646,92 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     } on CycleResolutionException {
       return null;
     }
+  }
+
+  void _recordModelActivityTrace({
+    required FsmState currentState,
+    required InquiryState inquiry,
+    required String apeName,
+    required String? subState,
+    required String prompt,
+    required DateTime assemblyStartedAt,
+    required DateTime assemblyEndedAt,
+  }) {
+    if (currentState == FsmState.idle) return;
+
+    final tracePath = _runTracePath();
+    final branch = _cycleContext?.branch;
+    if (tracePath == null || branch == null) return;
+
+    final promptCharacters = prompt.runes.length;
+    final promptLines = prompt.isEmpty ? 0 : '\n'.allMatches(prompt).length + 1;
+    final promptBytes = utf8.encode(prompt).length;
+    final estimatedInputTokens = promptCharacters == 0
+        ? 0
+        : ((promptCharacters + 3) ~/ 4);
+    final assemblyDuration = assemblyEndedAt.difference(assemblyStartedAt);
+
+    final lines = <String>[
+      '    event_class: model_activity',
+      '    phase: ${currentState.value}',
+      '    ape_name: $apeName',
+      '    model_surface: prompt_input',
+      '    prompt_characters: $promptCharacters',
+      '    prompt_lines: $promptLines',
+      '    prompt_utf8_bytes: $promptBytes',
+      '    estimated_input_tokens: $estimatedInputTokens',
+      '    token_estimate_basis: chars_div_4_ceil',
+      '    assembly_duration_seconds: ${assemblyDuration.inMilliseconds / 1000}',
+    ];
+
+    if (subState != null && subState.trim().isNotEmpty) {
+      lines.add('    sub_state: $subState');
+    }
+    if (inquiry.promptFragmentId != null &&
+        inquiry.promptFragmentId!.trim().isNotEmpty) {
+      lines.add('    prompt_fragment_id: ${inquiry.promptFragmentId!}');
+    }
+
+    _appendRunTraceEvent(lines, issue: inquiry.issue);
+  }
+
+  void _appendRunTraceEvent(List<String> lines, {String? issue}) {
+    final tracePath = _runTracePath();
+    final branch = _cycleContext?.branch;
+    if (tracePath == null || branch == null) return;
+
+    final file = File(tracePath);
+    file.parent.createSync(recursive: true);
+
+    final taskId = (issue != null && issue.trim().isNotEmpty)
+        ? issue.trim()
+        : branch;
+    final buffer = StringBuffer()
+      ..writeln(
+        '  - recorded_at: "${DateTime.now().toUtc().toIso8601String()}"',
+      )
+      ..writeln('    task_id: ${_yamlQuoted(taskId)}')
+      ..writeln('    branch: $branch');
+
+    for (final line in lines) {
+      buffer.writeln(line);
+    }
+
+    if (file.existsSync()) {
+      file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
+    } else {
+      file.writeAsStringSync('events:\n${buffer.toString()}');
+    }
+  }
+
+  String? _runTracePath() {
+    final cleanroomRoot = _cycleContext?.inquiryRoot;
+    if (cleanroomRoot == null) return null;
+    return p.join(cleanroomRoot, 'run_trace.yaml');
+  }
+
+  String _yamlQuoted(String value) {
+    return '"${value.replaceAll(r'\\', r'\\\\').replaceAll('"', '\\"')}"';
   }
 
   String get _resolvedProjectRoot =>
@@ -495,6 +779,40 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
       'advisory_sensor_stack': _yamlList(advisorySensorStack),
       'sensor_gate': sensorGate,
       'sensor_authority_rule': sensorAuthorityRule,
+    };
+  }
+
+  Map<String, String> _observabilityContext({
+    required String observabilityPolicy,
+    required String resultMetricsSurface,
+    required String executionTraceSurface,
+    required List<String> traceTargets,
+    required String failureTaxonomySurface,
+    required String observabilityAuthorityRule,
+  }) {
+    return {
+      'observability_policy': observabilityPolicy,
+      'result_metrics_surface': resultMetricsSurface,
+      'execution_trace_surface': executionTraceSurface,
+      'trace_targets': _yamlList(traceTargets),
+      'failure_taxonomy_surface': failureTaxonomySurface,
+      'observability_authority_rule': observabilityAuthorityRule,
+    };
+  }
+
+  Map<String, String> _evalContext({
+    required String evalPolicy,
+    required List<String> evalTargets,
+    required String failureClassificationMode,
+    required List<String> graderStack,
+    required String evalAuthorityRule,
+  }) {
+    return {
+      'eval_policy': evalPolicy,
+      'eval_targets': _yamlList(evalTargets),
+      'failure_classification_mode': failureClassificationMode,
+      'grader_stack': _yamlList(graderStack),
+      'eval_authority_rule': evalAuthorityRule,
     };
   }
 

@@ -15,6 +15,8 @@ Use confirmations_doc for confirmations when it applies.
 Treat upfront_context as your bounded starting context.
 Use retrieval_context only when the current uncertainty requires more evidence.
 Build authoritative_handoff so later phases do not need to reconstruct ANALYZE from scratch.
+Let retrieval_trigger_rule justify any widening beyond bounded context.
+Honor reread_avoidance_rule so writing work does not restart discovery by habit.
 
 ## When to Use
 
@@ -36,6 +38,8 @@ context_policy: progressive-disclosure
 upfront_context: ['cleanrooms/<branch>/issue.md', 'cleanrooms/<branch>/analyze/index.md']
 retrieval_context: ['cleanrooms/<branch>/analyze/index.md', 'cleanrooms/<branch>/analyze/confirmations.md', '<project_root>']
 deferred_context: ['broad repository rereads not justified by the active uncertainty']
+retrieval_trigger_rule: widen retrieval only when the bounded analysis corpus leaves a named uncertainty unresolved
+reread_avoidance_rule: do not restart repository-wide discovery when issue.md, index.md, and confirmations.md already bound the active uncertainty
 authoritative_handoff: cleanrooms/<branch>/analyze/diagnosis.md
 authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once written
 ```
@@ -46,6 +50,8 @@ authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once writ
 - `upfront_context` — the bounded starting context you should trust before wider retrieval
 - `retrieval_context` — the next retrieval surfaces if bounded context is insufficient
 - `deferred_context` — context that should stay out of the working set unless a concrete gap justifies it
+- `retrieval_trigger_rule` — the explicit condition that must be true before widening retrieval
+- `reread_avoidance_rule` — the rule that marks broad rediscovery as harness waste for this phase
 - `authoritative_handoff` — the artifact this phase is expected to leave as durable authority for the next phase
 - `authority_rule` — the rule that defines when the handoff outranks broad rereads
 
@@ -110,6 +116,8 @@ While analyzing, `diagnosis.md` is not just another output. It is the handoff ar
 2. Synthesize those findings into `authoritative_handoff`.
 3. Do not force PLAN to rediscover context you could have stabilized in `diagnosis.md`.
 4. Treat duplicate rereads that do not materially reduce uncertainty as harness waste.
+5. Use `retrieval_trigger_rule` to justify any widening beyond bounded context.
+6. Treat `reread_avoidance_rule` as the default unless new uncertainty is concrete and named.
 
 ## Checklist
 

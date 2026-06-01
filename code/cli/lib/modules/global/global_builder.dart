@@ -2,6 +2,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
 import '../../assets.dart';
 import 'commands/doctor.dart';
+import 'commands/help.dart';
 import 'commands/init.dart';
 import 'commands/tui.dart';
 import 'commands/uninstall.dart';
@@ -18,6 +19,12 @@ void buildGlobalModule(
     '',
     (req) => TuiCommand(TuiInput.fromCliRequest(req)),
     description: 'Display Inquiry status and FSM diagram',
+  );
+
+  m.command<HelpInput, HelpOutput>(
+    'help',
+    (req) => HelpCommand(HelpInput.fromCliRequest(req)),
+    description: 'Show available commands',
   );
 
   m.command<InitInput, InitOutput>(

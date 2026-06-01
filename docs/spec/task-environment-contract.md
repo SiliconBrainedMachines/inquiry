@@ -38,7 +38,7 @@ The minimum task-environment contract for active-cycle prompts is:
 | Field | Meaning |
 |---|---|
 | `project_root` | Absolute repository/worktree root |
-| `task_id` | Active issue/cycle identifier; fallback is branch name when issue is unavailable |
+| `task_id` | Active task/cycle identifier; it may come from an issue, branch, or another bounded task surface |
 | `input_artifacts` | Authoritative inputs for the current phase |
 | `expected_outputs` | Files or surfaces the phase is expected to produce/update |
 | `editable_surfaces` | Files/directories the phase is allowed to modify |
@@ -59,10 +59,10 @@ These fields live alongside the older phase-specific runtime paths such as `outp
 
 ### SOCRATES
 
-- `input_artifacts`: issue material plus `analyze/index.md`
+- `input_artifacts`: task statement or cycle brief plus `analyze/index.md`
 - `expected_outputs`: `confirmations.md`, `diagnosis.md`
 - `editable_surfaces`: `cleanrooms/<branch>/analyze/`
-- `read_only_surfaces`: issue statement / prior authority for the cycle
+- `read_only_surfaces`: task statement / prior authority for the cycle
 - `done_criteria`: diagnosis written and grounded in the bounded analysis corpus
 
 ### DESCARTES
