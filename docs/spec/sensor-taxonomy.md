@@ -140,7 +140,7 @@ END is the explicit pre-PR gate. Its minimum stack is:
 
 - `pre_pr` — blocking inspection before push or PR creation
 - `ci_required` — merge-authoritative checks that remain binding after PR creation
-- `runtime` — blocking checks when branch, task identity, FSM state, or target state looks inconsistent
+- `runtime` — blocking checks when branch, task identity, FSM state, or host state looks inconsistent
 - `inferential_optional` — non-blocking review findings unless strengthened by harder evidence
 
 END gate semantics:

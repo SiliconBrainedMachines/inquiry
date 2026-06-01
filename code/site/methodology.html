@@ -95,7 +95,7 @@
     <span class="key">prechecks</span>:
       - human_approval</pre>
       <p>
-        This is the core artifact. It's what makes Inquiry portable across targets and tools: every agent reads the same contract and can only produce the transitions it permits. If a future target (Claude, Codex, Gemini) processes a different prompt, the contract constrains the output shape identically.
+        This is the core artifact. It's what makes Inquiry portable across hosts and tools: every agent reads the same contract and can only produce the transitions it permits. If a future host (Claude, Codex, Gemini) processes a different prompt, the contract constrains the output shape identically.
       </p>
     </section>
 
@@ -109,7 +109,7 @@
           <h3><code>.inquiry/</code> — per-repo state</h3>
           <ul class="memory-list">
             <li><code>state.yaml</code> — current FSM state and last transition</li>
-            <li><code>config.yaml</code> — feature flags (<code>evolution.enabled</code>, target, etc.)</li>
+            <li><code>config.yaml</code> — feature flags and runtime preferences</li>
             <li><code>mutations.md</code> — human notes for DARWIN's evaluation pass</li>
             <li>Runtime coordination state for the active cycle</li>
           </ul>
@@ -146,10 +146,10 @@
         AI makes philosophical discipline operational again.
       </blockquote>
       <p>
-        Inquiry is not trying to prove that a weaker local model can beat a frontier hosted one. The aim is stricter: make AI-assisted engineering legible, auditable, and portable by grounding it in explicit thinking tools. If providers change, prices move, or targets churn, the doctrine should survive because the discipline lives in the method, not in one vendor surface.
+        Inquiry is not trying to prove that a weaker local model can beat a frontier hosted one. The aim is stricter: make AI-assisted engineering legible, auditable, and portable by grounding it in explicit thinking tools. If providers change, prices move, or hosts churn, the doctrine should survive because the discipline lives in the method, not in one vendor surface.
       </p>
       <p>
-        The thesis Inquiry exists to test is philosophical and methodological: AI-assisted software work improves when questioning, decomposition, verification, and evolutionary learning are turned into operational method. The evidence lives in a <code>metrics.yaml</code> dataset that doesn't fully exist yet — the reproducibility score sits at 2/10 until 30 clean cycles and a multi-target test matrix land. See the historical bootstrap thesis, <a href="ape-builds-ape.html">APE builds APE →</a>.
+        The thesis Inquiry exists to test is philosophical and methodological: AI-assisted software work improves when questioning, decomposition, verification, and evolutionary learning are turned into operational method. The evidence lives in a <code>metrics.yaml</code> dataset that doesn't fully exist yet — the reproducibility score sits at 2/10 until 30 clean cycles and a multi-host test matrix land. See the historical bootstrap thesis, <a href="ape-builds-ape.html">APE builds APE →</a>.
       </p>
     </section>
 

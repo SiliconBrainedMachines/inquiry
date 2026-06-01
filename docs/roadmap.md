@@ -51,7 +51,7 @@ DARWIN should continue to propose changes from concrete cycle evidence, not from
 
 These remain real possibilities, but they should land only when the harness earns them:
 
-- multi-target reactivation
+- multi-host reactivation
 - `iq task` and stronger issue/PR wrapping
 - richer host-side telemetry when the platform exposes it
 - more opinionated website and distribution surfaces
@@ -131,7 +131,7 @@ Several roadmap items from the early v0.0.x planning era are no longer near-term
 
 Larger features that require infrastructure from the near-term to land first. Not yet split into discrete issues.
 
-Viewed through the harness framing above, these mid-term items are best understood as **harness completion work**: first-class memory tooling, first-class task orchestration, target reactivation, and comparative validation across hosts.
+Viewed through the harness framing above, these mid-term items are best understood as **harness completion work**: first-class memory tooling, first-class task orchestration, host reactivation, and comparative validation across hosts.
 
 ### `iq memory` CLI
 First-class commands for the Memory-as-Code spec:
@@ -142,21 +142,21 @@ First-class commands for the Memory-as-Code spec:
 ### `iq task` CLI
 Replace the manual `gh issue create / gh pr create / gh pr merge` dance with a single command per FSM transition. Currently the agent calls `gh` directly; `iq task` would wrap that with prechecks such as task existence, branch/task identity coherence, and no scope drift under the single-task rule.
 
-### Multi-target reactivation
-The deferred half of [ADR D20](spec/target-specific-agents.md). Adapters already exist for Claude Code, Crush, Codex, and Gemini — they just aren't wired into `iq target get`. Reactivation requires:
+### Multi-host reactivation
+The deferred half of [ADR D20](spec/host-specific-agents.md). Adapters already exist for Claude Code, Codex, Gemini, and OpenCode — they just aren't wired into `iq host get`. Reactivation requires:
 1. Stable agent prompt API (so the same APE methodology runs identically across hosts)
-2. A test matrix that runs the same APE cycle against multiple targets
+2. A test matrix that runs the same APE cycle against multiple hosts
 3. Comparative metrics on top of the foundation already landed in #72
 
 ### Antifragility validation harness
-A test rig that runs N identical APE cycles against M targets (Copilot, Crush, Claude Code, and similar hosted surfaces) and aggregates `metrics.yaml` to test how well the same philosophical-methodological discipline survives tool changes and operational constraints.
+A test rig that runs N identical APE cycles against M hosts (Copilot, OpenCode, Claude Code, and similar hosted surfaces) and aggregates `metrics.yaml` to test how well the same philosophical-methodological discipline survives tool changes and operational constraints.
 
 ## Long-term (v1.0+)
 
 Theses that take the project beyond a CLI tool.
 
 ### Philosophical and Methodological Consolidation
-A mature statement of Inquiry as a doctrine for AI-assisted software work: sharpen the canonical role of Thinking Tools, clarify the Inquiry / APE / Finite APE Machine distinction, and make the philosophical lineage legible enough that the method survives changes in targets, vendors, and surrounding tooling.
+A mature statement of Inquiry as a doctrine for AI-assisted software work: sharpen the canonical role of Thinking Tools, clarify the Inquiry / APE / Finite APE Machine distinction, and make the philosophical lineage legible enough that the method survives changes in hosts, vendors, and surrounding tooling.
 
 ### Bootstrap-validation paper
 Publish the empirical paper on APE-builds-APE once the project has enough clean comparative cycle evidence and a stable publication plan.

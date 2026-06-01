@@ -69,7 +69,7 @@
             <span class="stage-range">v0.0.6 — v0.0.10</span>
           </div>
           <h3>Custom agent</h3>
-          <p>Deploy infrastructure (<code>iq target get</code>) stabilized as a single-target Copilot deployment. The cycle became self-enforcing — the agent refused to skip states, demanded issue numbers, required user gates. The system began constraining its own development.</p>
+          <p>Deploy infrastructure (<code>iq host get</code>) stabilized as a single-host Copilot deployment. The cycle became self-enforcing — the agent refused to skip states, demanded issue numbers, required user gates. The system began constraining its own development.</p>
           <div class="stage-evidence">Evidence: early cycle versions used <code>docs/issues/NNN-slug/</code> artifacts; current cycles use <code>cleanrooms/NNN-slug/</code>.</div>
         </li>
 
@@ -145,9 +145,9 @@
         <dd>
           Current reproducibility score: <strong>2/10</strong>. Early cycles ran before the contract stabilized; only post-v0.0.11 cycles qualify as clean. Thirty is a minimum for statistical claims.
         </dd>
-        <dt>3. A test matrix across targets</dt>
+        <dt>3. A test matrix across hosts</dt>
         <dd>
-          Single-target MVP today (Copilot). Adapters exist for Claude Code, Codex, Crush, and Gemini per <a href="https://github.com/ccisnedev/inquiry/blob/main/docs/spec/target-specific-agents.md">ADR D20</a>, but aren't wired in. The <em>methodology &gt; model</em> thesis demands comparison across targets — ideally including a local 7B — to be testable at all.
+          Single-host MVP today (Copilot). Adapters exist for Claude Code, Codex, Crush, and Gemini per <a href="https://github.com/ccisnedev/inquiry/blob/main/docs/spec/host-specific-agents.md">ADR D20</a>, but aren't wired in. The <em>methodology &gt; model</em> thesis demands comparison across hosts — ideally including a local 7B — to be testable at all.
         </dd>
       </dl>
     </section>

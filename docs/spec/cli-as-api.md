@@ -33,7 +33,7 @@ This means **skills are pure documentation** and commands are the enforcement la
 
 ### D6: Humans can use Inquiry without AI
 
-A developer without any AI tool can still use the implemented Inquiry CLI directly. Today that includes commands such as `iq init`, `iq doctor`, `iq target get`, `iq version`, and `iq fsm transition --event <e>`. The AI is an accelerator, not a requirement.
+A developer without any AI tool can still use the implemented Inquiry CLI directly. Today that includes commands such as `iq init`, `iq doctor`, `iq host get`, `iq version`, and `iq fsm transition --event <e>`. The AI is an accelerator, not a requirement.
 
 This is critical for trust: the human understands exactly what the tool does because they can use it themselves.
 
@@ -76,12 +76,14 @@ The current Inquiry CLI already enforces the runtime FSM and deployment operatio
 |---------|-------------|
 | `iq init` | Initialize Inquiry in a repo (`.inquiry/` runtime files) |
 | `iq doctor` | Verify prerequisites and environment readiness |
-| `iq target get` | Deploy agent + skills to the active target |
-| `iq target clean` | Remove deployed files |
+| `iq host get` | Deploy skills to the active host |
+| `iq host clean` | Remove deployed skills from all known hosts |
 | `iq fsm transition --event <e>` | Execute a declared FSM transition |
 | `iq upgrade` | Upgrade CLI binary |
 | `iq version` | Show version |
 | `iq uninstall` | Remove Inquiry completely |
+
+Legacy aliases `iq target get` and `iq target clean` remain supported for backward compatibility.
 
 ### Planned
 
