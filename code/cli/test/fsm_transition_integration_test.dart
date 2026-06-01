@@ -270,9 +270,16 @@ void _writePlan(String root, String branch, String content) {
 void _writePrePrInspection(String root, String branch, {required String verdict}) {
   final file = File(p.join(root, 'cleanrooms', branch, 'pre_pr_inspection.md'));
   file.createSync(recursive: true);
+  final issue = branch.split('-').first;
   file.writeAsStringSync(
     [
       'verdict: $verdict',
+      '',
+      '# END Pre-PR Inspection',
+      '',
+      'issue: "$issue"',
+      'branch: "$branch"',
+      'generated_at: "2026-06-01T00:00:00Z"',
       '',
       '## Pass 1 — Consistency',
       '- PASS: asset parity source/build reviewed',
