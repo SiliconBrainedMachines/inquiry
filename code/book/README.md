@@ -2,7 +2,7 @@
 
 This directory contains the source code for the book **Critique of Pure Abduction**.
 
-The book is now part of Inquiry and lives in `code/book/` as the product's canonical long-form doctrinal manuscript. Supporting research and working notes live under `docs/research/book/` and `docs/research/inquiry/`.
+The book is now part of Inquiry and lives in `code/book/` as the product's canonical long-form doctrinal manuscript. Current repository doctrine now lives in `docs/architecture.md`, `docs/roadmap.md`, and `docs/spec/`.
 
 ## Quick Start
 
