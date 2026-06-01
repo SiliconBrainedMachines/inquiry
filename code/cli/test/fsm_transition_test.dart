@@ -425,6 +425,43 @@ void main() {
       );
     });
 
+    test('seeded END inspection report records automatic completeness failures', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'EXECUTE', issue: '51');
+      _writePlan(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        '# Plan\n- [ ] pending execution step\n',
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'finish_execute',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isTrue);
+      final inspectionReport = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'pre_pr_inspection.md',
+        ),
+      ).readAsStringSync();
+      expect(
+        inspectionReport,
+        contains('FAIL: unchecked plan checkbox remains'),
+      );
+      expect(
+        inspectionReport,
+        contains('cleanrooms/51-idle-execution-guardrails/plan.md:2'),
+      );
+    });
+
     test('allows END to create PR and enter EVOLUTION', () async {
       _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
       _writeState(tempDir.path, 'END', issue: '51');
@@ -654,6 +691,55 @@ void main() {
       expect(
         inspectionReport,
         contains('assets/fsm/transition_contract.yaml:1'),
+      );
+    });
+
+    test('blocks END pr_ready when automatic completeness check detects unfinished plan work', () async {
+      _initGitRepo(tempDir.path, branch: '51-idle-execution-guardrails');
+      _writeState(tempDir.path, 'END', issue: '51');
+      _writePlan(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        '# Plan\n- [ ] pending execution step\n',
+      );
+      _writePrePrInspection(
+        tempDir.path,
+        '51-idle-execution-guardrails',
+        verdict: 'APPROVED',
+        consistencyChecks: const ['PASS: asset parity source/build reviewed'],
+        completenessChecks: const ['PASS: changed behavior covered by tests'],
+        traceabilityChecks: const ['PASS: every code change maps to plan.md'],
+      );
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'pr_ready',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => '51-idle-execution-guardrails',
+      ).execute();
+
+      expect(output.allowed, isFalse);
+      expect(
+        output.message,
+        contains('ERROR_PRECONDITION_PRE_PR_INSPECTION_INVALID'),
+      );
+      final inspectionReport = File(
+        p.join(
+          tempDir.path,
+          'cleanrooms',
+          '51-idle-execution-guardrails',
+          'pre_pr_inspection.md',
+        ),
+      ).readAsStringSync();
+      expect(
+        inspectionReport,
+        contains('FAIL: unchecked plan checkbox remains'),
+      );
+      expect(
+        inspectionReport,
+        contains('cleanrooms/51-idle-execution-guardrails/plan.md:2'),
       );
     });
 

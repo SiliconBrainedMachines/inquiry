@@ -25,6 +25,12 @@ class PrePrInspectionRunner {
 
   String? get _cleanroomRoot => _cycleContext?.inquiryRoot;
 
+  String? get _cleanroomPlanPath {
+    final cleanroomRoot = _cleanroomRoot;
+    if (cleanroomRoot == null) return null;
+    return p.join(cleanroomRoot, 'plan.md');
+  }
+
   void materializeReport() {
     final branch = _branch;
     final cleanroomRoot = _cleanroomRoot;
@@ -46,7 +52,12 @@ class PrePrInspectionRunner {
       file.writeAsStringSync(template);
     }
 
+    refreshDeterministicPasses();
+  }
+
+  void refreshDeterministicPasses() {
     refreshConsistency();
+    refreshCompleteness();
   }
 
   void refreshConsistency() {
@@ -56,21 +67,43 @@ class PrePrInspectionRunner {
     final file = File(p.join(cleanroomRoot, 'pre_pr_inspection.md'));
     if (!file.existsSync()) return;
 
+    _rewriteSection(
+      file,
+      startMarkers: const ['## Pass 1 — Consistency', '## Consistency'],
+      endMarkers: const ['## Pass 2 — Completeness', '## Completeness'],
+      checks: _deterministicConsistencyChecks(),
+    );
+  }
+
+  void refreshCompleteness() {
+    final cleanroomRoot = _cleanroomRoot;
+    if (cleanroomRoot == null) return;
+
+    final file = File(p.join(cleanroomRoot, 'pre_pr_inspection.md'));
+    if (!file.existsSync()) return;
+
+    _rewriteSection(
+      file,
+      startMarkers: const ['## Pass 2 — Completeness', '## Completeness'],
+      endMarkers: const ['## Pass 3 — Traceability', '## Traceability'],
+      checks: _automaticCompletenessChecks(),
+    );
+  }
+
+  void _rewriteSection(
+    File file, {
+    required List<String> startMarkers,
+    required List<String> endMarkers,
+    required List<String> checks,
+  }) {
     final content = file.readAsStringSync().replaceAll('\r\n', '\n');
-    final startMarker = _firstExistingMarker(content, const [
-      '## Pass 1 — Consistency',
-      '## Consistency',
-    ]);
-    final endMarker = _firstExistingMarker(content, const [
-      '## Pass 2 — Completeness',
-      '## Completeness',
-    ]);
+    final startMarker = _firstExistingMarker(content, startMarkers);
+    final endMarker = _firstExistingMarker(content, endMarkers);
     if (startMarker == null || endMarker == null) return;
     final start = content.indexOf(startMarker);
     final end = content.indexOf(endMarker);
     if (start == -1 || end == -1 || end <= start) return;
 
-    final checks = _deterministicConsistencyChecks();
     final before = content.substring(0, start + startMarker.length);
     final after = content.substring(end);
     final updated = StringBuffer()
@@ -161,6 +194,55 @@ class PrePrInspectionRunner {
     return findings;
   }
 
+  List<String> _automaticCompletenessChecks() {
+    final branch = _branch;
+    final planPath = _cleanroomPlanPath;
+    if (branch == null || planPath == null) {
+      return const [
+        '- WARN: no active cleanroom plan resolved; automatic completeness review skipped for this repo',
+      ];
+    }
+
+    final planFile = File(planPath);
+    final relativePlanPath = 'cleanrooms/$branch/plan.md';
+    if (!planFile.existsSync()) {
+      return [
+        '- WARN: plan.md missing for automatic completeness review at $relativePlanPath:1',
+      ];
+    }
+
+    final lines = planFile.readAsStringSync().replaceAll('\r\n', '\n').split(
+      '\n',
+    );
+    final uncheckedChecks = <String>[];
+    var checkedCount = 0;
+
+    for (var index = 0; index < lines.length; index++) {
+      final line = lines[index];
+      if (_uncheckedCheckboxPattern.hasMatch(line)) {
+        uncheckedChecks.add(
+          '- FAIL: unchecked plan checkbox remains at $relativePlanPath:${index + 1}',
+        );
+      } else if (_checkedCheckboxPattern.hasMatch(line)) {
+        checkedCount += 1;
+      }
+    }
+
+    if (uncheckedChecks.isNotEmpty) {
+      return uncheckedChecks;
+    }
+
+    if (checkedCount > 0) {
+      return [
+        '- PASS: all $checkedCount plan.md checkboxes are complete in $relativePlanPath',
+      ];
+    }
+
+    return [
+      '- WARN: no plan checkboxes found for automatic completeness review at $relativePlanPath:1',
+    ];
+  }
+
   Set<String> _relativeFiles(String root) {
     return Directory(root)
         .listSync(recursive: true)
@@ -197,3 +279,7 @@ class PrePrInspectionRunner {
     return 1;
   }
 }
+
+final RegExp _uncheckedCheckboxPattern = RegExp(r'^\s*[-*]\s+\[ \]\s+');
+
+final RegExp _checkedCheckboxPattern = RegExp(r'^\s*[-*]\s+\[[xX]\]\s+');
