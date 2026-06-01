@@ -254,7 +254,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
     final runTraceFile = '${cleanroomRoot}run_trace.yaml';
     const metricsFile = '.inquiry/metrics.yaml';
     const failureTaxonomySurface =
-      'docs/research/book/analyze/failure-taxonomy.md';
+      'docs/spec/eval-model.md';
     const failureClassificationMode =
       'classify repeated failures as model, host, inquiry_harness, or mixed';
     final taskId = (inquiry.issue != null && inquiry.issue!.trim().isNotEmpty)
