@@ -110,7 +110,7 @@ transitions:
     to: PLAN
     allowed: true
     operations:
-      prechecks: [issue_selected_or_created, diagnosis_exists, index_exists, confirmations_exists]
+      prechecks: [issue_selected_or_created, diagnosis_exists, diagnosis_structured, diagnosis_evidence_present, index_exists, confirmations_exists]
       effects: [generate_plan]
       artifacts: [plan.md]
       commit_policy: commit_analysis_boundary
@@ -266,7 +266,7 @@ transitions:
     allowed: true
     operations:
       prechecks: [issue_selected, feature_branch_selected]
-      effects: [finalize_execution]
+      effects: [finalize_execution, seed_pre_pr_inspection_template]
       artifacts: [execution_summary.md]
       commit_policy: stage_only
       prompt_fragment_id: execute_to_end
@@ -335,7 +335,7 @@ transitions:
     to: EVOLUTION
     allowed: true
     operations:
-      prechecks: [issue_selected, feature_branch_selected]
+      prechecks: [issue_selected, feature_branch_selected, pre_pr_inspection_approved]
       effects: [push_branch, create_pull_request]
       artifacts: [pull_request.md]
       commit_policy: push_and_pr
@@ -346,7 +346,7 @@ transitions:
     to: IDLE
     allowed: true
     operations:
-      prechecks: [issue_selected, feature_branch_selected]
+      prechecks: [issue_selected, feature_branch_selected, pre_pr_inspection_approved]
       effects: [push_branch, create_pull_request]
       artifacts: [pull_request.md]
       commit_policy: push_and_pr
@@ -436,6 +436,12 @@ preconditions:
   diagnosis_exists:
     description: "diagnosis.md exists for current issue"
     kind: filesystem
+  diagnosis_structured:
+    description: "diagnosis.md distinguishes evidence, hypotheses, constraints, and open questions before PLAN handoff"
+    kind: document-structure
+  diagnosis_evidence_present:
+    description: "diagnosis.md Evidence section contains concrete observed evidence and not only the bootstrap placeholder before PLAN handoff"
+    kind: document-content
   index_exists:
     description: "index.md exists for current issue analysis corpus"
     kind: filesystem
@@ -448,6 +454,9 @@ preconditions:
   feature_branch_selected:
     description: "inquiry-start prepared an issue-linked feature branch for the explicit start handoff"
     kind: git
+  pre_pr_inspection_approved:
+    description: "pre_pr_inspection.md exists for the current issue branch as a structured 3-pass report, FAIL findings cite file:line, and the final verdict is APPROVED"
+    kind: filesystem
   plan_approved:
     description: "User approved plan"
     kind: user-approval

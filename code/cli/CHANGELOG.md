@@ -4,6 +4,29 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.0]
+### Added
+- **Harness observability baseline**: `run_trace.yaml`, END pre-PR inspection, and the new observability/eval specs now give the maintainer durable evidence for transitions, sensor runs, retries, host-boundary tool activity, and model-bound prompt assembly cost
+
+### Changed
+- **0.6.x harness consolidation closure**: the runtime prompt contract now exposes bounded task identity, evidence-first ANALYZE order, explicit context-policy handoffs, visible sensor stacks, and END-local overhead summaries as the canonical operational model before the 0.7.x line
+- **Release closure evidence**: END now refreshes deterministic consistency, completeness, and traceability passes automatically, including minimal attribution across model-bound prompt input, host activity, and remaining remote runtime limits
+
+### Fixed
+- **Authority and observability alignment**: source assets, packaged assets, runtime traces, and focused regression coverage now agree on the instruction contract and overhead surfaces that 0.6.x promised
+
+## [0.6.6]
+### Added
+- **Global help surface**: `inquiry help`, `inquiry --help`, and `inquiry -h` now expose a stable command summary for root commands and module entrypoints, while preserving the status/TUI default for bare `inquiry`
+
+### Changed
+- **Authoritative handoff policy visibility**: `inquiry-context` now exposes explicit `retrieval_trigger_rule` and `reread_avoidance_rule` fields for ANALYZE, PLAN, and EXECUTE so later phases can explain when authority may be bypassed and when rereads are harness waste
+- **Release QA discipline**: CLI static analysis is now clean again and the packaged binary smoke is verified against the canonical build output and paired asset tree
+
+### Fixed
+- **Evidence-first ANALYZE handoff**: `complete_analysis` now blocks when `diagnosis.md` still contains only bootstrap evidence scaffolding, so PLAN cannot inherit an authority artifact with structure but no concrete observed evidence
+- **ANALYZE bootstrap alignment**: starting ANALYZE now seeds `diagnosis.md` alongside `index.md` and `confirmations.md`, keeping the required diagnosis structure available from the first cycle bootstrap instead of relying on manual artifact creation
+
 ## [0.6.5]
 ### Changed
 - **Instruction contract naming**: live start/end instruction surfaces now use `inquiry-start` and `inquiry-end` across assets, FSM contracts, prompt assembly, and explanatory docs, while preserving `issue-create` as the distinct IDLE triage instruction (#165)
