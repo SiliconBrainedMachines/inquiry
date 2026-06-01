@@ -18,12 +18,10 @@ class HostGetInput extends Input {
   HostGetInput({this.host = 'copilot'});
 
   factory HostGetInput.fromCliRequest(CliRequest req) =>
-      HostGetInput(
-        host: req.flagString('host') ?? req.flagString('target') ?? 'copilot',
-      );
+      HostGetInput(host: req.flagString('host') ?? 'copilot');
 
   @override
-  Map<String, dynamic> toJson() => {'host': host, 'target': host};
+  Map<String, dynamic> toJson() => {'host': host};
 }
 
 // ─── Output ─────────────────────────────────────────────────────────────────

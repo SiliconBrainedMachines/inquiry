@@ -13,7 +13,8 @@ void main() {
       expect(output.toText(), contains('inquiry help'));
       expect(output.toText(), contains('Root commands:'));
       expect(output.toText(), contains('Modules:'));
-      expect(output.toText(), contains('target get'));
+      expect(output.toText(), contains('host get'));
+      expect(output.toText(), isNot(contains('target get')));
       expect(output.toText(), contains('fsm transition'));
       expect(output.toText(), contains('ape prompt'));
     });

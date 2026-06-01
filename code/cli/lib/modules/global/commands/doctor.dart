@@ -70,7 +70,6 @@ class HostCheck {
 
   Map<String, dynamic> toJson() => {
     'hostName': hostName,
-    'targetName': hostName,
     'agentExists': agentExists,
     'missingSkills': missingSkills,
     'totalSkills': totalSkills,
@@ -100,8 +99,6 @@ class DoctorOutput extends Output {
   final List<HostCheck> hostChecks;
   final bool passed;
 
-  List<HostCheck> get targetChecks => hostChecks;
-
   DoctorOutput({
     required this.checks,
     this.hostChecks = const [],
@@ -112,7 +109,6 @@ class DoctorOutput extends Output {
   Map<String, dynamic> toJson() => {
     'checks': checks.map((c) => c.toJson()).toList(),
     'hostChecks': hostChecks.map((c) => c.toJson()).toList(),
-    'targetChecks': hostChecks.map((c) => c.toJson()).toList(),
     'passed': passed,
   };
 
