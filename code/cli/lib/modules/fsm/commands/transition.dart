@@ -11,6 +11,7 @@ import '../../../fsm_contract.dart';
 import '../../../src/git_utils.dart';
 import '../../ape/inquiry_state.dart';
 import '../effect_executor.dart';
+import '../pre_pr_inspection_runner.dart';
 
 typedef BranchProvider = Future<String> Function(String workingDirectory);
 typedef GitCommandRunner =
@@ -374,10 +375,10 @@ class StateTransitionCommand
     }
 
     if (prechecks.contains('pre_pr_inspection_approved')) {
-      EffectExecutor(
+      PrePrInspectionRunner(
         workingDirectory: workingDirectory,
         assets: _assets,
-      ).refreshPrePrInspectionConsistency();
+      ).refreshConsistency();
       final report = _prePrInspectionReport(branch, workingDirectory);
       if (!report.exists || report.verdict == null) {
         return 'ERROR_PRECONDITION_PRE_PR_INSPECTION_MISSING: pre_pr_inspection.md missing or verdict not found for current issue branch';
