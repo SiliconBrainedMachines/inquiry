@@ -16,21 +16,21 @@ Su propósito no es volver a justificar por qué Inquiry debe evolucionar como h
 
 La tesis práctica del plan es esta:
 
-**Inquiry ya es un harness suficiente para operar; el siguiente paso no es expandirlo indiscriminadamente, sino cerrar su arquitectura en torno a task contracts, sensor stack, context policy, observability y eval-backed evolution.**`
+**Inquiry ya es un harness suficiente para operar; el siguiente paso no es expandirlo indiscriminadamente, sino cerrar su arquitectura en torno a task contracts, ANALYZE evidence-first, context policy, sensor stack, observability y una base austera de eval-backed evolution.**
 
 ---
 
 ## 2. Resultado esperado
 
-Al completar este plan, Inquiry debería haber pasado de un estado de **controlled workflow / early contracted harness** a un estado de **contracted harness sólido con base real para sensorized harness**.
+Al completar este plan, Inquiry debería haber pasado de un estado de **controlled workflow / early contracted harness** a un estado de **contracted harness sólido con base real para cierre sensorizado y observabilidad operativa**.
 
 Eso significa que, al menos, deberán quedar resueltas estas propiedades:
 
 1. el agente recibe un entorno de tarea explícito y acotado
-2. las validaciones mínimas de trabajo están ordenadas y nombradas
+2. ANALYZE adquiere evidencia antes de interrogar al usuario
 3. la política de contexto entre fases deja de ser implícita
-4. el harness deja trazas y métricas más útiles sobre su propia operación
-5. la evolución del método puede apoyarse en evidencia más estructurada
+4. las validaciones mínimas de trabajo están ordenadas y nombradas
+5. el harness deja trazas y métricas más útiles sobre su propia operación
 
 ---
 
@@ -39,6 +39,7 @@ Eso significa que, al menos, deberán quedar resueltas estas propiedades:
 ### 3.1 En alcance
 
 - task environment contract
+- política evidence-first para ANALYZE
 - sensor taxonomy mínima
 - policy de contexto por fase
 - observabilidad básica del harness
@@ -61,19 +62,23 @@ Eso significa que, al menos, deberán quedar resueltas estas propiedades:
 
 No abrir sensores ni evals pesadas antes de definir mejor la tarea que el agente está intentando ejecutar.
 
-### 4.2 Shift-left
+### 4.2 Research-before-interrogation
+
+No aceptar la pregunta al usuario como primer reflejo del sistema cuando repo, artefactos, docs, tests o research acotado todavía no fueron explotados.
+
+### 4.3 Shift-left
 
 Todo feedback barato y útil debe moverse lo más temprano posible dentro del ciclo.
 
-### 4.3 Small-core
+### 4.4 Small-core
 
 No introducir nuevas abstracciones si el mismo resultado puede lograrse extendiendo `inquiry-context`, skills o contratos existentes.
 
-### 4.4 Evidence-before-doctrine
+### 4.5 Evidence-before-doctrine
 
 Las mutaciones del método y del harness deben apoyarse en evidencia observable, no solo en preferencia estilística.
 
-### 4.5 Host-boundary clarity
+### 4.6 Host-boundary clarity
 
 Cada mejora debe distinguir si pertenece al host agent, al adapter, o al outer harness de Inquiry.
 
@@ -81,7 +86,7 @@ Cada mejora debe distinguir si pertenece al host agent, al adapter, o al outer h
 
 ## 5. Fases del plan
 
-El plan se divide en cuatro fases consecutivas. No recomiendo paralelizarlas salvo en trabajo documental preliminar.
+El plan se divide en cinco fases consecutivas. No recomiendo paralelizarlas salvo en trabajo documental preliminar.
 
 ## 5.1 Fase 1 — Task Contract Foundation
 
@@ -108,12 +113,12 @@ Hacer que la tarea deje de ser una inferencia implícita y se convierta en un co
 
 - ninguna fuerte previa; esta es la base del resto del plan
 
-### Issues relacionadas
+### Superficies actuales relacionadas
 
-- `#178`
-- `#49`
-- `#60`
-- `#149`
+- `inquiry-context`
+- resolución de `project_root`
+- regla single-task-per-cycle
+- workspace discovery y layouts complejos
 
 ### Done
 
@@ -134,56 +139,50 @@ La fase está hecha cuando el agente puede saber, desde el prompt efectivo y sin
 
 ---
 
-## 5.2 Fase 2 — Sensor Stack Minimum Viable Harness
+## 5.2 Fase 2 — Evidence-First ANALYZE
 
 ### Objetivo
 
-Definir una arquitectura de sensores mínima pero explícita, empezando por los puntos donde Inquiry ya tiene gates o obligaciones claras.
+Hacer que ANALYZE investigue antes de preguntar y que la interrogación al usuario quede reservada para incertidumbres reales no resueltas por evidencia disponible.
 
 ### Entregables
 
-1. `docs/spec/sensor-taxonomy.md`
-2. Clasificación inicial:
-   - `local_fast`
-   - `pre_transition`
-   - `pre_pr`
-   - `ci_required`
-   - `continuous_drift`
-   - `runtime`
-   - `inferential_optional`
-3. Formalización del gate pre-PR en END
-4. Reglas para checks obligatorios de EXECUTE y END
-5. Primer diseño de `iq task check` o primitive equivalente
+1. Política explícita de adquisición de evidencia para ANALYZE
+2. Orden claro entre repo, artefactos de ciclo, docs, tests, runtime evidence, web research y preguntas al usuario
+3. Reglas de relevancia para preguntas de SOCRATES
+4. Fortalecimiento de `diagnosis.md` como artefacto que separa hechos observados, hipótesis y dudas pendientes
+5. Source gathering suficientemente amplio para no depender del usuario como primera fuente por defecto
 
 ### Dependencias
 
-- Fase 1, porque los sensores deben correr contra un task contract más claro
+- Fase 1, para que el análisis sepa con claridad cuál es la tarea activa y qué evidencia es pertinente
 
-### Issues relacionadas
+### Superficies actuales relacionadas
 
-- `#163`
-- `#127`
-- `#167`
+- instrucciones y prompts de ANALYZE
+- `diagnosis.md`
+- capacidades de research y source gathering
+- artefactos de cleanroom y evidencia ejecutable
 
 ### Done
 
 La fase está hecha cuando:
 
-1. existe una taxonomía de sensores escrita y estable
-2. END ya no depende solo de “crear PR” como ritual de cierre
-3. el camino de validación del ciclo es legible para humano y agente
+1. una parte significativa de los ciclos puede completar ANALYZE sin interrogación innecesaria
+2. las preguntas remanentes reducen incertidumbre real en vez de repetir trabajo que el repo ya podía resolver
+3. `diagnosis.md` distingue con claridad evidencia, hipótesis, constraints y preguntas abiertas
 
 ### Riesgo principal
 
-- convertir “sensor” en un nombre rimbombante para checks ya existentes sin cambiar el sistema real
+- describir ANALYZE evidence-first solo en doctrina sin mover el comportamiento real del sistema
 
 ### Mitigación
 
-- para cada sensor, definir momento, autoridad, costo y efecto operativo
+- exigir que cada refinamiento del análisis cambie el orden operativo de adquisición de evidencia o la calidad del diagnóstico observable
 
 ---
 
-## 5.3 Fase 3 — Context Policy and Memory Operations
+## 5.3 Fase 3 — Context Policy and Authoritative Handoffs
 
 ### Objetivo
 
@@ -200,12 +199,15 @@ Pasar de Memory as Code como intuición correcta a Memory as Code como policy op
 ### Dependencias
 
 - Fase 1, para saber qué parte del task contract debe entrar al contexto
-- idealmente Fase 2, para saber qué sensores deben ser visibles antes y después de actuar
+- idealmente Fase 2, para saber qué evidencia y qué síntesis deben sobrevivir al handoff
 
-### Issues relacionadas
+### Superficies actuales relacionadas
 
-- `#147`
-- bloque mid-term de `iq memory`
+- `diagnosis.md`
+- `plan.md`
+- `doc-read`
+- convenciones actuales de Memory as Code
+- módulo futuro `iq memory`
 
 ### Done
 
@@ -226,7 +228,60 @@ La fase está hecha cuando:
 
 ---
 
-## 5.4 Fase 4 — Harness Observability and Eval Foundation
+## 5.4 Fase 4 — Sensor Stack and END Discipline
+
+### Objetivo
+
+Definir una arquitectura de sensores mínima pero explícita, empezando por los puntos donde Inquiry ya tiene gates o obligaciones claras.
+
+### Entregables
+
+1. `docs/spec/sensor-taxonomy.md`
+2. Clasificación inicial:
+   - `local_fast`
+   - `pre_transition`
+   - `pre_pr`
+   - `ci_required`
+   - `continuous_drift`
+   - `runtime`
+   - `inferential_optional`
+3. Formalización del gate pre-PR en END
+4. Reglas para checks obligatorios de EXECUTE y END
+5. Primer diseño de `iq task check` o primitive equivalente
+6. Primer gate documental o linter que bloquee transiciones cuando el documento gobernante todavía tiene pendientes relevantes
+
+### Dependencias
+
+- Fases 1 a 3, porque los sensores deben correr contra un task contract más claro, un ANALYZE mejor fundado y handoffs más autoritativos
+
+### Superficies actuales relacionadas
+
+- `pre_pr_inspection`
+- `inquiry-end`
+- salida de transición y summaries operativas
+- release gate antes de END
+- validaciones documentales y linter de pendientes
+
+### Done
+
+La fase está hecha cuando:
+
+1. existe una taxonomía de sensores escrita y estable
+2. END ya no depende solo de “crear PR” como ritual de cierre
+3. el camino de validación del ciclo es legible para humano y agente
+4. las transiciones críticas muestran con claridad qué validan, qué ejecutan y qué bloquean
+
+### Riesgo principal
+
+- convertir “sensor” en un nombre rimbombante para checks ya existentes sin cambiar el sistema real
+
+### Mitigación
+
+- para cada sensor, definir momento, autoridad, costo y efecto operativo
+
+---
+
+## 5.5 Fase 5 — Harness Observability and Eval Foundation
 
 ### Objetivo
 
@@ -247,12 +302,15 @@ Dar al proyecto una capa mínima de observabilidad del harness y una base inicia
 
 ### Dependencias
 
-- Fases 1 a 3, porque sin task contract, sensor stack y context policy la observabilidad carece de semántica suficientemente estable
+- Fases 1 a 4, porque sin task contract, ANALYZE evidence-first, context policy y sensor stack la observabilidad carece de semántica suficientemente estable
 
-### Issues relacionadas
+### Superficies actuales relacionadas
 
-- `#156`
-- `#141`
+- `.inquiry/metrics.yaml`
+- trazas o artefactos por ciclo
+- entradas de EVOLUTION y retrospectives
+- failure taxonomy
+- `eval-model`
 
 ### Done
 
@@ -277,56 +335,66 @@ La fase está hecha cuando:
 El orden recomendado es estricto:
 
 1. **Fase 1** — Task Contract Foundation
-2. **Fase 2** — Sensor Stack Minimum Viable Harness
-3. **Fase 3** — Context Policy and Memory Operations
-4. **Fase 4** — Harness Observability and Eval Foundation
+2. **Fase 2** — Evidence-First ANALYZE
+3. **Fase 3** — Context Policy and Authoritative Handoffs
+4. **Fase 4** — Sensor Stack and END Discipline
+5. **Fase 5** — Harness Observability and Eval Foundation
 
 La razón es simple:
 
 - primero se acota la tarea
-- luego se ordena la validación
-- luego se optimiza la política de contexto
+- luego se mejora cómo se adquiere evidencia
+- luego se ordena la política de contexto y la autoridad de handoffs
+- después se consolidan los sensores y gates mínimos
 - finalmente se mide y se compara el propio harness
 
 ---
 
 ## 7. Backlog mínimo inicial
 
-Este es el backlog mínimo que yo abriría o re-ordenaría inmediatamente.
+Este es el backlog mínimo que conviene abrir o ejecutar de inmediato.
 
 ### Bloque A — contrato de tarea
 
-1. Persistir `project_root` en `inquiry-context`
-2. Diseñar `task-environment-contract.md`
-3. Definir campos mínimos obligatorios por fase
+1. Diseñar `task-environment-contract.md`
+2. Persistir `project_root` y demás campos mínimos en `inquiry-context`
+3. Definir campos obligatorios por fase
 4. Revisar single-task-per-cycle como invariante de contrato
 
-### Bloque B — sensores
+### Bloque B — ANALYZE evidence-first
 
-1. Diseñar `sensor-taxonomy.md`
-2. Formalizar `pre-pr` como gate de END
-3. Hacer visible el gate de version bump / release proposal en EXECUTE → END
-4. Declarar sensores mínimos por fase
+1. Diseñar la policy de adquisición de evidencia para ANALYZE
+2. Definir criterio de cuándo preguntar al usuario
+3. Endurecer `diagnosis.md` como artefacto evidence vs hypothesis
+4. Reforzar source gathering más allá del repo cuando el caso lo requiera
 
-### Bloque C — contexto y memoria
+### Bloque C — contexto y handoffs
 
 1. Diseñar `context-policy.md`
 2. Definir handoff authority de `diagnosis.md` y `plan.md`
 3. Diseñar `iq memory`
 4. Revisar `doc-read` bajo retrieval policy
 
-### Bloque D — observabilidad y evals
+### Bloque D — sensores y END
+
+1. Diseñar `sensor-taxonomy.md`
+2. Formalizar `pre_pr` como gate de END
+3. Hacer visible el gate de version bump y release closure en EXECUTE → END
+4. Declarar sensores mínimos por fase
+5. Definir un primer gate documental para pendientes detectables
+
+### Bloque E — observabilidad y evals
 
 1. Diseñar `harness-observability.md`
 2. Diseñar `eval-model.md`
-3. Extender estructura de métricas / trazas
+3. Extender estructura de métricas o trazas
 4. Catalogar fallos recurrentes del harness
 
 ---
 
 ## 8. Hitos sugeridos
 
-### Hito 1 — Contracted Harness MVP
+### Hito 1 — Contracted Task Harness MVP
 
 Se alcanza cuando:
 
@@ -334,15 +402,15 @@ Se alcanza cuando:
 - `project_root` y outputs esperados están en `inquiry-context`
 - existe una definición breve de done por fase
 
-### Hito 2 — Sensorized END
+### Hito 2 — Evidence-First ANALYZE MVP
 
 Se alcanza cuando:
 
-- END incluye un gate pre-PR explícito
-- EXECUTE y END tienen sensores mínimos documentados
-- el ciclo ya no depende solo de revisión informal antes del PR
+- ANALYZE revisa repo, artefactos, docs y tests antes de interrogar al usuario
+- `diagnosis.md` separa observación, hipótesis y preguntas abiertas
+- las preguntas remanentes son menos frecuentes y de más valor
 
-### Hito 3 — Context Policy MVP
+### Hito 3 — Authoritative Handoffs MVP
 
 Se alcanza cuando:
 
@@ -350,7 +418,15 @@ Se alcanza cuando:
 - está claro qué entra upfront y qué entra on-demand
 - los handoffs entre fases tienen autoridad explícita
 
-### Hito 4 — Observable Harness MVP
+### Hito 4 — Sensorized END MVP
+
+Se alcanza cuando:
+
+- END incluye un gate pre-PR explícito
+- EXECUTE y END tienen sensores mínimos documentados
+- el ciclo ya no depende solo de revisión informal antes del PR
+
+### Hito 5 — Observable Harness MVP
 
 Se alcanza cuando:
 
@@ -365,10 +441,10 @@ Se alcanza cuando:
 El plan completo puede considerarse sustancialmente cumplido cuando se den estas condiciones simultáneas:
 
 1. Inquiry tiene un task environment contract legible y usado por el runtime
-2. Inquiry tiene una taxonomía de sensores aplicada al menos en EXECUTE y END
+2. ANALYZE sigue un orden evidence-first explícito antes de preguntar al usuario
 3. Inquiry tiene una context policy por fase escrita y coherente con Memory as Code
-4. Inquiry registra suficiente evidencia para observar comportamiento del harness y no sólo resultados finales
-5. Inquiry puede empezar a convertir fallos recurrentes en primitive evals del propio sistema
+4. Inquiry tiene una taxonomía de sensores aplicada al menos en EXECUTE y END
+5. Inquiry registra suficiente evidencia para observar comportamiento del harness y no sólo resultados finales
 
 Si esas cinco condiciones se cumplen, Inquiry habrá dejado atrás el estado de harness implícito temprano y entrado en una etapa de harness deliberado y claramente superior.
 
@@ -381,7 +457,7 @@ Para proteger el foco del plan, recomiendo no hacer todavía lo siguiente:
 1. abrir el frente multi-target como prioridad principal
 2. crear nuevos agentes para tapar problemas del harness
 3. introducir bases externas de memoria como solución prematura
-4. construir una capa de eval engineering demasiado sofisticada antes de cerrar task contract y sensor stack
+4. construir una capa de eval engineering demasiado sofisticada antes de cerrar task contract, ANALYZE evidence-first y sensor stack
 5. convertir toda mejora metodológica en nueva surface area del CLI sin pasar por una spec mínima
 
 ---
@@ -390,11 +466,11 @@ Para proteger el foco del plan, recomiendo no hacer todavía lo siguiente:
 
 Si hay que empezar mañana, yo haría esto en este orden:
 
-1. abrir o actualizar la issue de `project_root` como parte explícita de Task Contract Foundation
-2. redactar `docs/spec/task-environment-contract.md`
-3. abrir la spec `docs/spec/sensor-taxonomy.md`
-4. bajar `#163` a una definición concreta de gate pre-PR
-5. preparar un primer borrador de `docs/spec/context-policy.md`
+1. redactar `docs/spec/task-environment-contract.md`
+2. redactar una policy breve de ANALYZE evidence-first y reforzar el contrato operativo de `diagnosis.md`
+3. preparar un primer borrador de `docs/spec/context-policy.md`
+4. abrir la spec `docs/spec/sensor-taxonomy.md` y declarar sensores mínimos de END
+5. definir la primera capa mínima de `docs/spec/harness-observability.md` y `docs/spec/eval-model.md`
 
 Eso ya crearía una columna vertebral real para el plan, sin esperar a tener toda la infraestructura futura del CLI lista.
 
@@ -408,6 +484,6 @@ La dirección ya está clara: Inquiry debe consolidarse como outer harness excel
 
 En una frase:
 
-> **primero task contract, luego sensor stack, luego context policy, y sólo después observability + eval foundation.**
+> **primero task contract, luego ANALYZE evidence-first, luego context policy, después sensor stack y END discipline, y sólo después observability + eval foundation.**
 
 Ese orden protege la simplicidad actual del proyecto y, al mismo tiempo, abre el camino correcto para llevarlo a un harness significativamente mejor.

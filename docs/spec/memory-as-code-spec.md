@@ -854,9 +854,30 @@ The CLI resolves all operational paths and injects them into the APE prompt. The
 
 ```yaml
 # --- inquiry-context ---
+project_root: <absolute repo root>
+task_id: <issue-or-branch>
+input_artifacts: ['cleanrooms/<branch>/issue.md', 'cleanrooms/<branch>/analyze/index.md']
+expected_outputs: ['cleanrooms/<branch>/analyze/confirmations.md', 'cleanrooms/<branch>/analyze/diagnosis.md']
+editable_surfaces: ['cleanrooms/<branch>/analyze/']
+read_only_surfaces: ['cleanrooms/<branch>/issue.md']
+validation_commands: []
+done_criteria: ['diagnosis.md written', 'confirmations.md grounded in the bounded analysis corpus']
+context_policy: progressive-disclosure
+authority_mode: build-authoritative-analysis
+upfront_context: ['cleanrooms/<branch>/issue.md', 'cleanrooms/<branch>/analyze/index.md']
+retrieval_context: ['cleanrooms/<branch>/analyze/index.md', 'cleanrooms/<branch>/analyze/confirmations.md', '<project_root>']
+deferred_context: ['broad repository rereads not justified by the active uncertainty']
+authoritative_handoff: cleanrooms/<branch>/analyze/diagnosis.md
+authority_rule: diagnosis.md becomes the authoritative handoff to PLAN once written
+sensor_policy: minimum-phase-stack
+minimum_sensor_stack: ['local_fast', 'pre_transition', 'pre_pr', 'runtime']
+blocking_sensor_stack: ['local_fast', 'pre_transition', 'runtime']
+advisory_sensor_stack: ['inferential_optional']
+sensor_gate: handoff-to-end
+sensor_authority_rule: pre_pr evidence must be complete before END handoff even when phase-local checks are green
 output_dir: cleanrooms/<branch>/analyze/
 index_file: cleanrooms/<branch>/analyze/index.md
-confirmed_doc: cleanrooms/<branch>/analyze/confirmed.md
+confirmations_doc: cleanrooms/<branch>/analyze/confirmations.md
 doc_protocol: doc-write
 ```
 
@@ -864,17 +885,20 @@ Fields vary by APE:
 
 | APE | Fields |
 |-----|--------|
-| SOCRATES | `output_dir`, `index_file`, `confirmed_doc`, `doc_protocol` |
-| DESCARTES | `analysis_input`, `output_dir`, `plan_file`, `doc_protocol` |
-| BASHO | `plan_file`, `output_dir`, `doc_protocol` |
-| DARWIN | `analyze_dir`, `plan_file`, `output_dir` |
+| Common task contract | `project_root`, `task_id`, `input_artifacts`, `expected_outputs`, `editable_surfaces`, `read_only_surfaces`, `validation_commands`, `done_criteria` |
+| Context policy layer | `context_policy`, `authority_mode`, `upfront_context`, `retrieval_context`, `deferred_context`, `authoritative_handoff`, `authority_rule` |
+| Sensor layer | `sensor_policy`, `minimum_sensor_stack`, `blocking_sensor_stack`, `advisory_sensor_stack`, `sensor_gate`, `sensor_authority_rule` |
+| SOCRATES | common task contract + context policy layer + `output_dir`, `index_file`, `confirmations_doc`, `doc_protocol` |
+| DESCARTES | common task contract + context policy layer + `analysis_input`, `output_dir`, `plan_file`, `doc_protocol` |
+| BASHO | common task contract + context policy layer + sensor layer + `plan_file`, `pre_pr_inspection_report` (structured 3-pass END gate report), `output_dir`, `doc_protocol` |
+| DARWIN | common task contract + `analyze_dir`, `diagnosis_file`, `plan_file`, `retrospective_file`, `mutations_file`, `state_file`, `metrics_snapshot_file`, `metrics_file`, `output_dir` |
 
 ### 11.3 Per-Cycle Investigation Material
 
 During ANALYZE, SOCRATES writes to `cleanrooms/<branch>/analyze/`:
 
 - `index.md` — primary index (created by CLI on transition)
-- `confirmed.md` — mandatory living document (template created by CLI)
+- `confirmations.md` — mandatory living document (template created by CLI)
 - `*.md` — additional investigation documents (one topic each)
 - `diagnosis.md` — final synthesis (references confirmed findings)
 
@@ -884,6 +908,18 @@ During ANALYZE, SOCRATES writes to `cleanrooms/<branch>/analyze/`:
 |-------|---------|
 | `doc-write` | Protocol for writing investigation material. Teaches index maintenance, frontmatter rules, one-topic-per-doc |
 | `doc-read` | Protocol for reading investigation material. Implements query planner: index → filter → partial → full |
+
+### 11.5 Context Policy Layer
+
+The task contract is necessary but not sufficient. Inquiry now pairs it with a lightweight context-policy layer so phases know what belongs in the initial working set, what should be retrieved only on demand, and what should remain outside the prompt window unless a concrete gap justifies wider rereads.
+
+This layer makes duplicate rereads an explicit harness defect rather than an invisible cost.
+
+### 11.6 Sensor Layer
+
+For EXECUTE and END, Inquiry also injects a lightweight sensor layer so the effective prompt exposes the minimum validation stack, the currently blocking sensor categories, and the gate the harness is serving.
+
+This keeps the sensor taxonomy visible in the runtime contract even before full automated enforcement lands.
 
 ### 11.5 Schema Enforcement
 

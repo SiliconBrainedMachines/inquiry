@@ -8,10 +8,11 @@ description: 'Protocol for ending an APE cycle. Use when: all plan.md checkboxes
 ## Prompt Summary
 
 Only run in EXECUTE after all plan checkboxes and tests are complete.
-Choose the version bump and update every version file.
-Update CHANGELOG from the completed plan phases.
-Commit the release changes.
-Push the branch and create the pull request.
+Run the END pre-PR inspection gate and stop on any blocking sensor failure.
+Confirm the already-proposed semver bump and stop if explicit user approval is still missing.
+Update every required version file once that approved bump is clear.
+Update CHANGELOG from the completed plan phases and commit the release changes.
+Push the branch and create the pull request only after the gate is green.
 
 ## When to Use
 
@@ -26,6 +27,16 @@ Push the branch and create the pull request.
 - All plan.md checkboxes must be complete
 - All tests must pass
 - Static analysis must pass with no errors
+- The semver bump proposal must already be explicit and user-approved before END handoff
+
+## Sensor Model
+
+END is not just a final mechanical push. It is the pre-PR gate where the harness evaluates the minimum closure sensor stack:
+
+- `pre_pr` — blocking release-discipline checks before push or PR creation
+- `ci_required` — merge-authoritative remote checks that remain binding after PR creation
+- `runtime` — blocking checks when repo, branch, CLI, or target state looks inconsistent
+- `inferential_optional` — non-blocking review findings unless stronger evidence upgrades them
 
 ## Steps
 
@@ -57,9 +68,11 @@ Expected: 0 incomplete checkboxes.
 
 If incomplete checkboxes remain, list them and abort.
 
-### Step 3: Determine Version Bump
+### Step 3: Confirm Approved Version Bump
 
-If the project uses semantic versioning, ask user to confirm bump type:
+If the project uses semantic versioning, confirm that the bump type was already proposed during EXECUTE and explicitly approved by the user. If that approval is still missing, stop and obtain it before editing release surfaces.
+
+Use these semver categories when validating the approved bump:
 
 | Type | When to Use |
 |------|-------------|
@@ -124,13 +137,50 @@ version: X.Y.Z
 Announce state change:
 > `[APE: END]`
 
-### Step 8: Push Branch
+### Step 8: Run END Pre-PR Inspection Gate
+
+Before pushing or creating the PR, evaluate the minimum END sensor stack:
+
+- `pre_pr`: version files updated, CHANGELOG updated, release commit present, no declared execution work left unfinished
+- `runtime`: branch, issue, FSM state, and target tool state are coherent
+- `ci_required`: required remote checks are identified even though they will run after PR creation
+- `inferential_optional`: any review concerns are recorded, but they do not block by themselves
+
+Record the local END gate result in `cleanrooms/{slug}/pre_pr_inspection.md`.
+`iq fsm transition --event finish_execute` now seeds this report automatically from the END inspection template so the gate starts from a structured scaffold instead of a blank file.
+The report must include a top-level verdict and the three formal inspection passes:
+
+```md
+verdict: APPROVED
+
+## Pass 1 — Consistency
+- PASS: asset parity source/build reviewed
+
+## Pass 2 — Completeness
+- PASS: changed behavior covered by tests
+
+## Pass 3 — Traceability
+- PASS: every code change maps to the approved issue/plan
+```
+
+Each pass must contain one or more `- PASS:`, `- FAIL:`, or `- WARN:` checks.
+Pass 1 is no longer a freeform manual section: Inquiry seeds it automatically from deterministic source/build parity checks when END begins and refreshes it again at `pr_ready`.
+Pass 2 now includes an automatic completeness check against `cleanrooms/<branch>/plan.md`: any remaining unchecked checkbox becomes a blocking `FAIL` with a repo-relative `file:line` citation, while plans with no checkboxes degrade to a `WARN` that still requires human review.
+Pass 3 now includes automatic traceability checks against the report metadata itself and a minimal overhead summary from `run_trace.yaml` plus `metrics_snapshot.yaml`: `issue:` and `branch:` in `cleanrooms/<branch>/pre_pr_inspection.md` must match the active cycle, and the report should summarize event counts, blocking concentration, gate failures, retries, model-bound prompt estimates, and any remaining remote runtime attribution limits with repo-relative citations. Keep adding manual issue/plan-mapping findings after the automatic traceability lines when they add real evidence.
+Every `FAIL` check must include a repo-relative `file:line` citation such as `code/cli/lib/modules/fsm/commands/transition.dart:355`.
+Allowed verdicts for this gate are `APPROVED` and `BLOCKED`.
+`APPROVED` is only valid when no pass contains a `FAIL` check.
+`iq fsm transition --event pr_ready` refuses to create the PR when the report is missing, lacks the required pass structure, contains any `FAIL` without `file:line`, declares any non-`APPROVED` verdict, or claims `APPROVED` while still containing a `FAIL` check.
+
+If any blocking `pre_pr` or `runtime` sensor fails, abort PR creation and return to the failing evidence.
+
+### Step 9: Push Branch
 
 ```bash
 git push -u origin {branch}
 ```
 
-### Step 9: Create Pull Request
+### Step 10: Create Pull Request
 
 ```bash
 gh pr create \
@@ -147,7 +197,7 @@ gh pr create \
 "
 ```
 
-**Important:** PR creation completes the explicit END gate.
+**Important:** PR creation happens only after the END gate is green.
 
 - PR merge is an **external event** (happens later, possibly with CI checks)
 - Do not wait for PR merge to leave END
@@ -170,7 +220,8 @@ When the PR is merged:
 5. Update CHANGELOG.md
 6. Commit: git add -A && git commit -m "vX.Y.Z: ..."
 7. Transition to END
-8. Push: git push -u origin {branch}
-9. Create PR: gh pr create --title "vX.Y.Z: ..."
-10. Scheduler transitions automatically after PR creation
+8. Run END pre-PR inspection gate
+9. Push: git push -u origin {branch}
+10. Create PR: gh pr create --title "vX.Y.Z: ..."
+11. Scheduler transitions automatically after PR creation
 ```
