@@ -1,4 +1,4 @@
-# Release workflow — 3-job pattern: check-version → create-release → build (matrix)
+# Release workflow — 4-job pattern: check-version → create-release-draft → build (matrix) → publish-release
 #
 # WORKAROUND (Windows only): Windows Defender on the windows-2025 / windows-latest
 # runner image (20260413.84.1+) quarantines dart.exe from the toolcache after
@@ -55,7 +55,7 @@ jobs:
             echo "should_release=true" >> "$GITHUB_OUTPUT"
           fi
 
-  # ─── Job 2: Create release (published, not draft) ─────────────────
+  # ─── Job 2: Create draft release ──────────────────────────────────
   create-release:
     needs: check-version
     if: needs.check-version.outputs.should_release == 'true'
@@ -69,7 +69,7 @@ jobs:
           git tag "$TAG"
           git push origin "$TAG"
 
-      - name: Create GitHub release
+      - name: Create GitHub release draft
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -77,7 +77,7 @@ jobs:
           gh release create "$TAG" \
             --title "$TAG" \
             --generate-notes \
-            --latest
+            --draft
 
   # ─── Job 3: Build + upload (matrix: Windows + Linux) ───────────────
   build:
@@ -177,3 +177,31 @@ jobs:
         run: |
           gh release upload "v${{ needs.check-version.outputs.version }}" ${{ matrix.asset }} --clobber
         shell: bash
+
+  # ─── Job 4: Publish release after all assets are present ──────────
+  publish-release:
+    needs: [check-version, create-release, build]
+    if: needs.check-version.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify release assets before publish
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ needs.check-version.outputs.version }}"
+          ASSETS=$(gh release view "$TAG" --json assets --jq '.assets[].name')
+          echo "$ASSETS"
+
+          for asset in inquiry-windows-x64.zip inquiry-linux-x64.tar.gz; do
+            if ! echo "$ASSETS" | grep -qx "$asset"; then
+              echo "Missing expected asset: $asset"
+              exit 1
+            fi
+          done
+
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ needs.check-version.outputs.version }}"
+          gh release edit "$TAG" --draft=false --latest
