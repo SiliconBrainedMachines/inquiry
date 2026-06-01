@@ -9,6 +9,7 @@ import 'package:path/path.dart' as p;
 import '../../../assets.dart';
 import '../../../fsm_contract.dart';
 import '../../../src/git_utils.dart';
+import '../../ape/instruction_prompt_loader.dart';
 import '../../ape/inquiry_state.dart';
 import '../effect_executor.dart';
 import '../pre_pr_inspection_runner.dart';
@@ -137,6 +138,7 @@ class StateTransitionOutput extends Output {
   final String? promptFragmentId;
   final String? requiredRole;
   final List<String>? requiredInstructions;
+  final String? instructionSummary;
   final String message;
   final int code;
 
@@ -149,6 +151,7 @@ class StateTransitionOutput extends Output {
     required this.promptFragmentId,
     required this.requiredRole,
     required this.requiredInstructions,
+    this.instructionSummary,
     required this.message,
     required this.code,
   });
@@ -163,6 +166,7 @@ class StateTransitionOutput extends Output {
     'prompt_fragment_id': promptFragmentId,
     'required_role': requiredRole,
     'required_instructions': requiredInstructions,
+    'instruction_summary': instructionSummary,
     'message': message,
   };
 
@@ -176,17 +180,24 @@ class StateTransitionOutput extends Output {
       return message;
     }
 
+    final summary = instructionSummary?.trim();
     final buffer = StringBuffer()..writeln(message);
     buffer.writeln(
       requiredRole != null ? 'required_role: $requiredRole' : 'required_role: null',
     );
     buffer.writeln('required_instructions: ${instructions.join(', ')}');
-    buffer.write(
+    buffer.writeln(
       promptFragmentId != null
           ? 'prompt_fragment_id: $promptFragmentId'
           : 'prompt_fragment_id: null',
     );
-    return buffer.toString();
+    if (summary != null && summary.isNotEmpty) {
+      buffer.writeln('instruction_summary:');
+      for (final line in summary.split('\n')) {
+        buffer.writeln('  $line');
+      }
+    }
+    return buffer.toString().trimRight();
   }
 }
 
@@ -299,6 +310,9 @@ class StateTransitionCommand
     final operations = transition.operations;
     final promptId = operations?.promptFragmentId;
     final prompt = promptId != null ? contract.promptFragments[promptId] : null;
+    final instructionSummary = prompt?.instructions == null || prompt!.instructions.isEmpty
+      ? null
+      : _loadInstructionSummary(prompt.instructions!, projectRoot);
 
     // Execute CLI-side effects
     final executor = EffectExecutor(
@@ -326,9 +340,39 @@ class StateTransitionCommand
       promptFragmentId: promptId,
       requiredRole: prompt?.role,
       requiredInstructions: prompt?.instructions,
+      instructionSummary: instructionSummary,
       message:
           'Transition ${current.value} --${event.value}--> ${transition.to?.value}',
       code: ExitCode.ok,
+    );
+  }
+
+  String? _loadInstructionSummary(List<String> instructions, String projectRoot) {
+    for (final assets in _instructionAssetCandidates(projectRoot)) {
+      if (!_hasInstructionAssets(assets, instructions)) {
+        continue;
+      }
+      return InstructionPromptLoader(assets: assets).loadMany(instructions);
+    }
+    return null;
+  }
+
+  Iterable<Assets> _instructionAssetCandidates(String projectRoot) sync* {
+    if (_assets != null) {
+      yield _assets!;
+    }
+
+    yield Assets(root: projectRoot);
+
+    final currentRoot = Directory.current.path;
+    if (currentRoot != projectRoot) {
+      yield Assets(root: currentRoot);
+    }
+  }
+
+  bool _hasInstructionAssets(Assets assets, List<String> instructions) {
+    return instructions.every(
+      (name) => File(assets.path('instructions/$name.md')).existsSync(),
     );
   }
 

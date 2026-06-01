@@ -71,6 +71,10 @@ void main() {
         expect(output.toText(), contains('DESCARTES'));
         expect(output.toText(), contains('doc-write'));
         expect(output.toText(), contains('analyze_to_plan'));
+        expect(
+          output.toText(),
+          contains('Write inside the CLI-created template and keep frontmatter unchanged.'),
+        );
         expect(_commitCount(tempDir.path), commitsBefore + 1);
 
         // Verify state was actually updated
@@ -373,6 +377,12 @@ void main() {
       expect(output.promptFragmentId, 'execute_to_end');
       expect(output.requiredRole, 'APE');
       expect(output.requiredInstructions, ['inquiry-end']);
+      expect(
+        output.toText(),
+        contains(
+          'Confirm the already-proposed semver bump and stop if explicit user approval is still missing.',
+        ),
+      );
       final inspectionReport = File(
         p.join(
           tempDir.path,
@@ -920,6 +930,8 @@ void main() {
         promptFragmentId: 'analyze_to_plan',
         requiredRole: 'DESCARTES',
         requiredInstructions: const ['doc-write'],
+        instructionSummary:
+            'Write inside the CLI-created template and keep frontmatter unchanged.',
         message: 'Transition ANALYZE --complete_analysis--> PLAN',
         code: 0,
       );
@@ -933,12 +945,11 @@ void main() {
       expect(text, contains('doc-write'));
       expect(text, contains('prompt_fragment_id'));
       expect(text, contains('analyze_to_plan'));
+      expect(text, contains('instruction_summary:'));
       expect(
         text,
-        isNot(
-          contains(
-            'Write inside the CLI-created template and keep frontmatter unchanged.',
-          ),
+        contains(
+          'Write inside the CLI-created template and keep frontmatter unchanged.',
         ),
       );
     });
