@@ -84,7 +84,9 @@ Ignored.
           'Stop as soon as you have enough evidence.\n'
           'Never scan a directory file by file.\n'
           'Trust authoritative_handoff first when the context policy says it is authoritative.\n'
-          'Use retrieval_context only for concrete gaps that the authoritative artifact does not resolve.',
+          'Use retrieval_context only for concrete gaps that the authoritative artifact does not resolve.\n'
+          'Let retrieval_trigger_rule decide when bounded context may be widened.\n'
+          'Treat reread_avoidance_rule as a hard warning against broad rediscovery.',
         ),
       );
       expect(summary, isNot(contains('---')));
@@ -105,7 +107,9 @@ Ignored.
           'Use confirmations_doc for confirmations when it applies.\n'
           'Treat upfront_context as your bounded starting context.\n'
           'Use retrieval_context only when the current uncertainty requires more evidence.\n'
-          'Build authoritative_handoff so later phases do not need to reconstruct ANALYZE from scratch.',
+          'Build authoritative_handoff so later phases do not need to reconstruct ANALYZE from scratch.\n'
+          'Let retrieval_trigger_rule justify any widening beyond bounded context.\n'
+          'Honor reread_avoidance_rule so writing work does not restart discovery by habit.',
         ),
       );
       expect(summary, isNot(contains('---')));

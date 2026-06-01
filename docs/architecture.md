@@ -4,7 +4,7 @@
 >
 > How APE orchestrates AI coding agents through a finite state machine.
 
-Inquiry is best read here as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work. In the 0.6.x series, the architectural priority is harness consolidation before optimization: cut avoidable context duplication across orchestrator, sub-agents, artifacts, and rereads; make evidence gathering precede user questioning; and surface overhead as an auditable system property.
+Inquiry is best read here as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work. In the 0.6.x series, the architectural priority is harness consolidation before optimization: make the task environment more explicit, make evidence gathering precede user questioning, cut avoidable context duplication across orchestrator, sub-agents, artifacts, and rereads, formalize sensorized closure, and surface overhead as an auditable system property.
 
 ## The system in one diagram
 
@@ -46,7 +46,7 @@ Inquiry is best read here as an **outer harness** around the host coding tool. T
 │  │  Activates the agent for that state:                          │  │
 │  │                                                               │  │
 │  │    IDLE     → DEWEY     (bounded triage, issue-ready only)    │  │
-│  │    ANALYZE  → SOCRATES  (mayéutica, produces diagnosis.md)    │  │
+│  │    ANALYZE  → SOCRATES  (evidence-first analysis, produces diagnosis.md) │  │
 │  │    PLAN     → DESCARTES (method, produces plan.md)            │  │
 │  │    EXECUTE  → BASHŌ     (techne, produces code + commits)     │  │
 │  │    END      → (PR gate: gh pr create + gh pr merge)           │  │
@@ -126,17 +126,17 @@ Viewed through the current research taxonomy, Inquiry spans all four agent-engin
 - **Eval Engineering**: PR gates, transition prechecks, state-owned artifact expectations, and cycle metrics provide partial but real evaluation structure.
 - **Harness Engineering**: the CLI, FSM, deployer, state files, skills, and human authorization rules form the actual control system around the host agent.
 
-That distinction matters because it clarifies what Inquiry already is and what still remains incomplete. Inquiry is no longer just a methodology described in markdown or a pack of prompts deployed into Copilot. It already functions as a repository-local harness. The unfinished work for 0.6.x is to deepen that harness with stronger sensors, more explicit context policy, evidence-first retrieval before user questioning, lower duplication across orchestrator/sub-agents/handoff artifacts, explicit overhead observability, and more formal eval-backed evolution.
+That distinction matters because it clarifies what Inquiry already is and what still remains incomplete. Inquiry is no longer just a methodology described in markdown or a pack of prompts deployed into Copilot. It already functions as a repository-local harness. The unfinished work for 0.6.x is to deepen that harness with more explicit task contracts, evidence-first retrieval before user questioning, lower duplication across orchestrator/sub-agents/handoff artifacts, stronger sensors around closure, explicit overhead observability, and a more formal base for eval-backed evolution.
 
-## 0.6.x harness priorities
+## 0.6.x harness program
 
-Before 0.7.0, Inquiry should tighten the current outer harness around five operational rules:
+Before 0.7.0, Inquiry should tighten the current outer harness around five ordered priorities:
 
-- **Evidence before inference.** Repository state, cleanroom artifacts, docs, tests, and targeted web research are authoritative. Model inference is provisional until grounded in evidence.
-- **Research before interrogation.** SOCRATES should ask the user only for facts or judgments that cannot be recovered from repo state, existing artifacts, or external research. When comparing approaches, it should propose candidate alternatives instead of delegating ideation entirely to the user.
-- **Context is a budget.** The harness should reduce duplication between the orchestrator, sub-agents, durable artifacts, and repeated reads. Handoff documents should become authoritative references, not material each phase re-derives from scratch.
-- **Clear stop conditions.** Once the problem is sufficiently bounded, ANALYZE should shift from questioning to synthesis instead of continuing a ritual Socratic loop.
-- **Overhead is part of the architecture.** Tool volume, wall-clock time, token load, cached share, and context-repetition cost belong to the harness surface because they determine whether Inquiry stays practical to delegate.
+- **Task contract first.** The agent should receive a more explicit task environment: bounded inputs, expected outputs, editable surfaces, validation commands, and done criteria.
+- **Evidence-first ANALYZE.** Repository state, cleanroom artifacts, docs, tests, and targeted web research are authoritative. SOCRATES should ask the user only for facts or judgments that cannot be recovered from those sources, and should stop questioning once the problem is sufficiently bounded.
+- **Context policy and authoritative handoffs.** The harness should reduce duplication between the orchestrator, sub-agents, durable artifacts, and repeated reads. Handoff documents should become authoritative references, not material each phase re-derives from scratch.
+- **Sensor stack and END discipline.** Transition checks, pre-PR inspection, release closure, and document-level gates should form a more legible closure path instead of remaining a patchwork of implicit rituals and scattered checks.
+- **Overhead observability and eval foundation.** Tool volume, wall-clock time, token load, cached share, context-repetition cost, and recurring failure classes belong to the harness surface because they determine whether Inquiry stays practical to delegate and improvable over time.
 
 ## Agent architecture
 
@@ -148,7 +148,7 @@ The scheduler does not inline each phase runbook itself. It reads state, inspect
 inquiry.agent.md
 ├── Reads .inquiry/state.yaml → determines active phase
 ├── IDLE: becomes DEWEY (bounded issue triage; handoff via inquiry-start)
-├── ANALYZE: becomes SOCRATES (asks questions, writes diagnosis.md)
+├── ANALYZE: becomes SOCRATES (gathers evidence, asks only if needed, writes diagnosis.md)
 ├── PLAN: becomes DESCARTES (decomposes, writes plan.md with phases)
 ├── EXECUTE: becomes BASHŌ (implements, tests, commits)
 ├── END: executes PR creation protocol
@@ -219,7 +219,7 @@ A complete APE cycle from issue to merge:
 1. Human and DEWEY clarify/select the GitHub issue in IDLE, using `issue-create` when the issue must be created or confirmed
 2. Human invokes inquiry-start skill
 3. CLI: IDLE → ANALYZE (start_analyze event)
-4. Agent (SOCRATES): asks clarifying questions, produces diagnosis.md
+4. Agent (SOCRATES): gathers repo and artifact evidence first, asks clarifying questions only if needed, produces diagnosis.md
 5. Human authorizes: ANALYZE → PLAN (complete_analysis)
 6. Agent (DESCARTES): writes plan.md with phased checkboxes
 7. Human authorizes: PLAN → EXECUTE (approve_plan)
