@@ -17,7 +17,7 @@ describe('inquiryInit', () => {
     assert.strictEqual(errorMsg, 'Inquiry: Open a workspace folder first.');
   });
 
-  it('runs ONLY inquiry init in terminal — no target get', async () => {
+  it('runs ONLY inquiry init in terminal — no host get', async () => {
     let terminalOptions: string | InitTerminalOptions | undefined;
     const sentTexts: string[] = [];
     let infoMsg = '';
@@ -40,12 +40,12 @@ describe('inquiryInit', () => {
     assert.deepStrictEqual(terminalOptions, { name: 'Inquiry Init', cwd: '/workspace' });
     const prefix = process.platform === 'win32' ? '& ' : '';
     const q = '"';
-    // Only ONE sendText: iq init — no target get
+    // Only ONE sendText: iq init — no host get
     assert.strictEqual(sentTexts.length, 1);
     assert.strictEqual(sentTexts[0], `${prefix}${q}/home/user/.inquiry/bin/inquiry${q} init`);
-    // No target get command sent
-    const hasTargetGet = sentTexts.some(t => /target\s+get/.test(t));
-    assert.strictEqual(hasTargetGet, false, 'target get must NOT be sent after iq init');
+    // No host get command sent
+    const hasHostGet = sentTexts.some(t => /host\s+get/.test(t));
+    assert.strictEqual(hasHostGet, false, 'host get must NOT be sent after iq init');
     assert.ok(infoMsg.includes('Reload'));
   });
 

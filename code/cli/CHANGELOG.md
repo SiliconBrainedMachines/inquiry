@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.2]
+### Changed
+- **Canonical host terminology**: `iq host get` and `iq host clean` are now the primary command surface across the CLI, docs, site, installers, and VS Code integration, while legacy `target` aliases remain supported for compatibility
+- **Deployment model clarity**: public docs and architecture now describe the real split between repo-scoped agent install via `iq init` and host-scoped skill deployment via `iq host get`
+
+### Fixed
+- **Host module wiring**: the host module builder now routes `iq host get` through the active deployer instead of the cleaner instance
+
 ## [0.7.1]
 ### Changed
 - **Release publication guardrail**: the release workflow now keeps GitHub releases in draft until both platform archives are uploaded and explicitly verified, so `latest` can no longer point at a partial CLI release
