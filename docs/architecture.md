@@ -1,19 +1,39 @@
 # Architecture
 
-> This document is the current canonical system-level explanation of APE as the orchestrating methodology.
+> This document is the current canonical system-level explanation of Inquiry as the orchestrating methodology.
 >
-> How APE orchestrates AI coding agents through a finite state machine.
+> How Inquiry orchestrates AI coding hosts through a finite state machine.
 
 Inquiry is best read as an **outer harness** around the host coding tool. The host runtime contributes the model, baseline tool invocation surface, and vendor-specific prompt substrate. Inquiry CLI contributes the repository-local control system layered on top of that substrate: explicit FSM state, inspectable prompt assembly, deployable skills, Memory as Code artifacts, human-gated transitions, and durable handoff documents. The point is not to replace the host's built-in harness, but to add a stricter and more inspectable one optimized for disciplined software work.
 
 The 0.7.x architectural stance is simple: keep the harness small, explicit, and evidence-backed. Inquiry should prefer a narrow core that can survive host changes over a sprawling documentation and feature surface that preserves every historical branch of thought.
+
+## The five-layer model
+
+Inquiry is easiest to reason about as **five stacked layers**. Higher layers constrain lower layers. Lower layers contribute capability, but they do not self-authorize changes to the layer above them.
+
+1. **Host layer** — the external coding host that provides the model, chat runtime, and tool surface. Today this is Copilot. Future hosts may include Claude, Codex, Gemini, or OpenCode.
+2. **Harness layer** — the repository-local engineering system: Inquiry CLI, bundled assets, `.inquiry/`, `cleanrooms/`, deployment adapters, and the host-visible orchestrator prompt. This is the durable engineering component.
+3. **FSM layer** — the explicit problem-solving control algorithm: `IDLE -> ANALYZE -> PLAN -> EXECUTE -> END -> EVOLUTION`, with total `(state, event)` transitions, prechecks, and artifact expectations.
+4. **Protocol layer** — the operational procedures. This includes private Inquiry runtime protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, and `inquiry-install`, plus public reusable skills such as `research`, `legion`, and `kritik`.
+5. **Cognitive layer** — the phase-specific thinking operators: DEWEY, SOCRATES, DESCARTES, BASHO, and DARWIN. They contribute a mode of reasoning, not control authority.
+
+The important consequence is that `inquiry.agent.md` is **part of the harness layer, not the whole harness**. It is the host-visible dispatcher that reads state, invokes the right protocol, and routes work to the active cognitive operator under FSM constraints.
+
+| Layer | Owns | Must not own |
+|---|---|---|
+| Host | Model runtime, chat surface, tools | Inquiry's repository-local methodology |
+| Harness | State, prompt assembly, deployment, durable artifacts | Phase-specific cognition |
+| FSM | Which phase is active and which transitions are legal | Ad hoc reasoning about the task |
+| Protocols | Repeatable operating procedures | Global state authority |
+| Cognitive operators | How to think within the current phase | Transition authority, deployment, or repo-wide control |
 
 ## The system in one diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────────┐
 │  Human (developer)                                                  │
-│    ↕ authorizes transitions, writes mutations.md, reviews PRs       │
+│    ↕ authorizes transitions, writes cycle mutations, reviews PRs    │
 └──────────────────────────────────┬──────────────────────────────────┘
                                    │
 ┌──────────────────────────────────▼──────────────────────────────────┐
@@ -27,24 +47,24 @@ The 0.7.x architectural stance is simple: keep the harness small, explicit, and 
 │  │  Total matrix: every (state × event) pair is explicit         │  │
 │  └───────────────────────────────────────────────────────────────┘  │
 │                                                                     │
-│  ┌──────────────┐    ┌──────────────────────────────────────────┐   │
-│  │ .inquiry/    │    │ Target Deployer                          │   │
-│  │  state.yaml  │    │                                          │   │
-│  │  config.yaml │    │  iq target get → copies to ~/.copilot/   │   │
-│  │  mutations.md│    │    agents/inquiry.agent.md               │   │
-│  └──────────────┘    │    skills/{issue-create,inquiry-start,...} │  │
-│                      └──────────────────────────────────────────┘   │
+│  ┌──────────────────────┐    ┌─────────────────────────────────────────┐   │
+│  │ .inquiry/            │    │ Host Deployer (`iq host get`)          │   │
+│  │  config.yaml         │    │                                         │   │
+│  │ cleanrooms/<branch>/ │    │  binds Inquiry to the active host      │   │
+│  │  .iq.state.yaml      │    │  by copying skills into it             │   │
+│  │  mutations.md        │    │  (`iq init` owns the repo agent)       │   │
+│  └──────────────────────┘    └─────────────────────────────────────────┘   │
 └─────────────────────────────────────────────────────────────────────┘
                                    │
-                          deploys agent + skills
+                          deploys host-visible agent + skills
                                    │
 ┌──────────────────────────────────▼──────────────────────────────────┐
-│  AI Coding Tool (Copilot, future: Claude/Crush/Gemini/Codex)        │
+│  AI Coding Host (Copilot now; future Claude/Codex/Gemini/OpenCode) │
 │                                                                     │
 │  ┌───────────────────────────────────────────────────────────────┐  │
-│  │  inquiry.agent.md (orchestrator)                              │  │
+│  │  inquiry.agent.md (host-visible orchestrator)                 │  │
 │  │                                                               │  │
-│  │  Reads .inquiry/state.yaml → knows current FSM state          │  │
+│  │  Reads the active cycle state → knows current FSM state       │  │
 │  │  Activates the agent for that state:                          │  │
 │  │                                                               │  │
 │  │    IDLE     → DEWEY     (bounded triage, issue-ready only)    │  │
@@ -75,10 +95,10 @@ Sub-agent prompt delivery is explicit and inspectable. `iq ape prompt --name <ap
 ┌──────────────────────────────────▼──────────────────────────────────┐
 │  Repository (Memory as Code)                                        │
 │                                                                     │
-│  .inquiry/state.yaml        ← current FSM state (IDLE, ANALYZE, etc.)   │
-│  .inquiry/config.yaml       ← cycle config (evolution.enabled, etc.)    │
-│  .inquiry/mutations.md      ← human notes for DARWIN                    │
-│  cleanrooms/NNN-slug/ ← per-cycle artifacts created only for active cycles │
+│  cleanrooms/<branch>/.iq.state.yaml ← current FSM state (IDLE, ANALYZE, etc.) │
+│  .inquiry/config.yaml             ← project-scoped config (evolution.enabled, etc.) │
+│  cleanrooms/<branch>/mutations.md ← human notes for DARWIN              │
+│  cleanrooms/NNN-slug/             ← per-cycle artifacts created only for active cycles │
 │  docs/                 ← intentionally minimal doctrine              │
 └─────────────────────────────────────────────────────────────────────┘
 ```
@@ -117,7 +137,7 @@ Each allowed transition carries:
 | `commit_policy` | When to commit (none, after_effects, after_artifacts) |
 | `prompt_fragment_id` | Links to agent prompt section for this transition |
 
-The CLI enforces this via `iq fsm transition --event <e>`: reads `.inquiry/state.yaml`, looks up `(current_state, event)` in the contract, validates prechecks, applies effects, writes new state.
+The CLI enforces this via `iq fsm transition --event <e>`: reads `cleanrooms/<branch>/.iq.state.yaml`, looks up `(current_state, event)` in the contract, validates prechecks, applies effects, writes the new cycle state.
 
 ## Inquiry as outer harness
 
@@ -148,13 +168,13 @@ The scheduler does not inline each phase runbook itself. It reads state, inspect
 
 ```
 inquiry.agent.md
-├── Reads .inquiry/state.yaml → determines active phase
+├── Reads cleanrooms/<branch>/.iq.state.yaml → determines active phase
 ├── IDLE: becomes DEWEY (bounded issue triage; handoff via inquiry-start)
 ├── ANALYZE: becomes SOCRATES (gathers evidence, asks only if needed, writes diagnosis.md)
 ├── PLAN: becomes DESCARTES (decomposes, writes plan.md with phases)
 ├── EXECUTE: becomes BASHŌ (implements, tests, commits)
 ├── END: executes PR creation protocol
-└── EVOLUTION: becomes DARWIN (reads mutations.md, proposes issues)
+└── EVOLUTION: becomes DARWIN (reads cleanrooms/<branch>/mutations.md, proposes issues)
 ```
 
 DEWEY determines whether the situation is ready to become or select a GitHub issue. It does not prepare branches, write `diagnosis.md`, or anticipate downstream phases; `inquiry-start` owns that explicit handoff.
@@ -189,17 +209,18 @@ Skills are **step-by-step protocols** invoked by the agent at specific moments. 
 
 Private skills are tied to Inquiry CLI concepts and only make sense inside the Inquiry runtime. Skills such as `research`, `legion`, and `kritik` are reusable protocols that can be invoked from any phase or directly by the user.
 
-SKILL.md files are **shared across targets** (same SKILL.md for Copilot, Claude, etc.). The agent file is **target-specific** (prompt format differs per tool).
+SKILL.md files are **shared across hosts** (same SKILL.md for Copilot, Claude, etc.). The agent file is **host-specific** because prompt format differs per host. Legacy `iq target ...` aliases remain accepted for compatibility, but `host` is the canonical term.
 
-## Deployment model
+## Host deployment model
+
+The canonical command surface is `iq host get`. Legacy `iq target get` remains accepted as a compatibility alias, but the operational model is host-bound.
 
 ```
-iq target get
+iq host get
     │
     ├── Reads bundled assets/ from alongside the inquiry binary
-    ├── Cleans ~/.copilot/{agents,skills}/  (idempotent reset)
-    ├── Copies inquiry.agent.md → ~/.copilot/agents/
-    └── Copies skills/ → ~/.copilot/skills/
+  ├── Cleans ~/.copilot/skills/  (idempotent reset)
+  └── Copies skills/ → ~/.copilot/skills/
          ├── issue-create/SKILL.md
          ├── inquiry-start/SKILL.md
          ├── inquiry-end/SKILL.md
@@ -209,6 +230,9 @@ iq target get
          ├── legion/SKILL.md
          ├── research/SKILL.md
          └── kritik/SKILL.md
+
+iq init
+  └── Ensures .github/agents/inquiry.agent.md exists in the repo
 ```
 
 Only **Copilot** is currently active. Adapters for other hosts remain deferred until Inquiry has a cleaner host-boundary contract and evidence that reactivation improves the harness instead of diluting it.
@@ -229,8 +253,8 @@ A complete APE cycle from issue to merge:
 9. Human invokes inquiry-end skill when plan complete
 10. CLI: EXECUTE → END (finish_execute) → git push + gh pr create
 11. PR merged → END → EVOLUTION or END → IDLE (per config)
-12. If EVOLUTION: DARWIN reads mutations.md, proposes improvement issues
-13. CLI: EVOLUTION → IDLE (finish_evolution), resets mutations.md
+12. If EVOLUTION: DARWIN reads `cleanrooms/<branch>/mutations.md`, proposes improvement issues
+13. CLI: EVOLUTION → IDLE (finish_evolution), resets `cleanrooms/<branch>/mutations.md`
 ```
 
 ## Key design decisions
@@ -243,6 +267,6 @@ A complete APE cycle from issue to merge:
 | **CLI enforces, agent proposes** | Transitions go through CLI | Agent can't corrupt state; human is gate |
 | **Skills are protocols** | Step-by-step markdown, not code | Portable across any LLM that reads markdown |
 | **Memory in repo** | .inquiry/ + docs/, no external DB | Version-controlled, survives any infrastructure change |
-| **Single target until MVP** | Copilot only (D20) | Prove methodology on one tool before fragmenting |
+| **Single host until MVP** | Copilot only (D20) | Prove methodology on one tool before fragmenting |
 | **Prompt delivery is explicit** | `iq ape prompt` prints identity + contract + context | The effective prompt stays inspectable; no hidden glue in standard APE YAMLs |
 | **EVOLUTION is opt-in** | config.yaml flag | Self-modification is powerful but must be conscious |

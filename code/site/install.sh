@@ -10,7 +10,7 @@
 #   3. Extracts to ~/.inquiry/
 #   4. Symlinks to ~/.local/bin (XDG standard, in default PATH)
 #   5. Symlinks `iq` alias
-#   6. Runs `inquiry target get` for the active target (Copilot today)
+#   6. Runs `inquiry host get` for the active host (Copilot today)
 #   7. Verifies with `inquiry version`
 
 set -euo pipefail
@@ -112,8 +112,8 @@ done
 
 # ─── Deploy and verify ───────────────────────────────────────────────────────
 
-echo ">>> Deploying Inquiry to the active target..."
-"$BIN_DIR/inquiry" target get
+echo ">>> Deploying Inquiry skills to the active host..."
+"$BIN_DIR/inquiry" host get
 
 echo ">>> Verifying installation..."
 VERSION_OUTPUT=$("$BIN_DIR/inquiry" version)

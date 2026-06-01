@@ -12,9 +12,9 @@ import 'assets.dart';
 import 'modules/global/global_builder.dart';
 import 'modules/fsm/fsm_builder.dart';
 import 'modules/ape/ape_builder.dart';
-import 'modules/target/target_builder.dart';
-import 'targets/all_adapters.dart';
-import 'targets/deployer.dart';
+import 'modules/host/host_builder.dart';
+import 'hosts/all_adapters.dart';
+import 'hosts/deployer.dart';
 
 List<String> normalizeInquiryArgs(List<String> args) {
   if (args.length == 1 && (args.first == '--help' || args.first == '-h')) {
@@ -31,7 +31,7 @@ Future<int> runInquiry(List<String> args) async {
 
   final assetsRoot = p.dirname(p.dirname(Platform.resolvedExecutable));
 
-  final deployer = TargetDeployer(
+  final deployer = HostDeployer(
     assets: Assets(root: assetsRoot),
     adapters: deployAdapters,
     homeDir:
@@ -40,7 +40,7 @@ Future<int> runInquiry(List<String> args) async {
         '',
   );
 
-  final cleaner = TargetDeployer(
+  final cleaner = HostDeployer(
     assets: Assets(root: assetsRoot),
     adapters: allAdapters,
     homeDir:
@@ -52,7 +52,8 @@ Future<int> runInquiry(List<String> args) async {
   final assets = Assets(root: assetsRoot);
 
   cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
-  cli.module('target', (m) => buildTargetModule(m, deployer: deployer, cleaner: cleaner));
+  cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
+  cli.module('target', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
 
