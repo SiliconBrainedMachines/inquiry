@@ -352,7 +352,7 @@ class EffectExecutor {
   }
 
   void refreshPrePrInspectionConsistency() {
-    _prePrInspectionRunner.refreshConsistency();
+    _prePrInspectionRunner.refreshDeterministicPasses();
   }
 
   /// Execute all CLI-side effects for a transition.
