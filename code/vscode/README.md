@@ -6,7 +6,7 @@
 > Every task follows a strict cycle: **ANALYZE → PLAN → EXECUTE**.
 > Structure from analysis to PR.
 
-This README is the extension's public entry surface. For the canonical repository documentation map, start at [../docs/index.md](../docs/index.md).
+This README is the extension's public entry surface. For the current repository doctrine, start at [../docs/architecture.md](../docs/architecture.md) and [../docs/roadmap.md](../docs/roadmap.md).
 
 ---
 
@@ -64,7 +64,7 @@ The status bar shows the current FSM phase in real time:
 ## Links
 
 - [Website](https://inquiry.ccisne.dev/) · [GitHub](https://github.com/ccisnedev/inquiry) · [Issues](https://github.com/ccisnedev/inquiry/issues)
-- [Docs map](https://github.com/ccisnedev/inquiry/blob/main/docs/index.md) · [Architecture](https://github.com/ccisnedev/inquiry/blob/main/docs/architecture.md) · [Finite APE Machine spec](https://github.com/ccisnedev/inquiry/blob/main/docs/spec/finite-ape-machine.md)
+- [Architecture](https://github.com/ccisnedev/inquiry/blob/main/docs/architecture.md) · [Roadmap](https://github.com/ccisnedev/inquiry/blob/main/docs/roadmap.md)
 
 For the full methodology, see [inquiry.ccisne.dev](https://inquiry.ccisne.dev/).
 
