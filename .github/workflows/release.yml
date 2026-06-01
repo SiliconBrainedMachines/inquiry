@@ -189,7 +189,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v${{ needs.check-version.outputs.version }}"
-          ASSETS=$(gh release view "$TAG" --json assets --jq '.assets[].name')
+          ASSETS=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')
           echo "$ASSETS"
 
           for asset in inquiry-windows-x64.zip inquiry-linux-x64.tar.gz; do
@@ -204,4 +204,4 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="v${{ needs.check-version.outputs.version }}"
-          gh release edit "$TAG" --draft=false --latest
+          gh release edit "$TAG" --repo "$GITHUB_REPOSITORY" --draft=false --latest
