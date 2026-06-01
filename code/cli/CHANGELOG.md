@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.3]
+### Changed
+- **EXECUTE cognitive operator**: ADA now replaces BASHŌ as Inquiry's live EXECUTE thinking tool, keeping programming-manifesto cognition separate from the FSM's operational workflow contract
+- **Public and architectural surfaces**: README, specs, site pages, and the VS Code END-state fixture now describe the live roster as DEWEY, SOCRATES, DESCARTES, ADA, and DARWIN
+
+### Fixed
+- **EXECUTE handoff parity**: prompt assembly, transition contracts, END visibility, doctor integrity checks, and transition coverage now agree that EXECUTE carries `coding-manifesto-review` while END carries no active ape
+
 ## [0.7.2]
 ### Changed
 - **Canonical host terminology**: `iq host get` and `iq host clean` are now the primary command surface across the CLI, docs, site, installers, and VS Code integration, while legacy `target` aliases remain supported for compatibility

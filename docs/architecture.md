@@ -16,7 +16,7 @@ Inquiry is easiest to reason about as **five stacked layers**. Higher layers con
 2. **Harness layer** — the repository-local engineering system: Inquiry CLI, bundled assets, `.inquiry/`, `cleanrooms/`, deployment adapters, and the host-visible orchestrator prompt. This is the durable engineering component.
 3. **FSM layer** — the explicit problem-solving control algorithm: `IDLE -> ANALYZE -> PLAN -> EXECUTE -> END -> EVOLUTION`, with total `(state, event)` transitions, prechecks, and artifact expectations.
 4. **Protocol layer** — the operational procedures. This includes private Inquiry runtime protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, and `inquiry-install`, plus public reusable skills such as `research`, `legion`, and `kritik`.
-5. **Cognitive layer** — the phase-specific thinking operators: DEWEY, SOCRATES, DESCARTES, BASHO, and DARWIN. They contribute a mode of reasoning, not control authority.
+5. **Cognitive layer** — the phase-specific thinking operators: DEWEY, SOCRATES, DESCARTES, ADA, and DARWIN. They contribute a mode of reasoning, not control authority.
 
 The important consequence is that `inquiry.agent.md` is **part of the harness layer, not the whole harness**. It is the host-visible dispatcher that reads state, invokes the right protocol, and routes work to the active cognitive operator under FSM constraints.
 
@@ -70,7 +70,7 @@ The important consequence is that `inquiry.agent.md` is **part of the harness la
 │  │    IDLE     → DEWEY     (bounded triage, issue-ready only)    │  │
 │  │    ANALYZE  → SOCRATES  (evidence-first analysis, produces diagnosis.md) │  │
 │  │    PLAN     → DESCARTES (method, produces plan.md)            │  │
-│  │    EXECUTE  → BASHŌ     (techne, produces code + commits)     │  │
+│  │    EXECUTE  → ADA       (programming manifesto, produces code under phase contract) │  │
 │  │    END      → (PR gate: gh pr create + gh pr merge)           │  │
 │  │    EVOLUTION→ DARWIN    (mutations, produces issues)          │  │
 │  │                                                               │  │
@@ -172,7 +172,7 @@ inquiry.agent.md
 ├── IDLE: becomes DEWEY (bounded issue triage; handoff via inquiry-start)
 ├── ANALYZE: becomes SOCRATES (gathers evidence, asks only if needed, writes diagnosis.md)
 ├── PLAN: becomes DESCARTES (decomposes, writes plan.md with phases)
-├── EXECUTE: becomes BASHŌ (implements, tests, commits)
+├── EXECUTE: becomes ADA (frames intent, locates the control surface, composes the change, reviews the slice)
 ├── END: executes PR creation protocol
 └── EVOLUTION: becomes DARWIN (reads cleanrooms/<branch>/mutations.md, proposes issues)
 ```
@@ -249,7 +249,7 @@ A complete APE cycle from issue to merge:
 5. Human authorizes: ANALYZE → PLAN (complete_analysis)
 6. Agent (DESCARTES): writes plan.md with phased checkboxes
 7. Human authorizes: PLAN → EXECUTE (approve_plan)
-8. Agent (BASHŌ): implements phase by phase, commits, marks checkboxes
+8. Agent (ADA): implements phase by phase under the plan and reviews each changed slice against the coding manifesto; commits and release closure remain phase-owned contract obligations
 9. Human invokes inquiry-end skill when plan complete
 10. CLI: EXECUTE → END (finish_execute) → git push + gh pr create
 11. PR merged → END → EVOLUTION or END → IDLE (per config)

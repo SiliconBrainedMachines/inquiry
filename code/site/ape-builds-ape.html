@@ -79,8 +79,8 @@
             <span class="stage-range">v0.0.11+</span>
           </div>
           <h3>CLI + contract</h3>
-          <p>Runtime infrastructure arrived: FSM transition contract (YAML), programmatic transitions with precondition validation (<code>iq fsm transition</code>), declarative effects, and evolution infrastructure (<code>.inquiry/config.yaml</code>, <code>.inquiry/mutations.md</code>). The contract says what's legal; tests prove the contract holds. The system now named Inquiry is used to build itself — the original bootstrap thesis called this "APE builds APE" because APE was the project's working name at the time.</p>
-          <div class="stage-evidence">Evidence: <code>transition_contract.yaml</code>, 131 passing tests, 12 GitHub releases, 69+ issues and PRs.</div>
+          <p>Runtime infrastructure arrived: FSM transition contract (YAML), programmatic transitions with precondition validation (<code>iq fsm transition</code>), declarative effects, and evolution infrastructure (<code>.inquiry/config.yaml</code>, <code>cleanrooms/&lt;branch&gt;/mutations.md</code>). The contract says what's legal; tests prove the contract holds. The system now named Inquiry is used to build itself — the original bootstrap thesis called this "APE builds APE" because APE was the project's working name at the time.</p>
+          <div class="stage-evidence">Evidence: <code>transition_contract.yaml</code>, passing CLI + VS Code suites, tagged releases, and the issue/PR history.</div>
         </li>
       </ol>
     </section>
@@ -88,23 +88,23 @@
     <section aria-labelledby="evidence-heading">
       <h2 id="evidence-heading">Evidence today</h2>
       <p class="section-intro">
-        Numbers after two months. Everything is in git history and the GitHub API — auditable by anyone who wants to check.
+        Snapshot from the current repository state. Everything listed here is grounded in the repo, its tags, or the validated package test surfaces.
       </p>
       <div class="stats-grid">
         <div class="stat">
-          <div class="stat-num">14</div>
-          <div class="stat-label">versions shipped<br><span class="stat-sub">12 GitHub releases</span></div>
+          <div class="stat-num">45</div>
+          <div class="stat-label">tagged versions<br><span class="stat-sub">current git history</span></div>
         </div>
         <div class="stat">
-          <div class="stat-num">131</div>
-          <div class="stat-label">tests passing<br><span class="stat-sub">cross-platform</span></div>
+          <div class="stat-num">512</div>
+          <div class="stat-label">tests passing<br><span class="stat-sub">CLI + VS Code packages</span></div>
         </div>
         <div class="stat">
-          <div class="stat-num">9</div>
-          <div class="stat-label">CLI commands<br><span class="stat-sub">across 3 modules</span></div>
+          <div class="stat-num">13</div>
+          <div class="stat-label">CLI commands<br><span class="stat-sub">across 5 root modules</span></div>
         </div>
         <div class="stat">
-          <div class="stat-num">4</div>
+          <div class="stat-num">5</div>
           <div class="stat-label">active agents<br><span class="stat-sub">down from 9 in lore</span></div>
         </div>
         <div class="stat">
@@ -127,7 +127,7 @@
         <strong>Example.</strong> Issue <a href="https://github.com/ccisnedev/inquiry/issues/54">#54</a> proposes a change to how EXECUTE interacts with the test runner, citing three cycles where the same inefficiency appeared. The proposal is public, debatable, and subject to the same review process as any other issue. Nothing is filed silently.
       </div>
       <p>
-        The mutations aren't theoretical. <a href="agents.html">The live roster — DEWEY, SOCRATES, DESCARTES, BASHŌ, DARWIN</a> — exists as it does because DARWIN proposed absorbing MARCOPOLO into SOCRATES, replacing SUNZI with DESCARTES's method, deprecating ADA's TDD phase in favor of BASHŌ's techne, and eventually making IDLE's operator explicit as DEWEY.
+        The mutations aren't theoretical. <a href="agents.html">The live roster — DEWEY, SOCRATES, DESCARTES, ADA, DARWIN</a> — exists as it does because DARWIN proposed absorbing MARCOPOLO into SOCRATES, replacing SUNZI with DESCARTES's method, restoring ADA as EXECUTE's operator once the project learned that workflow belongs in phase contracts, and eventually making IDLE's operator explicit as DEWEY.
       </p>
     </section>
 
@@ -171,7 +171,7 @@
         </a>
         <a href="agents.html" class="deeper-card">
           <h3>Meet the agents →</h3>
-          <p>The live five-agent roster — DEWEY, SOCRATES, DESCARTES, BASHŌ, DARWIN — and the larger cast it replaced.</p>
+          <p>The live five-agent roster — DEWEY, SOCRATES, DESCARTES, ADA, DARWIN — and the larger cast it replaced.</p>
         </a>
         <a href="evolution.html" class="deeper-card">
           <h3>Evolution →</h3>
