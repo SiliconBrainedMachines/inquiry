@@ -1,6 +1,6 @@
-/// Doctor command — verifies prerequisites and target deployment.
+/// Doctor command — verifies prerequisites and host deployment.
 ///
-/// Checks: inquiry version, git, gh, gh auth, .inquiry/ init, target deployment.
+/// Checks: inquiry version, git, gh, gh auth, .inquiry/ init, host deployment.
 library;
 
 import 'dart:io';
@@ -12,8 +12,8 @@ import 'package:path/path.dart' as p;
 import '../../../assets.dart';
 import '../../../src/version.dart' as version_lib;
 import '../../../src/version_check.dart';
-import '../../../targets/copilot_adapter.dart';
-import '../../../targets/target_adapter.dart';
+import '../../../hosts/copilot_adapter.dart';
+import '../../../hosts/host_adapter.dart';
 
 /// Function type for running external processes.
 ///
@@ -50,16 +50,16 @@ class DoctorCheck {
   };
 }
 
-/// Result of checking a target's deployment status.
-class TargetCheck {
-  final String targetName;
+/// Result of checking a host's deployment status.
+class HostCheck {
+  final String hostName;
   final bool agentExists;
   final List<String> missingSkills;
   final int totalSkills;
   final String? error;
 
-  TargetCheck({
-    required this.targetName,
+  HostCheck({
+    required this.hostName,
     required this.agentExists,
     required this.missingSkills,
     required this.totalSkills,
@@ -69,7 +69,7 @@ class TargetCheck {
   bool get passed => agentExists && missingSkills.isEmpty && error == null;
 
   Map<String, dynamic> toJson() => {
-    'targetName': targetName,
+    'hostName': hostName,
     'agentExists': agentExists,
     'missingSkills': missingSkills,
     'totalSkills': totalSkills,
@@ -96,19 +96,19 @@ class DoctorInput extends Input {
 /// Output for the doctor command.
 class DoctorOutput extends Output {
   final List<DoctorCheck> checks;
-  final List<TargetCheck> targetChecks;
+  final List<HostCheck> hostChecks;
   final bool passed;
 
   DoctorOutput({
     required this.checks,
-    this.targetChecks = const [],
+    this.hostChecks = const [],
     required this.passed,
   });
 
   @override
   Map<String, dynamic> toJson() => {
     'checks': checks.map((c) => c.toJson()).toList(),
-    'targetChecks': targetChecks.map((c) => c.toJson()).toList(),
+    'hostChecks': hostChecks.map((c) => c.toJson()).toList(),
     'passed': passed,
   };
 
@@ -132,32 +132,32 @@ class DoctorOutput extends Output {
       }
     }
 
-    if (targetChecks.isNotEmpty) {
-      buffer.writeln('Checking targets...');
-      for (final tc in targetChecks) {
+    if (hostChecks.isNotEmpty) {
+      buffer.writeln('Checking hosts...');
+      for (final tc in hostChecks) {
         if (tc.error != null) {
-          buffer.writeln('  ✗ ${tc.targetName}: ${tc.error}');
+          buffer.writeln('  ✗ ${tc.hostName}: ${tc.error}');
         } else if (tc.passed) {
           final deployed = tc.totalSkills - tc.missingSkills.length;
           buffer.writeln(
-            '  ✓ ${tc.targetName}: agent + $deployed skills deployed',
+            '  ✓ ${tc.hostName}: agent + $deployed skills deployed',
           );
         } else {
           if (!tc.agentExists) {
-            buffer.writeln('  ✗ ${tc.targetName}: agent not deployed');
+            buffer.writeln('  ✗ ${tc.hostName}: agent not deployed');
             buffer.writeln("    → Run 'inquiry init' to deploy agent");
           } else {
-            buffer.writeln('  ✓ ${tc.targetName}: agent deployed');
+            buffer.writeln('  ✓ ${tc.hostName}: agent deployed');
           }
           if (tc.missingSkills.isNotEmpty) {
             buffer.writeln(
-              '  ✗ ${tc.targetName}: missing skills: '
+              '  ✗ ${tc.hostName}: missing skills: '
               '${tc.missingSkills.join(', ')}',
             );
-            // Only suggest target get when agent is already deployed
+            // Only suggest host get when agent is already deployed
             if (tc.agentExists) {
               buffer.writeln(
-                "    → Run 'inquiry target get' to deploy skills",
+                "    → Run 'inquiry host get' to deploy skills",
               );
             }
           }
@@ -195,7 +195,7 @@ class RealFileSystemOps implements FileSystemOps {
   }
 }
 
-/// Command that verifies all prerequisites and target deployment.
+/// Command that verifies all prerequisites and host deployment.
 class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   @override
   final DoctorInput input;
@@ -203,7 +203,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   final ProcessRunner _runProcess;
   final FileSystemOps _fileSystem;
   final Assets? _assets;
-  final List<TargetAdapter> _activeAdapters;
+  final List<HostAdapter> _activeAdapters;
   final String _workingDirectory;
   final Future<VersionCheckResult> Function({required String currentVersion})?
       _versionChecker;
@@ -217,7 +217,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     String? inquiryVersionOverride,
     FileSystemOps? fileSystemOps,
     Assets? assets,
-    List<TargetAdapter>? activeAdapters,
+    List<HostAdapter>? activeAdapters,
     String? workingDirectory,
     Future<VersionCheckResult> Function({required String currentVersion})?
         versionChecker,
@@ -324,18 +324,18 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
       checks.add(versionCheck);
     }
 
-    // Target checks
-    final targetChecks = <TargetCheck>[];
+    // Host checks
+    final hostChecks = <HostCheck>[];
     for (final adapter in _activeAdapters) {
-      targetChecks.add(_verifyTarget(adapter));
+      hostChecks.add(_verifyHost(adapter));
     }
 
-    final targetsPassed = targetChecks.every((tc) => tc.passed);
+    final hostsPassed = hostChecks.every((hc) => hc.passed);
 
     return DoctorOutput(
       checks: checks,
-      targetChecks: targetChecks,
-      passed: prereqPassed && targetsPassed,
+      hostChecks: hostChecks,
+      passed: prereqPassed && hostsPassed,
     );
   }
 
@@ -360,8 +360,8 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     return _fileSystem.fileExists(agentPath);
   }
 
-  /// Verifies a single target adapter's deployment.
-  TargetCheck _verifyTarget(TargetAdapter adapter) {
+  /// Verifies a single host adapter's deployment.
+  HostCheck _verifyHost(HostAdapter adapter) {
     final homeDir = _fileSystem.homeDirectory();
     final expectedSkills = _getExpectedSkills();
 
@@ -381,8 +381,8 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
       }
     }
 
-    return TargetCheck(
-      targetName: adapter.name,
+    return HostCheck(
+      hostName: adapter.name,
       agentExists: agentExists,
       missingSkills: missingSkills,
       totalSkills: expectedSkills.length,
@@ -407,7 +407,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     }
 
     // APE definition files
-    const apeFiles = ['socrates', 'dewey', 'descartes', 'basho', 'darwin'];
+    const apeFiles = ['socrates', 'dewey', 'descartes', 'ada', 'darwin'];
     for (final ape in apeFiles) {
       final path = _assets.path('apes/$ape.yaml');
       if (!File(path).existsSync()) {

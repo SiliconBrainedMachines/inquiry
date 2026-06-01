@@ -39,7 +39,7 @@ abstract class PlatformOps {
   /// Handles OS-specific locking and permission issues.
   Future<void> selfReplace(String newBinaryPath, String currentBinaryPath);
 
-  /// Run post-install steps (e.g. `ape target get`) using the correct binary.
+  /// Run post-install steps (e.g. `iq host get`) using the correct binary.
   Future<void> runPostInstall(String installDir);
 
   /// Schedule deletion of a directory after the current process exits.

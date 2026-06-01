@@ -1,8 +1,8 @@
 import 'package:path/path.dart' as p;
 
-import 'target_adapter.dart';
+import 'host_adapter.dart';
 
-class OpenCodeAdapter extends TargetAdapter {
+class OpenCodeAdapter extends HostAdapter {
   @override
   String get name => 'opencode';
 

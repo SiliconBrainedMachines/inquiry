@@ -35,7 +35,7 @@ END is not just a final mechanical push. It is the pre-PR gate where the harness
 
 - `pre_pr` — blocking release-discipline checks before push or PR creation
 - `ci_required` — merge-authoritative remote checks that remain binding after PR creation
-- `runtime` — blocking checks when repo, branch, CLI, or target state looks inconsistent
+- `runtime` — blocking checks when repo, branch, CLI, or host state looks inconsistent
 - `inferential_optional` — non-blocking review findings unless stronger evidence upgrades them
 
 ## Steps
@@ -142,7 +142,7 @@ Announce state change:
 Before pushing or creating the PR, evaluate the minimum END sensor stack:
 
 - `pre_pr`: version files updated, CHANGELOG updated, release commit present, no declared execution work left unfinished
-- `runtime`: branch, issue, FSM state, and target tool state are coherent
+- `runtime`: branch, issue, FSM state, and host tool state are coherent
 - `ci_required`: required remote checks are identified even though they will run after PR creation
 - `inferential_optional`: any review concerns are recorded, but they do not block by themselves
 

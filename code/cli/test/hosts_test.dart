@@ -1,9 +1,9 @@
 import 'package:test/test.dart';
 
-import 'package:inquiry_cli/targets/all_adapters.dart';
+import 'package:inquiry_cli/hosts/all_adapters.dart';
 
 void main() {
-  group('TargetAdapter implementations', () {
+  group('HostAdapter implementations', () {
     for (final adapter in allAdapters) {
       test('${adapter.name} returns non-empty skillsDirectory', () {
         final skillsDir = adapter.skillsDirectory('/home/user');

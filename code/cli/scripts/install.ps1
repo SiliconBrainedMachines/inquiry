@@ -9,7 +9,7 @@
 #   3. Extracts to $env:LOCALAPPDATA\inquiry\
 #   4. Adds inquiry\bin\ to the user PATH
 #   5. Creates `iq.cmd` batch shim
-#   6. Runs `inquiry target get`
+#   6. Runs `inquiry host get`
 #   7. Verifies with `inquiry version`
 
 $ErrorActionPreference = 'Stop'
@@ -89,8 +89,8 @@ if ($userPath -notlike "*$binDir*") {
 
 # ─── Deploy and verify ───────────────────────────────────────────────────────
 
-Write-Host '>>> Deploying Inquiry to all targets...'
-& (Join-Path $binDir 'inquiry.exe') target get
+Write-Host '>>> Deploying Inquiry skills to the active host...'
+& (Join-Path $binDir 'inquiry.exe') host get
 
 Write-Host '>>> Verifying installation...'
 $versionOutput = & (Join-Path $binDir 'inquiry.exe') version

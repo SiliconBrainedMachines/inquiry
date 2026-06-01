@@ -30,7 +30,7 @@ If evolution is disabled in `.inquiry/config.yaml`, the cycle returns directly f
 | IDLE | DEWEY | Triage, issue readiness, and explicit start handoff | `.inquiry/state.yaml` |
 | ANALYZE | SOCRATES | Clarify the problem and produce a rigorous diagnosis | `cleanrooms/<issue>/analyze/diagnosis.md` |
 | PLAN | DESCARTES | Design the execution sequence and verification strategy | `cleanrooms/<issue>/plan.md` |
-| EXECUTE | BASHŌ | Implement phase by phase under the plan's constraints | code + commits |
+| EXECUTE | ADA | Implement phase by phase under the plan's constraints and coding manifesto | code + commits |
 | END | APE + human gate | Create and merge the PR through an explicit closure gate | PR |
 | EVOLUTION | DARWIN | Propose improvements to the framework itself | issues/comments in the Inquiry repository |
 
@@ -47,7 +47,7 @@ The current system uses one primary sub-agent per active work phase:
 - DEWEY in IDLE
 - SOCRATES in ANALYZE
 - DESCARTES in PLAN
-- BASHŌ in EXECUTE
+- ADA in EXECUTE
 - DARWIN in EVOLUTION
 
 APE still orchestrates every state boundary, and END remains the explicit APE + human closure gate. Earlier expanded rosters are historical context, not the active architectural model.
