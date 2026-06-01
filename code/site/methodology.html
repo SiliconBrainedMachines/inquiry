@@ -59,8 +59,8 @@
           <dt><code>PLAN</code> · DESCARTES</dt>
           <dd>Divide, order, verify, enumerate. Produces <code>plan.md</code>.</dd>
 
-          <dt><code>EXECUTE</code> · BASHŌ</dt>
-          <dd>Minimal, beautiful implementation under the tests. Produces code and commits.</dd>
+          <dt><code>EXECUTE</code> · ADA</dt>
+          <dd>Programming as explicit construction under a coding manifesto. Produces code and commits.</dd>
 
           <dt><code>END</code> · PR gate</dt>
           <dd>Opens and merges the pull request via <code>gh</code>. No agent; the CLI orchestrates.</dd>
@@ -102,26 +102,26 @@
     <section aria-labelledby="memory-heading">
       <h2 id="memory-heading">Memory as code</h2>
       <p class="section-intro">
-        Project memory lives in two places, both markdown, both in git. No vector DB. No hosted memory service. The repository <em>is</em> the database.
+        Inquiry keeps repository knowledge in plain files, not a hosted memory service. Repo-scoped configuration lives in <code>.inquiry/</code>; cycle-scoped state and artifacts live in <code>cleanrooms/&lt;branch&gt;/</code>.
       </p>
       <div class="memory-cols">
         <div class="memory-col">
-          <h3><code>.inquiry/</code> — per-repo state</h3>
+          <h3><code>.inquiry/</code> — repo-scoped configuration</h3>
           <ul class="memory-list">
-            <li><code>state.yaml</code> — current FSM state and last transition</li>
             <li><code>config.yaml</code> — feature flags and runtime preferences</li>
-            <li><code>mutations.md</code> — human notes for DARWIN's evaluation pass</li>
-            <li>Runtime coordination state for the active cycle</li>
+            <li><code>metrics*.yaml</code> — repository-scoped metrics surfaces when enabled</li>
+            <li>Settings shared across cycles, hosts, and future runs</li>
           </ul>
         </div>
         <div class="memory-col">
-          <h3><code>docs/</code> — project knowledge and cycle artifacts</h3>
+          <h3><code>cleanrooms/&lt;branch&gt;/</code> + <code>docs/</code> — cycle state and project knowledge</h3>
           <ul class="memory-list">
-            <li>ADRs, specs, runbooks — whatever the project needs long-term</li>
-            <li><code>cleanrooms/&lt;issue&gt;/</code> holds per-cycle analysis, plan, and metrics artifacts</li>
+            <li><code>.iq.state.yaml</code> — current FSM state and last transition for the active cycle</li>
+            <li><code>analyze/diagnosis.md</code>, <code>plan.md</code>, <code>run_trace.yaml</code>, and <code>mutations.md</code> hold the cycle evidence</li>
+            <li>ADRs, specs, and runbooks in <code>docs/</code> hold the long-term project memory</li>
             <li>Indexed by the agents via the <code>doc-read</code> skill</li>
             <li><code>index.md</code> per directory acts as a primary index</li>
-            <li>Frontmatter YAML acts as a schema (enforced by a future skill)</li>
+            <li>Structured YAML and durable markdown keep the same evidence legible to the host, the agent, and the reviewer</li>
           </ul>
         </div>
       </div>

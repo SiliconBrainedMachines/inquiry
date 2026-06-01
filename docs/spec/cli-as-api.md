@@ -61,9 +61,9 @@ The current Inquiry CLI already enforces the runtime FSM and deployment operatio
 | doc-write | `iq memory write` (planned) | `docs/` and other validated documentation surfaces | ANALYZE |
 | doc-read | `iq memory query` (planned) | stdout query results and targeted repository reads | ANALYZE |
 | planning | (via DESCARTES sub-agent) | `cleanrooms/{task}/plan.md` | PLAN |
-| tdd | (domain skill for BASHŌ) | Source code + tests | EXECUTE |
-| api-design | (domain skill for BASHŌ) | Source code | EXECUTE |
-| db-as-code | (domain skill for BASHŌ) | Migration files | EXECUTE |
+| tdd | (domain skill for ADA / EXECUTE) | Source code + tests | EXECUTE |
+| api-design | (domain skill for ADA / EXECUTE) | Source code | EXECUTE |
+| db-as-code | (domain skill for ADA / EXECUTE) | Migration files | EXECUTE |
 | evolution | `gh issue list`, `gh issue create`, `gh issue comment` | Issues in the Inquiry repository | EVOLUTION |
 | transition | `iq fsm transition --event <e>` | `.inquiry/state.yaml` | Any |
 | (future) status | `iq status` | stdout (derived from docs/) | Any |
