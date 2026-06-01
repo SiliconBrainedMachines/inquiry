@@ -1,5 +1,3 @@
 state: END
 issue: "152"
-ape:
-  name: basho
-  state: implement
+ape: null

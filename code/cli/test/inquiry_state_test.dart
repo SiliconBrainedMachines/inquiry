@@ -165,8 +165,8 @@ void main() {
         state: 'EXECUTE',
         issue: '200',
         promptFragmentId: 'plan_to_execute',
-        apeName: 'basho',
-        apeState: 'implement',
+        apeName: 'ada',
+        apeState: 'frame_intent',
       );
       original.saveTo(stateFile);
 
@@ -174,8 +174,8 @@ void main() {
       expect(loaded.state, equals('EXECUTE'));
       expect(loaded.issue, equals('200'));
       expect(loaded.promptFragmentId, equals('plan_to_execute'));
-      expect(loaded.apeName, equals('basho'));
-      expect(loaded.apeState, equals('implement'));
+      expect(loaded.apeName, equals('ada'));
+      expect(loaded.apeState, equals('frame_intent'));
     });
   });
 
