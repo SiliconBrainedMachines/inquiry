@@ -1,6 +1,6 @@
 /// `inquiry uninstall` — removes Inquiry CLI from the system.
 ///
-/// 1. Cleans all deployed targets (agents + skills).
+/// 1. Cleans all deployed hosts (agents + skills).
 /// 2. Removes inquiry\bin\ from the user PATH.
 /// 3. Spawns a background process to delete the install directory.
 library;
@@ -11,8 +11,8 @@ import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
-import '../../../targets/deployer.dart';
-import '../../../targets/platform_ops.dart';
+import '../../../hosts/deployer.dart';
+import '../../../hosts/platform_ops.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -49,7 +49,7 @@ class UninstallOutput extends Output {
 class UninstallCommand implements Command<UninstallInput, UninstallOutput> {
   @override
   final UninstallInput input;
-  final TargetDeployer deployer;
+  final HostDeployer deployer;
   final PlatformOps platformOps;
   final String _workingDirectory;
 
@@ -66,7 +66,7 @@ class UninstallCommand implements Command<UninstallInput, UninstallOutput> {
 
   @override
   Future<UninstallOutput> execute() async {
-    // 1. Clean all targets (adapter paths + old global agent paths)
+    // 1. Clean all hosts (adapter paths + old global agent paths)
     deployer.clean();
 
     // 2. Clean repo-scoped agent

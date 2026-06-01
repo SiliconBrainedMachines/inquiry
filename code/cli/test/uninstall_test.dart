@@ -6,12 +6,12 @@ import 'package:test/test.dart';
 
 import 'package:inquiry_cli/assets.dart';
 import 'package:inquiry_cli/modules/global/commands/uninstall.dart';
-import 'package:inquiry_cli/targets/deployer.dart';
-import 'package:inquiry_cli/targets/target_adapter.dart';
+import 'package:inquiry_cli/hosts/deployer.dart';
+import 'package:inquiry_cli/hosts/host_adapter.dart';
 
 import 'platform_ops_test.dart' show FakePlatformOps;
 
-class _FakeAdapter extends TargetAdapter {
+class _FakeAdapter extends HostAdapter {
   @override
   String get name => 'fake';
 
@@ -28,7 +28,7 @@ class _FakeAdapter extends TargetAdapter {
 void main() {
   late Directory tempDir;
   late Directory homeDir;
-  late TargetDeployer deployer;
+  late HostDeployer deployer;
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('ape_uninstall_test_');
@@ -46,7 +46,7 @@ void main() {
       p.join(agentDir.path, 'inquiry.agent.md'),
     ).writeAsStringSync('# APE Agent');
 
-    deployer = TargetDeployer(
+    deployer = HostDeployer(
       assets: Assets(root: tempDir.path),
       adapters: [_FakeAdapter()],
       homeDir: homeDir.path,
@@ -58,7 +58,7 @@ void main() {
   });
 
   group('UninstallCommand', () {
-    test('cleans deployed targets', () async {
+    test('cleans deployed hosts', () async {
       deployer.deployExclusive('fake');
 
       expect(
@@ -79,7 +79,7 @@ void main() {
       expect(output.exitCode, ExitCode.ok);
       expect(output.message, contains('uninstalled'));
 
-      // Targets should be cleaned
+      // Hosts should be cleaned
       expect(
         Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
         isFalse,
