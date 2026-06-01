@@ -1,21 +1,21 @@
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
-import '../../targets/deployer.dart';
+import '../../hosts/deployer.dart';
 import 'commands/clean.dart';
 import 'commands/get.dart';
 
 void buildTargetModule(
   ModuleBuilder m, {
-  required TargetDeployer deployer,
-  required TargetDeployer cleaner,
+  required HostDeployer deployer,
+  required HostDeployer cleaner,
 }) {
   m.command<TargetGetInput, TargetGetOutput>(
     'get',
     (req) => TargetGetCommand(
       TargetGetInput.fromCliRequest(req),
-      deployer: cleaner,
+      deployer: deployer,
     ),
-    description: 'Deploy Inquiry skills to the specified target (default: copilot)',
+    description: 'Deploy Inquiry skills to the specified host (default: copilot)',
   );
 
   m.command<TargetCleanInput, TargetCleanOutput>(
@@ -24,6 +24,6 @@ void buildTargetModule(
       TargetCleanInput.fromCliRequest(req),
       deployer: cleaner,
     ),
-    description: 'Remove deployed Inquiry files from all targets',
+    description: 'Remove deployed Inquiry files from all hosts',
   );
 }

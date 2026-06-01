@@ -6,7 +6,7 @@ import 'package:inquiry_cli/src/version_check.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-/// Mock filesystem for testing doctor target checks.
+/// Mock filesystem for testing doctor host checks.
 class MockFileSystemOps implements FileSystemOps {
   final Map<String, bool> _files = {};
   final Map<String, bool> _dirs = {};
@@ -82,7 +82,7 @@ void main() {
     const workingDir = '/repo/current';
     const homeDir = '/home/testuser';
 
-    /// Creates a mock FS where .inquiry/ exists and all targets are deployed.
+    /// Creates a mock FS where .inquiry/ exists and all hosts are deployed.
     /// Agent is at the repo-scoped path (E3 contract).
     MockFileSystemOps allPassFs(String wd, String home, List<String> skills) {
       final fs = MockFileSystemOps()..setHome(home);
@@ -315,20 +315,20 @@ void main() {
       expect(text, contains('Some checks failed.'));
     });
 
-    group('Target verification', () {
-      test('Scenario A: all targets deployed → exit 0', () async {
+    group('Host verification', () {
+      test('Scenario A: all hosts deployed → exit 0', () async {
         final cmd = makeCmd();
         final output = await cmd.execute();
 
         expect(output.passed, isTrue);
         expect(output.exitCode, 0);
-        expect(output.targetChecks.length, 1);
-        expect(output.targetChecks.first.passed, isTrue);
-        expect(output.targetChecks.first.agentExists, isTrue);
-        expect(output.targetChecks.first.missingSkills, isEmpty);
+        expect(output.hostChecks.length, 1);
+        expect(output.hostChecks.first.passed, isTrue);
+        expect(output.hostChecks.first.agentExists, isTrue);
+        expect(output.hostChecks.first.missingSkills, isEmpty);
 
         final text = output.toText()!;
-        expect(text, contains('Checking targets...'));
+        expect(text, contains('Checking hosts...'));
         expect(text, contains('✓ copilot: agent + 9 skills deployed'));
         expect(text, contains('All checks passed.'));
       });
@@ -343,8 +343,8 @@ void main() {
 
         expect(output.passed, isFalse);
         expect(output.exitCode, 1);
-        expect(output.targetChecks.first.agentExists, isFalse);
-        expect(output.targetChecks.first.missingSkills,
+        expect(output.hostChecks.first.agentExists, isFalse);
+        expect(output.hostChecks.first.missingSkills,
             unorderedEquals(testSkills));
 
         final text = output.toText()!;
@@ -356,7 +356,7 @@ void main() {
 
       test('Scenario C: no .inquiry/ directory → exit 1', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
-        // .inquiry does NOT exist, targets do NOT exist
+        // .inquiry does NOT exist, hosts do NOT exist
 
         final cmd = makeCmd(fs: fs);
         final output = await cmd.execute();
@@ -408,41 +408,42 @@ void main() {
 
         expect(output.passed, isFalse);
         expect(output.exitCode, 1);
-        expect(output.targetChecks.first.agentExists, isTrue);
-        expect(output.targetChecks.first.missingSkills, ['issue-create']);
+        expect(output.hostChecks.first.agentExists, isTrue);
+        expect(output.hostChecks.first.missingSkills, ['issue-create']);
 
         final text = output.toText()!;
         expect(text, contains('✓ copilot: agent deployed'));
         expect(text, contains('✗ copilot: missing skills: issue-create'));
-        expect(text, contains("Run 'inquiry target get' to deploy skills"));
+        expect(text, contains("Run 'inquiry host get' to deploy skills"));
       });
 
-      test('TargetCheck.toJson() includes all fields', () {
-        final check = TargetCheck(
-          targetName: 'copilot',
+      test('HostCheck.toJson() includes all fields', () {
+        final check = HostCheck(
+          hostName: 'copilot',
           agentExists: true,
           missingSkills: ['doc-read'],
           totalSkills: 9,
         );
 
         final json = check.toJson();
+        expect(json['hostName'], 'copilot');
         expect(json['targetName'], 'copilot');
         expect(json['agentExists'], true);
         expect(json['missingSkills'], ['doc-read']);
         expect(json['totalSkills'], 9);
       });
 
-      test('TargetCheck.passed is true when agent exists and no missing skills', () {
-        final passing = TargetCheck(
-          targetName: 'copilot',
+      test('HostCheck.passed is true when agent exists and no missing skills', () {
+        final passing = HostCheck(
+          hostName: 'copilot',
           agentExists: true,
           missingSkills: [],
           totalSkills: 9,
         );
         expect(passing.passed, isTrue);
 
-        final failing = TargetCheck(
-          targetName: 'copilot',
+        final failing = HostCheck(
+          hostName: 'copilot',
           agentExists: false,
           missingSkills: ['x'],
           totalSkills: 1,
@@ -470,7 +471,7 @@ void main() {
 
         final output = await cmd.execute();
 
-        expect(output.targetChecks.first.agentExists, isTrue);
+        expect(output.hostChecks.first.agentExists, isTrue);
         expect(output.passed, isTrue);
       });
 
@@ -482,7 +483,7 @@ void main() {
         final cmd = makeCmd(fs: fs);
         final output = await cmd.execute();
 
-        expect(output.targetChecks.first.agentExists, isFalse);
+        expect(output.hostChecks.first.agentExists, isFalse);
         expect(output.passed, isFalse);
       });
 
@@ -499,7 +500,7 @@ void main() {
         final cmd = makeCmd(fs: fs);
         final output = await cmd.execute();
 
-        expect(output.targetChecks.first.agentExists, isFalse,
+        expect(output.hostChecks.first.agentExists, isFalse,
             reason: 'Old global path is no longer valid — must run iq init');
       });
 
@@ -513,7 +514,7 @@ void main() {
         final text = output.toText()!;
 
         expect(text, contains("'inquiry init'"),
-            reason: 'Remediation must suggest iq init, not iq target get');
+          reason: 'Remediation must suggest iq init, not iq host get');
         expect(text, isNot(contains("'inquiry target get'")));
       });
 
@@ -524,14 +525,14 @@ void main() {
 
         final output = await cmd.execute();
 
-        // All targetChecks must have the same agentExists value
+        // All hostChecks must have the same agentExists value
         final allAgentExists =
-            output.targetChecks.map((c) => c.agentExists).toSet();
+            output.hostChecks.map((c) => c.agentExists).toSet();
         expect(allAgentExists, equals({true}),
             reason: 'agentExists is repo-scoped — same for all adapters');
       });
 
-      test('no assets available → targets still checked, 0 skills expected', () async {
+      test('no assets available → hosts still checked, 0 skills expected', () async {
         final fs = allPassFs(workingDir, homeDir, []);
         // Assets with empty skills dir
         final emptyTempDir = Directory.systemTemp.createTempSync('empty_assets_');
@@ -542,9 +543,9 @@ void main() {
         final output = await cmd.execute();
 
         // Agent exists, 0 skills expected → passes
-        expect(output.targetChecks.first.totalSkills, 0);
-        expect(output.targetChecks.first.agentExists, isTrue);
-        expect(output.targetChecks.first.passed, isTrue);
+        expect(output.hostChecks.first.totalSkills, 0);
+        expect(output.hostChecks.first.agentExists, isTrue);
+        expect(output.hostChecks.first.passed, isTrue);
 
         emptyTempDir.deleteSync(recursive: true);
       });
