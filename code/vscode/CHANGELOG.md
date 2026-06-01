@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.4.1] - 2026-06-01
+
+### Fixed
+- `Inquiry: Init` now retries from the newest published CLI release that actually contains the platform asset instead of assuming GitHub `latest` is already complete
+- Auto-install failures are surfaced clearly, installation is rechecked before `iq init`, and the init terminal now runs from the selected workspace root
+
 ## [0.4.0] - 2026-05-30
 
 ### Changed
