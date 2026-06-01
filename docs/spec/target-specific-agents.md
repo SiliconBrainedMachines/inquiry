@@ -28,7 +28,7 @@ Each tool only reads files from its own directory. Subsumption assumed tools sha
 
 ## 2. Correction: gentle-ai Pattern
 
-The initial adapter design referenced gentle-ai (see `cleanrooms/003-ape-init-v2/analyze/referencia-gentle-ai.md`), which copies skills identically across 11 targets. The assumption was that agents could receive the same treatment.
+The initial adapter design treated gentle-ai as evidence that skills and agents could both be copied uniformly across targets. That assumption turned out to be wrong.
 
 **This was incorrect.**
 
