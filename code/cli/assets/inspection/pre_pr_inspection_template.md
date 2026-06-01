@@ -13,7 +13,7 @@ generated_at: "{{GENERATED_AT}}"
 - WARN: completeness findings include automatic plan.md checkbox review when END is entered and refreshed again at pr_ready; replace or complement this with concrete coverage findings before approval
 
 ## Pass 3 — Traceability
-- WARN: traceability findings include automatic issue/branch metadata review when END is entered and refreshed again at pr_ready; replace or complement this with concrete issue/plan mapping findings before approval
+- WARN: traceability findings include automatic issue/branch metadata review plus a minimal overhead summary from run_trace and metrics_snapshot, including model-bound prompt estimates and remaining remote runtime attribution limits, when END is entered and refreshed again at pr_ready; replace or complement this with concrete issue/plan mapping findings before approval
 
 ## Citation Guidance
 

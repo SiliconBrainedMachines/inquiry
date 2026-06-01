@@ -3,6 +3,7 @@ library;
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
+import 'package:yaml/yaml.dart';
 
 import '../../assets.dart';
 import '../../src/cycle_context.dart';
@@ -20,6 +21,8 @@ class PrePrInspectionRunner {
   late final CycleContext? _cycleContext = _tryResolveCycleContext();
 
   String get _projectRoot => _cycleContext?.projectRoot ?? workingDirectory;
+
+  String get _inquiryDir => p.join(_cycleContext?.inquiryCliRoot ?? _projectRoot, '.inquiry');
 
   String? get _branch => _cycleContext?.branch;
 
@@ -142,7 +145,7 @@ class PrePrInspectionRunner {
       ..writeAll(checks.map((line) => '$line\n'))
       ..write('\n')
       ..write(after);
-    file.writeAsStringSync(updated.toString().trimRight() + '\n');
+    file.writeAsStringSync('${updated.toString().trimRight()}\n');
   }
 
   CycleContext? _tryResolveCycleContext() {
@@ -311,12 +314,318 @@ class PrePrInspectionRunner {
     }
 
     if (findings.isEmpty && activeIssue != null && activeIssue.isNotEmpty) {
-      return [
+      findings.add(
         '- PASS: inspection metadata matches active issue "$activeIssue" and branch "$branch"',
+      );
+    }
+
+    findings.addAll(_automaticOverheadChecks(branch));
+    return findings;
+  }
+
+  List<String> _automaticOverheadChecks(String branch) {
+    final relativeTracePath = 'cleanrooms/$branch/run_trace.yaml';
+    final traceFile = File(p.join(_cleanroomRoot!, 'run_trace.yaml'));
+    if (!traceFile.existsSync()) {
+      return [
+        '- WARN: overhead summary could not read run_trace at $relativeTracePath:1',
       ];
     }
 
-    return findings;
+    final events = _loadRunTraceEvents(traceFile);
+    if (events.isEmpty) {
+      return [
+        '- WARN: overhead summary found no trace events in $relativeTracePath:1',
+      ];
+    }
+
+    final counts = <String, int>{
+      'transition': 0,
+      'sensor_run': 0,
+      'block': 0,
+      'retry': 0,
+      'phase_timing': 0,
+      'tool_activity': 0,
+      'model_activity': 0,
+    };
+    final nonApprovedGates = <String, int>{};
+    final blockingBoundaries = <String, int>{};
+    final retryCounts = <String, int>{};
+    final retryReasons = <String, String>{};
+    final phaseCosts = <String, double>{};
+    final toolClasses = <String, int>{};
+    final modelInputTokens = <String, int>{};
+    final modelPromptCharacters = <String, int>{};
+    final modelAssemblyDurations = <String, double>{};
+
+    for (final event in events) {
+      final eventClass = _traceString(event['event_class']);
+      if (counts.containsKey(eventClass)) {
+        counts[eventClass] = counts[eventClass]! + 1;
+      }
+
+      if (eventClass == 'sensor_run') {
+        final verdict = _traceString(event['verdict']).toUpperCase();
+        final gate = _traceString(event['gate']);
+        if (gate.isNotEmpty && verdict.isNotEmpty && verdict != 'APPROVED') {
+          nonApprovedGates[gate] = (nonApprovedGates[gate] ?? 0) + 1;
+        }
+      }
+
+      if (eventClass == 'block') {
+        final boundary = _traceString(event['blocking_boundary']);
+        if (boundary.isNotEmpty) {
+          blockingBoundaries[boundary] = (blockingBoundaries[boundary] ?? 0) + 1;
+        }
+      }
+
+      if (eventClass == 'retry') {
+        final transitionEvent = _traceString(event['transition_event']);
+        if (transitionEvent.isNotEmpty) {
+          retryCounts[transitionEvent] = (retryCounts[transitionEvent] ?? 0) + 1;
+          final reason = _traceString(event['triggering_failure']);
+          if (reason.isNotEmpty) {
+            retryReasons.putIfAbsent(transitionEvent, () => reason);
+          }
+        }
+      }
+
+      if (eventClass == 'phase_timing') {
+        final phase = _traceString(event['phase']);
+        final duration = _traceDouble(event['duration_seconds']);
+        if (phase.isNotEmpty && duration != null) {
+          phaseCosts[phase] = (phaseCosts[phase] ?? 0) + duration;
+        }
+      }
+
+      if (eventClass == 'tool_activity') {
+        final toolClass = _traceString(event['tool_class']);
+        if (toolClass.isNotEmpty) {
+          toolClasses[toolClass] = (toolClasses[toolClass] ?? 0) + 1;
+        }
+      }
+
+      if (eventClass == 'model_activity') {
+        final label = _traceString(event['ape_name']).isNotEmpty
+            ? _traceString(event['ape_name'])
+            : _traceString(event['phase']);
+        if (label.isEmpty) continue;
+
+        final estimatedTokens = _traceInt(event['estimated_input_tokens']);
+        final promptCharacters = _traceInt(event['prompt_characters']);
+        final assemblyDuration = _traceDouble(
+          event['assembly_duration_seconds'],
+        );
+
+        if (estimatedTokens != null && estimatedTokens > 0) {
+          modelInputTokens[label] =
+              (modelInputTokens[label] ?? 0) + estimatedTokens;
+        }
+        if (promptCharacters != null && promptCharacters > 0) {
+          modelPromptCharacters[label] =
+              (modelPromptCharacters[label] ?? 0) + promptCharacters;
+        }
+        if (assemblyDuration != null && assemblyDuration > 0) {
+          modelAssemblyDurations[label] =
+              (modelAssemblyDurations[label] ?? 0) + assemblyDuration;
+        }
+      }
+    }
+
+    final lines = <String>[
+      '- PASS: overhead summary event counts transition=${counts['transition']}, sensor_run=${counts['sensor_run']}, block=${counts['block']}, retry=${counts['retry']}, phase_timing=${counts['phase_timing']}, tool_activity=${counts['tool_activity']}, model_activity=${counts['model_activity']} at $relativeTracePath:1',
+    ];
+
+    final dominantBoundary = _topCount(blockingBoundaries);
+    if (dominantBoundary == null) {
+      lines.add(
+        '- PASS: overhead summary found no blocking boundaries before END in $relativeTracePath:1',
+      );
+    } else {
+      lines.add(
+        '- WARN: overhead summary shows blocking concentrated at ${dominantBoundary.key}=${dominantBoundary.value} in $relativeTracePath:1',
+      );
+    }
+
+    final dominantGate = _topCount(nonApprovedGates);
+    if (dominantGate == null) {
+      lines.add(
+        '- PASS: overhead summary found no non-approved gates before END in $relativeTracePath:1',
+      );
+    } else {
+      lines.add(
+        '- WARN: overhead summary shows non-approved gates concentrated at ${dominantGate.key}=${dominantGate.value} in $relativeTracePath:1',
+      );
+    }
+
+    final dominantRetry = _topCount(retryCounts);
+    if (dominantRetry == null) {
+      lines.add(
+        '- PASS: overhead summary found no retries before END in $relativeTracePath:1',
+      );
+    } else {
+      final reason = retryReasons[dominantRetry.key];
+      final reasonSuffix = reason == null || reason.isEmpty
+          ? ''
+          : ' due to "${reason.replaceAll('"', '\\"')}"';
+      lines.add(
+        '- WARN: overhead summary shows retry pressure at ${dominantRetry.key}=${dominantRetry.value}$reasonSuffix in $relativeTracePath:1',
+      );
+    }
+
+    final dominantPhase = _topCost(phaseCosts);
+    if (dominantPhase != null) {
+      lines.add(
+        '- PASS: overhead summary shows highest observed phase cost at ${dominantPhase.key}=${dominantPhase.value.toStringAsFixed(3)}s in $relativeTracePath:1',
+      );
+    } else {
+      final snapshotFile = File(p.join(_inquiryDir, 'metrics_snapshot.yaml'));
+      final relativeSnapshotPath = '.inquiry/metrics_snapshot.yaml';
+      if (snapshotFile.existsSync()) {
+        lines.add(
+          '- WARN: overhead summary found no phase_timing events yet; only cycle-start snapshot is available at $relativeSnapshotPath:1',
+        );
+      } else {
+        lines.add(
+          '- WARN: overhead summary could not attribute phase cost because both $relativeTracePath:1 and $relativeSnapshotPath:1 lack timing evidence',
+        );
+      }
+    }
+
+    final modelSummary = _modelSummary(
+      modelInputTokens,
+      modelPromptCharacters,
+      modelAssemblyDurations,
+    );
+    if (modelSummary == null) {
+      lines.add(
+        '- WARN: overhead summary found no model-bound prompt surfaces before END in $relativeTracePath:1',
+      );
+    } else {
+      lines.add(
+        '- PASS: overhead summary estimates model-bound prompt input as [$modelSummary] in $relativeTracePath:1',
+      );
+    }
+
+    final harnessEventCount = counts.entries
+        .where(
+          (entry) =>
+              entry.key != 'tool_activity' && entry.key != 'model_activity',
+        )
+        .fold<int>(0, (sum, entry) => sum + entry.value);
+    final hostSummary = toolClasses.isEmpty
+        ? 'no host-boundary tool_activity events observed'
+        : (() {
+            final entries = toolClasses.entries.toList()
+              ..sort((a, b) => b.value.compareTo(a.value));
+            return entries
+                .map((entry) => '${entry.key}=${entry.value}')
+                .join(', ');
+          })();
+    final totalAssemblySeconds = modelAssemblyDurations.values.fold<double>(
+      0,
+      (sum, value) => sum + value,
+    );
+    final assemblySuffix = totalAssemblySeconds > 0
+        ? ' plus ${totalAssemblySeconds.toStringAsFixed(3)}s of local prompt assembly time'
+        : '';
+    if (modelSummary == null) {
+      lines.add(
+        '- WARN: overhead summary attributes host-boundary activity as [$hostSummary], harness control-path activity as $harnessEventCount trace events, and leaves model-bound plus remote model runtime/caching cost unattributed in local surfaces at $relativeTracePath:1',
+      );
+    } else {
+      lines.add(
+        '- WARN: overhead summary attributes host-boundary activity as [$hostSummary], harness control-path activity as $harnessEventCount trace events$assemblySuffix, and leaves only remote model runtime/caching cost unattributed in local surfaces at $relativeTracePath:1',
+      );
+    }
+
+    return lines;
+  }
+
+  List<YamlMap> _loadRunTraceEvents(File traceFile) {
+    try {
+      final doc = loadYaml(traceFile.readAsStringSync());
+      if (doc is! YamlMap) return const [];
+      final events = doc['events'];
+      if (events is! YamlList) return const [];
+      return events.whereType<YamlMap>().toList(growable: false);
+    } catch (_) {
+      return const [];
+    }
+  }
+
+  String _traceString(Object? value) => value?.toString().trim() ?? '';
+
+  double? _traceDouble(Object? value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(_traceString(value));
+  }
+
+  int? _traceInt(Object? value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    return int.tryParse(_traceString(value));
+  }
+
+  String? _modelSummary(
+    Map<String, int> tokenEstimates,
+    Map<String, int> promptCharacters,
+    Map<String, double> assemblyDurations,
+  ) {
+    final labels = <String>{
+      ...tokenEstimates.keys,
+      ...promptCharacters.keys,
+      ...assemblyDurations.keys,
+    };
+    if (labels.isEmpty) return null;
+
+    final ordered = labels.toList()
+      ..sort((a, b) {
+        final tokenOrder =
+            (tokenEstimates[b] ?? 0).compareTo(tokenEstimates[a] ?? 0);
+        if (tokenOrder != 0) return tokenOrder;
+        final charOrder =
+            (promptCharacters[b] ?? 0).compareTo(promptCharacters[a] ?? 0);
+        if (charOrder != 0) return charOrder;
+        return a.compareTo(b);
+      });
+
+    return ordered.map((label) {
+      final parts = <String>[];
+      final tokens = tokenEstimates[label] ?? 0;
+      final chars = promptCharacters[label] ?? 0;
+      final assemblySeconds = assemblyDurations[label] ?? 0;
+
+      if (tokens > 0) parts.add('$tokens est_tokens');
+      if (chars > 0) parts.add('$chars chars');
+      if (assemblySeconds > 0) {
+        parts.add('${assemblySeconds.toStringAsFixed(3)}s assembly');
+      }
+
+      return '$label=${parts.join('/')}';
+    }).join(', ');
+  }
+
+  MapEntry<String, int>? _topCount(Map<String, int> counts) {
+    if (counts.isEmpty) return null;
+    final entries = counts.entries.toList()
+      ..sort((a, b) {
+        final countOrder = b.value.compareTo(a.value);
+        if (countOrder != 0) return countOrder;
+        return a.key.compareTo(b.key);
+      });
+    return entries.first;
+  }
+
+  MapEntry<String, double>? _topCost(Map<String, double> costs) {
+    if (costs.isEmpty) return null;
+    final entries = costs.entries.toList()
+      ..sort((a, b) {
+        final costOrder = b.value.compareTo(a.value);
+        if (costOrder != 0) return costOrder;
+        return a.key.compareTo(b.key);
+      });
+    return entries.first;
   }
 
   _InspectionReportMetadata _reportMetadata(String content) {
@@ -371,6 +680,8 @@ class PrePrInspectionRunner {
         check.startsWith(
           '- WARN: active issue missing in state; automatic traceability review degraded',
         ) ||
+        check.startsWith('- PASS: overhead summary ') ||
+        check.startsWith('- WARN: overhead summary ') ||
         check ==
             '- WARN: replace this placeholder with a concrete traceability finding before approval';
   }

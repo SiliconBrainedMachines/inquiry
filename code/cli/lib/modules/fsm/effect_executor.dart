@@ -33,6 +33,16 @@ const cliEffects = {
 typedef IssueBodyProvider =
     String? Function(String issue, String workingDirectory);
 
+class RetryTraceContext {
+  final int retryCount;
+  final String triggeringFailure;
+
+  const RetryTraceContext({
+    required this.retryCount,
+    required this.triggeringFailure,
+  });
+}
+
 class EffectExecutor {
   final String workingDirectory;
   final Assets? _assets;
@@ -139,7 +149,11 @@ class EffectExecutor {
   }
 
   /// Create `cleanrooms/<branch>/analyze/index.md` and `confirmations.md` for ANALYZE phase.
-  void openAnalysisContext() {
+  void openAnalysisContext({
+    String? tracePhase,
+    String? traceEvent,
+    String? promptFragmentId,
+  }) {
     final branch = _branch;
     final cleanroomRoot = _cleanroomRoot;
     if (branch == null || cleanroomRoot == null) return;
@@ -169,7 +183,8 @@ class EffectExecutor {
         '\n'
         '| # | File | Title | Status | Tags |\n'
         '|---|------|-------|--------|------|\n'
-        '| 1 | confirmations.md | Confirmations | active | confirmations, findings |\n',
+        '| 1 | confirmations.md | Confirmations | active | confirmations, findings |\n'
+        '| 2 | diagnosis.md | Diagnosis | active | diagnosis, evidence-first |\n',
       );
     }
 
@@ -191,7 +206,42 @@ class EffectExecutor {
       );
     }
 
-    _writeIssueMirror(cleanroomRoot, branch, issue, today);
+    final diagnosisFile = File(p.join(cleanroomDir, 'diagnosis.md'));
+    if (!diagnosisFile.existsSync()) {
+      diagnosisFile.writeAsStringSync(
+        '---\n'
+        'id: diagnosis\n'
+        'title: "Diagnosis"\n'
+        'date: $today\n'
+        'status: active\n'
+        'tags: [diagnosis, evidence-first]\n'
+        '---\n'
+        '\n'
+        '# Diagnosis\n'
+        '\n'
+        '## Evidence\n'
+        '- Record observed repo, artifact, test, runtime, or research evidence here.\n'
+        '\n'
+        '## Hypotheses\n'
+        '- State the current explanation or candidate cause licensed by the evidence.\n'
+        '\n'
+        '## Constraints\n'
+        '- Capture bounded constraints, invariants, or environmental limits here.\n'
+        '\n'
+        '## Open Questions\n'
+        '- List only unresolved questions that evidence could not yet answer.\n',
+      );
+    }
+
+    _writeIssueMirror(
+      cleanroomRoot,
+      branch,
+      issue,
+      today,
+      tracePhase: tracePhase,
+      traceEvent: traceEvent,
+      promptFragmentId: promptFragmentId,
+    );
   }
 
   /// Best-effort `cleanrooms/<branch>/issue.md` mirror of the GitHub issue.
@@ -203,6 +253,11 @@ class EffectExecutor {
     String branch,
     String issue,
     String today,
+    {
+    String? tracePhase,
+    String? traceEvent,
+    String? promptFragmentId,
+    }
   ) {
     final issueFile = File(p.join(cleanroomRoot, 'issue.md'));
     if (issueFile.existsSync()) return;
@@ -213,6 +268,19 @@ class EffectExecutor {
         body = _issueBodyProvider(issue, _projectRoot);
       } catch (_) {
         body = null;
+      }
+      if (tracePhase != null && traceEvent != null) {
+        recordToolActivityTrace(
+          currentState: tracePhase,
+          event: traceEvent,
+          toolClass: 'gh',
+          commandFamily: 'issue_view',
+          outcome: body == null ? 'unavailable' : 'succeeded',
+          authority: p.posix.join('cleanrooms', branch, 'issue.md'),
+          operationsExecuted: const ['open_analysis_context'],
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
       }
     }
 
@@ -365,10 +433,14 @@ class EffectExecutor {
   List<String> executeAll({
     required List<String> effects,
     required String newState,
+    String? currentState,
+    String? event,
     String? issue,
     String? promptFragmentId,
   }) {
     final executed = <String>[];
+    final previousState = InquiryState.load(workingDirectory);
+    final traceRecordedAt = DateTime.now().toUtc();
 
     // Always update state on valid transition
     updateState(newState, issue: issue, promptFragmentId: promptFragmentId);
@@ -377,7 +449,11 @@ class EffectExecutor {
     for (final effect in effects) {
       switch (effect) {
         case 'open_analysis_context':
-          openAnalysisContext();
+          openAnalysisContext(
+            tracePhase: newState,
+            traceEvent: event,
+            promptFragmentId: promptFragmentId,
+          );
           executed.add(effect);
         case 'reset_mutations':
           resetMutations();
@@ -404,6 +480,306 @@ class EffectExecutor {
       }
     }
 
+    if (currentState != null && event != null) {
+      recordPhaseTimingTrace(
+        previousState,
+        recordedAt: traceRecordedAt,
+        operationsExecuted: executed,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
+      recordTransitionTrace(
+        currentState: currentState,
+        event: event,
+        newState: newState,
+        operationsExecuted: executed,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
+    }
+
     return executed;
+  }
+
+  void recordTransitionTrace({
+    required String currentState,
+    required String event,
+    String? newState,
+    required List<String> operationsExecuted,
+    String outcome = 'allowed',
+    String? issue,
+    String? promptFragmentId,
+    String? reason,
+  }) {
+    final lines = <String>[
+      '    event_class: transition',
+      '    from_state: $currentState',
+      '    transition_event: $event',
+      '    to_state: ${newState ?? 'null'}',
+      '    outcome: $outcome',
+    ];
+
+    if (promptFragmentId != null && promptFragmentId.trim().isNotEmpty) {
+      lines.add('    prompt_fragment_id: $promptFragmentId');
+    }
+    if (reason != null && reason.trim().isNotEmpty) {
+      lines.add('    reason: ${_yamlQuoted(reason.trim())}');
+    }
+
+    lines.add(
+      '    operations_executed: [${operationsExecuted.map(_yamlScalar).join(', ')}]',
+    );
+
+    _appendRunTraceEvent(lines, issue: issue);
+  }
+
+  void recordPhaseTimingTrace(
+    InquiryState previousState, {
+    required DateTime recordedAt,
+    required List<String> operationsExecuted,
+    String? issue,
+    String? promptFragmentId,
+  }) {
+    final phase = previousState.state.trim();
+    if (phase.isEmpty || phase == 'IDLE') return;
+
+    final startedAtRaw = previousState.updatedAt ?? previousState.createdAt;
+    if (startedAtRaw == null || startedAtRaw.trim().isEmpty) return;
+
+    final startedAt = DateTime.tryParse(startedAtRaw)?.toUtc();
+    if (startedAt == null) return;
+
+    final duration = recordedAt.difference(startedAt);
+    if (duration.isNegative) return;
+
+    final lines = <String>[
+      '    event_class: phase_timing',
+      '    phase: $phase',
+      '    started_at: ${_yamlQuoted(startedAt.toIso8601String())}',
+      '    ended_at: ${_yamlQuoted(recordedAt.toIso8601String())}',
+      '    duration_seconds: ${duration.inMilliseconds / 1000}',
+    ];
+
+    if (promptFragmentId != null && promptFragmentId.trim().isNotEmpty) {
+      lines.add('    prompt_fragment_id: $promptFragmentId');
+    }
+
+    lines.add(
+      '    operations_executed: [${operationsExecuted.map(_yamlScalar).join(', ')}]',
+    );
+
+    _appendRunTraceEvent(lines, issue: issue);
+  }
+
+  void recordBlockTrace({
+    required String currentState,
+    required String event,
+    required String blockingBoundary,
+    required String reason,
+    required String authoritativeSurface,
+    List<String> operationsExecuted = const <String>[],
+    String? issue,
+    String? promptFragmentId,
+  }) {
+    final lines = <String>[
+      '    event_class: block',
+      '    phase: $currentState',
+      '    transition_event: $event',
+      '    blocking_boundary: $blockingBoundary',
+      '    reason: ${_yamlQuoted(reason)}',
+      '    authoritative_surface: ${_yamlQuoted(authoritativeSurface)}',
+    ];
+
+    if (promptFragmentId != null && promptFragmentId.trim().isNotEmpty) {
+      lines.add('    prompt_fragment_id: $promptFragmentId');
+    }
+
+    lines.add(
+      '    operations_executed: [${operationsExecuted.map(_yamlScalar).join(', ')}]',
+    );
+
+    _appendRunTraceEvent(lines, issue: issue);
+  }
+
+  void recordSensorRunTrace({
+    required String currentState,
+    required String sensorCategory,
+    required String gate,
+    required String verdict,
+    required String authority,
+    List<String> operationsExecuted = const <String>[],
+    String? issue,
+    String? promptFragmentId,
+  }) {
+    final lines = <String>[
+      '    event_class: sensor_run',
+      '    phase: $currentState',
+      '    sensor_category: $sensorCategory',
+      '    gate: $gate',
+      '    verdict: $verdict',
+      '    authority: ${_yamlQuoted(authority)}',
+    ];
+
+    if (promptFragmentId != null && promptFragmentId.trim().isNotEmpty) {
+      lines.add('    prompt_fragment_id: $promptFragmentId');
+    }
+
+    lines.add(
+      '    operations_executed: [${operationsExecuted.map(_yamlScalar).join(', ')}]',
+    );
+
+    _appendRunTraceEvent(lines, issue: issue);
+  }
+
+  void recordToolActivityTrace({
+    required String currentState,
+    required String event,
+    required String toolClass,
+    required String commandFamily,
+    required String outcome,
+    int? exitCode,
+    String? authority,
+    List<String> operationsExecuted = const <String>[],
+    String? issue,
+    String? promptFragmentId,
+  }) {
+    final lines = <String>[
+      '    event_class: tool_activity',
+      '    phase: $currentState',
+      '    transition_event: $event',
+      '    tool_class: $toolClass',
+      '    command_family: $commandFamily',
+      '    outcome: $outcome',
+    ];
+
+    if (exitCode != null) {
+      lines.add('    exit_code: $exitCode');
+    }
+    if (authority != null && authority.trim().isNotEmpty) {
+      lines.add('    authority: ${_yamlQuoted(authority)}');
+    }
+    if (promptFragmentId != null && promptFragmentId.trim().isNotEmpty) {
+      lines.add('    prompt_fragment_id: $promptFragmentId');
+    }
+
+    lines.add(
+      '    operations_executed: [${operationsExecuted.map(_yamlScalar).join(', ')}]',
+    );
+
+    _appendRunTraceEvent(lines, issue: issue);
+  }
+
+  RetryTraceContext? retryContextFor({
+    required String currentState,
+    required String event,
+  }) {
+    final tracePath = _runTracePath();
+    if (tracePath == null) return null;
+
+    final file = File(tracePath);
+    if (!file.existsSync()) return null;
+
+    final content = file.readAsStringSync();
+    final entries = content.split(
+      RegExp(r'^  - recorded_at: ', multiLine: true),
+    );
+    var retryCount = 0;
+    String? triggeringFailure;
+
+    for (final rawEntry in entries.skip(1)) {
+      final entry = '  - recorded_at: $rawEntry';
+      if (!entry.contains('event_class: block')) continue;
+      if (!entry.contains('phase: $currentState')) continue;
+      if (!entry.contains('transition_event: $event')) continue;
+      retryCount += 1;
+      final reasonMatch = RegExp(
+        r'^    reason: "((?:[^"\\]|\\.)*)"',
+        multiLine: true,
+      ).firstMatch(entry);
+      if (reasonMatch != null) {
+        triggeringFailure = _yamlUnquoted(reasonMatch.group(1)!);
+      }
+    }
+
+    if (retryCount == 0) return null;
+    return RetryTraceContext(
+      retryCount: retryCount,
+      triggeringFailure:
+          triggeringFailure ?? 'previous blocked transition for same phase/event',
+    );
+  }
+
+  void recordRetryTrace({
+    required String currentState,
+    required String event,
+    required String triggeringFailure,
+    required int retryCount,
+    List<String> operationsExecuted = const <String>[],
+    String? issue,
+    String? promptFragmentId,
+  }) {
+    final lines = <String>[
+      '    event_class: retry',
+      '    phase: $currentState',
+      '    transition_event: $event',
+      '    triggering_failure: ${_yamlQuoted(triggeringFailure)}',
+      '    retry_count: $retryCount',
+    ];
+
+    if (promptFragmentId != null && promptFragmentId.trim().isNotEmpty) {
+      lines.add('    prompt_fragment_id: $promptFragmentId');
+    }
+
+    lines.add(
+      '    operations_executed: [${operationsExecuted.map(_yamlScalar).join(', ')}]',
+    );
+
+    _appendRunTraceEvent(lines, issue: issue);
+  }
+
+  void _appendRunTraceEvent(List<String> lines, {String? issue}) {
+    final tracePath = _runTracePath();
+    final branch = _branch;
+    if (tracePath == null || branch == null) return;
+
+    final file = File(tracePath);
+    file.parent.createSync(recursive: true);
+
+    final taskId =
+        (issue != null && issue.trim().isNotEmpty) ? issue.trim() : branch;
+    final buffer = StringBuffer()
+      ..writeln(
+        '  - recorded_at: "${DateTime.now().toUtc().toIso8601String()}"',
+      )
+      ..writeln('    task_id: ${_yamlQuoted(taskId)}')
+      ..writeln('    branch: $branch');
+
+    for (final line in lines) {
+      buffer.writeln(line);
+    }
+
+    if (file.existsSync()) {
+      file.writeAsStringSync(buffer.toString(), mode: FileMode.append);
+    } else {
+      file.writeAsStringSync('events:\n${buffer.toString()}');
+    }
+  }
+
+  String? _runTracePath() {
+    final cleanroomRoot = _cleanroomRoot;
+    if (cleanroomRoot == null) return null;
+    return p.join(cleanroomRoot, 'run_trace.yaml');
+  }
+
+  String _yamlScalar(String value) {
+    return "'${value.replaceAll("'", "''")}'";
+  }
+
+  String _yamlQuoted(String value) {
+    return '"${value.replaceAll(r'\\', r'\\\\').replaceAll('"', '\\"')}"';
+  }
+
+  String _yamlUnquoted(String value) {
+    return value.replaceAll(r'\"', '"').replaceAll(r'\\', r'\');
   }
 }

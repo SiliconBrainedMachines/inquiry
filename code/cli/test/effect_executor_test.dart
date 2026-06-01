@@ -251,6 +251,42 @@ void main() {
     });
 
     group('executeAll', () {
+      test('records tool_activity when open_analysis_context fetches issue body', () {
+        File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
+
+        final executor = EffectExecutor(
+          workingDirectory: tempDir.path,
+          issueBodyProvider: (issue, _) => 'Body for issue $issue',
+        );
+
+        final executed = executor.executeAll(
+          effects: ['open_analysis_context'],
+          newState: 'ANALYZE',
+          currentState: 'IDLE',
+          event: 'start_analyze',
+          issue: '145',
+          promptFragmentId: 'idle_to_analyze',
+        );
+
+        expect(executed, containsAll(['update_state', 'open_analysis_context']));
+
+        final traceContent = File(
+          '${tempDir.path}/cleanrooms/$branch/run_trace.yaml',
+        ).readAsStringSync();
+
+        expect(traceContent, contains('event_class: tool_activity'));
+        expect(traceContent, contains('phase: ANALYZE'));
+        expect(traceContent, contains('transition_event: start_analyze'));
+        expect(traceContent, contains('tool_class: gh'));
+        expect(traceContent, contains('command_family: issue_view'));
+        expect(traceContent, contains('outcome: succeeded'));
+        expect(
+          traceContent,
+          contains('authority: "cleanrooms/$branch/issue.md"'),
+        );
+        expect(traceContent, contains('prompt_fragment_id: idle_to_analyze'));
+      });
+
       test('executes multiple effects in order', () {
         File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
         File(
@@ -261,6 +297,8 @@ void main() {
         final executed = executor.executeAll(
           effects: ['reset_mutations', 'snapshot_metrics'],
           newState: 'ANALYZE',
+          currentState: 'IDLE',
+          event: 'start_analyze',
           issue: '145',
           promptFragmentId: 'idle_to_analyze',
         );
@@ -280,6 +318,27 @@ void main() {
           '${tempDir.path}/cleanrooms/$branch/mutations.md',
         ).readAsStringSync();
         expect(mutContent, isNot(contains('old stuff')));
+
+        final runTrace = File(
+          '${tempDir.path}/cleanrooms/$branch/run_trace.yaml',
+        );
+        expect(runTrace.existsSync(), isTrue);
+        final traceContent = runTrace.readAsStringSync();
+        expect(traceContent, contains('events:'));
+        expect(traceContent, contains('event_class: transition'));
+        expect(traceContent, contains('task_id: "145"'));
+        expect(traceContent, contains('branch: $branch'));
+        expect(traceContent, contains('from_state: IDLE'));
+        expect(traceContent, contains('transition_event: start_analyze'));
+        expect(traceContent, contains('to_state: ANALYZE'));
+        expect(traceContent, contains('outcome: allowed'));
+        expect(traceContent, contains('prompt_fragment_id: idle_to_analyze'));
+        expect(
+          traceContent,
+          contains(
+            "operations_executed: ['update_state', 'reset_mutations', 'snapshot_metrics']",
+          ),
+        );
       });
 
       test('skips unknown effects gracefully', () {
@@ -289,6 +348,8 @@ void main() {
         final executed = executor.executeAll(
           effects: ['noop', 'push_branch', 'generate_plan'],
           newState: 'ANALYZE',
+          currentState: 'IDLE',
+          event: 'start_analyze',
         );
 
         // Only update_state is a CLI effect; the rest are skill-side
@@ -296,10 +357,76 @@ void main() {
         expect(executed, isNot(contains('noop')));
         expect(executed, isNot(contains('push_branch')));
       });
+
+      test('appends run_trace entries for repeated transitions', () {
+        File(stateFilePath).writeAsStringSync('state: IDLE\nissue: null\n');
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.executeAll(
+          effects: const [],
+          newState: 'ANALYZE',
+          currentState: 'IDLE',
+          event: 'start_analyze',
+          issue: '145',
+        );
+        executor.executeAll(
+          effects: const [],
+          newState: 'PLAN',
+          currentState: 'ANALYZE',
+          event: 'complete_analysis',
+          issue: '145',
+        );
+
+        final traceContent = File(
+          '${tempDir.path}/cleanrooms/$branch/run_trace.yaml',
+        ).readAsStringSync();
+
+        expect(
+          RegExp('event_class: transition').allMatches(traceContent).length,
+          2,
+        );
+        expect(traceContent, contains('transition_event: start_analyze'));
+        expect(traceContent, contains('transition_event: complete_analysis'));
+      });
+
+      test('records phase_timing when leaving a persisted phase', () {
+        File(stateFilePath).writeAsStringSync(
+          'version: 1\n'
+          'state: ANALYZE\n'
+          'issue: "145"\n'
+          'prompt_fragment_id: null\n'
+          'status: active\n'
+          'ape: null\n'
+          'created_at: "2026-05-31T10:00:00.000Z"\n'
+          'updated_at: "2026-05-31T10:00:00.000Z"\n',
+        );
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.executeAll(
+          effects: const [],
+          newState: 'PLAN',
+          currentState: 'ANALYZE',
+          event: 'complete_analysis',
+          issue: '145',
+        );
+
+        final traceContent = File(
+          '${tempDir.path}/cleanrooms/$branch/run_trace.yaml',
+        ).readAsStringSync();
+
+        expect(traceContent, contains('event_class: phase_timing'));
+        expect(traceContent, contains('phase: ANALYZE'));
+        expect(
+          traceContent,
+          contains('started_at: "2026-05-31T10:00:00.000Z"'),
+        );
+        expect(traceContent, contains('ended_at: "'));
+        expect(traceContent, contains('duration_seconds: '));
+      });
     });
 
     group('openAnalysisContext', () {
-      test('creates analyze bootstrap with confirmations.md', () {
+      test('creates analyze bootstrap with confirmations.md and diagnosis.md', () {
         File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
 
         final executor = EffectExecutor(workingDirectory: tempDir.path);
@@ -311,10 +438,15 @@ void main() {
         final confirmationsFile = File(
           '${tempDir.path}/cleanrooms/$branch/analyze/confirmations.md',
         );
+        final diagnosisFile = File(
+          '${tempDir.path}/cleanrooms/$branch/analyze/diagnosis.md',
+        );
 
         expect(indexFile.existsSync(), isTrue);
         expect(confirmationsFile.existsSync(), isTrue);
+        expect(diagnosisFile.existsSync(), isTrue);
         expect(indexFile.readAsStringSync(), contains('confirmations.md'));
+        expect(indexFile.readAsStringSync(), contains('diagnosis.md'));
       });
 
       test('creates methodology-neutral confirmations bootstrap', () {
@@ -329,6 +461,25 @@ void main() {
         final content = confirmationsFile.readAsStringSync();
 
         expect(content, contains('title: "Confirmations"'));
+        expect(content, isNot(contains('author: socrates')));
+      });
+
+      test('creates diagnosis bootstrap with evidence-first sections', () {
+        File(stateFilePath).writeAsStringSync('state: ANALYZE\nissue: "145"\n');
+
+        final executor = EffectExecutor(workingDirectory: tempDir.path);
+        executor.openAnalysisContext();
+
+        final diagnosisFile = File(
+          '${tempDir.path}/cleanrooms/$branch/analyze/diagnosis.md',
+        );
+        final content = diagnosisFile.readAsStringSync();
+
+        expect(content, contains('title: "Diagnosis"'));
+        expect(content, contains('## Evidence'));
+        expect(content, contains('## Hypotheses'));
+        expect(content, contains('## Constraints'));
+        expect(content, contains('## Open Questions'));
         expect(content, isNot(contains('author: socrates')));
       });
 
