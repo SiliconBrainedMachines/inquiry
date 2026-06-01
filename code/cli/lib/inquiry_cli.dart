@@ -20,6 +20,9 @@ List<String> normalizeInquiryArgs(List<String> args) {
   if (args.length == 1 && (args.first == '--help' || args.first == '-h')) {
     return const ['help'];
   }
+  if (args.length == 1 && (args.first == '--version' || args.first == '-v')) {
+    return const ['version'];
+  }
   return args;
 }
 
