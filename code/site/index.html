@@ -30,8 +30,8 @@
     <header>
       <h1><span class="ape">Inquiry</span></h1>
       <p class="primary-tagline">Analyze. Plan. Execute.</p>
-      <p class="secondary-tagline">Currently available for GitHub Copilot. More targets coming soon.</p>
-      <span class="badge">v0.7.1</span>
+      <p class="secondary-tagline">Currently available for GitHub Copilot. More hosts coming soon.</p>
+      <span class="badge">v0.7.3</span>
       <p class="secondary-tagline">Public entry surface. For the canonical documentation map, start in the repository docs.</p>
 
       <div class="hero-install" id="install">
@@ -46,7 +46,7 @@
             <button class="copy-btn" onclick="copy(this)" aria-label="Copy install command">Copy</button>
             <code>irm https://inquiry.ccisne.dev/install.ps1 | iex</code>
           </div>
-          <p class="install-note">Installs to <code>%LOCALAPPDATA%\inquiry\</code>, adds to <code>PATH</code>, and deploys Inquiry agents to your AI coding tool.</p>
+          <p class="install-note">Installs to <code>%LOCALAPPDATA%\inquiry\</code>, adds to <code>PATH</code>, and deploys Inquiry skills to your AI coding host.</p>
         </div>
         <div id="panel-linux" class="os-panel" role="tabpanel" aria-labelledby="tab-linux" hidden>
           <div class="install-block">
@@ -54,7 +54,7 @@
             <button class="copy-btn" onclick="copy(this)" aria-label="Copy install command">Copy</button>
             <code>curl -fsSL https://inquiry.ccisne.dev/install.sh | bash</code>
           </div>
-          <p class="install-note">Installs to <code>~/.inquiry/</code> and deploys Inquiry agents to your AI coding tool.</p>
+          <p class="install-note">Installs to <code>~/.inquiry/</code> and deploys Inquiry skills to your AI coding host.</p>
         </div>
       </div>
 
@@ -87,7 +87,7 @@
         </div>
         <div class="phase">
           <h3 class="phase-name">EXECUTE</h3>
-          <p class="phase-desc">Implement under the constraints of the tests. Each change small enough to merge confidently.</p>
+          <p class="phase-desc">Implement under the active plan and coding manifesto. Each change small enough to merge confidently.</p>
           <span class="output">code + commits</span>
         </div>
       </div>
@@ -99,8 +99,8 @@
       <pre class="quickstart"><span class="comment"># verify prerequisites (inquiry, git, gh, gh auth)</span>
 <span class="cmd">iq doctor</span>
 
-<span class="comment"># deploy Inquiry agent + skills to your AI tool (Copilot today)</span>
-<span class="cmd">iq target get</span>
+<span class="comment"># deploy Inquiry skills to your AI host (Copilot today)</span>
+<span class="cmd">iq host get</span>
 
 <span class="comment"># scaffold .inquiry/ in your repo</span>
 <span class="cmd">cd your-repo &amp;&amp; iq init</span></pre>
@@ -112,18 +112,18 @@
         <li class="cmd"><code>iq</code><span class="desc">Print ASCII banner + version</span></li>
         <li class="cmd"><code>iq init</code><span class="desc">Scaffold repo-scoped Inquiry files (<code>.inquiry/config.yaml</code>, ignore rules, agent)</span></li>
         <li class="cmd"><code>iq doctor</code><span class="desc">Verify prerequisites</span></li>
-        <li class="cmd"><code>iq target get</code><span class="desc">Deploy agent + skills to AI tool</span></li>
+        <li class="cmd"><code>iq host get</code><span class="desc">Deploy skills to the active AI host</span></li>
         <li class="cmd"><code>iq fsm transition</code><span class="desc">Execute a deterministic FSM transition</span></li>
         <li class="cmd"><code>iq fsm state</code><span class="desc">Show current FSM state as JSON</span></li>
         <li class="cmd"><code>iq ape prompt</code><span class="desc">Assemble sub-agent prompt from state</span></li>
         <li class="cmd"><code>iq upgrade</code><span class="desc">Update to the latest release</span></li>
       </ul>
-      <p class="see-all">12 commands total — see <a href="https://github.com/ccisnedev/inquiry#available-commands">the full table on GitHub</a>.</p>
+      <p class="see-all">13 commands total — see <a href="https://github.com/ccisnedev/inquiry#available-commands">the full table on GitHub</a>.</p>
     </section>
 
     <section id="targets">
-      <h2>Targets</h2>
-      <p>Inquiry deploys agent prompts and skills to the global configuration of your AI coding tool.</p>
+      <h2>Hosts</h2>
+      <p>Inquiry deploys host-scoped skills to the global configuration of your AI coding tool. The repo-scoped agent is scaffolded by <code>iq init</code>.</p>
       <ul class="targets">
         <li class="target-badge"><span class="dot"></span>GitHub Copilot</li>
         <li class="target-badge future"><span class="dot"></span>Claude Code</li>
@@ -131,7 +131,7 @@
         <li class="target-badge future"><span class="dot"></span>Crush</li>
         <li class="target-badge future"><span class="dot"></span>Gemini</li>
       </ul>
-      <p class="install-note">Adapters for Claude, Codex, Crush, and Gemini already exist — awaiting a stable agent prompt API before being wired in (<a href="https://github.com/ccisnedev/inquiry/blob/main/docs/spec/target-specific-agents.md">ADR D20</a>).</p>
+      <p class="install-note">Adapters for Claude, Codex, Crush, and Gemini already exist — awaiting a stable agent prompt API before being wired in (<a href="https://github.com/ccisnedev/inquiry/blob/main/docs/spec/host-specific-agents.md">ADR D20</a>).</p>
     </section>
 
     <section id="deeper">
@@ -143,7 +143,7 @@
         </a>
         <a href="agents.html" class="deeper-card">
           <h3>Meet the agents →</h3>
-          <p>Five active agents — DEWEY, SOCRATES, DESCARTES, BASHŌ, DARWIN — and the honest story of the larger roster that collapsed.</p>
+          <p>Five active agents — DEWEY, SOCRATES, DESCARTES, ADA, DARWIN — and the honest story of the larger roster that collapsed.</p>
         </a>
         <a href="methodology.html" class="deeper-card">
           <h3>Methodology →</h3>

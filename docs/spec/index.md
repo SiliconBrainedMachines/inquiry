@@ -25,7 +25,7 @@ Technical specifications that still support the live Inquiry runtime.
 | [cooperative-multitasking-model.md](cooperative-multitasking-model.md) | Two-level FSM and scheduler/task coordination model |
 | [signal-based-coordination.md](signal-based-coordination.md) | Signal/event model for coordination and transitions |
 | [cli-as-api.md](cli-as-api.md) | Boundary between skills, agent behavior, and CLI enforcement |
-| [target-specific-agents.md](target-specific-agents.md) | Host-boundary deployment strategy and current Copilot-first decision |
+| [host-specific-agents.md](host-specific-agents.md) | Host-boundary deployment strategy and current Copilot-first decision |
 | [state-encapsulation.md](state-encapsulation.md) | State encapsulation principle and related system analogies |
 
 ## Recommended read order

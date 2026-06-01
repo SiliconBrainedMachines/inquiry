@@ -54,7 +54,7 @@ void main() {
     // Copy APE YAMLs
     final apesDir = Directory('${tempDir.path}/assets/apes');
     apesDir.createSync(recursive: true);
-    for (final name in ['socrates', 'descartes', 'basho', 'darwin']) {
+    for (final name in ['socrates', 'dewey', 'descartes', 'ada', 'darwin']) {
       final src = File('assets/apes/$name.yaml');
       if (src.existsSync()) {
         src.copySync('${apesDir.path}/$name.yaml');
@@ -231,7 +231,7 @@ void main() {
         expect(apes[0]['name'], equals('descartes'));
       });
 
-      test('EXECUTE has basho running', () async {
+      test('EXECUTE has ada running', () async {
         setupWorkspace(state: 'EXECUTE', issue: '145');
 
         final command = FsmStateCommand(
@@ -241,7 +241,19 @@ void main() {
         final apes = result.toJson()['apes'] as List;
 
         expect(apes, hasLength(1));
-        expect(apes[0]['name'], equals('basho'));
+        expect(apes[0]['name'], equals('ada'));
+      });
+
+      test('END has no active ape', () async {
+        setupWorkspace(state: 'END', issue: '145');
+
+        final command = FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        );
+        final result = await command.execute();
+        final apes = result.toJson()['apes'] as List;
+
+        expect(apes, isEmpty);
       });
 
       test('EVOLUTION has darwin running', () async {

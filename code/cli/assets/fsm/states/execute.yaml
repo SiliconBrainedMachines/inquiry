@@ -5,6 +5,7 @@ description: "Implementation under plan constraints"
 instructions: |
   Implement the plan phase by phase under its formal constraints.
   Each phase produces tested code and a commit.
+  Review each changed slice against the active programming manifesto before calling the slice complete.
   After the final plan phase, perform release preparation:
   - Version bump (as specified in the plan)
   - CHANGELOG update
@@ -20,6 +21,7 @@ constraints:
   - inferential_optional findings can sharpen review but do not override stronger blocking sensors on their own
   - Follow plan.md phases in order
   - Each phase must pass its verification criteria before advancing
+  - Each changed slice must satisfy the active programming manifesto before phase completion; if it does not, rewrite it
   - Commits must be atomic (one phase = one commit)
   - No scope creep — only implement what plan.md specifies
   - Version bump and CHANGELOG are mandatory before completion

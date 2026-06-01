@@ -82,7 +82,7 @@ inquiry-vscode/
 │   │   ├── mutations.ts         ← add mutation note
 │   │   ├── doctor.ts            ← ape.doctor
 │   │   ├── install.ts           ← install/update CLI
-│   │   ├── target.ts            ← ape target get/clean
+│   │   ├── installer.ts         ← install/update CLI + `inquiry host get`
 │   │   └── state.ts             ← ape state transition wrapper
 │   │
 │   ├── views/                   ← Sidebar panels
@@ -212,8 +212,6 @@ await vscode.commands.executeCommand("setContext", "ape:currentState", "ANALYZE"
 | `ape.install` | Install CLI | APE | `!ape:cliInstalled` | GitHub Release download |
 | `ape.update` | Update CLI | APE | `ape:cliInstalled` | `ape upgrade` |
 | `ape.uninstall` | Uninstall CLI | APE | `ape:cliInstalled` | `ape uninstall` |
-| `ape.target.get` | Deploy Agents | APE | `ape:cliInstalled` | `ape target get` |
-| `ape.target.clean` | Clean Agents | APE | `ape:cliInstalled` | `ape target clean` |
 | `ape.startAnalysis` | Start Analysis | APE Cycle | `ape:projectLoaded && ape:currentState == IDLE` | `ape state transition -e start_analysis` |
 | `ape.approveDiagnosis` | Approve Diagnosis | APE Cycle | `ape:currentState == ANALYZE && ape:hasDiagnosis` | `ape state transition -e approve_diagnosis` |
 | `ape.approvePlan` | Approve Plan | APE Cycle | `ape:currentState == PLAN && ape:hasPlan` | `ape state transition -e approve_plan` |

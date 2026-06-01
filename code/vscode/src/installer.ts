@@ -253,11 +253,11 @@ export async function installInquiryCli(deps?: Partial<InstallerDeps>): Promise<
         setEnvPath(`${binDir}${path.delimiter}${currentPath}`);
       }
 
-      // 6. Deploy to active target
-      progress.report({ message: 'Deploying to active target...' });
+      // 6. Deploy to active host
+      progress.report({ message: 'Deploying to active host...' });
       const binaryPath = path.join(binDir, platform === 'win32' ? 'inquiry.exe' : 'inquiry');
       try {
-        await execFileFn(binaryPath, ['target', 'get']);
+        await execFileFn(binaryPath, ['host', 'get']);
       } catch { /* non-fatal */ }
 
       // 7. Verify
