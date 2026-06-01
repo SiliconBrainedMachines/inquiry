@@ -153,32 +153,31 @@
   padding-right: 5.75rem;
 }
 
-/* --- BASHŌ: asymmetric layout + sakura + sumi-e + haiku --- */
-.agent-card--basho .inner {
+/* --- ADA: manifesto card + logic trace motif --- */
+.agent-card--ada .inner {
   padding-left: 3.25rem;
   position: relative;
 }
 
-.agent-card--basho .sakura-anchor {
+.agent-card--ada .logic-anchor {
   position: absolute;
-  top: 1.3rem;
+  top: 1.2rem;
   left: 0.9rem;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
 }
 
-.agent-card--basho .sumi-divider {
+.agent-card--ada .logic-divider {
   display: block;
   width: 100%;
   height: 14px;
   margin: 0.2rem 0 0.4rem;
 }
 
-.agent-card--basho .haiku {
+.agent-card--ada .manifesto {
   font-family: var(--mono);
   font-size: 0.82rem;
   color: var(--fg-dim);
-  font-style: italic;
   line-height: 1.5;
   padding-left: 0.9rem;
   border-left: 1px solid rgba(239, 68, 68, 0.4);

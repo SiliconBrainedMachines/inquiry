@@ -31,7 +31,7 @@ The insight: **AI capability only becomes trustworthy when governed by rigorous 
 | **IDLE** | DEWEY | Deweyan problematization — scope, deduplicate, prepare issue handoff | selected issue + `inquiry-start` handoff |
 | **ANALYZE** | SOCRATES | Socratic questioning — clarify, challenge, evidence | `confirmed.md` → `diagnosis.md` |
 | **PLAN** | DESCARTES | Scientific method — divide, order, verify, enumerate | `plan.md` |
-| **EXECUTE** | BASHŌ | Wabi-sabi — minimal, beautiful implementation under tests | code + commits |
+| **EXECUTE** | ADA | Programming manifesto — intention-first construction and slice review | code + commits |
 | **END** | — | PR gate — review, merge | merged PR |
 | **EVOLUTION** | DARWIN | Natural selection — propose methodology mutations | issues on this repo |
 
@@ -52,7 +52,7 @@ During ANALYZE, SOCRATES writes investigation material to `cleanrooms/<branch>/a
 - **Topic documents** — optional bounded evidence threads when needed
 - **`diagnosis.md`** — final synthesis that references all findings
 
-DESCARTES reads `diagnosis.md` as its authoritative planning input. BASHO and END inherit `plan.md`, `pre_pr_inspection.md`, and `run_trace.yaml` as the closure and observability surfaces that now define the 0.7.x baseline.
+DESCARTES reads `diagnosis.md` as its authoritative planning input. ADA inherits `plan.md` as the execution baseline, while EXECUTE and END rely on `pre_pr_inspection.md` and `run_trace.yaml` as the closure and observability surfaces that now define the 0.7.x baseline.
 
 This ensures that analysis survives context windows, session resets, and model swaps. The investigation is in the files, not in the chat.
 

@@ -33,7 +33,7 @@ void ape_tick() {
     case IDLE:       dewey_run();          break;  // Sub-agent: DEWEY (bounded triage)
     case ANALYZE:    socrates_run();       break;  // Sub-agent: SOCRATES
     case PLAN:       descartes_run();      break;  // Sub-agent: DESCARTES
-    case EXECUTE:    basho_run();          break;  // Sub-agent: BASHŌ
+    case EXECUTE:    ada_run();            break;  // Sub-agent: ADA
     case END:        ape_end();            break;  // APE direct + human gate
     case EVOLUTION:  darwin_run();         break;  // Sub-agent: DARWIN
   }
@@ -42,7 +42,7 @@ void ape_tick() {
 
 ### Key Properties
 
-1. **One primary operator per phase.** IDLE→DEWEY. ANALYZE→SOCRATES. PLAN→DESCARTES. EXECUTE→BASHŌ. END→APE + human gate. EVOLUTION→DARWIN.
+1. **One primary operator per phase.** IDLE→DEWEY. ANALYZE→SOCRATES. PLAN→DESCARTES. EXECUTE→ADA. END→APE + human gate. EVOLUTION→DARWIN.
 2. **Sub-agents are launched with clean context.** Each invocation receives: the user's input, the relevant artifacts (diagnosis.md, plan.md, etc.), and a phase-specific prompt. The sub-agent does not know about other phases or agents.
 3. **Illusion of continuity.** Sub-agents don't persist between ticks. APE reconstructs context from artifacts (`state.yaml`, `diagnosis.md`, `plan.md`) and passes it to the sub-agent on each invocation. The agent experiences continuity; the scheduler provides it.
 4. **Agents are unaware of each other.** No agent knows what other agents exist. Communication is through artifacts (files) routed by the scheduler (see [signal-based-coordination](signal-based-coordination.md)).
@@ -55,7 +55,7 @@ void ape_tick() {
 | DEWEY | IDLE | Deweyan problematization | `issue_selected_or_created` inside TRIAGE until explicit start |
 | SOCRATES | ANALYZE | Mayéutica (Socratic method) | `diagnosis.md` — rigorous paper with references |
 | DESCARTES | PLAN | Method (divide, order, verify, enumerate) | `plan.md` — WBS with checkboxes + test pseudocode |
-| BASHŌ | EXECUTE | Techne + 用の美 (functional beauty) | Code + commits per phase |
+| ADA | EXECUTE | Programming manifesto | Code + commits per phase |
 | APE + human gate | END | Explicit closure discipline | PR creation and merge gate |
 | DARWIN | EVOLUTION | Natural selection (observe, compare, select) | Issues in the Inquiry repository (via `gh`) |
 
@@ -91,4 +91,4 @@ The [finite-ape-machine spec](finite-ape-machine.md) describes the current three
 IDLE → ANALYZE → PLAN → EXECUTE → END → EVOLUTION → IDLE
 ```
 
-The [lore](../lore.md) describes the broader original roster. The current operational model uses DEWEY, SOCRATES, DESCARTES, BASHŌ, DARWIN, and an explicit END gate governed by APE plus the human.
+The [lore](../lore.md) describes the broader original roster. The current operational model uses DEWEY, SOCRATES, DESCARTES, ADA, DARWIN, and an explicit END gate governed by APE plus the human.
