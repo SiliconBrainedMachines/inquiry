@@ -325,6 +325,7 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'doc_protocol': 'doc-read',
         };
       case 'basho':
+        final isEnd = currentState == FsmState.end;
         final sensorContext = currentState == FsmState.end
             ? _sensorContext(
                 sensorPolicy: 'minimum-phase-stack',
@@ -373,6 +374,9 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
                 'trust plan.md as the execution baseline unless implementation hits a concrete ambiguity that requires targeted retrieval',
           ),
           ...sensorContext,
+          if (!isEnd)
+            'release_gate':
+                'propose semver bump and get explicit user approval before END handoff',
           'input_artifacts': _yamlList(['${cleanroomRoot}plan.md']),
           'expected_outputs': _yamlList([
             cycleContext.projectRoot,
@@ -386,6 +390,8 @@ class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
           'validation_commands': _yamlList(const []),
           'done_criteria': _yamlList([
             'implementation remains bounded by ${cleanroomRoot}plan.md',
+            if (!isEnd)
+              'semver bump proposal is explicit and user-approved before END handoff',
             'required validations complete before END',
           ]),
           'pre_pr_inspection_report': '${cleanroomRoot}pre_pr_inspection.md',

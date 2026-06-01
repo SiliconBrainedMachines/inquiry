@@ -79,8 +79,9 @@ These fields live alongside the older phase-specific runtime paths such as `outp
 - `expected_outputs`: bounded project changes plus cycle-local artifacts
 - `editable_surfaces`: project working tree under `project_root`, subject to plan constraints
 - `read_only_surfaces`: `plan.md` as the governing execution contract
+- `release_gate`: semver bump must be proposed and explicitly approved before the EXECUTE -> END handoff
 - `pre_pr_inspection_report`: `cleanrooms/<branch>/pre_pr_inspection.md` on the closure path into END, auto-seeded on `finish_execute`, with an auto-generated `Consistency` pass, automatic `plan.md` checkbox completeness review, and automatic report metadata traceability review all refreshed at `pr_ready`, plus `Completeness` and `Traceability` passes, overall verdict, and `file:line` citations for `FAIL` findings
-- `done_criteria`: implementation stays bounded by plan and completes required validation before END
+- `done_criteria`: implementation stays bounded by plan, the semver bump proposal is explicit and approved before handoff, and required validation completes before END
 
 ### DARWIN
 
