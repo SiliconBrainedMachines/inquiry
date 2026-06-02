@@ -94,28 +94,6 @@
       <p class="cycle-note">Backward transitions from <code>PLAN</code> or <code>EXECUTE</code> back to <code>ANALYZE</code> are allowed — re-analysis is part of the contract.</p>
     </section>
 
-    <section id="design-characteristics">
-      <h2>Design characteristics</h2>
-      <div class="deeper">
-        <article class="deeper-card">
-          <h3>Explicit finite-state control</h3>
-          <p>Inquiry structures work as a declared state machine with named phases, legal transitions, and an explicit END gate rather than leaving task flow implicit in chat history.</p>
-        </article>
-        <article class="deeper-card">
-          <h3>Operator-specific reasoning rules</h3>
-          <p>The active phase is tied to a named thinking operator with a bounded role, so questioning, planning, execution, and evolution are governed by different explicit instructions.</p>
-        </article>
-        <article class="deeper-card">
-          <h3>Repository-local memory</h3>
-          <p>Project state and cycle artifacts are stored as files in the repository, which makes the method version-controlled, inspectable, and portable across sessions and hosts.</p>
-        </article>
-        <article class="deeper-card">
-          <h3>Inspectable prompt assembly</h3>
-          <p>The effective sub-agent prompt is assembled from explicit assets and runtime context, so the working instructions can be printed, reviewed, and versioned instead of remaining hidden inside the host.</p>
-        </article>
-      </div>
-    </section>
-
     <section id="quickstart">
       <h2>Quick start</h2>
       <pre class="quickstart"><span class="comment"># verify prerequisites (inquiry, git, gh, gh auth)</span>
