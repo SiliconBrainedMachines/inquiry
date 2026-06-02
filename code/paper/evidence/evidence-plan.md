@@ -2,7 +2,7 @@
 
 > **Type:** evidence
 > **Status:** draft
-> **Depends on:** [../thesis.md](../thesis.md), [../research-question.md](../research-question.md)
+> **Depends on:** [../contribution.md](../contribution.md), [../thesis.md](../thesis.md), [../research-question.md](../research-question.md)
 > **Used by:** the assembled paper draft
 
 ## Principle
@@ -34,7 +34,7 @@ The contrafactual is **same model, same tasks, harness on vs. off**.
 
 A secondary condition (generic scaffolding, operators stripped of their named
 constraints) can be added later to harden the strong-path argument
-([../thesis.md](../thesis.md)); it is not required for the first paper.
+([../contribution.md](../contribution.md)); it is not required for the first paper.
 
 ## Measures, mapped to claims
 

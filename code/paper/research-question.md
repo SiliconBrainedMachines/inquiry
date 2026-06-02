@@ -2,15 +2,15 @@
 
 > **Type:** question
 > **Status:** draft
-> **Depends on:** [thesis.md](thesis.md)
+> **Depends on:** [contribution.md](contribution.md), [thesis.md](thesis.md)
 > **Used by:** [evidence/evidence-plan.md](evidence/evidence-plan.md)
 
 ## Question
 
-Does reifying specific philosophical inference-disciplines as an explicit harness
-measurably improve the **evidence-discipline**, **inspectability**, and **human-clarification
-economy** of LLM-assisted software work, relative to freestyle use of the same model —
-and at what overhead cost?
+Does implementing a small, philosophically individuated operator library as explicit
+harness rules measurably improve the **evidence-discipline**, **inspectability**, and
+**human-clarification economy** of LLM-assisted software work, relative to freestyle use
+of the same model — and at what overhead cost?
 
 ## Falsifiable claims
 
@@ -50,6 +50,9 @@ strong-path argument but are not required for the first paper. See
 ## What a positive result would and would not show
 
 A positive result would show that *named inference-disciplines, delivered as a harness,*
-change measurable behavior in the predicted direction. It would **not** show
-universal superiority, nor that the effect holds for every model, task, or host. Those
-are future-paper questions ([research-line.md](research-line.md)).
+change measurable behavior in the predicted direction, and would support the stronger
+claim that philosophical lineage can matter operationally as a reusable source of
+operator distinctions rather than merely as inspiration.
+
+It would **not** show universal superiority, nor that the effect holds for every model,
+task, or host. Those are future-paper questions ([research-line.md](research-line.md)).
