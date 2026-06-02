@@ -3,29 +3,45 @@
 > **Type:** research-line
 > **Status:** stable
 > **Depends on:** [concepts/abductive-machine.md](concepts/abductive-machine.md), [concepts/thinking-tools.md](concepts/thinking-tools.md)
-> **Used by:** [thesis.md](thesis.md), [research-question.md](research-question.md)
+> **Used by:** [contribution.md](contribution.md), [thesis.md](thesis.md), [research-question.md](research-question.md)
 
 ## The program
 
-The long-horizon research line is the **engineering of inference**: taking disciplines
-of reasoning developed by philosophy and reifying them as executable engineering
-artifacts — states, contracts, prompts, and protocols — that govern how a machine
-reasons.
+The long-horizon research line is the **engineering of inference**: an exercise in
+applied epistemology that asks how the conditions of justified machine action can be
+designed rather than merely hoped for. In Inquiry, that means converting disciplines of
+reasoning into executable engineering artifacts — operators, state contracts, prompts,
+and durable traces — that govern when a machine may ask, infer, act, and claim to know.
 
-The generative idea is older than this project and simple to state: **philosophy can be
-turned into engineering of thought.** Methods such as Socratic maieutics, Cartesian
-methodic doubt, and Deweyan inquiry are not merely historical doctrines; they are
-*procedures for disciplining inference*. The new fact that makes the program timely is
-the arrival of a practical abductive machine — the large language model
-([concepts/abductive-machine.md](concepts/abductive-machine.md)).
+The generative idea is not simply that philosophy contains interesting old ideas. It is
+that philosophy may contain a **preexisting taxonomy of inference operators**:
+differentiated procedures for eliciting premises, doubting claims, and moving from
+indeterminate situations to warranted assertions. If such a taxonomy can be made
+operational, AI engineering gains not only reusable heuristics but a structured design
+space for building and comparing inference-governing systems.
 
 ## Why now
 
-For most of history these inference-disciplines had only human practitioners. They were
-taught, not executed. An LLM changes the situation: it produces fluent abduction at
-scale but does not natively govern it. That creates, for the first time, a concrete
-substrate on which inference-disciplines can be **mechanized and measured** rather than
-only described.
+Until a practical, general, and accessible abductive machine existed, these disciplines
+could be taught, exemplified, and argued over, but not embedded into everyday technical
+systems and observed under real work conditions. A large language model changes that
+condition. It provides a daily, general-purpose engine of fluent abduction that is
+powerful enough to matter and undisciplined enough to need governance. That makes
+inference-governance an engineering surface rather than a purely philosophical one.
+
+## What would make the line non-trivial
+
+This line matters scientifically only if it yields more than historical reuse. Its value
+would lie in three outcomes:
+
+- a reusable taxonomy of operator classes with sharper boundaries than ad hoc
+  scaffolding,
+- operational implementations whose effects can be isolated and measured,
+- and a cumulative research program in which operators can be added, removed, combined,
+  and compared across tasks and hosts.
+
+If those outcomes do not materialize, the line collapses into a historically interesting
+but scientifically weak source of metaphors.
 
 ## Scope of the line vs. the first paper
 

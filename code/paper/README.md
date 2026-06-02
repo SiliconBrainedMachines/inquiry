@@ -14,7 +14,7 @@ Every document follows the same shape:
 ```
 # Title
 
-> **Type:** thesis | research-line | question | concept | operator | method | evidence
+> **Type:** thesis | research-line | contribution | question | concept | operator | method | evidence
 > **Status:** draft | stable
 > **Depends on:** links to the documents this one assumes
 > **Used by:** links to the documents that consume this one
@@ -36,6 +36,7 @@ Rules, in the spirit of clean code:
 | Document | Type | Role |
 |---|---|---|
 | [research-line.md](research-line.md) | research-line | The long-horizon program: engineering of inference |
+| [contribution.md](contribution.md) | contribution | The paper's non-trivial contribution and why the philosophical lineage matters |
 | [thesis.md](thesis.md) | thesis | The first paper's central, falsifiable claim |
 | [research-question.md](research-question.md) | question | The question and the claims that can fail |
 | [concepts/abductive-machine.md](concepts/abductive-machine.md) | concept | The LLM as an undisciplined abductive engine |
@@ -50,7 +51,8 @@ Rules, in the spirit of clean code:
 ## How a paper is assembled from this folder
 
 A paper draft is a **composition** of these atomic documents, not a separate manuscript
-that duplicates them. The first paper draws its argument from `thesis.md` and
-`research-question.md`, its mechanism from the `concepts/` and `operators/` files, and
-its empirical structure from `evidence/evidence-plan.md`. Several papers can be composed
-from the same atomic base; this is why the base must stay clean.
+that duplicates them. The first paper draws its research program from `research-line.md`,
+its non-trivial claim from `contribution.md`, its central hypothesis from `thesis.md`
+and `research-question.md`, its mechanism from the `concepts/` and `operators/` files,
+and its empirical structure from `evidence/evidence-plan.md`. Several papers can be
+composed from the same atomic base; this is why the base must stay clean.
