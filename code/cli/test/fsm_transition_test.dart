@@ -410,6 +410,29 @@ void main() {
       },
     );
 
+    test(
+      'blocks IDLE to ANALYZE when branch does not match active issue',
+      () async {
+        _initGitRepo(tempDir.path, branch: 't1-pilot-h');
+        _writeState(tempDir.path, 'IDLE', issue: '231');
+
+        final input = StateTransitionInput(
+          currentState: null,
+          event: 'start_analyze',
+          workingDirectory: tempDir.path,
+        );
+        final command = StateTransitionCommand(
+          input,
+          branchProvider: (_) async => 't1-pilot-h',
+        );
+
+        final output = await command.execute();
+
+        expect(output.allowed, isFalse);
+        expect(output.message, contains('ERROR_PRECONDITION_BRANCH_POLICY'));
+      },
+    );
+
     test('allows IDLE to ANALYZE with issue and feature branch', () async {
       _initGitRepo(tempDir.path, branch: '152-feature-branch');
       _writeState(tempDir.path, 'IDLE');
@@ -598,6 +621,30 @@ void main() {
             'authoritative_surface: "cleanrooms/51-idle-execution-guardrails/plan.md"',
           ),
         );
+      },
+    );
+
+    test(
+      'blocks PLAN -> EXECUTE on non-main branch that is not issue-linked',
+      () async {
+        const branch = 't1-pilot-h';
+
+        _initGitRepo(tempDir.path, branch: branch);
+        _writePlan(tempDir.path, branch, '# plan\n');
+        _writeState(tempDir.path, 'PLAN', issue: '231');
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'approve_plan',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => branch,
+        ).execute();
+
+        expect(output.allowed, isFalse);
+        expect(output.nextState, isNull);
+        expect(output.message, contains('ERROR_PRECONDITION_BRANCH_POLICY'));
       },
     );
 
