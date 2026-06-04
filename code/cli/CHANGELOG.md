@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.7]
+### Fixed
+- **Issue-linked branch enforcement**: `feature_branch_selected` and boundary commits now require a branch that actually matches the active issue prefix, so `start_analyze` and later phase boundaries no longer accept arbitrary non-main branches as valid explicit-start handoff context
+
+## [0.7.6]
+### Fixed
+- **IDLE handoff discipline**: the scheduler firmware now treats `issue_selected_or_created` and `feature_branch_selected` as IDLE handoff markers instead of universal `iq ape transition` events, preventing the harness from misrouting the explicit-start boundary after issue triage
+
 ## [0.7.5]
 ### Fixed
 - **Release publication automation**: `publish-release` now resolves the GitHub release through explicit repo context, so draft publication no longer fails in a clean job without `checkout`
