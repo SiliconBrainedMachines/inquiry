@@ -403,10 +403,10 @@ class StateTransitionCommand
         reason: boundaryCommitResult.errorMessage!,
         blockingBoundary: 'boundary_commit',
         authoritativeSurface: _boundaryCommitSpec(
-              transition.operations?.commitPolicy ?? 'none',
-              branch: branch,
-              issue: resolvedIssue,
-            )
+          transition.operations?.commitPolicy ?? 'none',
+          branch: branch,
+          issue: resolvedIssue,
+        )
             ?.path ??
             'git:commit',
       );
@@ -677,7 +677,7 @@ class StateTransitionCommand
     }
 
     if (prechecks.contains('feature_branch_selected')) {
-      if (branch == 'main' || branch == 'master' || branch.isEmpty) {
+      if (!_isIssueLinkedFeatureBranch(branch, issue)) {
         _recordPrecheckSensor(
           executor,
           currentState: currentState,
@@ -687,7 +687,7 @@ class StateTransitionCommand
           issue: issue,
           promptFragmentId: promptFragmentId,
         );
-        return 'ERROR_PRECONDITION_BRANCH_POLICY: Use issue-linked feature branch, not main';
+        return 'ERROR_PRECONDITION_BRANCH_POLICY: Use issue-linked feature branch matching active issue';
       }
       _recordPrecheckSensor(
         executor,
@@ -1036,7 +1036,7 @@ class StateTransitionCommand
       return const _BoundaryCommitResult.success();
     }
 
-    if (branch.isEmpty || branch == 'main' || branch == 'master') {
+    if (!_isIssueLinkedFeatureBranch(branch, issue)) {
       return _BoundaryCommitResult.failure(
         'ERROR_BOUNDARY_COMMIT_BRANCH_POLICY: Cannot create ${spec.label} commit without an issue-linked feature branch',
       );
@@ -1094,6 +1094,29 @@ class StateTransitionCommand
     return const _BoundaryCommitResult.success(
       operationsExecuted: ['create_boundary_commit'],
     );
+  }
+
+  bool _isIssueLinkedFeatureBranch(String branch, String? issue) {
+    final normalizedBranch = branch.trim();
+    if (normalizedBranch.isEmpty ||
+        normalizedBranch == 'main' ||
+        normalizedBranch == 'master') {
+      return false;
+    }
+
+    final normalizedIssue = issue?.trim();
+    if (normalizedIssue == null || normalizedIssue.isEmpty) {
+      return false;
+    }
+
+    final canonicalIssue =
+        int.tryParse(normalizedIssue)?.toString() ?? normalizedIssue;
+    final validPrefixes = <String>{'$canonicalIssue-'};
+    if (canonicalIssue.length < 3) {
+      validPrefixes.add('${canonicalIssue.padLeft(3, '0')}-');
+    }
+
+    return validPrefixes.any(normalizedBranch.startsWith);
   }
 
   _BoundaryCommitSpec? _boundaryCommitSpec(
