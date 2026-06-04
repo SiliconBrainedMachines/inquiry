@@ -48,7 +48,7 @@ tags: [plan, decomposition]
 
 | Phase | TDD mode | Phase-complete evidence |
 |---|---|---|
-| 1 | RED→GREEN helper contract | One git-backed helper yields the same expected root for direct-root and nested entry paths and is ready to replace literal repo-root expectations. |
+| 1 | GREEN setup | One git-backed helper yields the same expected root for direct-root and nested entry paths and is ready to replace literal repo-root expectations. |
 | 2 | RED→GREEN Windows reproducer | A Windows-only alternate-path test is red under alias-root expectations and green under helper-derived git-root expectations. |
 | 3 | Guarded GREEN sweep | Every in-scope ape prompt consumer uses the helper-derived root while branch-relative cleanroom paths remain unchanged. |
 | 4 | Regression gate | Focused ape prompt tests, `dart analyze`, and the full `dart test` suite all pass, with the full suite run last. |
@@ -56,46 +56,45 @@ tags: [plan, decomposition]
 ## Phase 1 — Establish canonical-root expectation fixture
 
 **Dependencies:** None  
-**TDD applicability:** Yes — RED by proving one git-backed helper is the authoritative expected-root source for direct and nested entry paths, then GREEN by reusing that helper wherever the bounded test surface asserts repository root values.
+**TDD applicability:** GREEN-only setup — establish the authoritative expected-root source for direct and nested entry paths first; the first genuine RED for alias-versus-git-root behavior belongs to Phase 2.
 
 ### Entry criteria
 
-- [ ] `cleanrooms\231-windows-ape-prompt-tests-should-use-git-resolved-p\analyze\diagnosis.md` remains the authoritative handoff and its test-only diagnosis still stands.
-- [ ] A bounded assertion inventory is prepared from `rg "p\.normalize\(gitTmpDir\.path\)" code\cli\test\ape_prompt_test.dart -n`, limited to expectation sites rather than setup paths.
-- [ ] The schema guard remains green: no planned edit is required in `code\cli\lib\src\cycle_context.dart`, `code\cli\lib\src\git_utils.dart`, or the inquiry-context map literal in `code\cli\lib\modules\ape\commands\prompt.dart`.
+- [x] `cleanrooms\231-windows-ape-prompt-tests-should-use-git-resolved-p\analyze\diagnosis.md` remains the authoritative handoff and its test-only diagnosis still stands.
+- [x] A bounded assertion inventory is prepared from `rg "p\.normalize\(gitTmpDir\.path\)" code\cli\test\ape_prompt_test.dart -n`, limited to expectation sites rather than setup paths.
+- [x] The schema guard remains green: no planned edit is required in `code\cli\lib\src\cycle_context.dart`, `code\cli\lib\src\git_utils.dart`, or the inquiry-context map literal in `code\cli\lib\modules\ape\commands\prompt.dart`.
 
 ### Execution steps
 
-- [ ] Add a test-local helper in `code\cli\test\ape_prompt_test.dart` that resolves the expected repository root by running `git rev-parse --show-toplevel` for a supplied working directory and normalizing the result with the same Windows path rules the runtime uses.
-- [ ] Reuse that helper anywhere the prompt contract expects the authoritative repository root string instead of repeating literal `p.normalize(gitTmpDir.path)` expectations.
-- [ ] Keep the helper bounded to the ape prompt test surface; do not change `ApePromptCommand._resolveRuntimeContext`, `CycleContext.resolve`, or `getProjectRoot` unless new evidence disproves the diagnosis.
+- [x] Import and reuse `getProjectRoot` from `package:inquiry_cli/src/git_utils.dart` as the authoritative expected-root helper for test expectations, because it already shells out to `git rev-parse --show-toplevel` and applies `normalizeGitRootPath` before `p.normalize`.
+- [x] Reuse that helper anywhere the prompt contract expects the authoritative repository root string instead of repeating literal `p.normalize(gitTmpDir.path)` expectations.
+- [x] If a direct `getProjectRoot` import proves impossible for a bounded test reason, use `normalizeGitRootPath` as the normalization primitive in any fallback helper; do not reimplement the helper with bare `p.normalize`, because that would miss MSYS-style `/c/...` git output on Windows.
+- [x] Keep the helper bounded to the ape prompt test surface; do not change `ApePromptCommand._resolveRuntimeContext`, `CycleContext.resolve`, or `getProjectRoot` unless new evidence disproves the diagnosis.
 
 ### Verification
 
-- [ ] Direct-root invocation and nested-subdirectory invocation both yield the same helper-derived root string for the same repository.
-- [ ] On Windows, the helper can represent a canonical git root even when the working-directory spelling differs from the entered alias path.
-- [ ] The helper can be consumed by the existing bounded prompt scenarios (`socrates prompt includes inquiry-context with output_dir`, `descartes prompt includes analysis_input path`, and the nested-subdirectory anchor test) without changing any runtime production code.
-- [ ] No shared interface/type-shape change is introduced: helper derivation stays test-local and does not require new `CycleContext` fields or inquiry-context keys.
+- [x] Direct-root invocation and nested-subdirectory invocation both yield the same helper-derived root string for the same repository.
+- [x] On Windows, the helper can represent a canonical git root even when the working-directory spelling differs from the entered alias path.
+- [x] Any helper path normalization still matches production behavior for both `C:/...` and MSYS-style `/c/...` git output.
+- [x] The helper can be consumed by the existing bounded prompt scenarios (`socrates prompt includes inquiry-context with output_dir`, `descartes prompt includes analysis_input path`, and the nested-subdirectory anchor test) without changing any runtime production code.
+- [x] No shared interface/type-shape change is introduced: helper derivation stays test-local and does not require new `CycleContext` fields or inquiry-context keys.
 
 ### Test definition (pseudocode)
 
 ```text
-RED:
+SETUP / GREEN:
 repo = createTempGitRepo()
 nested = repo\lib\nested\deeper
-enteredPathRoot = normalize(repo.path)
-assert enteredPathRoot is only the caller spelling, not the git authority
-
-GREEN:
 expectedRoot = resolveGitRoot(repo.path)
 assert resolveGitRoot(nested) == expectedRoot
 assert helperExpectedRoot(repo.path) == expectedRoot
+assert helperExpectedRoot(msysStyleRootIfAvailable) == expectedRoot
 ```
 
 ### Risk notes
 
 - Git may emit slash or case normalization that differs from the entered path spelling; the helper must normalize once, consistently, and become the only expected-root authority inside this test file.
-- Reusing the full prompt assembly path to compute expectations would weaken coverage; prefer a git-backed helper plus the shared normalization primitive instead.
+- Reusing the full prompt assembly path to compute expectations would weaken coverage; prefer `getProjectRoot` or, if absolutely necessary, a fallback helper that still delegates to `normalizeGitRootPath` rather than reimplementing root normalization from scratch.
 - If a helper-only change cannot satisfy the assertions, the diagnosis is falsified and the work must return to analysis before touching constructors or prompt-shape emitters.
 
 ## Phase 2 — Add Windows alternate-path coverage
@@ -112,14 +111,17 @@ assert helperExpectedRoot(repo.path) == expectedRoot
 ### Execution steps
 
 - [ ] Add a Windows-only fixture that enters the same repository through an alternate spelling such as a junction, or another alias path that reproduces `git rev-parse --show-toplevel != entered path`.
+- [ ] Create the junction with `Process.runSync('cmd', ['/c', 'mklink', '/J', junctionPath, targetPath])` and assert `exitCode == 0`, because `mklink` is a `cmd.exe` built-in rather than a standalone executable.
 - [ ] Add a focused ape prompt test that invokes prompt assembly from the alias path and asserts that inquiry-context uses the helper-derived git root instead of the alias spelling.
 - [ ] Reuse the existing subdirectory-anchoring pattern where possible so the new coverage stays inside the current harness shape.
+- [ ] Register `addTearDown(() => Process.runSync('cmd', ['/c', 'rmdir', junctionPath]))` inside the test so the junction link is removed before the enclosing `gitTmpDir.deleteSync(recursive: true)` teardown runs; do not rely on recursive directory deletion while the junction still exists.
 - [ ] Keep junction setup and cleanup local to `code\cli\test\ape_prompt_test.dart`; do not introduce a shared filesystem utility for a single bounded reproducer.
 
 ### Verification
 
 - [ ] The planned focused test `task contract uses git-resolved project root when invoked through a Windows junction` is red when expectations are tied to the alias path and green when expectations use the helper-derived git root.
 - [ ] The Windows-only fixture cleans up deterministically after the test run.
+- [ ] The junction cleanup order is safe: the junction link is removed first, and only then does the enclosing temp repo teardown delete the target tree.
 - [ ] The negative alias-vs-git-root comparison is performed on normalized strings so the failure signal reflects root authority drift rather than slash-format noise.
 
 ### Test definition (pseudocode)
@@ -127,7 +129,8 @@ assert helperExpectedRoot(repo.path) == expectedRoot
 ```text
 RED:
 repo = createTempGitRepo()
-alias = createWindowsJunction(repo.path)
+alias = createWindowsJunctionWith("cmd /c mklink /J", repo.path)
+addTearDown(removeJunctionLinkFirstWith("cmd /c rmdir"))
 assert normalize(alias.path) != resolveGitRoot(alias.path)
 prompt = runApePrompt(workingDirectory: alias.path, ape: 'socrates', subState: 'clarification')
 assert prompt contains "project_root: ${normalize(alias.path)}"   // expected to fail
@@ -142,6 +145,7 @@ assert prompt does not contain "project_root: ${normalize(alias.path)}"
 
 - Junction creation and cleanup can be host-sensitive; guard the fixture with `Platform.isWindows` and keep non-Windows behavior unchanged.
 - Git may canonicalize slash direction as well as path spelling, so the negative assertion must compare normalized forms.
+- `Directory.deleteSync(recursive: true)` must not be trusted to clean a tree that still contains the junction; remove the junction link first to avoid dangling links or unintended traversal into the target.
 - No existing test helper currently creates Windows junctions, so the fixture plan must stay deliberately local and disposable.
 
 ## Phase 3 — Re-anchor all alias-based ape prompt assertions

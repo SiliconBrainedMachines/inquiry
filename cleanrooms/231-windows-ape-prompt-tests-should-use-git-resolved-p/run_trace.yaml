@@ -1,0 +1,553 @@
+events:
+  - recorded_at: "2026-06-04T13:46:00.160124Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T13:46:00.161133Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: feature_branch_selected
+    verdict: APPROVED
+    authority: "git:branch"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T13:46:02.998282Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: start_analyze
+    tool_class: gh
+    command_family: issue_view
+    outcome: succeeded
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/issue.md"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['open_analysis_context']
+  - recorded_at: "2026-06-04T13:46:03.232912Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: allowed
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['update_state', 'open_analysis_context', 'reset_mutations', 'snapshot_metrics']
+  - recorded_at: "2026-06-04T13:46:26.191242Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 10041
+    prompt_lines: 150
+    prompt_utf8_bytes: 10051
+    estimated_input_tokens: 2511
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: clarification
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-04T13:51:46.567207Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 10051
+    prompt_lines: 150
+    prompt_utf8_bytes: 10061
+    estimated_input_tokens: 2513
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: assumptions
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-04T13:55:02.223378Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 10042
+    prompt_lines: 150
+    prompt_utf8_bytes: 10052
+    estimated_input_tokens: 2511
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: evidence
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-04T13:58:04.682955Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 10050
+    prompt_lines: 150
+    prompt_utf8_bytes: 10060
+    estimated_input_tokens: 2513
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: perspectives
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-04T14:00:12.118888Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 10091
+    prompt_lines: 150
+    prompt_utf8_bytes: 10101
+    estimated_input_tokens: 2523
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: implications
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-04T14:02:39.838594Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 10090
+    prompt_lines: 150
+    prompt_utf8_bytes: 10100
+    estimated_input_tokens: 2523
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: meta_reflection
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-04T14:06:42.688309Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:06:42.689320Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:06:42.698039Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: INVALID
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:06:42.702324Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_STRUCTURE_INVALID: diagnosis.md must contain Evidence, Hypotheses, Constraints, and Open Questions sections for current issue branch; missing: Hypotheses"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:06:42.704487Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_STRUCTURE_INVALID: diagnosis.md must contain Evidence, Hypotheses, Constraints, and Open Questions sections for current issue branch; missing: Hypotheses"
+    authoritative_surface: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:34.344579Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_STRUCTURE_INVALID: diagnosis.md must contain Evidence, Hypotheses, Constraints, and Open Questions sections for current issue branch; missing: Hypotheses"
+    retry_count: 1
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-04T14:07:34.345579Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:34.349579Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:34.353092Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:34.356350Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: APPROVED
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:34.358351Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: index_exists
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze/index.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:34.371372Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: confirmations_exists
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze/confirmations.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:34.527892Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: complete_analysis
+    tool_class: git
+    command_family: add
+    outcome: succeeded
+    exit_code: 0
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-04T14:07:34.820700Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: complete_analysis
+    tool_class: git
+    command_family: commit
+    outcome: succeeded
+    exit_code: 0
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-04T14:07:34.821700Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: commit_analysis_boundary
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:07:35.681856Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: phase_timing
+    phase: ANALYZE
+    started_at: "2026-06-04T14:06:00.716375Z"
+    ended_at: "2026-06-04T14:07:35.100751Z"
+    duration_seconds: 94.384
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-04T14:07:35.683365Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: allowed
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-04T14:07:50.810525Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: PLAN
+    ape_name: descartes
+    model_surface: prompt_input
+    prompt_characters: 6843
+    prompt_lines: 125
+    prompt_utf8_bytes: 6845
+    estimated_input_tokens: 1711
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: decomposition
+    prompt_fragment_id: analyze_to_plan
+  - recorded_at: "2026-06-04T14:15:14.632964Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: PLAN
+    ape_name: descartes
+    model_surface: prompt_input
+    prompt_characters: 6802
+    prompt_lines: 125
+    prompt_utf8_bytes: 6804
+    estimated_input_tokens: 1701
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: ordering
+    prompt_fragment_id: analyze_to_plan
+  - recorded_at: "2026-06-04T14:18:06.963057Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: PLAN
+    ape_name: descartes
+    model_surface: prompt_input
+    prompt_characters: 6831
+    prompt_lines: 125
+    prompt_utf8_bytes: 6835
+    estimated_input_tokens: 1708
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: verification
+    prompt_fragment_id: analyze_to_plan
+  - recorded_at: "2026-06-04T14:23:02.005267Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: PLAN
+    ape_name: descartes
+    model_surface: prompt_input
+    prompt_characters: 6872
+    prompt_lines: 126
+    prompt_utf8_bytes: 6874
+    estimated_input_tokens: 1718
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: enumeration
+    prompt_fragment_id: analyze_to_plan
+  - recorded_at: "2026-06-04T14:30:57.990950Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: PLAN
+    sensor_category: runtime
+    gate: issue_selected
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/.iq.state.yaml"
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:30:57.991464Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: PLAN
+    sensor_category: runtime
+    gate: feature_branch_selected
+    verdict: APPROVED
+    authority: "git:branch"
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:30:57.994577Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: PLAN
+    sensor_category: pre_transition
+    gate: plan_approved
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/plan.md"
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:30:58.111690Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: tool_activity
+    phase: PLAN
+    transition_event: approve_plan
+    tool_class: git
+    command_family: add
+    outcome: succeeded
+    exit_code: 0
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/plan.md"
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-04T14:30:58.346954Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: tool_activity
+    phase: PLAN
+    transition_event: approve_plan
+    tool_class: git
+    command_family: commit
+    outcome: succeeded
+    exit_code: 0
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/plan.md"
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-04T14:30:58.348070Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: PLAN
+    sensor_category: pre_transition
+    gate: commit_plan_boundary
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/plan.md"
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T14:30:59.023073Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: phase_timing
+    phase: PLAN
+    started_at: "2026-06-04T14:29:13.081420Z"
+    ended_at: "2026-06-04T14:30:58.574120Z"
+    duration_seconds: 105.492
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-04T14:30:59.024290Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: transition
+    from_state: PLAN
+    transition_event: approve_plan
+    to_state: EXECUTE
+    outcome: allowed
+    prompt_fragment_id: plan_to_execute
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-04T14:36:17.468413Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: transition
+    from_state: EXECUTE
+    transition_event: approve_plan
+    to_state: null
+    outcome: blocked
+    reason: "EXECUTE cannot approve plan"
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-04T14:36:17.470423Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: block
+    phase: EXECUTE
+    transition_event: approve_plan
+    blocking_boundary: transition_matrix
+    reason: "EXECUTE cannot approve plan"
+    authoritative_surface: "assets/fsm/transition_contract.yaml"
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-04T14:36:44.689435Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: EXECUTE
+    ape_name: ada
+    model_surface: prompt_input
+    prompt_characters: 7663
+    prompt_lines: 126
+    prompt_utf8_bytes: 7665
+    estimated_input_tokens: 1916
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: frame_intent
+    prompt_fragment_id: plan_to_execute
+  - recorded_at: "2026-06-04T14:38:24.288925Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: EXECUTE
+    ape_name: ada
+    model_surface: prompt_input
+    prompt_characters: 7712
+    prompt_lines: 127
+    prompt_utf8_bytes: 7714
+    estimated_input_tokens: 1928
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: locate_control_surface
+    prompt_fragment_id: plan_to_execute
+  - recorded_at: "2026-06-04T14:42:01.940686Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: EXECUTE
+    ape_name: ada
+    model_surface: prompt_input
+    prompt_characters: 7715
+    prompt_lines: 127
+    prompt_utf8_bytes: 7717
+    estimated_input_tokens: 1929
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: compose_change
+    prompt_fragment_id: plan_to_execute
+  - recorded_at: "2026-06-04T14:46:02.000132Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: model_activity
+    phase: EXECUTE
+    ape_name: ada
+    model_surface: prompt_input
+    prompt_characters: 7756
+    prompt_lines: 126
+    prompt_utf8_bytes: 7758
+    estimated_input_tokens: 1939
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: manifesto_review
+    prompt_fragment_id: plan_to_execute
