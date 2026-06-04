@@ -608,3 +608,45 @@ events:
     assembly_duration_seconds: 0.001
     sub_state: locate_control_surface
     prompt_fragment_id: execute_continue
+  - recorded_at: "2026-06-04T15:08:04.228828Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: EXECUTE
+    sensor_category: runtime
+    gate: issue_selected
+    verdict: APPROVED
+    authority: "cleanrooms/231-windows-ape-prompt-tests-should-use-git-resolved-p/.iq.state.yaml"
+    prompt_fragment_id: execute_continue
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T15:08:04.229827Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: sensor_run
+    phase: EXECUTE
+    sensor_category: runtime
+    gate: feature_branch_selected
+    verdict: APPROVED
+    authority: "git:branch"
+    prompt_fragment_id: execute_continue
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-04T15:08:04.813696Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: phase_timing
+    phase: EXECUTE
+    started_at: "2026-06-04T15:05:15.152678Z"
+    ended_at: "2026-06-04T15:08:04.408209Z"
+    duration_seconds: 169.255
+    prompt_fragment_id: execute_continue
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-04T15:08:04.814240Z"
+    task_id: "231"
+    branch: 231-windows-ape-prompt-tests-should-use-git-resolved-p
+    event_class: transition
+    from_state: EXECUTE
+    transition_event: go_execute
+    to_state: EXECUTE
+    outcome: allowed
+    prompt_fragment_id: execute_continue
+    operations_executed: ['update_state']

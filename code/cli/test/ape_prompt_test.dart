@@ -1533,6 +1533,7 @@ void main() {
             kStateFileName,
           ),
         ).writeAsStringSync('state: EXECUTE\nissue: "152"\n');
+        final expectedProjectRoot = resolveExpectedProjectRoot(gitTmpDir.path);
 
         final cmd = ApePromptCommand(
           ApePromptInput(
@@ -1604,7 +1605,7 @@ void main() {
         expect(
           result.prompt,
           contains(
-            "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+            "retrieval_context: ['$expectedProjectRoot', 'cleanrooms/152-test-branch/']",
           ),
         );
         expect(
@@ -1760,7 +1761,7 @@ void main() {
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
-          "retrieval_context: ['${p.normalize(gitTmpDir.path)}', 'cleanrooms/152-test-branch/']",
+          "retrieval_context: ['$expectedProjectRoot', 'cleanrooms/152-test-branch/']",
         );
         expectContextKeyOnlyInInquiryContext(
           result.prompt,
