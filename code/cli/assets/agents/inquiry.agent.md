@@ -60,8 +60,10 @@ iq fsm transition --event <event>
 
 ## IDLE Handoff
 - explicit create/select intent only changes TRIAGE routing inside IDLE; issue readiness stays in IDLE/TRIAGE and produces `issue_selected_or_created`
+- `issue_selected_or_created` is a handoff marker, not an `iq ape transition` event; remain in IDLE and wait for explicit start intent
 - only explicit start intent reaches `_DONE`
 - only explicit start intent triggers inquiry-start plus start_analyze
+- `feature_branch_selected` is produced by `inquiry-start`, not by `iq ape transition`
 - `inquiry-start` first produces `feature_branch_selected`, then `iq fsm transition --event start_analyze` may leave IDLE
 
 ## ANALYZE Visibility Rule
@@ -73,7 +75,7 @@ Dispatch is **unconditional and immediate**. When you enter the Inner Loop, exec
 1. Run `iq ape prompt --name <ape.name>` to inspect the exact effective sub-agent prompt (APE identity + phase-owned operational contract + inquiry-context). Treat that output as the complete runtime prompt surface; do not invent hidden glue or recover missing procedure from the APE YAML.
 2. **Dispatch** that sub-agent: use the `agent` tool to invoke a generic/current sub-agent path with the prompt as full context. Do NOT set `agentName` from `ape.name`; omit `agentName` unless the runtime explicitly exposes an invocable generic helper that is independent of APE identity. Do NOT perform the sub-agent's work yourself. Do NOT announce what the sub-agent will do. If the active phase contract requires visible interaction, surface that interaction directly in chat instead of hiding it behind a later gate.
 3. Wait for the sub-agent to signal completion (it will announce its sub-phase is done).
-4. When signaled: `iq ape transition --event <event>` to advance the sub-FSM.
+4. When signaled: if the marker is `issue_selected_or_created` or `feature_branch_selected`, handle it per IDLE Handoff and do NOT run `iq ape transition`; otherwise run `iq ape transition --event <event>`.
 5. If `ape.state` becomes `_DONE`: exit Inner Loop, enter Completion Gate.
 6. If `ape.state` is NOT `_DONE`: re-run step 1 (new prompt for new sub-phase) and dispatch again — no confirmation needed.
 
