@@ -205,22 +205,22 @@ for each scenario in focusedScenarios:
 
 ### Entry criteria
 
-- [ ] Phases 1 through 3 are complete and the modified prompt tests are internally consistent.
-- [ ] No runtime-schema change was introduced outside the bounded test surface.
-- [ ] The post-edit inventory reruns are clean: any remaining `p.normalize(gitTmpDir.path)` or repo-root `retrieval_context` hit has been explicitly classified before validation starts.
+- [x] Phases 1 through 3 are complete and the modified prompt tests are internally consistent.
+- [x] No runtime-schema change was introduced outside the bounded test surface.
+- [x] The post-edit inventory reruns are clean: any remaining `p.normalize(gitTmpDir.path)` or repo-root `retrieval_context` hit has been explicitly classified before validation starts.
 
 ### Execution steps
 
-- [ ] Run focused ape prompt coverage in `code\cli` for the named scenarios: `socrates prompt includes inquiry-context with output_dir`, `descartes prompt includes analysis_input path`, `task contract stays anchored to project root when invoked from a subdirectory`, `basho prompt includes plan contract in assembled prompt`, and the new Windows alternate-path case.
-- [ ] Run `dart analyze` in `code\cli` because the same package is gated by CI static analysis.
-- [ ] Run the full existing CLI project test suite from `code\cli` with `dart test` as the final verification step.
+- [x] Run focused ape prompt coverage in `code\cli` for the named scenarios: `socrates prompt includes inquiry-context with output_dir`, `descartes prompt includes analysis_input path`, `task contract stays anchored to project root when invoked from a subdirectory`, `basho prompt includes plan contract in assembled prompt`, and the new Windows alternate-path case.
+- [x] Run `dart analyze` in `code\cli` because the same package is gated by CI static analysis.
+- [x] Run the full existing CLI project test suite from `code\cli` with `dart test` as the final verification step.
 
 ### Verification
 
-- [ ] The focused ape prompt tests pass on the Windows host, including the new alternate-path case, and preserve transcript or run-trace behavior.
-- [ ] `dart analyze` completes without new diagnostics.
-- [ ] `dart test` passes for the full `code\cli` suite, not just the ape prompt subset.
-- [ ] The validation transcript preserves the focused test output and the existing `cleanrooms\231-windows-ape-prompt-tests-should-use-git-resolved-p\run_trace.yaml` evidence rather than replacing them with ad hoc artifacts.
+- [x] The focused ape prompt tests pass on the Windows host, including the new alternate-path case, and preserve transcript or run-trace behavior.
+- [x] `dart analyze` completes without new diagnostics.
+- [x] `dart test` passes for the full `code\cli` suite, not just the ape prompt subset.
+- [x] The validation transcript preserves the focused test output and the existing `cleanrooms\231-windows-ape-prompt-tests-should-use-git-resolved-p\run_trace.yaml` evidence rather than replacing them with ad hoc artifacts.
 
 ### Test definition (pseudocode)
 
