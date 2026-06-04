@@ -123,6 +123,21 @@ void main() {
       );
     });
 
+    test('does not treat IDLE handoff markers as ape transitions', () {
+      expect(
+        content,
+        contains('`issue_selected_or_created` is a handoff marker, not an `iq ape transition` event'),
+      );
+      expect(
+        content,
+        contains('`feature_branch_selected` is produced by `inquiry-start`, not by `iq ape transition`'),
+      );
+      expect(
+        content,
+        contains('do NOT run `iq ape transition`; otherwise run `iq ape transition --event <event>`'),
+      );
+    });
+
     test('forbids direct writes to .inquiry/', () {
       expect(content, contains('NEVER'));
       expect(content, contains('.inquiry/'));
