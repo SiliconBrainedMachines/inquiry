@@ -104,25 +104,25 @@ assert helperExpectedRoot(msysStyleRootIfAvailable) == expectedRoot
 
 ### Entry criteria
 
-- [ ] Phase 1's helper exists and can compute the canonical root independently of the entered path spelling.
-- [ ] The acceptance criterion for Windows alternate-path coverage is still bounded to the ape prompt test surface.
-- [ ] The fixture-reuse search has identified the existing nested-working-directory setup in `ape_prompt_test.dart`, so the Windows alias case can be inserted without inventing a second harness pattern.
+- [x] Phase 1's helper exists and can compute the canonical root independently of the entered path spelling.
+- [x] The acceptance criterion for Windows alternate-path coverage is still bounded to the ape prompt test surface.
+- [x] The fixture-reuse search has identified the existing nested-working-directory setup in `ape_prompt_test.dart`, so the Windows alias case can be inserted without inventing a second harness pattern.
 
 ### Execution steps
 
-- [ ] Add a Windows-only fixture that enters the same repository through an alternate spelling such as a junction, or another alias path that reproduces `git rev-parse --show-toplevel != entered path`.
-- [ ] Create the junction with `Process.runSync('cmd', ['/c', 'mklink', '/J', junctionPath, targetPath])` and assert `exitCode == 0`, because `mklink` is a `cmd.exe` built-in rather than a standalone executable.
-- [ ] Add a focused ape prompt test that invokes prompt assembly from the alias path and asserts that inquiry-context uses the helper-derived git root instead of the alias spelling.
-- [ ] Reuse the existing subdirectory-anchoring pattern where possible so the new coverage stays inside the current harness shape.
-- [ ] Register `addTearDown(() => Process.runSync('cmd', ['/c', 'rmdir', junctionPath]))` inside the test so the junction link is removed before the enclosing `gitTmpDir.deleteSync(recursive: true)` teardown runs; do not rely on recursive directory deletion while the junction still exists.
-- [ ] Keep junction setup and cleanup local to `code\cli\test\ape_prompt_test.dart`; do not introduce a shared filesystem utility for a single bounded reproducer.
+- [x] Add a Windows-only fixture that enters the same repository through an alternate spelling such as a junction, or another alias path that reproduces `git rev-parse --show-toplevel != entered path`.
+- [x] Create the junction with `Process.runSync('cmd', ['/c', 'mklink', '/J', junctionPath, targetPath])` and assert `exitCode == 0`, because `mklink` is a `cmd.exe` built-in rather than a standalone executable.
+- [x] Add a focused ape prompt test that invokes prompt assembly from the alias path and asserts that inquiry-context uses the helper-derived git root instead of the alias spelling.
+- [x] Reuse the existing subdirectory-anchoring pattern where possible so the new coverage stays inside the current harness shape.
+- [x] Register `addTearDown(() => Process.runSync('cmd', ['/c', 'rmdir', junctionPath]))` inside the test so the junction link is removed before the enclosing `gitTmpDir.deleteSync(recursive: true)` teardown runs; do not rely on recursive directory deletion while the junction still exists.
+- [x] Keep junction setup and cleanup local to `code\cli\test\ape_prompt_test.dart`; do not introduce a shared filesystem utility for a single bounded reproducer.
 
 ### Verification
 
-- [ ] The planned focused test `task contract uses git-resolved project root when invoked through a Windows junction` is red when expectations are tied to the alias path and green when expectations use the helper-derived git root.
-- [ ] The Windows-only fixture cleans up deterministically after the test run.
-- [ ] The junction cleanup order is safe: the junction link is removed first, and only then does the enclosing temp repo teardown delete the target tree.
-- [ ] The negative alias-vs-git-root comparison is performed on normalized strings so the failure signal reflects root authority drift rather than slash-format noise.
+- [x] The planned focused test `task contract uses git-resolved project root when invoked through a Windows junction` is red when expectations are tied to the alias path and green when expectations use the helper-derived git root.
+- [x] The Windows-only fixture cleans up deterministically after the test run.
+- [x] The junction cleanup order is safe: the junction link is removed first, and only then does the enclosing temp repo teardown delete the target tree.
+- [x] The negative alias-vs-git-root comparison is performed on normalized strings so the failure signal reflects root authority drift rather than slash-format noise.
 
 ### Test definition (pseudocode)
 
