@@ -1450,6 +1450,80 @@ void main() {
         },
       );
 
+      test(
+        'task contract uses git-resolved project root when invoked through a Windows junction',
+        () async {
+          File(
+            p.join(
+              gitTmpDir.path,
+              'cleanrooms',
+              '152-test-branch',
+              kStateFileName,
+            ),
+          ).writeAsStringSync('state: ANALYZE\nissue: "152"\n');
+
+          final junctionRootPath = p.join(
+            gitTmpDir.parent.path,
+            '${p.basename(gitTmpDir.path)}_junction',
+          );
+          final createJunctionResult = Process.runSync('cmd', [
+            '/c',
+            'mklink',
+            '/J',
+            junctionRootPath,
+            gitTmpDir.path,
+          ]);
+
+          expect(
+            createJunctionResult.exitCode,
+            equals(0),
+            reason:
+                'Failed to create Windows junction: ${createJunctionResult.stdout}\n${createJunctionResult.stderr}',
+          );
+          addTearDown(
+            () => Process.runSync('cmd', ['/c', 'rmdir', junctionRootPath]),
+          );
+
+          final aliasNestedDir = Directory(
+            p.join(junctionRootPath, 'lib', 'nested', 'deeper'),
+          )..createSync(recursive: true);
+          final expectedProjectRoot = resolveExpectedProjectRoot(
+            aliasNestedDir.path,
+          );
+          final aliasProjectRoot = p.normalize(junctionRootPath);
+
+          expect(
+            expectedProjectRoot,
+            resolveExpectedProjectRoot(gitTmpDir.path),
+          );
+          expect(
+            aliasProjectRoot,
+            isNot(equals(p.normalize(expectedProjectRoot))),
+          );
+
+          final cmd = ApePromptCommand(
+            ApePromptInput(
+              name: 'socrates',
+              subState: 'clarification',
+              workingDirectory: aliasNestedDir.path,
+            ),
+            assets: Assets(root: gitTmpDir.path),
+          );
+          final result = await cmd.execute();
+
+          expect(result.prompt, contains('project_root: $expectedProjectRoot'));
+          expect(
+            result.prompt,
+            isNot(contains('project_root: $aliasProjectRoot')),
+          );
+          expectContextKeyOnlyInInquiryContext(
+            result.prompt,
+            'project_root: $expectedProjectRoot',
+          );
+        },
+        skip: !Platform.isWindows,
+      );
+
       test('basho prompt includes plan contract in assembled prompt', () async {
         File(
           p.join(
