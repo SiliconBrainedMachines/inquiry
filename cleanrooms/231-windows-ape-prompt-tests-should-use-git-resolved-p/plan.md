@@ -155,26 +155,26 @@ assert prompt does not contain "project_root: ${normalize(alias.path)}"
 
 ### Entry criteria
 
-- [ ] The canonical-root helper is the single expected-root source in `code\cli\test\ape_prompt_test.dart`.
-- [ ] The Phase 2 alternate-path test exists as the proving case for the alias-vs-git-root mismatch and is ready to guard the broader sweep.
-- [ ] The full assertion inventory is available from `rg "p\.normalize\(gitTmpDir\.path\)" code\cli\test\ape_prompt_test.dart -n` plus `rg "retrieval_context:" code\cli\test\ape_prompt_test.dart -n`.
-- [ ] The inventory is classified into the four bounded scenarios listed in `## Bounded assertion inventory`, with each hit tagged as `project_root`, repo-root `retrieval_context`, or setup-only.
+- [x] The canonical-root helper is the single expected-root source in `code\cli\test\ape_prompt_test.dart`.
+- [x] The Phase 2 alternate-path test exists as the proving case for the alias-vs-git-root mismatch and is ready to guard the broader sweep.
+- [x] The full assertion inventory is available from `rg "p\.normalize\(gitTmpDir\.path\)" code\cli\test\ape_prompt_test.dart -n` plus `rg "retrieval_context:" code\cli\test\ape_prompt_test.dart -n`.
+- [x] The inventory is classified into the four bounded scenarios listed in `## Bounded assertion inventory`, with each hit tagged as `project_root`, repo-root `retrieval_context`, or setup-only.
 
 ### Execution steps
 
-- [ ] Replace alias-based `project_root` expectations in the diagnosis-cited ANALYZE and PLAN tests with helper-derived git-root assertions.
-- [ ] Replace alias-based `retrieval_context` expectations that include the repository root in ANALYZE, PLAN, and EXECUTE prompt contexts with helper-derived git-root assertions.
-- [ ] For each matched `retrieval_context` string, update only the repository-root element and leave cleanroom-relative entries such as `cleanrooms\<branch>\...` untouched.
-- [ ] Keep intentionally branch-relative or cleanroom-relative expectations such as `output_dir`, `plan_file`, and `cleanrooms\<branch>\...` unchanged.
-- [ ] Review every remaining `p.normalize(gitTmpDir.path)` hit in `ape_prompt_test.dart` and confirm it is either an updated in-scope expectation or an out-of-scope setup path that should stay literal.
-- [ ] Rerun both inventory searches after the sweep and classify every surviving match as setup-only or intentionally unchanged before leaving the phase.
+- [x] Replace alias-based `project_root` expectations in the diagnosis-cited ANALYZE and PLAN tests with helper-derived git-root assertions.
+- [x] Replace alias-based `retrieval_context` expectations that include the repository root in ANALYZE, PLAN, and EXECUTE prompt contexts with helper-derived git-root assertions.
+- [x] For each matched `retrieval_context` string, update only the repository-root element and leave cleanroom-relative entries such as `cleanrooms\<branch>\...` untouched.
+- [x] Keep intentionally branch-relative or cleanroom-relative expectations such as `output_dir`, `plan_file`, and `cleanrooms\<branch>\...` unchanged.
+- [x] Review every remaining `p.normalize(gitTmpDir.path)` hit in `ape_prompt_test.dart` and confirm it is either an updated in-scope expectation or an out-of-scope setup path that should stay literal.
+- [x] Rerun both inventory searches after the sweep and classify every surviving match as setup-only or intentionally unchanged before leaving the phase.
 
 ### Verification
 
-- [ ] No in-scope assertion still encodes the entered alias spelling as the authoritative repository root.
-- [ ] Existing direct-root and nested-subdirectory prompt tests still assert the same inquiry-context structure, with only the expected root source changed.
-- [ ] The bounded consumer set is exhausted: `socrates prompt includes inquiry-context with output_dir`, `descartes prompt includes analysis_input path`, `task contract stays anchored to project root when invoked from a subdirectory`, and `basho prompt includes plan contract in assembled prompt` no longer rely on `p.normalize(gitTmpDir.path)` for repo-root expectations.
-- [ ] No unclassified `p.normalize(gitTmpDir.path)` or repo-root `retrieval_context` hit remains in `ape_prompt_test.dart`; every surviving literal path is setup-only or intentionally branch-relative.
+- [x] No in-scope assertion still encodes the entered alias spelling as the authoritative repository root.
+- [x] Existing direct-root and nested-subdirectory prompt tests still assert the same inquiry-context structure, with only the expected root source changed.
+- [x] The bounded consumer set is exhausted: `socrates prompt includes inquiry-context with output_dir`, `descartes prompt includes analysis_input path`, `task contract stays anchored to project root when invoked from a subdirectory`, and `basho prompt includes plan contract in assembled prompt` no longer rely on `p.normalize(gitTmpDir.path)` for repo-root expectations.
+- [x] No unclassified `p.normalize(gitTmpDir.path)` or repo-root `retrieval_context` hit remains in `ape_prompt_test.dart`; every surviving literal path is setup-only or intentionally branch-relative.
 
 ### Test definition (pseudocode)
 
