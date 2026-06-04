@@ -18,17 +18,17 @@ tags: [plan, decomposition]
 ## Enumeration completeness guardrails
 
 - No planned phase changes a shared interface or type shape. The diagnosis authorizes only expectation updates inside `code\cli\test\ape_prompt_test.dart`; `CycleContext`, `getProjectRoot`, `ApePromptCommand._resolveRuntimeContext`, and inquiry-context key names stay unchanged unless new evidence falsifies the diagnosis.
-- [ ] Alias-root search inventory: run `rg "p\.normalize\(gitTmpDir\.path\)" code\cli\test\ape_prompt_test.dart -n` to enumerate every literal repo-root expectation still tied to the entered path spelling.
-- [ ] Retrieval-context search inventory: run `rg "retrieval_context:" code\cli\test\ape_prompt_test.dart -n`, then use `rg "test\('" code\cli\test\ape_prompt_test.dart -n` plus nearby line reads to map each hit to its enclosing scenario before editing.
-- [ ] Fixture-reuse search: run `rg "nested|workingDirectory:|createSync\(recursive: true\)" code\cli\test\ape_prompt_test.dart -n` so the Windows alternate-path case stays inside the existing harness shape instead of inventing a new scaffold.
-- [ ] Schema-change guard: if any step appears to require changing `CycleContext` fields or inquiry-context key names, stop and return to analysis before editing. Use `rg "const CycleContext\(|return CycleContext\(" code\cli\lib code\cli\test -n` to enumerate type construction sites, `rg "'project_root':|retrieval_context|authoritative_handoff|upfront_context" code\cli\lib code\cli\test -n` to enumerate inquiry-context object-literal or adapter sites, and `rg "cycleContext\.projectRoot|getProjectRoot\(" code\cli\lib code\cli\test -n` to enumerate authority consumers.
+- [x] Alias-root search inventory: run `rg "p\.normalize\(gitTmpDir\.path\)" code\cli\test\ape_prompt_test.dart -n` to enumerate every literal repo-root expectation still tied to the entered path spelling.
+- [x] Retrieval-context search inventory: run `rg "retrieval_context:" code\cli\test\ape_prompt_test.dart -n`, then use `rg "test\('" code\cli\test\ape_prompt_test.dart -n` plus nearby line reads to map each hit to its enclosing scenario before editing.
+- [x] Fixture-reuse search: run `rg "nested|workingDirectory:|createSync\(recursive: true\)" code\cli\test\ape_prompt_test.dart -n` so the Windows alternate-path case stays inside the existing harness shape instead of inventing a new scaffold.
+- [x] Schema-change guard: if any step appears to require changing `CycleContext` fields or inquiry-context key names, stop and return to analysis before editing. Use `rg "const CycleContext\(|return CycleContext\(" code\cli\lib code\cli\test -n` to enumerate type construction sites, `rg "'project_root':|retrieval_context|authoritative_handoff|upfront_context" code\cli\lib code\cli\test -n` to enumerate inquiry-context object-literal or adapter sites, and `rg "cycleContext\.projectRoot|getProjectRoot\(" code\cli\lib code\cli\test -n` to enumerate authority consumers.
 
 ## Bounded assertion inventory
 
-- [ ] `socrates prompt includes inquiry-context with output_dir` — update `project_root` and ANALYZE `retrieval_context` expectations to the helper-derived git root.
-- [ ] `descartes prompt includes analysis_input path` — update `project_root` and PLAN `retrieval_context` expectations to the helper-derived git root.
-- [ ] `task contract stays anchored to project root when invoked from a subdirectory` — update both direct and inquiry-context-only `project_root` assertions to the helper-derived git root.
-- [ ] `basho prompt includes plan contract in assembled prompt` — update EXECUTE `retrieval_context` expectations, including both raw prompt and inquiry-context-only assertions, to the helper-derived git root where the repo-root element appears.
+- [x] `socrates prompt includes inquiry-context with output_dir` — update `project_root` and ANALYZE `retrieval_context` expectations to the helper-derived git root.
+- [x] `descartes prompt includes analysis_input path` — update `project_root` and PLAN `retrieval_context` expectations to the helper-derived git root.
+- [x] `task contract stays anchored to project root when invoked from a subdirectory` — update both direct and inquiry-context-only `project_root` assertions to the helper-derived git root.
+- [x] `basho prompt includes plan contract in assembled prompt` — update EXECUTE `retrieval_context` expectations, including both raw prompt and inquiry-context-only assertions, to the helper-derived git root where the repo-root element appears.
 
 ## Phase dependencies
 
