@@ -10,15 +10,4 @@
 # Inquiry — cycle-local runtime state is derived, never tracked
 cleanrooms/**/.iq.state.yaml
 
-# Paper build artifacts — keep only the curated compiled PDF under code/paper/output/
-code/paper/*.aux
-code/paper/*.bbl
-code/paper/*.blg
-code/paper/*.fdb_latexmk
-code/paper/*.fls
-code/paper/*.log
-code/paper/*.out
-code/paper/*.synctex.gz
-code/paper/*.pdf
-code/paper/output/*.synctex.gz
-!code/paper/output/*.pdf
+# Paper build artifacts are governed locally in code/paper/.gitignore
