@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.7.6]
+### Added
+- **Paper release artifact**: the first Inquiry paper now ships with a curated compiled PDF, a real IEEE manuscript source, and a derived BibTeX surface under `code/paper/`
+
+### Changed
+- **Paper provenance**: the manuscript now cites Inquiry v0.7.5 explicitly as the tagged software release used for the reported pilot runs
+- **Release distribution**: GitHub releases now require and upload the compiled paper PDF alongside the CLI platform archives
+
 ## [0.7.5]
 ### Fixed
 - **Release publication automation**: `publish-release` now resolves the GitHub release through explicit repo context, so draft publication no longer fails in a clean job without `checkout`

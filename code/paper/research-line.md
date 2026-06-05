@@ -2,7 +2,7 @@
 
 > **Type:** research-line
 > **Status:** stable
-> **Depends on:** [concepts/abductive-machine.md](concepts/abductive-machine.md), [concepts/thinking-tools.md](concepts/thinking-tools.md)
+> **Depends on:** [concepts/abductive-machine.md](concepts/abductive-machine.md), [concepts/thinking-tools.md](concepts/thinking-tools.md), [references.md](references.md)
 > **Used by:** [contribution.md](contribution.md), [thesis.md](thesis.md), [research-question.md](research-question.md)
 
 ## The program
@@ -16,7 +16,8 @@ and durable traces — that govern when a machine may ask, infer, act, and claim
 The generative idea is not simply that philosophy contains interesting old ideas. It is
 that philosophy may contain a **preexisting taxonomy of inference operators**:
 differentiated procedures for eliciting premises, doubting claims, and moving from
-indeterminate situations to warranted assertions. If such a taxonomy can be made
+indeterminate situations to warranted assertions [plato_theaetetus;
+descartes_discourse; dewey_logic; peirce_cp]. If such a taxonomy can be made
 operational, AI engineering gains not only reusable heuristics but a structured design
 space for building and comparing inference-governing systems.
 
@@ -25,9 +26,11 @@ space for building and comparing inference-governing systems.
 Until a practical, general, and accessible abductive machine existed, these disciplines
 could be taught, exemplified, and argued over, but not embedded into everyday technical
 systems and observed under real work conditions. A large language model changes that
-condition. It provides a daily, general-purpose engine of fluent abduction that is
-powerful enough to matter and undisciplined enough to need governance. That makes
-inference-governance an engineering surface rather than a purely philosophical one.
+condition [brown2020gpt3]. It provides a daily, general-purpose engine of fluent
+abduction that is powerful enough to matter and undisciplined enough to need governance,
+which is why later reasoning scaffolds concentrate on post hoc control [wei2022cot;
+yao2023react; yao2023tot; schick2023toolformer]. That makes inference-governance an
+engineering surface rather than a purely philosophical one.
 
 ## What would make the line non-trivial
 
