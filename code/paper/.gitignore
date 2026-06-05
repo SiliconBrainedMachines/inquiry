@@ -19,3 +19,7 @@ agenticdev-2026-ieee-manuscript.pdf
 
 # Generated distribution and submission outputs
 output/
+
+# Local secrets and ad-hoc submission bundles
+.env
+arxiv-submission.zip

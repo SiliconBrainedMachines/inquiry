@@ -175,6 +175,16 @@ what is in progress, and what remains to be done.
   versioning the PDF in Git, the site plus LinkedIn as amplification surfaces, and
   AgenticDev 2026 with ICSE 2027 NIER fallback as the formal venue path.
 
+- [x] Create an operational publication checklist to avoid duplicate outreach.
+  Deliverable: [publication-operations-checklist.md](publication-operations-checklist.md).
+  Outcome: outbound endorsement requests, bounce handling, follow-up cadence, and
+  LinkedIn publication sequencing are now tracked in one place.
+
+- [x] Create a primary-venue submission lane checklist for AgenticDev.
+  Deliverable: [agenticdev-submission-checklist.md](agenticdev-submission-checklist.md).
+  Outcome: formal submission dates, package gates, portal execution steps, and
+  pre-upload quality checks are now explicit and can run in parallel with arXiv.
+
 ## Current Priority
 
 The next step is to turn the paper into a live multi-channel publication surface:
