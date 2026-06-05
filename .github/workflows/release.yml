@@ -79,6 +79,20 @@ jobs:
             --generate-notes \
             --draft
 
+      - name: Upload paper PDF asset
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          TAG="v${{ needs.check-version.outputs.version }}"
+          PAPER_PDF="code/paper/output/agenticdev-2026-ieee-manuscript.pdf"
+
+          if [ ! -f "$PAPER_PDF" ]; then
+            echo "Missing expected paper asset: $PAPER_PDF"
+            exit 1
+          fi
+
+          gh release upload "$TAG" "$PAPER_PDF" --clobber
+
   # ─── Job 3: Build + upload (matrix: Windows + Linux) ───────────────
   build:
     needs: [check-version, create-release]
@@ -192,7 +206,7 @@ jobs:
           ASSETS=$(gh release view "$TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[].name')
           echo "$ASSETS"
 
-          for asset in inquiry-windows-x64.zip inquiry-linux-x64.tar.gz; do
+          for asset in inquiry-windows-x64.zip inquiry-linux-x64.tar.gz agenticdev-2026-ieee-manuscript.pdf; do
             if ! echo "$ASSETS" | grep -qx "$asset"; then
               echo "Missing expected asset: $asset"
               exit 1

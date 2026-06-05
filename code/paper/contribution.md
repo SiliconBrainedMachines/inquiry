@@ -2,7 +2,7 @@
 
 > **Type:** contribution
 > **Status:** draft
-> **Depends on:** [research-line.md](research-line.md), [concepts/abductive-machine.md](concepts/abductive-machine.md), [concepts/thinking-tools.md](concepts/thinking-tools.md)
+> **Depends on:** [research-line.md](research-line.md), [concepts/abductive-machine.md](concepts/abductive-machine.md), [concepts/thinking-tools.md](concepts/thinking-tools.md), [references.md](references.md)
 > **Used by:** [thesis.md](thesis.md), [research-question.md](research-question.md), [evidence/evidence-plan.md](evidence/evidence-plan.md)
 
 ## Claim
@@ -11,7 +11,8 @@ The paper's contribution is not to show that some old philosophical ideas remain
 That would be too weak. The contribution is to argue that philosophical lineage can
 function as a **source of operator taxonomy for AI engineering**: a disciplined way to
 define, separate, and operationalize rules of inference that would otherwise appear only
-as generic prompt heuristics.
+as generic prompt heuristics [plato_theaetetus; descartes_discourse; dewey_logic;
+peirce_cp].
 
 ## What is new
 
@@ -27,10 +28,11 @@ Three distinct contributions are claimed.
 ## Why lineage matters
 
 The relevance of philosophical lineage is not prestige. It is that philosophy already
-performed long differentiation work on kinds of inferential discipline. The lineage
-supplies boundaries and normative semantics: what problem each operator solves, what
-counts as success, and what should be withheld. Good scaffolding can imitate surface
-behavior; lineage helps specify the operator.
+performed long differentiation work on kinds of inferential discipline [plato_theaetetus;
+descartes_discourse; dewey_logic; peirce_cp]. The lineage supplies boundaries and
+normative semantics: what problem each operator solves, what counts as success, and what
+should be withheld. Good scaffolding can imitate surface behavior; lineage helps specify
+the operator.
 
 ## What the paper does not claim
 
