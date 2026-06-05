@@ -67,6 +67,7 @@ Rules, in the spirit of clean code:
 | [submission-target-and-formatting-decision.md](submission-target-and-formatting-decision.md) | plan | Working publication-target decision that fixes the paper family and short-paper formatting constraints |
 | [short-paper-surrogate-template.md](short-paper-surrogate-template.md) | plan | Concrete internal ACM-like surrogate template used before selecting a real CFP or publisher format |
 | [real-cfp-target-decision.md](real-cfp-target-decision.md) | plan | Chosen real CFP target, with AgenticDev 2026 as primary venue and IEEE conference format as provisional external template |
+| [publication-channels-plan.md](publication-channels-plan.md) | plan | Four-channel publication strategy covering arXiv, GitHub release artifacts, site and LinkedIn amplification, and formal venue submission |
 | [abstract-draft.md](abstract-draft.md) | plan | Working short-paper abstract aligned with the narrowed pilot claim |
 | [introduction-section-draft.md](introduction-section-draft.md) | plan | Working introduction that frames the engineering problem, artifact, pilot design, and bounded result |
 | [manuscript-assembly-draft.md](manuscript-assembly-draft.md) | plan | Single short-paper assembly surface that compresses the current atomic drafts into one manuscript-form flow |
@@ -81,11 +82,10 @@ These files are derived submission artifacts rather than atomic research documen
 |---|---|
 | [agenticdev-2026-ieee-manuscript.tex](agenticdev-2026-ieee-manuscript.tex) | Real IEEE conference manuscript instantiated from the venue-specific markdown draft |
 | [agenticdev-2026-ieee-references.bib](agenticdev-2026-ieee-references.bib) | Companion BibTeX file derived from the cited subset of [references.md](references.md) |
-| [output/agenticdev-2026-ieee-manuscript.pdf](output/agenticdev-2026-ieee-manuscript.pdf) | Curated compiled manuscript PDF intended for release distribution and submission packaging |
 
-Only the curated PDF in [output/](output/) is versioned as a derived artifact. Local
-LaTeX auxiliaries such as `.aux`, `.bbl`, `.blg`, `.fls`, `.fdb_latexmk`, `.log`, and
-`.synctex.gz` are build byproducts and should not be tracked.
+Compiled PDFs and all LaTeX auxiliaries under [output/](output/) are generated
+artifacts, not versioned sources. They are built locally or in CI and distributed as
+release assets rather than stored in Git.
 
 ## How a paper is assembled from this folder
 
@@ -110,6 +110,10 @@ into a concrete internal manuscript format before any real CFP is chosen.
 `real-cfp-target-decision.md` then selects AgenticDev 2026 at ASE 2026 as the first
 real venue target and records the official IEEE conference format as the provisional
 external template until workshop-specific guidance becomes public.
+`publication-channels-plan.md` fixes the four outward channels for the first paper:
+arXiv as the canonical public paper URL, GitHub releases as the PDF artifact channel,
+the Inquiry site plus LinkedIn as amplification surfaces, and AgenticDev 2026 with
+ICSE 2027 NIER fallback as the formal venue path.
 `abstract-draft.md` and `introduction-section-draft.md` are the front-matter drafts now
 written against that constrained paper shape rather than against the earlier broader
 strong-path ambition. `manuscript-assembly-draft.md` is the first place where those
@@ -118,9 +122,8 @@ under one short-paper budget. `agenticdev-2026-ieee-manuscript-draft.md` is the 
 venue-specific port of that assembly, reorganized as a submission-oriented shell for
 AgenticDev 2026 under the provisional IEEE conference format. That venue-specific shell
 is now instantiated as the real external submission artifacts
-`agenticdev-2026-ieee-manuscript.tex` and `agenticdev-2026-ieee-references.bib`, with
-the curated compiled PDF kept at `output/agenticdev-2026-ieee-manuscript.pdf` for
-release distribution.
+`agenticdev-2026-ieee-manuscript.tex` and `agenticdev-2026-ieee-references.bib`, while
+the compiled PDF is rebuilt for release distribution instead of being versioned.
 `task-packet-template.md` is the reusable container used to instantiate the pilot runs
 from the approved corpus. Several papers can be composed from the same atomic base;
 this is why the base must stay clean.

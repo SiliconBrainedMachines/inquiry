@@ -1,0 +1,21 @@
+# LaTeX and local paper build byproducts
+*.aux
+*.bbl
+*.blg
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz
+*.toc
+*.lof
+*.lot
+*.nav
+*.snm
+*.vrb
+
+# Compiled manuscript emitted next to the source when no output dir is used
+agenticdev-2026-ieee-manuscript.pdf
+
+# Generated distribution and submission outputs
+output/

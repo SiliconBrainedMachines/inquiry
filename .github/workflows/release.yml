@@ -79,6 +79,23 @@ jobs:
             --generate-notes \
             --draft
 
+      - name: Install LaTeX toolchain for paper build
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            latexmk \
+            texlive-latex-base \
+            texlive-latex-recommended \
+            texlive-latex-extra \
+            texlive-fonts-recommended \
+            texlive-publishers
+
+      - name: Compile paper PDF
+        run: |
+          mkdir -p code/paper/output
+          cd code/paper
+          latexmk -pdf -interaction=nonstopmode -halt-on-error -outdir=output agenticdev-2026-ieee-manuscript.tex
+
       - name: Upload paper PDF asset
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

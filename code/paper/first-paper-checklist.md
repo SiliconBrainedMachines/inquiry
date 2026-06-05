@@ -168,10 +168,17 @@ what is in progress, and what remains to be done.
   to source-level metadata cleanup now fixed in both the atomic reference registry and
   the derived .bib.
 
+- [x] Fix the paper's publication-channel strategy.
+  Deliverable: [publication-channels-plan.md](publication-channels-plan.md).
+  Outcome: the first paper now has an explicit four-channel plan: arXiv as the
+  canonical public paper URL, GitHub releases as the PDF artifact channel without
+  versioning the PDF in Git, the site plus LinkedIn as amplification surfaces, and
+  AgenticDev 2026 with ICSE 2027 NIER fallback as the formal venue path.
+
 ## Current Priority
 
-The next step is to turn the adapted assembly into a submission-ready venue draft:
+The next step is to turn the paper into a live multi-channel publication surface:
 
-1. replace the placeholder author block in [agenticdev-2026-ieee-manuscript.tex](agenticdev-2026-ieee-manuscript.tex) with final author, affiliation, and acknowledgment metadata when the submission identity is fixed,
+1. replace the temporary arXiv home placeholder with the final paper identifier as soon as the preprint exists, then propagate that same canonical link to the site and LinkedIn surfaces,
 2. if AgenticDev later publishes different formatting guidance, reconcile the same bounded draft and compiled IEEE files to that format and re-run the compile check,
-3. perform the final camera-ready hygiene pass in the compiled file: last-page column balancing, final bibliography polish, and any venue-specific wording constraints that appear later.
+3. perform the final camera-ready hygiene pass in the compiled file and the public-facing announcement pass together: last-page column balancing, final bibliography polish, publications page review, and LinkedIn launch copy.
