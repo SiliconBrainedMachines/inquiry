@@ -142,5 +142,13 @@ void main() {
       expect(content, contains('NEVER'));
       expect(content, contains('.inquiry/'));
     });
+
+    test('requires exact literal output when explicitly requested', () {
+      expect(
+        content,
+        contains('If the user requests an exact literal response'),
+      );
+      expect(content, contains('output only that literal'));
+    });
   });
 }
