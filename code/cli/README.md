@@ -39,3 +39,18 @@ curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 | `iq ape prompt --name <name>` | Assemble sub-agent prompt from YAML + current state |
 | `iq ape state` | Show active APE sub-state and valid transitions |
 | `iq ape transition --event <e>` | Advance the active APE's internal FSM |
+
+## H/F Benchmark (Gemma4)
+
+Use the PowerShell runner to compare Inquiry methodology mode (H) vs freestyle mode (F) with local Copilot CLI routing to Ollama.
+
+```powershell
+./scripts/benchmark-hf-gemma4.ps1 -Workspace . -Model gemma4:latest
+```
+
+The runner executes both modes with equivalent prompts, stores raw JSONL logs under `tmp/`, and writes `summary.json` with:
+
+- model detection in logs
+- evidence that `iq fsm state --json` was executed
+- token compliance (`tokenSeen` and `exactTokenMessageSeen`)
+- pass/fail booleans for standard and strict literal checks
