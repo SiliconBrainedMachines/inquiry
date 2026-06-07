@@ -1,0 +1,9 @@
+mode=f
+attempt=1
+workspace=c:\Users\44358590\Code\silicon-brained-machines\inquiry
+model=gemma4:latest
+providerBaseUrl=http://localhost:11434/v1
+runTimeoutSec=30
+promptLength=587
+promptSha256=5450140A99A391E654A747F5C7AB1DF6B08DE197F1C51BB12CE5E2F9449A3BBA
+command=copilot -C <workspace> --name fullflow-f --model <model> --allow-all-tools -p <prompt> --output-format json -s

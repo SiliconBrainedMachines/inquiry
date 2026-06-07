@@ -1,0 +1,83 @@
+{
+  "generatedAt": "2026-06-06T21:03:43.0177198-05:00",
+  "workspace": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry",
+  "issue": 242,
+  "issueTitle": "Benchmark full Inquiry flow with gemma4 H vs F",
+  "branch": "242-fullflow-hf-gemma4",
+  "model": "gemma4:latest",
+  "providerBaseUrl": "http://localhost:11434/v1",
+  "results": [
+    {
+      "mode": "h",
+      "exitCode": 0,
+      "modelSeen": true,
+      "stateCommandSeen": true,
+      "reachedIDLE": false,
+      "reachedANALYZE": false,
+      "reachedPLAN": false,
+      "reachedEXECUTE": false,
+      "reachedEND": false,
+      "reachedEVOLUTION": false,
+      "toolStarts": 8,
+      "toolCompletes": 8,
+      "toolCalls": 16,
+      "tokenSeen": true,
+      "exactTokenMessageSeen": false,
+      "sessionDurationMs": 55242,
+      "totalApiDurationMs": 49006,
+      "premiumRequests": 0,
+      "logPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\h.jsonl",
+      "attemptsMetaPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\h.jsonl.meta.json",
+      "attempts": [
+        {
+          "attempt": 1,
+          "start": "2026-06-06T21:01:29.8123991-05:00",
+          "end": "2026-06-06T21:02:28.5758671-05:00",
+          "durationSec": 58.76,
+          "exitCode": 0,
+          "timedOut": false,
+          "nilContentTypeError": false,
+          "retryTriggered": false,
+          "logPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\h.jsonl",
+          "commandPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\h.jsonl.command.txt"
+        }
+      ]
+    },
+    {
+      "mode": "f",
+      "exitCode": 0,
+      "modelSeen": true,
+      "stateCommandSeen": false,
+      "reachedIDLE": false,
+      "reachedANALYZE": false,
+      "reachedPLAN": false,
+      "reachedEXECUTE": false,
+      "reachedEND": false,
+      "reachedEVOLUTION": false,
+      "toolStarts": 23,
+      "toolCompletes": 23,
+      "toolCalls": 46,
+      "tokenSeen": true,
+      "exactTokenMessageSeen": false,
+      "sessionDurationMs": 70309,
+      "totalApiDurationMs": 68585,
+      "premiumRequests": 0,
+      "logPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\f.jsonl",
+      "attemptsMetaPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\f.jsonl.meta.json",
+      "attempts": [
+        {
+          "attempt": 1,
+          "start": "2026-06-06T21:02:28.7337264-05:00",
+          "end": "2026-06-06T21:03:42.8757284-05:00",
+          "durationSec": 74.14,
+          "exitCode": 0,
+          "timedOut": false,
+          "nilContentTypeError": false,
+          "retryTriggered": false,
+          "logPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\f.jsonl.attempt1",
+          "commandPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-210129\\f.jsonl.attempt1.command.txt"
+        }
+      ]
+    }
+  ]
+}
