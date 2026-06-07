@@ -1,0 +1,12 @@
+{
+  "attempt": 1,
+  "start": "2026-06-07T00:28:04.2749074-05:00",
+  "end": "2026-06-07T00:30:07.1749648-05:00",
+  "durationSec": 122.9,
+  "exitCode": 124,
+  "timedOut": true,
+  "nilContentTypeError": false,
+  "retryTriggered": false,
+  "logPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260607-002651\\f.jsonl.attempt1",
+  "commandPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260607-002651\\f.jsonl.attempt1.command.txt"
+}
