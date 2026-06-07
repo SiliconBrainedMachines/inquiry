@@ -1,0 +1,9 @@
+mode=h
+attempt=1
+workspace=.
+model=gemma4:latest
+providerBaseUrl=http://localhost:11434/v1
+runTimeoutSec=240
+promptLength=6919
+promptSha256=25B90652D5883A582007215C9B66D447012F9D4026AB75ABB46B6A303AB74BF9
+command=copilot -C <workspace> --name fullflow-h --model <model> --allow-all-tools -p <prompt> --output-format json -s

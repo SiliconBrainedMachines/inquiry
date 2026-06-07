@@ -1,0 +1,53 @@
+{
+  "generatedAt": "2026-06-06T20:51:22.2773375-05:00",
+  "workspace": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry",
+  "issue": 242,
+  "issueTitle": "Benchmark full Inquiry flow with gemma4 H vs F",
+  "branch": "242-fullflow-hf-gemma4",
+  "model": "gemma4:latest",
+  "providerBaseUrl": "http://localhost:11434/v1",
+  "results": [
+    {
+      "mode": "h",
+      "exitCode": 1,
+      "modelSeen": false,
+      "stateCommandSeen": false,
+      "reachedIDLE": false,
+      "reachedANALYZE": false,
+      "reachedPLAN": false,
+      "reachedEXECUTE": false,
+      "reachedEND": false,
+      "reachedEVOLUTION": false,
+      "toolStarts": 0,
+      "toolCompletes": 0,
+      "toolCalls": 0,
+      "tokenSeen": false,
+      "exactTokenMessageSeen": false,
+      "sessionDurationMs": null,
+      "totalApiDurationMs": null,
+      "premiumRequests": null,
+      "logPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-205118\\h.jsonl"
+    },
+    {
+      "mode": "f",
+      "exitCode": 0,
+      "modelSeen": false,
+      "stateCommandSeen": false,
+      "reachedIDLE": false,
+      "reachedANALYZE": false,
+      "reachedPLAN": false,
+      "reachedEXECUTE": false,
+      "reachedEND": false,
+      "reachedEVOLUTION": false,
+      "toolStarts": 0,
+      "toolCompletes": 0,
+      "toolCalls": 0,
+      "tokenSeen": false,
+      "exactTokenMessageSeen": false,
+      "sessionDurationMs": null,
+      "totalApiDurationMs": null,
+      "premiumRequests": null,
+      "logPath": "C:\\Users\\44358590\\Code\\silicon-brained-machines\\inquiry\\code\\cli\\tmp\\fullflow-hf-20260606-205118\\f.jsonl"
+    }
+  ]
+}

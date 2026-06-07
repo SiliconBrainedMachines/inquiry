@@ -29,6 +29,21 @@ curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 | `iq` | TUI banner with current FSM state |
 | `iq init` | Scaffold `cleanrooms/` and repo-scoped `.inquiry/config.yaml` |
 | `iq doctor` | Verify prerequisites: `inquiry`, `git`, `gh`, `gh auth` |
+
+## H/F Full-Flow Benchmark (Gemma4)
+
+Use the full-flow runner to compare Inquiry methodology mode (H) vs freestyle mode (F) on the longer IDLE -> ANALYZE -> PLAN -> EXECUTE -> END path with local Copilot CLI routing to Ollama.
+
+```powershell
+./scripts/benchmark-fullflow-gemma4.ps1 -Workspace . -Model gemma4:latest -IssueNumber 242
+```
+
+The runner prepares a benchmark cleanroom, executes both modes against the same issue/branch context, and writes `summary.json` with:
+
+- per-mode tool-call counts
+- per-mode session and API duration
+- whether each state was reached (`IDLE`, `ANALYZE`, `PLAN`, `EXECUTE`, `END`)
+- exact-token compliance for the final run marker
 | `iq version` | Print CLI version |
 | `iq upgrade` | Download and install latest release |
 | `iq uninstall` | Remove `inquiry` binary and deployed assets |

@@ -1,0 +1,77 @@
+events:
+  - recorded_at: "2026-06-06T17:44:10.520410Z"
+    task_id: "paper-1"
+    branch: paper-1
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: MISSING
+    authority: "cleanrooms/paper-1/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-06T17:44:10.522410Z"
+    task_id: "paper-1"
+    branch: paper-1
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: blocked
+    prompt_fragment_id: idle_to_analyze
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-06T17:44:10.523411Z"
+    task_id: "paper-1"
+    branch: paper-1
+    event_class: block
+    phase: IDLE
+    transition_event: start_analyze
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    authoritative_surface: "cleanrooms/paper-1/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-06T17:44:53.782422Z"
+    task_id: "paper-1"
+    branch: paper-1
+    event_class: retry
+    phase: IDLE
+    transition_event: start_analyze
+    triggering_failure: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    retry_count: 1
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-06T17:44:53.783421Z"
+    task_id: "paper-1"
+    branch: paper-1
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: MISSING
+    authority: "cleanrooms/paper-1/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-06T17:44:53.784954Z"
+    task_id: "paper-1"
+    branch: paper-1
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: blocked
+    prompt_fragment_id: idle_to_analyze
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-06T17:44:53.786611Z"
+    task_id: "paper-1"
+    branch: paper-1
+    event_class: block
+    phase: IDLE
+    transition_event: start_analyze
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    authoritative_surface: "cleanrooms/paper-1/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
