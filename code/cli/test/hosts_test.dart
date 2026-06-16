@@ -53,12 +53,24 @@ void main() {
   });
 
   group('deployAdapters registry', () {
-    test('returns exactly 1 adapter', () {
-      expect(deployAdapters, hasLength(1));
+    test('returns copilot and opencode', () {
+      expect(deployAdapters, hasLength(2));
+      expect(
+        deployAdapters.map((a) => a.name),
+        containsAll(<String>['copilot', 'opencode']),
+      );
+    });
+  });
+
+  group('deploysAgent capability', () {
+    test('opencode opts into agent deploy', () {
+      final opencode = deployAdapters.firstWhere((a) => a.name == 'opencode');
+      expect(opencode.deploysAgent, isTrue);
     });
 
-    test('only contains copilot', () {
-      expect(deployAdapters.single.name, equals('copilot'));
+    test('copilot does not deploy the agent', () {
+      final copilot = deployAdapters.firstWhere((a) => a.name == 'copilot');
+      expect(copilot.deploysAgent, isFalse);
     });
   });
 }

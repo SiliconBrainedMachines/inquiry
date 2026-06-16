@@ -16,5 +16,5 @@ final List<HostAdapter> allAdapters = [
 ];
 
 /// Adapters that receive deploys in the current version.
-/// For v0.0.x only Copilot is active (D20).
-final List<HostAdapter> deployAdapters = [CopilotAdapter()];
+/// Copilot deploys skills; OpenCode deploys skills + the inquiry agent (#247, D1).
+final List<HostAdapter> deployAdapters = [CopilotAdapter(), OpenCodeAdapter()];
