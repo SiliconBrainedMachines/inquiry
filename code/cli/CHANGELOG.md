@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.8.0]
+### Added
+- **OpenCode host support** (#247): `iq host get --host opencode` now deploys the `research`, `legion`, and `kritik` skills plus the `inquiry` agent (as an OpenCode `mode: primary` agent) into `~/.config/opencode/`. A new `HostAdapter.deploysAgent` capability lets a host opt into agent deployment; OpenCode opts in while Copilot stays skills-only. Verified against the real `opencode` CLI (`opencode agent list` shows `inquiry`).
+
 ## [0.7.7]
 ### Fixed
 - **Issue-linked branch enforcement**: `feature_branch_selected` and boundary commits now require a branch that actually matches the active issue prefix, so `start_analyze` and later phase boundaries no longer accept arbitrary non-main branches as valid explicit-start handoff context
