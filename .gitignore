@@ -9,3 +9,6 @@
 
 # Inquiry — cycle-local runtime state is derived, never tracked
 cleanrooms/**/.iq.state.yaml
+
+# Inquiry — CLI benchmark scratch logs are derived, never tracked
+code/cli/tmp/
