@@ -19,6 +19,12 @@ abstract class HostAdapter {
   /// Whether this host's base directory exists on disk.
   bool exists(String homeDir) => Directory(baseDirectory(homeDir)).existsSync();
 
+  /// Whether `host get` should also deploy the inquiry agent to this host.
+  ///
+  /// Most hosts receive skills only; the inquiry agent is repo-scoped via
+  /// `iq init`. Hosts that expose a global agent directory (OpenCode) opt in.
+  bool get deploysAgent => false;
+
   /// Names of other hosts that make this one redundant.
   ///
   /// When any listed target exists, this adapter should be skipped

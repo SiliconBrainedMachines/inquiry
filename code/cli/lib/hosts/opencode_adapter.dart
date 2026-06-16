@@ -17,4 +17,7 @@ class OpenCodeAdapter extends HostAdapter {
   @override
   String agentDirectory(String homeDir) =>
       p.join(homeDir, '.config', 'opencode', 'agents');
+
+  @override
+  bool get deploysAgent => true;
 }
