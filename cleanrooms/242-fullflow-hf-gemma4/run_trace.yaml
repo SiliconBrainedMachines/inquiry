@@ -1,0 +1,1128 @@
+events:
+  - recorded_at: "2026-06-07T01:19:06.203699Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: MISSING
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:06.204791Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: blocked
+    prompt_fragment_id: idle_to_analyze
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:06.207037Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: IDLE
+    transition_event: start_analyze
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:33.925093Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: IDLE
+    transition_event: start_analyze
+    triggering_failure: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    retry_count: 1
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T01:19:33.926093Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: MISSING
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:33.927212Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: blocked
+    prompt_fragment_id: idle_to_analyze
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:33.928221Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: IDLE
+    transition_event: start_analyze
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:54.209559Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: IDLE
+    transition_event: start_analyze
+    triggering_failure: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    retry_count: 2
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T01:19:54.210068Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: MISSING
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:54.212075Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: blocked
+    prompt_fragment_id: idle_to_analyze
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:19:54.213074Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: IDLE
+    transition_event: start_analyze
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:21:00.448681Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: IDLE
+    transition_event: start_analyze
+    triggering_failure: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    retry_count: 3
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T01:21:00.449693Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: MISSING
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:21:00.453406Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: blocked
+    prompt_fragment_id: idle_to_analyze
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:21:00.459094Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: IDLE
+    transition_event: start_analyze
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:21:07.894178Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: IDLE
+    transition_event: start_analyze
+    triggering_failure: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    retry_count: 4
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T01:21:07.895217Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: MISSING
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:21:07.895743Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: blocked
+    prompt_fragment_id: idle_to_analyze
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:21:07.896788Z"
+    task_id: "242-fullflow-hf-gemma4"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: IDLE
+    transition_event: start_analyze
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:23:23.166768Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: IDLE
+    transition_event: start_analyze
+    triggering_failure: "ERROR_PRECONDITION_ISSUE_FIRST: Create/select issue before commitment actions"
+    retry_count: 5
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T01:23:23.167280Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:23:23.168847Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: IDLE
+    sensor_category: runtime
+    gate: feature_branch_selected
+    verdict: APPROVED
+    authority: "git:branch"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:23:25.530695Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: start_analyze
+    tool_class: gh
+    command_family: issue_view
+    outcome: succeeded
+    authority: "cleanrooms/242-fullflow-hf-gemma4/issue.md"
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['open_analysis_context']
+  - recorded_at: "2026-06-07T01:23:25.777066Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: IDLE
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: allowed
+    prompt_fragment_id: idle_to_analyze
+    operations_executed: ['update_state', 'open_analysis_context', 'reset_mutations', 'snapshot_metrics']
+  - recorded_at: "2026-06-07T01:23:51.790405Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 9475
+    prompt_lines: 150
+    prompt_utf8_bytes: 9485
+    estimated_input_tokens: 2369
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: clarification
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-07T01:24:12.577425Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 9475
+    prompt_lines: 150
+    prompt_utf8_bytes: 9485
+    estimated_input_tokens: 2369
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: clarification
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-07T01:25:32.444123Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 9475
+    prompt_lines: 150
+    prompt_utf8_bytes: 9485
+    estimated_input_tokens: 2369
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: clarification
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-07T01:27:50.204077Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 9485
+    prompt_lines: 150
+    prompt_utf8_bytes: 9495
+    estimated_input_tokens: 2372
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: assumptions
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-07T01:28:23.463590Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:28:23.464597Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: MISSING
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:28:23.465597Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_MISSING: diagnosis.md missing for current issue branch"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:28:23.465597Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_MISSING: diagnosis.md missing for current issue branch"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:28:29.012341Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 9485
+    prompt_lines: 150
+    prompt_utf8_bytes: 9495
+    estimated_input_tokens: 2372
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: assumptions
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-07T01:29:31.779964Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 9476
+    prompt_lines: 150
+    prompt_utf8_bytes: 9486
+    estimated_input_tokens: 2369
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: evidence
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-07T01:31:19.423410Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: ANALYZE
+    ape_name: socrates
+    model_surface: prompt_input
+    prompt_characters: 9525
+    prompt_lines: 150
+    prompt_utf8_bytes: 9535
+    estimated_input_tokens: 2382
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.0
+    sub_state: implications
+    prompt_fragment_id: idle_to_analyze
+  - recorded_at: "2026-06-07T01:48:08.419820Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_MISSING: diagnosis.md missing for current issue branch"
+    retry_count: 1
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T01:48:08.420337Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:48:08.421418Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:48:08.422992Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:48:08.424024Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: INVALID
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:48:08.424552Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T01:48:08.425080Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:17:13.954309Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    retry_count: 2
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T05:17:13.955819Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:17:13.958326Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:17:13.960844Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:17:13.962844Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: INVALID
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:17:13.964353Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:17:13.965883Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:19:39.656020Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    retry_count: 3
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T05:19:39.657102Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:19:39.658717Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:19:39.659780Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:19:39.660310Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: INVALID
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:19:39.660847Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:19:39.661906Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:15.292712Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    retry_count: 4
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T05:26:15.293248Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:15.294763Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:15.296771Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:15.297892Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: INVALID
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:15.297892Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:15.298891Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:29.730520Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    retry_count: 5
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T05:26:29.731040Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:29.732641Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:29.734257Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:29.735328Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: INVALID
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:29.735883Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T05:26:29.736413Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: precondition_gate
+    reason: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:41.520417Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    retry_count: 6
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T09:13:41.521417Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:41.521417Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:41.524465Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:41.524465Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: APPROVED
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:41.525473Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: index_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/index.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:41.526473Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: confirmations_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/confirmations.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:41.625002Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: complete_analysis
+    tool_class: git
+    command_family: add
+    outcome: succeeded
+    exit_code: 0
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-07T09:13:41.842781Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: complete_analysis
+    tool_class: git
+    command_family: commit
+    outcome: succeeded
+    exit_code: 0
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-07T09:13:41.843852Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: commit_analysis_boundary
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:13:42.417997Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: phase_timing
+    phase: ANALYZE
+    started_at: "2026-06-07T01:35:40.133972Z"
+    ended_at: "2026-06-07T09:13:42.088157Z"
+    duration_seconds: 27481.954
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-07T09:13:42.417997Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: allowed
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-07T09:14:14.633622Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: model_activity
+    phase: PLAN
+    ape_name: descartes
+    model_surface: prompt_input
+    prompt_characters: 6405
+    prompt_lines: 125
+    prompt_utf8_bytes: 6407
+    estimated_input_tokens: 1602
+    token_estimate_basis: chars_div_4_ceil
+    assembly_duration_seconds: 0.001
+    sub_state: decomposition
+    prompt_fragment_id: analyze_to_plan
+  - recorded_at: "2026-06-07T09:18:01.796990Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: phase_timing
+    phase: PLAN
+    started_at: "2026-06-07T09:13:42.415999Z"
+    ended_at: "2026-06-07T09:18:01.388195Z"
+    duration_seconds: 258.972
+    prompt_fragment_id: plan_to_analyze
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-07T09:18:01.799268Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: PLAN
+    transition_event: start_analyze
+    to_state: ANALYZE
+    outcome: allowed
+    prompt_fragment_id: plan_to_analyze
+    operations_executed: ['update_state']
+  - recorded_at: "2026-06-07T09:18:45.728520Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: retry
+    phase: ANALYZE
+    transition_event: complete_analysis
+    triggering_failure: "ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_MISSING: diagnosis.md Evidence section must contain concrete observed evidence before PLAN handoff; replace the bootstrap placeholder with actual repo, artifact, test, runtime, or research evidence"
+    retry_count: 6
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition']
+  - recorded_at: "2026-06-07T09:18:45.728520Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: runtime
+    gate: issue_selected_or_created
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/.iq.state.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.731359Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.732866Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_structured
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/diagnosis.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.737072Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: diagnosis_evidence_present
+    verdict: APPROVED
+    authority: "assets/fsm/transition_contract.yaml"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.740074Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: index_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/index.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.745100Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: confirmations_exists
+    verdict: APPROVED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze/confirmations.md"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.856544Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: complete_analysis
+    tool_class: git
+    command_family: add
+    outcome: succeeded
+    exit_code: 0
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-07T09:18:45.989362Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: tool_activity
+    phase: ANALYZE
+    transition_event: complete_analysis
+    tool_class: git
+    command_family: commit
+    outcome: failed
+    exit_code: 1
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'create_boundary_commit']
+  - recorded_at: "2026-06-07T09:18:45.990363Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: sensor_run
+    phase: ANALYZE
+    sensor_category: pre_transition
+    gate: commit_analysis_boundary
+    verdict: FAILED
+    authority: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.991363Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: transition
+    from_state: ANALYZE
+    transition_event: complete_analysis
+    to_state: PLAN
+    outcome: blocked
+    prompt_fragment_id: analyze_to_plan
+    reason: "ERROR_BOUNDARY_COMMIT_FAILED: Failed to create analysis boundary commit: On branch 242-fullflow-hf-gemma4
+Changes not staged for commit:
+  (use \"git add <file>...\" to update what will be committed)
+  (use \"git restore <file>...\" to discard changes in working directory)
+	modified:   code/cli/README.md
+
+Untracked files:
+  (use \"git add <file>...\" to include in what will be committed)
+	cleanrooms/236-local-model-idle-compat/
+	cleanrooms/242-fullflow-hf-gemma4/issue.md
+	cleanrooms/242-fullflow-hf-gemma4/mutations.md
+	cleanrooms/242-fullflow-hf-gemma4/run_trace.yaml
+	cleanrooms/paper-1/
+	code/cli/cleanrooms/
+	code/cli/scripts/benchmark-fullflow-gemma4.ps1
+	code/cli/tmp/
+	code/paper/
+
+no changes added to commit (use \"git add\" and/or \"git commit -a\")"
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-07T09:18:45.991363Z"
+    task_id: "242"
+    branch: 242-fullflow-hf-gemma4
+    event_class: block
+    phase: ANALYZE
+    transition_event: complete_analysis
+    blocking_boundary: boundary_commit
+    reason: "ERROR_BOUNDARY_COMMIT_FAILED: Failed to create analysis boundary commit: On branch 242-fullflow-hf-gemma4
+Changes not staged for commit:
+  (use \"git add <file>...\" to update what will be committed)
+  (use \"git restore <file>...\" to discard changes in working directory)
+	modified:   code/cli/README.md
+
+Untracked files:
+  (use \"git add <file>...\" to include in what will be committed)
+	cleanrooms/236-local-model-idle-compat/
+	cleanrooms/242-fullflow-hf-gemma4/issue.md
+	cleanrooms/242-fullflow-hf-gemma4/mutations.md
+	cleanrooms/242-fullflow-hf-gemma4/run_trace.yaml
+	cleanrooms/paper-1/
+	code/cli/cleanrooms/
+	code/cli/scripts/benchmark-fullflow-gemma4.ps1
+	code/cli/tmp/
+	code/paper/
+
+no changes added to commit (use \"git add\" and/or \"git commit -a\")"
+    authoritative_surface: "cleanrooms/242-fullflow-hf-gemma4/analyze"
+    prompt_fragment_id: analyze_to_plan
+    operations_executed: ['validate_transition', 'validate_prechecks']
