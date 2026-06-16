@@ -271,3 +271,45 @@ events:
     outcome: allowed
     prompt_fragment_id: plan_to_execute
     operations_executed: ['update_state']
+  - recorded_at: "2026-06-16T23:31:09.583576Z"
+    task_id: "247"
+    branch: 247-opencode-host-support
+    event_class: sensor_run
+    phase: EXECUTE
+    sensor_category: runtime
+    gate: issue_selected
+    verdict: APPROVED
+    authority: "cleanrooms/247-opencode-host-support/.iq.state.yaml"
+    prompt_fragment_id: execute_to_end
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-16T23:31:09.584687Z"
+    task_id: "247"
+    branch: 247-opencode-host-support
+    event_class: sensor_run
+    phase: EXECUTE
+    sensor_category: runtime
+    gate: feature_branch_selected
+    verdict: APPROVED
+    authority: "git:branch"
+    prompt_fragment_id: execute_to_end
+    operations_executed: ['validate_transition', 'validate_prechecks']
+  - recorded_at: "2026-06-16T23:31:09.975271Z"
+    task_id: "247"
+    branch: 247-opencode-host-support
+    event_class: phase_timing
+    phase: EXECUTE
+    started_at: "2026-06-16T23:25:09.455162Z"
+    ended_at: "2026-06-16T23:31:09.648572Z"
+    duration_seconds: 360.193
+    prompt_fragment_id: execute_to_end
+    operations_executed: ['update_state', 'seed_pre_pr_inspection_template']
+  - recorded_at: "2026-06-16T23:31:09.976273Z"
+    task_id: "247"
+    branch: 247-opencode-host-support
+    event_class: transition
+    from_state: EXECUTE
+    transition_event: finish_execute
+    to_state: END
+    outcome: allowed
+    prompt_fragment_id: execute_to_end
+    operations_executed: ['update_state', 'seed_pre_pr_inspection_template']
