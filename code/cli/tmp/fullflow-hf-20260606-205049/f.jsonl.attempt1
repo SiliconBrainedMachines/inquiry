@@ -1,6 +1,0 @@
-error: Invalid command format.
-
-It looks like your prompt was not quoted, so the extra words were treated as separate arguments.
-Wrap the prompt in quotes, for example: copilot -p "your prompt here"
-
-Try 'copilot --help' for more information.
