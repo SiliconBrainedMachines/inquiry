@@ -33,6 +33,7 @@ class HostDeployer {
     clean();
     final selected = adapters.firstWhere((a) => a.name == hostName);
     _deploySkills(selected);
+    if (selected.deploysAgent) _deployAgent(selected);
   }
 
   /// Removes all deployed files from **all** adapter directories.
@@ -53,6 +54,14 @@ class HostDeployer {
       hostFile.parent.createSync(recursive: true);
       hostFile.writeAsStringSync(content);
     }
+  }
+
+  /// Deploys the inquiry agent (OpenCode-tailored) to the host's agent dir as `inquiry.md`.
+  void _deployAgent(HostAdapter adapter) {
+    final content = assets.loadString('agents/inquiry.opencode.md');
+    final hostFile = File(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'));
+    hostFile.parent.createSync(recursive: true);
+    hostFile.writeAsStringSync(content);
   }
 
   void _deleteDirectory(String path) {
