@@ -256,6 +256,55 @@ void main() {
       );
     });
   });
+
+  group('agent deploy (deploysAgent capability)', () {
+    setUp(() {
+      File(p.join(tempDir.path, 'assets', 'agents', 'inquiry.opencode.md'))
+          .writeAsStringSync('---\nmode: primary\n---\n# Inquiry');
+    });
+
+    test('deploys inquiry.md when the host opts in', () {
+      final agentDeployer = HostDeployer(
+        assets: assets,
+        adapters: [_AgentHostAdapter()],
+        homeDir: homeDir.path,
+      );
+
+      agentDeployer.deployExclusive('agenthost');
+
+      final agentFile =
+          File(p.join(homeDir.path, '.agenthost', 'agents', 'inquiry.md'));
+      expect(agentFile.existsSync(), isTrue);
+      expect(agentFile.readAsStringSync(), contains('mode: primary'));
+    });
+
+    test('does not deploy an agent when the host opts out', () {
+      deployer.deployExclusive('fake'); // FakeAdapter.deploysAgent == false
+      expect(
+        Directory(p.join(homeDir.path, '.fake', 'agents')).existsSync(),
+        isFalse,
+      );
+    });
+  });
+}
+
+class _AgentHostAdapter extends HostAdapter {
+  @override
+  String get name => 'agenthost';
+
+  @override
+  String baseDirectory(String homeDir) => p.join(homeDir, '.agenthost');
+
+  @override
+  String skillsDirectory(String homeDir) =>
+      p.join(homeDir, '.agenthost', 'skills');
+
+  @override
+  String agentDirectory(String homeDir) =>
+      p.join(homeDir, '.agenthost', 'agents');
+
+  @override
+  bool get deploysAgent => true;
 }
 
 class _SecondFakeAdapter extends HostAdapter {
