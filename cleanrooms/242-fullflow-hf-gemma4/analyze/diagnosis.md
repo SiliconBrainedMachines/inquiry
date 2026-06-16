@@ -11,12 +11,12 @@ tags: [diagnosis, evidence-first]
 ## Evidence
 - Observed benchmark context in repository: issue #242 on branch 242-fullflow-hf-gemma4 with FSM state ANALYZE at 2026-06-07T00:26:51.3540336-05:00.
 
-## Hypotheses
+## Hypothesis for Freestyle (F) Mode Execution
 - State the current explanation or candidate cause licensed by the evidence.
 
 ## Constraints
 - Capture bounded constraints, invariants, or environmental limits here.
 
 ## Open Questions
-- List only unresolved questions that evidence could not yet answer.
+- [To be populated during PLAN and EXECUTE phases]
 
