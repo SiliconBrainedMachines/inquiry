@@ -10,7 +10,7 @@
 #   3. Extracts to ~/.inquiry/
 #   4. Symlinks to ~/.local/bin (XDG standard, in default PATH)
 #   5. Symlinks `iq` alias
-#   6. Runs `inquiry host get` for the active host (Copilot today)
+#   6. Runs `inquiry host get` for the active host (OpenCode or Copilot)
 #   7. Verifies with `inquiry version`
 
 set -euo pipefail
