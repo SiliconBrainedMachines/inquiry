@@ -147,7 +147,7 @@
         </dd>
         <dt>3. A test matrix across hosts</dt>
         <dd>
-          Single-host MVP today (Copilot). Adapters exist for Claude Code, Codex, Crush, and Gemini per <a href="https://github.com/ccisnedev/inquiry/blob/main/docs/spec/host-specific-agents.md">ADR D20</a>, but aren't wired in. The <em>methodology &gt; model</em> thesis demands comparison across hosts — ideally including a local 7B — to be testable at all.
+          Two hosts wired in today — OpenCode and Copilot. OpenCode unlocks the local-model comparison the thesis demands (e.g. <code>qwen3-coder</code> via Ollama). Adapters for Claude Code, Codex, Crush, and Gemini exist per <a href="https://github.com/ccisnedev/inquiry/blob/main/docs/spec/host-specific-agents.md">ADR D20</a> but aren't wired in yet. The <em>methodology &gt; model</em> thesis demands comparison across hosts to be testable at all.
         </dd>
       </dl>
     </section>
