@@ -17,7 +17,7 @@ constraints:
   - Every plan must include a final verification step that runs the full project test suite (all existing tests, not just phase-specific ones)
   - No code edits (belongs to EXECUTE)
   - Plan must reference diagnosis.md decisions
-  - Each phase must have verification criteria
+  - Each phase must have an executable verification check (a test runner command or test-file reference), not pseudocode; the plan_executable_checks gate enforces this at PLAN handoff
   - If a phase changes a shared interface/type shape, that phase must list both consumer sites and construction sites, plus the search method used to find the constructors
   - Plan must be approved by user before transitioning
 

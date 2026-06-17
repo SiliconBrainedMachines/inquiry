@@ -234,6 +234,91 @@ void main() {
       },
     );
 
+    test(
+      'fails precheck when diagnosis evidence has no verifiable handle',
+      () async {
+        const branch = '51-idle-execution-guardrails';
+        _initGitRepo(tempDir.path, branch: branch);
+        _writeState(tempDir.path, 'ANALYZE', issue: '51');
+        _writeAnalyzeIndex(tempDir.path, branch);
+        _writeConfirmations(tempDir.path, branch);
+        final diagnosisFile = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'analyze', 'diagnosis.md'),
+        )..createSync(recursive: true);
+        // Evidence is concrete prose but cites no re-checkable handle
+        // (no file:line, URL, or inline code).
+        diagnosisFile.writeAsStringSync(
+          '# Diagnosis\n\n'
+          '## Evidence\n'
+          '- Observed that the benchmark run did not reach the END state.\n\n'
+          '## Hypotheses\n'
+          '- Working hypothesis\n\n'
+          '## Constraints\n'
+          '- No additional constraints\n\n'
+          '## Open Questions\n'
+          '- None\n',
+        );
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'complete_analysis',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => branch,
+        ).execute();
+
+        expect(output.allowed, isFalse);
+        expect(
+          output.message,
+          contains('ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_UNVERIFIABLE'),
+        );
+
+        final traceContent = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        ).readAsStringSync();
+        expect(traceContent, contains('gate: diagnosis_evidence_verifiable'));
+        expect(traceContent, contains('verdict: INVALID'));
+      },
+    );
+
+    test(
+      'passes when each evidence bullet carries a verifiable handle',
+      () async {
+        const branch = '51-idle-execution-guardrails';
+        _initGitRepo(tempDir.path, branch: branch);
+        _writeState(tempDir.path, 'ANALYZE', issue: '51');
+        _writeAnalyzeIndex(tempDir.path, branch);
+        _writeConfirmations(tempDir.path, branch);
+        final diagnosisFile = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'analyze', 'diagnosis.md'),
+        )..createSync(recursive: true);
+        diagnosisFile.writeAsStringSync(
+          '# Diagnosis\n\n'
+          '## Evidence\n'
+          '- OpenCode adapter paths match the docs — `lib/hosts/opencode_adapter.dart:10`.\n'
+          '- OpenCode docs confirm the skill path — https://opencode.ai/docs/skills/.\n\n'
+          '## Hypotheses\n'
+          '- Working hypothesis\n\n'
+          '## Constraints\n'
+          '- No additional constraints\n\n'
+          '## Open Questions\n'
+          '- None\n',
+        );
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'complete_analysis',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => branch,
+        ).execute();
+
+        expect(output.allowed, isTrue);
+      },
+    );
+
     test('records retry trace when a blocked ANALYZE handoff is attempted again', () async {
       const branch = '51-idle-execution-guardrails';
       _initGitRepo(tempDir.path, branch: branch);
@@ -499,6 +584,44 @@ void main() {
       expect(output.exitCode, 7);
       expect(output.message, contains('ERROR_PRECONDITION_BRANCH_POLICY'));
     });
+
+    test(
+      'fails precheck when plan verifies phases without executable checks',
+      () async {
+        const branch = '51-idle-execution-guardrails';
+        _initGitRepo(tempDir.path, branch: branch);
+        _writeState(tempDir.path, 'PLAN', issue: '51');
+        File(p.join(tempDir.path, 'cleanrooms', branch, 'plan.md'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '# Plan\n\n'
+            '## Phase 1 — implement the thing\n'
+            '- Step: write the code\n'
+            '- Verification: confirm it works by reading the diff\n',
+          );
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'approve_plan',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => branch,
+        ).execute();
+
+        expect(output.allowed, isFalse);
+        expect(
+          output.message,
+          contains('ERROR_PRECONDITION_PLAN_CHECKS_NOT_EXECUTABLE'),
+        );
+
+        final traceContent = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        ).readAsStringSync();
+        expect(traceContent, contains('gate: plan_executable_checks'));
+        expect(traceContent, contains('verdict: INVALID'));
+      },
+    );
 
     test(
       'transitions PLAN -> EXECUTE only after plan boundary commit',
@@ -1391,7 +1514,7 @@ void _writeDiagnosis(String root, String branch, String content) {
     '# Diagnosis\n'
     '\n'
     '## Evidence\n'
-    '$content\n'
+    '- $content (`lib/example.dart:1`)\n'
     '\n'
     '## Hypotheses\n'
     '- Hypothesis placeholder\n'
@@ -1421,7 +1544,7 @@ void _writeConfirmations(String root, String branch) {
 void _writePlan(String root, String branch, String content) {
   final file = File(p.join(root, 'cleanrooms', branch, 'plan.md'));
   file.createSync(recursive: true);
-  file.writeAsStringSync(content);
+  file.writeAsStringSync('$content\n## Verification\n- `dart test`\n');
 }
 
 void _writePrePrInspection(
