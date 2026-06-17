@@ -29,7 +29,8 @@ base_prompt: |
   Produce a phased plan that is detailed enough to execute mechanically. Structure:
 
   - Phases with checkable sub-steps (`- [ ]`)
-  - Test definitions in pseudocode for each phase
+  - An executable acceptance check for each phase — a real test runner command
+    or a test-file reference, NOT pseudocode (the PLAN handoff gate enforces this)
   - Risk notes where applicable
   - Dependencies between phases
   - Explicit entry criteria, execution steps, and verification for every phase
@@ -41,7 +42,8 @@ base_prompt: |
   - Do not implement anything. Do not create code, tests, or deliverables.
   - Do not suggest transitions or next steps.
   - Iterate until the active planning contract says the plan is ready.
-  - Consider TDD applicability: which phases benefit from RED→GREEN?
+  - Apply TDD where a phase changes behavior: ship a failing (RED) executable
+    test as that phase's acceptance check before EXECUTE makes it pass (GREEN).
 
 states:
   decomposition:
@@ -72,8 +74,10 @@ states:
       - event: back
         to: ordering
     prompt: |
-      FOCUS: Verification. Define test definitions in pseudocode for each phase.
-      Consider TDD applicability: which phases benefit from RED→GREEN?
+      FOCUS: Verification. Give each phase an executable acceptance check — a test
+      runner command or a test-file reference, not pseudocode. The PLAN handoff
+      gate (plan_executable_checks) blocks until every phase carries one.
+      Where a phase changes behavior, write it as a failing (RED) test first.
 
   enumeration:
     description: "Review completeness — nothing omitted"

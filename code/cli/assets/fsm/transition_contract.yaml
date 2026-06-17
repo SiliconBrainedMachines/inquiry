@@ -110,7 +110,7 @@ transitions:
     to: PLAN
     allowed: true
     operations:
-      prechecks: [issue_selected_or_created, diagnosis_exists, diagnosis_structured, diagnosis_evidence_present, index_exists, confirmations_exists]
+      prechecks: [issue_selected_or_created, diagnosis_exists, diagnosis_structured, diagnosis_evidence_present, diagnosis_evidence_verifiable, index_exists, confirmations_exists]
       effects: [generate_plan]
       artifacts: [plan.md]
       commit_policy: commit_analysis_boundary
@@ -185,7 +185,7 @@ transitions:
     to: EXECUTE
     allowed: true
     operations:
-      prechecks: [issue_selected, feature_branch_selected, plan_approved]
+      prechecks: [issue_selected, feature_branch_selected, plan_approved, plan_executable_checks]
       effects: [prepare_execute]
       artifacts: [execution_log.md]
       commit_policy: commit_plan_boundary
@@ -231,7 +231,7 @@ transitions:
     to: EXECUTE
     allowed: true
     operations:
-      prechecks: [issue_selected, feature_branch_selected, plan_approved]
+      prechecks: [issue_selected, feature_branch_selected, plan_approved, plan_executable_checks]
       effects: [prepare_execute]
       artifacts: [execution_log.md]
       commit_policy: branch_required
@@ -442,6 +442,9 @@ preconditions:
   diagnosis_evidence_present:
     description: "diagnosis.md Evidence section contains concrete observed evidence and not only the bootstrap placeholder before PLAN handoff"
     kind: document-content
+  diagnosis_evidence_verifiable:
+    description: "every diagnosis.md Evidence bullet carries a re-checkable handle (file:line, URL, or inline-code command/test id) so each claim can be reopened and verified"
+    kind: document-content
   index_exists:
     description: "index.md exists for current issue analysis corpus"
     kind: filesystem
@@ -460,6 +463,9 @@ preconditions:
   plan_approved:
     description: "User approved plan"
     kind: user-approval
+  plan_executable_checks:
+    description: "plan.md verifies phases with executable checks (test runner command or test-file reference), not pseudocode; at least one overall and at least one per phase"
+    kind: document-content
   pr_created:
     description: "Pull request exists for issue branch"
     kind: github
