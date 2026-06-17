@@ -773,6 +773,30 @@ class StateTransitionCommand
       );
     }
 
+    if (prechecks.contains('diagnosis_evidence_verifiable')) {
+      if (!_diagnosisEvidenceIsVerifiable(branch, workingDirectory)) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'diagnosis_evidence_verifiable',
+          verdict: 'INVALID',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_UNVERIFIABLE: every diagnosis.md Evidence bullet must carry a re-checkable handle (a file:line reference, a URL, or an inline-code command/test id) so each claim can be reopened and verified';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'diagnosis_evidence_verifiable',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
+    }
+
     if (prechecks.contains('index_exists')) {
       if (!_analysisIndexExists(branch, workingDirectory)) {
         _recordPrecheckSensor(
@@ -972,6 +996,41 @@ class StateTransitionCommand
     return normalizedLines.any(
       (line) => line.toLowerCase() != _diagnosisEvidenceBootstrapPlaceholder,
     );
+  }
+
+  bool _diagnosisEvidenceIsVerifiable(String branch, String workingDirectory) {
+    final content = _readDiagnosisContent(branch, workingDirectory);
+    if (content == null) return false;
+
+    final evidenceBody = _diagnosisSectionBody(
+      content,
+      _diagnosisSectionPatterns['Evidence']!,
+    );
+    if (evidenceBody == null) return false;
+
+    final bullets = evidenceBody
+        .split('\n')
+        .map(_normalizeDiagnosisSectionLine)
+        .where((line) => line.isNotEmpty)
+        .where(
+          (line) =>
+              line.toLowerCase() != _diagnosisEvidenceBootstrapPlaceholder,
+        )
+        .toList(growable: false);
+    if (bullets.isEmpty) return false;
+
+    return bullets.every(_evidenceLineHasVerifiableHandle);
+  }
+
+  /// A re-checkable evidence handle: a URL, a `file:line` reference, or an
+  /// inline-code span (a command, test id, or backtick-quoted path).
+  bool _evidenceLineHasVerifiableHandle(String line) {
+    final url = RegExp(r'https?://\S+');
+    final fileLine = RegExp(r'[\w./\\-]+\.[A-Za-z0-9]+:\d+');
+    final inlineCode = RegExp('`[^`]+`');
+    return url.hasMatch(line) ||
+        fileLine.hasMatch(line) ||
+        inlineCode.hasMatch(line);
   }
 
   String? _readDiagnosisContent(String branch, String workingDirectory) {
