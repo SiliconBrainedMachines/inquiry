@@ -8,10 +8,57 @@ param(
   [int]$RunTimeoutSec = 600,
   [int]$RunTimeoutSecH = 0,
   [int]$RunTimeoutSecF = 0,
-  [switch]$NonInteractiveBenchmark
+  [switch]$NonInteractiveBenchmark,
+  [switch]$GradeTests
 )
 
 $ErrorActionPreference = "Stop"
+
+# --- Verifiable-artifact grading (#246) -------------------------------------
+# These grade what the cycle PRODUCED (reopenable evidence, executable plan
+# checks, a green suite) rather than only that the flow moved. Same handle
+# definitions as the ANALYZE/PLAN gates (#244/#245).
+
+function Test-EvidenceVerifiable {
+  param([string]$DiagnosisPath)
+  if (-not (Test-Path $DiagnosisPath)) { return $false }
+  $inEvidence = $false
+  $bullets = @()
+  foreach ($line in (Get-Content -Path $DiagnosisPath)) {
+    if ($line -match '^##?\s+Evidence\b') { $inEvidence = $true; continue }
+    if ($inEvidence -and $line -match '^#{1,6}\s') { break }
+    if ($inEvidence) {
+      $t = $line.Trim()
+      if ($t -match '^[-*]\s+') { $bullets += ($t -replace '^[-*]\s+', '') }
+    }
+  }
+  if ($bullets.Count -eq 0) { return $false }
+  $handle = '(https?://|[\w./\\-]+\.[A-Za-z0-9]+:\d+|`[^`]+`)'
+  foreach ($b in $bullets) { if ($b -notmatch $handle) { return $false } }
+  return $true
+}
+
+function Test-PlanExecutable {
+  param([string]$PlanPath)
+  if (-not (Test-Path $PlanPath)) { return $false }
+  $lines = Get-Content -Path $PlanPath
+  $phaseCount = ($lines | Where-Object { $_ -match '^#{2,4}\s+.*\bphase\b' }).Count
+  $runner = '`[^`]*\b(dart test|flutter test|npm (test|run)|pytest|go test|cargo test|mocha|jest)\b[^`]*`'
+  $testFile = '(_test\.\w+|\.test\.\w+|_spec\.\w+|(^|[\s/`])test/)'
+  $handleCount = ($lines | Where-Object { $_ -match $runner -or $_ -match $testFile }).Count
+  if ($handleCount -eq 0) { return $false }
+  return ($handleCount -ge $phaseCount)
+}
+
+function Test-SuiteGreen {
+  param([string]$CliRoot)
+  try {
+    Push-Location $CliRoot
+    $out = & dart test 2>&1 | Out-String
+    return ($out -match 'All tests passed!')
+  } catch { return $false }
+  finally { Pop-Location }
+}
 
 function Invoke-GhJson {
   param(
@@ -668,6 +715,22 @@ $hResult = Invoke-CopilotRun -ModeName 'h' -Prompt $hPrompt -Token 'FULLFLOW_H_O
 Write-Host "Running F benchmark (freestyle)..."
 $fResult = Invoke-CopilotRun -ModeName 'f' -Prompt $fPrompt -Token 'FULLFLOW_F_OK' -LogPath $fLog -MaxAttempts 2 -RunTimeoutSec $RunTimeoutSecF
 
+# Grade the artifacts the cycle produced — the PRIMARY result (#246).
+$diagnosisForGrading = Join-Path $cleanroomDir 'diagnosis.md'
+$planForGrading = Join-Path (Split-Path $cleanroomDir -Parent) 'plan.md'
+$cliRootForGrading = Split-Path $PSScriptRoot -Parent
+$diagnosisVerifiable = Test-EvidenceVerifiable -DiagnosisPath $diagnosisForGrading
+$planExecutable = Test-PlanExecutable -PlanPath $planForGrading
+$testsGreen = if ($GradeTests) { Test-SuiteGreen -CliRoot $cliRootForGrading } else { $null }
+$verifiableArtifacts = [pscustomobject]@{
+  diagnosisEvidenceVerifiable = $diagnosisVerifiable
+  planHasExecutableChecks = $planExecutable
+  testsGreen = $testsGreen
+  # "verifiable" requires reopenable evidence + an executable plan, and a green
+  # suite when graded. A cycle that only emits its success token is NOT verifiable.
+  verifiable = ($diagnosisVerifiable -and $planExecutable -and ($testsGreen -ne $false))
+}
+
 $summary = [pscustomobject]@{
   generatedAt = (Get-Date).ToString('o')
   workspace = (Resolve-Path $Workspace).Path
@@ -676,13 +739,17 @@ $summary = [pscustomobject]@{
   branch = $BranchName
   model = $Model
   providerBaseUrl = $ProviderBaseUrl
+  verifiableArtifacts = $verifiableArtifacts
   results = @($hResult, $fResult)
 }
 
 $summary | ConvertTo-Json -Depth 8 | Set-Content -Path $summaryPath -Encoding UTF8
 
 Write-Host ""
-Write-Host "Full-flow benchmark summary"
+Write-Host "Verifiable artifacts (primary result):"
+$verifiableArtifacts | Format-List diagnosisEvidenceVerifiable, planHasExecutableChecks, testsGreen, verifiable
+Write-Host ""
+Write-Host "Flow movement (secondary):"
 $summary.results | Format-Table mode, exitCode, reachedIDLE, reachedANALYZE, reachedPLAN, reachedEXECUTE, reachedEND, toolCalls, totalApiDurationMs, sessionDurationMs, premiumRequests -AutoSize
 Write-Host ""
 Write-Host "Summary JSON: $summaryPath"
