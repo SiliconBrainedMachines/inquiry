@@ -586,6 +586,44 @@ void main() {
     });
 
     test(
+      'fails precheck when plan verifies phases without executable checks',
+      () async {
+        const branch = '51-idle-execution-guardrails';
+        _initGitRepo(tempDir.path, branch: branch);
+        _writeState(tempDir.path, 'PLAN', issue: '51');
+        File(p.join(tempDir.path, 'cleanrooms', branch, 'plan.md'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '# Plan\n\n'
+            '## Phase 1 — implement the thing\n'
+            '- Step: write the code\n'
+            '- Verification: confirm it works by reading the diff\n',
+          );
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'approve_plan',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => branch,
+        ).execute();
+
+        expect(output.allowed, isFalse);
+        expect(
+          output.message,
+          contains('ERROR_PRECONDITION_PLAN_CHECKS_NOT_EXECUTABLE'),
+        );
+
+        final traceContent = File(
+          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
+        ).readAsStringSync();
+        expect(traceContent, contains('gate: plan_executable_checks'));
+        expect(traceContent, contains('verdict: INVALID'));
+      },
+    );
+
+    test(
       'transitions PLAN -> EXECUTE only after plan boundary commit',
       () async {
         const branch = '51-idle-execution-guardrails';
@@ -1506,7 +1544,7 @@ void _writeConfirmations(String root, String branch) {
 void _writePlan(String root, String branch, String content) {
   final file = File(p.join(root, 'cleanrooms', branch, 'plan.md'));
   file.createSync(recursive: true);
-  file.writeAsStringSync(content);
+  file.writeAsStringSync('$content\n## Verification\n- `dart test`\n');
 }
 
 void _writePrePrInspection(
