@@ -869,6 +869,30 @@ class StateTransitionCommand
       );
     }
 
+    if (prechecks.contains('plan_executable_checks')) {
+      if (!_planHasExecutableChecks(branch, workingDirectory)) {
+        _recordPrecheckSensor(
+          executor,
+          currentState: currentState,
+          precheck: 'plan_executable_checks',
+          verdict: 'INVALID',
+          branch: branch,
+          issue: issue,
+          promptFragmentId: promptFragmentId,
+        );
+        return 'ERROR_PRECONDITION_PLAN_CHECKS_NOT_EXECUTABLE: plan.md must verify phases with executable checks (a test runner command or a test-file reference), not pseudocode; provide at least one executable check, and at least one per phase';
+      }
+      _recordPrecheckSensor(
+        executor,
+        currentState: currentState,
+        precheck: 'plan_executable_checks',
+        verdict: 'APPROVED',
+        branch: branch,
+        issue: issue,
+        promptFragmentId: promptFragmentId,
+      );
+    }
+
     if (prechecks.contains('pre_pr_inspection_approved')) {
       PrePrInspectionRunner(
         workingDirectory: workingDirectory,
@@ -950,12 +974,14 @@ class StateTransitionCommand
         return 'git:branch';
       case 'diagnosis_exists':
       case 'diagnosis_structured':
+      case 'diagnosis_evidence_verifiable':
         return p.posix.join('cleanrooms', branch, 'analyze', 'diagnosis.md');
       case 'index_exists':
         return p.posix.join('cleanrooms', branch, 'analyze', 'index.md');
       case 'confirmations_exists':
         return p.posix.join('cleanrooms', branch, 'analyze', 'confirmations.md');
       case 'plan_approved':
+      case 'plan_executable_checks':
         return p.posix.join('cleanrooms', branch, 'plan.md');
       case 'pre_pr_inspection_approved':
         return p.posix.join('cleanrooms', branch, 'pre_pr_inspection.md');
@@ -1044,6 +1070,44 @@ class StateTransitionCommand
       'diagnosis.md',
     );
     final file = File(diagnosisPath);
+    if (!file.existsSync()) return null;
+    return file.readAsStringSync();
+  }
+
+  /// Whether plan.md verifies its work with executable checks rather than
+  /// pseudocode: at least one executable handle overall, and — when the plan
+  /// is organized in phases — at least as many handles as phase headings.
+  bool _planHasExecutableChecks(String branch, String workingDirectory) {
+    final content = _readPlanContent(branch, workingDirectory);
+    if (content == null) return false;
+
+    final lines = content.split('\n');
+    final phaseHeading = RegExp(r'^#{2,4}\s+.*\bphase\b', caseSensitive: false);
+    final phaseCount = lines.where(phaseHeading.hasMatch).length;
+    final handleCount = lines.where(_planLineHasExecutableHandle).length;
+
+    if (handleCount == 0) return false;
+    return handleCount >= phaseCount;
+  }
+
+  /// An executable verification handle: a test-runner command in inline code,
+  /// or a reference to a test file/dir.
+  bool _planLineHasExecutableHandle(String line) {
+    final runner = RegExp(
+      r'`[^`]*\b(?:dart test|flutter test|npm (?:test|run)|pytest|go test|cargo test|mocha|jest)\b[^`]*`',
+      caseSensitive: false,
+    );
+    final testFile = RegExp(
+      r'(?:_test\.\w+|\.test\.\w+|_spec\.\w+|(?:^|[\s/`])test/)',
+      caseSensitive: false,
+    );
+    return runner.hasMatch(line) || testFile.hasMatch(line);
+  }
+
+  String? _readPlanContent(String branch, String workingDirectory) {
+    if (branch.isEmpty) return null;
+    final planPath = p.join(workingDirectory, 'cleanrooms', branch, 'plan.md');
+    final file = File(planPath);
     if (!file.existsSync()) return null;
     return file.readAsStringSync();
   }
