@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.0]
+### Fixed
+- **Local-model IDLE triage drift** (#236): hardened IDLE guidance so local models (e.g. gemma4/qwen via Ollama) stop drifting on command/event names. The IDLE state contract, the `issue-create` instruction, and both inquiry agent firmwares (Copilot + OpenCode) now state that `issue_selected_or_created` is a readiness report token (not an `iq fsm transition` event), require using only the events returned by `iq fsm state --json`, and forbid unsupported `gh issue list` flags such as `--no-defaults`.
+
 ## [0.9.0]
 ### Added
 - **Evidence-verifiability gates** (#244, #245): two new ANALYZE/PLAN handoff prechecks tighten the methodology so trust transfers to the verifier, not the phase.

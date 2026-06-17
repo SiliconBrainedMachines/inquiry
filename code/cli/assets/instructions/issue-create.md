@@ -48,6 +48,8 @@ gh issue list --state open --search "<keywords>" --limit 20
 ```
 
 Use the results to confirm whether an existing issue already captures the work.
+Use only documented `gh issue list` flags for the installed CLI version.
+Do not append compatibility-breaking flags such as `--no-defaults`.
 
 ### Step 3: Create the Issue if No Match Exists
 
