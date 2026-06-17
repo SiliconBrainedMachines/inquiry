@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.9.0]
+### Added
+- **Evidence-verifiability gates** (#244, #245): two new ANALYZE/PLAN handoff prechecks tighten the methodology so trust transfers to the verifier, not the phase.
+  - `diagnosis_evidence_verifiable`: `complete_analysis` blocks unless every `diagnosis.md` Evidence bullet carries a re-checkable handle (a `file:line` reference, a URL, or an inline-code command/test id). Non-emptiness is no longer sufficient.
+  - `plan_executable_checks`: PLAN→EXECUTE (`approve_plan`/`go_execute`) blocks unless `plan.md` verifies its phases with executable checks (a test-runner command or test-file reference) rather than pseudocode — at least one overall and at least one per phase. DESCARTES guidance promotes "Consider TDD" to shipping a failing (RED) test as each phase's acceptance check.
+
+### Changed
+- **Benchmark grades verifiable artifacts** (#246): `benchmark-fullflow-*` `summary.json` now reports a `verifiableArtifacts` block (`diagnosisEvidenceVerifiable`, `planHasExecutableChecks`, `testsGreen`, `verifiable`) as the primary result; tool counts, states, and durations are demoted to a secondary "flow movement" view. A cycle that only emits its success token is not verifiable.
+- **Site**: OpenCode is listed first and marked available; the future "macOS soon" install tab was removed.
+
 ## [0.8.0]
 ### Added
 - **OpenCode host support** (#247): `iq host get --host opencode` now deploys the `research`, `legion`, and `kritik` skills plus the `inquiry` agent (as an OpenCode `mode: primary` agent) into `~/.config/opencode/`. A new `HostAdapter.deploysAgent` capability lets a host opt into agent deployment; OpenCode opts in while Copilot stays skills-only. Verified against the real `opencode` CLI (`opencode agent list` shows `inquiry`).
