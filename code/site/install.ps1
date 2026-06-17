@@ -9,7 +9,7 @@
 #   3. Extracts to $env:LOCALAPPDATA\inquiry\
 #   4. Adds inquiry\bin\ to the user PATH
 #   5. Creates `iq.cmd` batch shim
-#   6. Runs `inquiry host get` for the active host (Copilot today)
+#   6. Runs `inquiry host get` for the active host (OpenCode or Copilot)
 #   7. Verifies with `inquiry version`
 
 $ErrorActionPreference = 'Stop'
