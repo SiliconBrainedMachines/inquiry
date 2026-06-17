@@ -299,7 +299,7 @@ void _writeDiagnosis(String root, String branch, String content) {
     '# Diagnosis\n'
     '\n'
     '## Evidence\n'
-    '$content\n'
+    '- $content (`lib/example.dart:1`)\n'
     '\n'
     '## Hypotheses\n'
     '- Working hypothesis\n'
@@ -315,7 +315,7 @@ void _writeDiagnosis(String root, String branch, String content) {
 void _writePlan(String root, String branch, String content) {
   final file = File(p.join(root, 'cleanrooms', branch, 'plan.md'));
   file.createSync(recursive: true);
-  file.writeAsStringSync(content);
+  file.writeAsStringSync('$content\n## Verification\n- `dart test`\n');
 }
 
 void _writePrePrInspection(String root, String branch, {required String verdict}) {
