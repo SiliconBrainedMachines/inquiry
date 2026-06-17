@@ -299,7 +299,7 @@ void _writeDiagnosis(String root, String branch, String content) {
     '# Diagnosis\n'
     '\n'
     '## Evidence\n'
-    '$content\n'
+    '- $content (`lib/example.dart:1`)\n'
     '\n'
     '## Hypotheses\n'
     '- Working hypothesis\n'
