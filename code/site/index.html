@@ -4,17 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inquiry — Analyze. Plan. Execute.</title>
-  <meta name="description" content="Inquiry is a philosophical and methodological framework for AI-assisted software work: Analyze. Plan. Execute. Thinking tools made operational for GitHub Copilot.">
+  <meta name="description" content="Inquiry is a philosophical and methodological framework for AI-assisted software work: Analyze. Plan. Execute. Thinking tools made operational for OpenCode and GitHub Copilot.">
   <meta name="theme-color" content="#0a0e1a">
 
   <meta property="og:title" content="Inquiry — Analyze. Plan. Execute.">
-  <meta property="og:description" content="A philosophical and methodological framework for AI-assisted software work. Thinking tools made operational for GitHub Copilot.">
+  <meta property="og:description" content="A philosophical and methodological framework for AI-assisted software work. Thinking tools made operational for OpenCode and GitHub Copilot.">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://inquiry.ccisne.dev/">
 
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="Inquiry — Analyze. Plan. Execute.">
-  <meta name="twitter:description" content="A philosophical and methodological framework for AI-assisted software work. Thinking tools made operational for GitHub Copilot.">
+  <meta name="twitter:description" content="A philosophical and methodological framework for AI-assisted software work. Thinking tools made operational for OpenCode and GitHub Copilot.">
 
   <link rel="icon" type="image/svg+xml" href="img/favicon.svg">
 
@@ -30,7 +30,7 @@
     <header>
       <h1><span class="ape">Inquiry</span></h1>
       <p class="primary-tagline">Analyze. Plan. Execute.</p>
-      <p class="secondary-tagline">Currently available for GitHub Copilot. More hosts coming soon.</p>
+      <p class="secondary-tagline">Available for OpenCode and GitHub Copilot. More hosts coming soon.</p>
       <span class="badge">v0.8.0</span>
       <p class="secondary-tagline">Public entry surface. For the canonical documentation map, start in the repository docs.</p>
 
@@ -38,7 +38,6 @@
         <div class="os-tabs" role="tablist" aria-label="Operating system">
           <button class="os-tab" role="tab" aria-selected="true" aria-controls="panel-windows" id="tab-windows" onclick="switchTab('windows')">Windows</button>
           <button class="os-tab" role="tab" aria-selected="false" aria-controls="panel-linux" id="tab-linux" onclick="switchTab('linux')">Linux</button>
-          <button class="os-tab" role="tab" aria-selected="false" disabled title="Coming soon">macOS<span class="soon-tag">soon</span></button>
         </div>
         <div id="panel-windows" class="os-panel" role="tabpanel" aria-labelledby="tab-windows">
           <div class="install-block">
@@ -99,7 +98,7 @@
       <pre class="quickstart"><span class="comment"># verify prerequisites (inquiry, git, gh, gh auth)</span>
 <span class="cmd">iq doctor</span>
 
-<span class="comment"># deploy Inquiry skills to your AI host (Copilot today)</span>
+<span class="comment"># deploy Inquiry skills to your AI host (OpenCode or Copilot)</span>
 <span class="cmd">iq host get</span>
 
 <span class="comment"># scaffold .inquiry/ in your repo</span>
@@ -125,6 +124,7 @@
       <h2>Hosts</h2>
       <p>Inquiry deploys host-scoped skills to the global configuration of your AI coding tool. The repo-scoped agent is scaffolded by <code>iq init</code>.</p>
       <ul class="targets">
+        <li class="target-badge"><span class="dot"></span>OpenCode</li>
         <li class="target-badge"><span class="dot"></span>GitHub Copilot</li>
         <li class="target-badge future"><span class="dot"></span>Claude Code</li>
         <li class="target-badge future"><span class="dot"></span>Codex</li>
