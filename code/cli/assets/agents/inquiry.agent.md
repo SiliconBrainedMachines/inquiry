@@ -65,6 +65,7 @@ iq fsm transition --event <event>
 - only explicit start intent triggers inquiry-start plus start_analyze
 - `feature_branch_selected` is produced by `inquiry-start`, not by `iq ape transition`
 - `inquiry-start` first produces `feature_branch_selected`, then `iq fsm transition --event start_analyze` may leave IDLE
+- use only events listed in `iq fsm state --json` for the active state
 
 ## ANALYZE Visibility Rule
 ANALYZE must remain visible to the user. While the FSM state is ANALYZE, the scheduler must surface the active dialogue in chat, let the user answer and refine the investigation in real time, and must not hide analysis interaction behind the Completion Gate.

@@ -9,7 +9,9 @@ instructions: |
   IDLE owns that fast-path routing contract: triage_objective=create_or_select, deterministic_skill=issue-create, allowed_commands=gh issue list, gh issue view, gh issue create, gh issue edit.
   Inquiry CLI injects that routing contract into the assembled prompt as explicit inquiry-context.
   When issue readiness is reached, produce issue_selected_or_created, reset DEWEY, and remain in IDLE.
+  issue_selected_or_created is a readiness report token, not an iq fsm transition event.
   DONE is reached only on explicit start intent; DONE consumes inquiry-start to prepare feature_branch_selected.
+  Use only transition events returned by `iq fsm state --json` for the current state.
   Only after that handoff may IDLE fire start_analyze.
   Run 'iq doctor' as first action to validate environment.
 
