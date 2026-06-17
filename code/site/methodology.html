@@ -54,10 +54,10 @@
           <dd>Bounded issue triage. DEWEY determines whether the situation is ready to become or select a GitHub issue; <code>inquiry-start</code> performs the explicit handoff into ANALYZE.</dd>
 
           <dt><code>ANALYZE</code> · SOCRATES</dt>
-          <dd>Clarifies the problem through dialog. Produces <code>diagnosis.md</code>.</dd>
+          <dd>Clarifies the problem through dialog. Produces <code>diagnosis.md</code>. The handoff gate requires every Evidence bullet to carry a re-checkable handle — a <code>file:line</code>, URL, or inline-code reference — so each claim can be reopened, not just asserted.</dd>
 
           <dt><code>PLAN</code> · DESCARTES</dt>
-          <dd>Divide, order, verify, enumerate. Produces <code>plan.md</code>.</dd>
+          <dd>Divide, order, verify, enumerate. Produces <code>plan.md</code>, where every phase must carry an <em>executable</em> acceptance check (a test-runner command or a test file), not pseudocode.</dd>
 
           <dt><code>EXECUTE</code> · ADA</dt>
           <dd>Programming as explicit construction under a coding manifesto. Produces code and commits.</dd>
@@ -83,6 +83,7 @@
     <span class="key">event</span>: complete_analysis
     <span class="key">prechecks</span>:
       - diagnosis_exists
+      - diagnosis_evidence_verifiable  <span class="comment"># every Evidence bullet has a re-checkable handle</span>
       - issue_linked
     <span class="key">effects</span>:
       - set_state: PLAN
