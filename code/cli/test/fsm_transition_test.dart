@@ -624,6 +624,45 @@ void main() {
     );
 
     test(
+      'accepts python checks (fenced or inline) as executable verification',
+      () async {
+        const branch = '51-idle-execution-guardrails';
+        _initGitRepo(tempDir.path, branch: branch);
+        _writeState(tempDir.path, 'PLAN', issue: '51');
+        File(p.join(tempDir.path, 'cleanrooms', branch, 'plan.md'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync(
+            '# Plan\n\n'
+            '## Phase 1 — fix the function\n'
+            '- Step: edit the code\n'
+            '- Verification:\n'
+            '```bash\n'
+            'python -c "import mod; assert mod.f() == 1"\n'
+            '```\n\n'
+            '## Phase 2 — handle edge cases\n'
+            '- Step: add guards\n'
+            '- Verification: `python3 -m pytest tests/`\n',
+          );
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'approve_plan',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => branch,
+        ).execute();
+
+        // The gate must recognize python -c / python -m as executable checks,
+        // whether in a fenced block or inline, and not reject the plan.
+        expect(
+          output.message,
+          isNot(contains('ERROR_PRECONDITION_PLAN_CHECKS_NOT_EXECUTABLE')),
+        );
+      },
+    );
+
+    test(
       'transitions PLAN -> EXECUTE only after plan boundary commit',
       () async {
         const branch = '51-idle-execution-guardrails';
