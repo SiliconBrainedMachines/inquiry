@@ -1094,7 +1094,7 @@ class StateTransitionCommand
   /// or a reference to a test file/dir.
   bool _planLineHasExecutableHandle(String line) {
     final runner = RegExp(
-      r'`[^`]*\b(?:dart test|flutter test|npm (?:test|run)|pytest|go test|cargo test|mocha|jest)\b[^`]*`',
+      r'(?:dart test|flutter test|npm (?:test|run)|pytest|python3?\s+(?:-c|-m|[^\s`]+\.py)|go test|cargo test|mocha|jest)',
       caseSensitive: false,
     );
     final testFile = RegExp(

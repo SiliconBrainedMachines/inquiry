@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.1]
+### Fixed
+- **PLAN executable-check gate too strict** (#245 follow-up): `plan_executable_checks` rejected valid `python` verification commands and any check written in a fenced code block — it only recognized a fixed runner list inside single-line inline backticks. The detector now recognizes `python -c` / `python -m` / `python file.py` invocations and matches runner commands whether fenced or inline, so plans that verify phases with real Python checks pass the ANALYZE→EXECUTE gate. Found while driving a real conducted Inquiry cycle on a local model.
+
 ## [0.10.0]
 ### Fixed
 - **Local-model IDLE triage drift** (#236): hardened IDLE guidance so local models (e.g. gemma4/qwen via Ollama) stop drifting on command/event names. The IDLE state contract, the `issue-create` instruction, and both inquiry agent firmwares (Copilot + OpenCode) now state that `issue_selected_or_created` is a readiness report token (not an `iq fsm transition` event), require using only the events returned by `iq fsm state --json`, and forbid unsupported `gh issue list` flags such as `--no-defaults`.
