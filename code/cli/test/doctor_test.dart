@@ -269,7 +269,7 @@ void main() {
       expect(json['checks'], isList);
       expect((json['checks'] as List).length, 5);
       expect(json['hostChecks'], isList);
-      expect((json['hostChecks'] as List).length, 1);
+      expect((json['hostChecks'] as List).length, 2);
 
       final firstCheck = (json['checks'] as List).first as Map<String, dynamic>;
       expect(firstCheck, containsPair('name', 'inquiry'));
@@ -322,14 +322,22 @@ void main() {
 
         expect(output.passed, isTrue);
         expect(output.exitCode, 0);
-        expect(output.hostChecks.length, 1);
-        expect(output.hostChecks.first.passed, isTrue);
-        expect(output.hostChecks.first.agentExists, isTrue);
-        expect(output.hostChecks.first.missingSkills, isEmpty);
+        expect(output.hostChecks.length, 2);
+        final copilot =
+            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
+        expect(copilot.active, isTrue);
+        expect(copilot.passed, isTrue);
+        expect(copilot.agentExists, isTrue);
+        expect(copilot.missingSkills, isEmpty);
+        // OpenCode is simply not the active host — not a failure.
+        final opencode =
+            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
+        expect(opencode.active, isFalse);
 
         final text = output.toText()!;
         expect(text, contains('Checking hosts...'));
         expect(text, contains('✓ copilot: agent + 9 skills deployed'));
+        expect(text, contains('- opencode: not deployed (inactive)'));
         expect(text, contains('All checks passed.'));
       });
 
@@ -343,14 +351,13 @@ void main() {
 
         expect(output.passed, isFalse);
         expect(output.exitCode, 1);
-        expect(output.hostChecks.first.agentExists, isFalse);
-        expect(output.hostChecks.first.missingSkills,
-            unorderedEquals(testSkills));
+        // No host has skills → none active.
+        expect(output.hostChecks.every((h) => !h.active), isTrue);
 
         final text = output.toText()!;
-        expect(text, contains('✗ copilot: agent not deployed'));
-        expect(text, contains('✗ copilot: missing skills:'));
-        expect(text, contains("Run 'inquiry init' to deploy agent"));
+        expect(text, contains('✗ no host deployed'));
+        expect(text,
+            contains("Run 'inquiry host get --host <copilot|opencode>'"));
         expect(text, contains('Some checks failed.'));
       });
 
@@ -373,8 +380,8 @@ void main() {
         final text = output.toText()!;
         expect(text, contains('✗ inquiry init'));
         expect(text, contains("Run 'inquiry init' to initialize"));
-        expect(text, contains('✗ copilot: agent not deployed'));
-        expect(text, contains("Run 'inquiry init' to deploy agent"));
+        // Nothing deployed → no active host.
+        expect(text, contains('✗ no host deployed'));
       });
 
       test('Scenario D: partial deployment → exit 1', () async {
@@ -408,13 +415,17 @@ void main() {
 
         expect(output.passed, isFalse);
         expect(output.exitCode, 1);
-        expect(output.hostChecks.first.agentExists, isTrue);
-        expect(output.hostChecks.first.missingSkills, ['issue-create']);
+        final copilot =
+            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
+        expect(copilot.active, isTrue);
+        expect(copilot.agentExists, isTrue);
+        expect(copilot.missingSkills, ['issue-create']);
 
         final text = output.toText()!;
         expect(text, contains('✓ copilot: agent deployed'));
         expect(text, contains('✗ copilot: missing skills: issue-create'));
-        expect(text, contains("Run 'inquiry host get' to deploy skills"));
+        expect(text,
+            contains("Run 'inquiry host get --host copilot' to deploy skills"));
       });
 
       test('HostCheck.toJson() includes all fields', () {
@@ -503,32 +514,76 @@ void main() {
             reason: 'Old global path is no longer valid — must run iq init');
       });
 
-      test('doctor remediation suggests "inquiry init" when agent is missing', () async {
+      test('doctor remediation suggests host get when no host is deployed', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
-        // No agent, no skills
+        // No agent, no skills → no active host
 
         final cmd = makeCmd(fs: fs);
         final output = await cmd.execute();
         final text = output.toText()!;
 
-        expect(text, contains("'inquiry init'"),
-          reason: 'Remediation must suggest iq init, not iq host get');
+        expect(text, contains('✗ no host deployed'));
+        expect(text, contains('inquiry host get --host'));
         expect(text, isNot(contains("'inquiry target get'")));
       });
 
-      test('agentExists is adapter-independent — it is repo-scoped', () async {
-        // Agent in repo, skills in copilot adapter
+      test('agent location is host-specific (Copilot repo-scoped, OpenCode global)', () async {
+        // Repo agent + copilot skills present; OpenCode global agent absent.
         final fs = allPassFs(workingDir, homeDir, testSkills);
         final cmd = makeCmd(fs: fs);
 
         final output = await cmd.execute();
 
-        // All hostChecks must have the same agentExists value
-        final allAgentExists =
-            output.hostChecks.map((c) => c.agentExists).toSet();
-        expect(allAgentExists, equals({true}),
-            reason: 'agentExists is repo-scoped — same for all adapters');
+        final copilot =
+            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
+        final opencode =
+            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
+        expect(copilot.agentExists, isTrue,
+            reason: 'Copilot agent is repo-scoped (.github/agents/)');
+        expect(opencode.agentExists, isFalse,
+            reason: 'OpenCode agent is global; not deployed in this fixture');
+      });
+
+      test('Scenario E: OpenCode active, Copilot inactive → exit 0 (regression #257)', () async {
+        final fs = MockFileSystemOps()..setHome(homeDir);
+        fs.setDirectoryExists('.inquiry', true);
+        // OpenCode fully deployed: global agent + skills.
+        fs.setFileExists(
+          p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
+          true,
+        );
+        for (final skill in testSkills) {
+          fs.setFileExists(
+            p.join(homeDir, '.config', 'opencode', 'skills', skill, 'SKILL.md'),
+            true,
+          );
+        }
+        // Copilot skills cleaned by the exclusive deploy; a repo agent lingers.
+        fs.setFileExists(
+          p.join(workingDir, '.github', 'agents', 'inquiry.agent.md'),
+          true,
+        );
+
+        final cmd = makeCmd(fs: fs);
+        final output = await cmd.execute();
+
+        expect(output.passed, isTrue,
+            reason: 'OpenCode is fully deployed → healthy');
+        expect(output.exitCode, 0);
+        final opencode =
+            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
+        expect(opencode.active, isTrue);
+        expect(opencode.passed, isTrue);
+        final copilot =
+            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
+        expect(copilot.active, isFalse,
+            reason: 'Copilot skills cleaned → inactive, not a failure');
+
+        final text = output.toText()!;
+        expect(text, contains('✓ opencode: agent + 9 skills deployed'));
+        expect(text, contains('- copilot: not deployed (inactive)'));
+        expect(text, contains('All checks passed.'));
       });
 
       test('no assets available → hosts still checked, 0 skills expected', () async {
