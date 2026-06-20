@@ -91,3 +91,4 @@ Dispatch is **unconditional and immediate**. When you enter the Inner Loop, exec
 - If a command fails, report the error and offer retry.
 - If you are unsure of your state, run `iq fsm state --json`; complete one sub-phase at a time before transitioning.
 - Do not enumerate states, transitions, or sub-agent names from memory. Read them from the CLI output.
+- If the user requests an exact literal response (for example "respond exactly TOKEN"), output only that literal in the final response and nothing else.
