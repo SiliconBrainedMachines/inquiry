@@ -16,4 +16,10 @@ class CopilotAdapter extends HostAdapter {
   @override
   String agentDirectory(String homeDir) =>
       p.join(homeDir, '.copilot', 'agents');
+
+  // Copilot runs inside VS Code: the install hint points at the command palette.
+  @override
+  Map<String, String> get agentSubstitutions => const {
+        'INIT_HINT': 'Tell the user to press `Ctrl+Shift+P` → **Inquiry: Init**',
+      };
 }

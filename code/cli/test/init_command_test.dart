@@ -241,9 +241,15 @@ void main() {
         );
         final agentDir = Directory(p.join(assetsRoot.path, 'assets', 'agents'));
         agentDir.createSync(recursive: true);
+        // Firmware is assembled from the shared body + per-host frontmatter.
         File(
-          p.join(agentDir.path, 'inquiry.agent.md'),
-        ).writeAsStringSync('---\nname: inquiry\n---\nTest agent content.');
+          p.join(agentDir.path, 'inquiry.body.md'),
+        ).writeAsStringSync('Test agent content.');
+        final fmDir = Directory(p.join(agentDir.path, 'frontmatter'))
+          ..createSync(recursive: true);
+        File(
+          p.join(fmDir.path, 'copilot.yaml'),
+        ).writeAsStringSync('name: inquiry');
       });
 
       tearDown(() {
