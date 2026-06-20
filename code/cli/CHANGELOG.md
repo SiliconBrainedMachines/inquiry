@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.2]
+### Fixed
+- **OpenCode agent deployed to the wrong directory** (#247 follow-up): `iq host get --host opencode` wrote the `inquiry` agent to `~/.config/opencode/agents/` (plural), but OpenCode discovers global agents in `~/.config/opencode/agent/` (singular). The deployed agent was therefore invisible to `opencode agent list`, and `opencode run --agent inquiry` silently **fell back to the default agent** — so the Inquiry firmware never actually ran on the OpenCode host. The adapter now targets the singular `agent/` directory (verified: `opencode agent list` shows `inquiry (primary)` against opencode 1.17.7). This corrects the [0.8.0] note, whose "verified against the real opencode CLI" claim did not hold for current OpenCode. A regression test now pins the singular path.
+
 ## [0.10.1]
 ### Fixed
 - **PLAN executable-check gate too strict** (#245 follow-up): `plan_executable_checks` rejected valid `python` verification commands and any check written in a fenced code block — it only recognized a fixed runner list inside single-line inline backticks. The detector now recognizes `python -c` / `python -m` / `python file.py` invocations and matches runner commands whether fenced or inline, so plans that verify phases with real Python checks pass the ANALYZE→EXECUTE gate. Found while driving a real conducted Inquiry cycle on a local model.

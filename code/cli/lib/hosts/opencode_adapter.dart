@@ -14,9 +14,13 @@ class OpenCodeAdapter extends HostAdapter {
   String skillsDirectory(String homeDir) =>
       p.join(homeDir, '.config', 'opencode', 'skills');
 
+  // OpenCode discovers global agents in `~/.config/opencode/agent/` (singular).
+  // A plural `agents/` directory is ignored, so `opencode agent list` never sees
+  // the deployed agent and `opencode run --agent inquiry` silently falls back to
+  // the default agent (#247).
   @override
   String agentDirectory(String homeDir) =>
-      p.join(homeDir, '.config', 'opencode', 'agents');
+      p.join(homeDir, '.config', 'opencode', 'agent');
 
   @override
   bool get deploysAgent => true;
