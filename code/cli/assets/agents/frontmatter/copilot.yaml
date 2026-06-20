@@ -1,0 +1,3 @@
+name: inquiry
+description: 'Inquiry — a strict FSM scheduler for structured task delivery. Dispatches sub-agents as thinking tools. User approval only at state completion gates.'
+tools: [vscode, execute, read, agent, edit, search, web, browser, todo]
