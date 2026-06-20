@@ -2,12 +2,18 @@ import 'dart:io';
 
 import 'package:test/test.dart';
 
+import 'package:inquiry_cli/assets.dart';
+import 'package:inquiry_cli/hosts/agent_builder.dart';
+import 'package:inquiry_cli/hosts/copilot_adapter.dart';
+
 void main() {
-  group('inquiry.agent.md firmware', () {
+  group('inquiry firmware (assembled)', () {
     late String content;
 
     setUpAll(() {
-      content = File('assets/agents/inquiry.agent.md').readAsStringSync();
+      // Firmware is now assembled from the shared body + per-host frontmatter.
+      content =
+          AgentBuilder(Assets(root: Directory.current.path)).build(CopilotAdapter());
     });
 
     test('references iq fsm state', () {
@@ -72,6 +78,10 @@ void main() {
         }
       }
       final bodyLines = lines.sublist(bodyStart);
+      // A trailing file newline is not a line of firmware — don't count it.
+      while (bodyLines.isNotEmpty && bodyLines.last.trim().isEmpty) {
+        bodyLines.removeLast();
+      }
       expect(bodyLines.length, lessThan(90),
           reason: 'Firmware body should be under 90 lines, got ${bodyLines.length}');
     });
