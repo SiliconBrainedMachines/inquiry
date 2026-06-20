@@ -19,22 +19,22 @@ void main() {
 
     test('path resolves under assets/', () {
       final assets = Assets(root: tempDir.path);
-      final resolved = assets.path('agents/inquiry.agent.md');
+      final resolved = assets.path('agents/inquiry.body.md');
 
       expect(
         resolved,
-        p.join(tempDir.path, 'assets', 'agents', 'inquiry.agent.md'),
+        p.join(tempDir.path, 'assets', 'agents', 'inquiry.body.md'),
       );
     });
 
     test('loadString reads file content relative to root', () {
       final assetsDir = Directory(p.join(tempDir.path, 'assets', 'agents'));
       assetsDir.createSync(recursive: true);
-      final file = File(p.join(assetsDir.path, 'inquiry.agent.md'));
+      final file = File(p.join(assetsDir.path, 'inquiry.body.md'));
       file.writeAsStringSync('# APE Agent');
 
       final assets = Assets(root: tempDir.path);
-      final content = assets.loadString('agents/inquiry.agent.md');
+      final content = assets.loadString('agents/inquiry.body.md');
 
       expect(content, '# APE Agent');
     });
@@ -75,9 +75,10 @@ void main() {
       assets = Assets(root: Directory.current.path);
     });
 
-    test('reads agents/inquiry.agent.md', () {
-      final content = assets.loadString('agents/inquiry.agent.md');
-      expect(content, contains('APE'));
+    test('reads agents/inquiry.body.md (shared firmware body)', () {
+      final content = assets.loadString('agents/inquiry.body.md');
+      expect(content, contains('Inquiry Scheduler'));
+      expect(content, contains('{{INIT_HINT}}'));
       expect(content, isNotEmpty);
     });
 
