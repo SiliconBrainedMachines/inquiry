@@ -1,0 +1,2 @@
+description: 'Inquiry — a strict FSM scheduler for structured task delivery. Dispatches sub-agents as thinking tools. User approval only at state completion gates.'
+mode: primary

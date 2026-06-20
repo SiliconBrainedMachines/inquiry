@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:path/path.dart' as p;
 
 import '../assets.dart';
+import 'agent_builder.dart';
 import 'host_adapter.dart';
 
 /// Orchestrates deploying skills to host tool directories.
@@ -56,9 +57,10 @@ class HostDeployer {
     }
   }
 
-  /// Deploys the inquiry agent (OpenCode-tailored) to the host's agent dir as `inquiry.md`.
+  /// Deploys the inquiry agent to the host's agent dir as `inquiry.md`,
+  /// assembled from the shared body + the host's frontmatter.
   void _deployAgent(HostAdapter adapter) {
-    final content = assets.loadString('agents/inquiry.opencode.md');
+    final content = AgentBuilder(assets).build(adapter);
     final hostFile = File(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'));
     hostFile.parent.createSync(recursive: true);
     hostFile.writeAsStringSync(content);
