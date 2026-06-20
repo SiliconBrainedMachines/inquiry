@@ -1,3 +1,4 @@
+import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'package:inquiry_cli/hosts/all_adapters.dart';
@@ -59,6 +60,20 @@ void main() {
         deployAdapters.map((a) => a.name),
         containsAll(<String>['copilot', 'opencode']),
       );
+    });
+  });
+
+  group('OpenCode agent directory (regression #247)', () {
+    final opencode = deployAdapters.firstWhere((a) => a.name == 'opencode');
+
+    test('agentDirectory is the SINGULAR ~/.config/opencode/agent', () {
+      // OpenCode reads global agents from `agent/` (singular). A plural
+      // `agents/` is ignored, so the deployed agent is invisible to
+      // `opencode agent list` / `--agent inquiry`. Pin the singular form.
+      final parts = p.split(opencode.agentDirectory('/home/user'));
+      expect(parts.last, 'agent');
+      expect(parts.last, isNot('agents'));
+      expect(parts[parts.length - 2], 'opencode');
     });
   });
 
