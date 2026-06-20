@@ -24,4 +24,10 @@ class OpenCodeAdapter extends HostAdapter {
 
   @override
   bool get deploysAgent => true;
+
+  // OpenCode is a headless CLI: the install hint points at `iq init`.
+  @override
+  Map<String, String> get agentSubstitutions => const {
+        'INIT_HINT': 'Run `iq init`',
+      };
 }

@@ -259,8 +259,14 @@ void main() {
 
   group('agent deploy (deploysAgent capability)', () {
     setUp(() {
-      File(p.join(tempDir.path, 'assets', 'agents', 'inquiry.opencode.md'))
-          .writeAsStringSync('---\nmode: primary\n---\n# Inquiry');
+      // Shared body + per-host frontmatter (assembled by AgentBuilder).
+      File(p.join(tempDir.path, 'assets', 'agents', 'inquiry.body.md'))
+          .writeAsStringSync('# Inquiry');
+      final fmDir = Directory(
+        p.join(tempDir.path, 'assets', 'agents', 'frontmatter'),
+      )..createSync(recursive: true);
+      File(p.join(fmDir.path, 'agenthost.yaml'))
+          .writeAsStringSync('mode: primary');
     });
 
     test('deploys inquiry.md when the host opts in', () {
