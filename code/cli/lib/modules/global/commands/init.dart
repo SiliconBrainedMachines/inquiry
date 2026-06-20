@@ -17,6 +17,8 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../assets.dart';
+import '../../../hosts/agent_builder.dart';
+import '../../../hosts/copilot_adapter.dart';
 import '../../../src/git_utils.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
@@ -106,7 +108,7 @@ class InitCommand implements Command<InitInput, InitOutput> {
   }
 
   void _deployAgent(String root, Assets assets, List<String> steps) {
-    final content = assets.loadString('agents/inquiry.agent.md');
+    final content = AgentBuilder(assets).build(CopilotAdapter());
     final agentFile = File(
       p.join(root, '.github', 'agents', 'inquiry.agent.md'),
     );

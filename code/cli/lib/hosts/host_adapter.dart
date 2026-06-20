@@ -25,6 +25,19 @@ abstract class HostAdapter {
   /// `iq init`. Hosts that expose a global agent directory (OpenCode) opt in.
   bool get deploysAgent => false;
 
+  /// Asset path of this host's agent frontmatter YAML.
+  ///
+  /// [AgentBuilder] assembles it with the shared firmware body
+  /// (`agents/inquiry.body.md`). Defaults to a per-host file named after [name].
+  String get agentFrontmatterAsset => 'agents/frontmatter/$name.yaml';
+
+  /// Host-specific substitutions applied to the shared firmware body.
+  ///
+  /// Keys are matched as `{{KEY}}`. Lets a single body carry the one or two
+  /// genuinely host-specific lines (e.g. the install/init hint) without
+  /// duplicating the whole firmware per host.
+  Map<String, String> get agentSubstitutions => const {};
+
   /// Names of other hosts that make this one redundant.
   ///
   /// When any listed target exists, this adapter should be skipped

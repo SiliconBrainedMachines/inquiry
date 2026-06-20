@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.3]
+### Changed
+- **Single-source agent firmware** (#247 follow-up): the inquiry agent firmware is now assembled from one shared body (`assets/agents/inquiry.body.md`) plus per-host frontmatter (`assets/agents/frontmatter/{copilot,opencode}.yaml`) via a new `AgentBuilder`, instead of two hand-maintained near-duplicate files (`inquiry.agent.md` + `inquiry.opencode.md`). The two had already drifted — the exact-literal output rule (0.10.2) had landed only on Copilot — and a single body makes that class of drift impossible. The only legitimate per-host differences (frontmatter schema and the install hint) are declared per host via `HostAdapter.agentFrontmatterAsset` / `agentSubstitutions`. Deployed filenames are unchanged (`.github/agents/inquiry.agent.md` for Copilot, `~/.config/opencode/agent/inquiry.md` for OpenCode), and the exact-literal rule now ships to both hosts.
+
 ## [0.10.2]
 ### Fixed
 - **OpenCode agent deployed to the wrong directory** (#247 follow-up): `iq host get --host opencode` wrote the `inquiry` agent to `~/.config/opencode/agents/` (plural), but OpenCode discovers global agents in `~/.config/opencode/agent/` (singular). The deployed agent was therefore invisible to `opencode agent list`, and `opencode run --agent inquiry` silently **fell back to the default agent** — so the Inquiry firmware never actually ran on the OpenCode host. The adapter now targets the singular `agent/` directory (verified: `opencode agent list` shows `inquiry (primary)` against opencode 1.17.7). This corrects the [0.8.0] note, whose "verified against the real opencode CLI" claim did not hold for current OpenCode. A regression test now pins the singular path.
