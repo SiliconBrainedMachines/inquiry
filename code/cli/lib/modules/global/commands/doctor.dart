@@ -12,7 +12,7 @@ import 'package:path/path.dart' as p;
 import '../../../assets.dart';
 import '../../../src/version.dart' as version_lib;
 import '../../../src/version_check.dart';
-import '../../../hosts/copilot_adapter.dart';
+import '../../../hosts/all_adapters.dart';
 import '../../../hosts/host_adapter.dart';
 
 /// Function type for running external processes.
@@ -58,21 +58,30 @@ class HostCheck {
   final int totalSkills;
   final String? error;
 
+  /// Whether this host is the active/deployed one (its skills are present).
+  /// Under the exclusive deploy model exactly one host is active at a time; an
+  /// inactive host is not a failure (it was simply not the chosen host).
+  final bool active;
+
   HostCheck({
     required this.hostName,
     required this.agentExists,
     required this.missingSkills,
     required this.totalSkills,
     this.error,
+    this.active = true,
   });
 
-  bool get passed => agentExists && missingSkills.isEmpty && error == null;
+  /// An inactive host never fails the doctor; an active host must be complete.
+  bool get passed =>
+      !active || (agentExists && missingSkills.isEmpty && error == null);
 
   Map<String, dynamic> toJson() => {
     'hostName': hostName,
     'agentExists': agentExists,
     'missingSkills': missingSkills,
     'totalSkills': totalSkills,
+    'active': active,
     if (error != null) 'error': error,
   };
 }
@@ -137,6 +146,9 @@ class DoctorOutput extends Output {
       for (final tc in hostChecks) {
         if (tc.error != null) {
           buffer.writeln('  ✗ ${tc.hostName}: ${tc.error}');
+        } else if (!tc.active) {
+          // Not the active host — informational, not a failure.
+          buffer.writeln('  - ${tc.hostName}: not deployed (inactive)');
         } else if (tc.passed) {
           final deployed = tc.totalSkills - tc.missingSkills.length;
           buffer.writeln(
@@ -157,11 +169,17 @@ class DoctorOutput extends Output {
             // Only suggest host get when agent is already deployed
             if (tc.agentExists) {
               buffer.writeln(
-                "    → Run 'inquiry host get' to deploy skills",
+                "    → Run 'inquiry host get --host ${tc.hostName}' to deploy skills",
               );
             }
           }
         }
+      }
+      if (!hostChecks.any((hc) => hc.active)) {
+        buffer.writeln('  ✗ no host deployed');
+        buffer.writeln(
+          "    → Run 'inquiry host get --host <copilot|opencode>'",
+        );
       }
     }
 
@@ -224,7 +242,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   }) : _runProcess = runProcess ?? Process.run,
        _fileSystem = fileSystemOps ?? RealFileSystemOps(),
        _assets = assets,
-       _activeAdapters = activeAdapters ?? [CopilotAdapter()],
+       _activeAdapters = activeAdapters ?? deployAdapters,
        _workingDirectory = workingDirectory ?? Directory.current.path,
        _versionChecker = versionChecker,
        inquiryVersion = inquiryVersionOverride ?? version_lib.inquiryVersion;
@@ -330,7 +348,9 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
       hostChecks.add(_verifyHost(adapter));
     }
 
-    final hostsPassed = hostChecks.every((hc) => hc.passed);
+    // At least one host must be active (deployed); inactive hosts never fail.
+    final anyActive = hostChecks.any((hc) => hc.active);
+    final hostsPassed = anyActive && hostChecks.every((hc) => hc.passed);
 
     return DoctorOutput(
       checks: checks,
@@ -365,8 +385,12 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     final homeDir = _fileSystem.homeDirectory();
     final expectedSkills = _getExpectedSkills();
 
-    // Agent is repo-scoped — independent of which adapter is active
-    final agentExists = _verifyRepoAgent();
+    // Agent location is host-specific: hosts that deploy a global agent
+    // (OpenCode) keep it in their agent dir; others (Copilot) are repo-scoped.
+    final agentExists = adapter.deploysAgent
+        ? _fileSystem
+            .fileExists(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'))
+        : _verifyRepoAgent();
 
     // Check skills — adapter-scoped
     final missingSkills = <String>[];
@@ -381,11 +405,19 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
       }
     }
 
+    // Active = this host's skills are deployed. Under the exclusive deploy
+    // model exactly one host is active; with no expected skills (assets
+    // unavailable) fall back to agent presence.
+    final active = expectedSkills.isEmpty
+        ? agentExists
+        : missingSkills.length < expectedSkills.length;
+
     return HostCheck(
       hostName: adapter.name,
       agentExists: agentExists,
       missingSkills: missingSkills,
       totalSkills: expectedSkills.length,
+      active: active,
     );
   }
 
