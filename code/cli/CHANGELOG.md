@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.4]
+### Fixed
+- **`iq doctor` was blind to non-default hosts** (#257): doctor hardcoded the Copilot adapter, so after `iq host get --host opencode` (an *exclusive* deploy that cleans other hosts) it reported a misleading failure about Copilot's now-absent skills and never verified the OpenCode deployment at all. Doctor now checks every deploy-capable host, locates each host's agent correctly (Copilot repo-scoped `.github/agents/`, OpenCode global `~/.config/opencode/agent/inquiry.md`), and treats a non-active host as informational ("not deployed (inactive)") rather than a failure — passing when the active host is fully deployed and flagging "no host deployed" only when none is active. Removes the last hardcoded single-default-host assumption from the health path.
+
 ## [0.10.3]
 ### Changed
 - **Single-source agent firmware** (#247 follow-up): the inquiry agent firmware is now assembled from one shared body (`assets/agents/inquiry.body.md`) plus per-host frontmatter (`assets/agents/frontmatter/{copilot,opencode}.yaml`) via a new `AgentBuilder`, instead of two hand-maintained near-duplicate files (`inquiry.agent.md` + `inquiry.opencode.md`). The two had already drifted — the exact-literal output rule (0.10.2) had landed only on Copilot — and a single body makes that class of drift impossible. The only legitimate per-host differences (frontmatter schema and the install hint) are declared per host via `HostAdapter.agentFrontmatterAsset` / `agentSubstitutions`. Deployed filenames are unchanged (`.github/agents/inquiry.agent.md` for Copilot, `~/.config/opencode/agent/inquiry.md` for OpenCode), and the exact-literal rule now ships to both hosts.
