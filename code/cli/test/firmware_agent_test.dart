@@ -160,5 +160,12 @@ void main() {
       );
       expect(content, contains('output only that literal'));
     });
+
+    test('on a gate/validation failure, repairs the artifact instead of blind retry (#263)', () {
+      expect(content, contains('do NOT re-fire the same event'));
+      expect(content, contains('repairs the artifact'));
+      // the artifact-as-function ideal must be stated
+      expect(content, contains('.md` artifacts on disk'));
+    });
   });
 }

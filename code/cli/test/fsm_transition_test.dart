@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -1503,6 +1504,41 @@ void main() {
         emptyInstructionsOutput.toText(),
         equals('Transition PLAN --approve_plan--> EXECUTE'),
       );
+    });
+
+    test('gate/validation failure appends repair guidance, not blind retry (#263)', () {
+      final gateFail = StateTransitionOutput(
+        allowed: false,
+        currentState: 'ANALYZE',
+        event: 'complete_analysis',
+        nextState: null,
+        operationsExecuted: const ['validate_transition', 'validate_prechecks'],
+        promptFragmentId: null,
+        requiredRole: null,
+        requiredInstructions: null,
+        message: 'ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_UNVERIFIABLE: fix it',
+        code: ExitCode.validationFailed,
+      );
+      final text = gateFail.toText()!;
+      expect(text, contains('ERROR_PRECONDITION'),
+          reason: 'preserves the original gate error');
+      expect(text, contains('Do NOT re-run "complete_analysis"'));
+      expect(text, contains('re-dispatch the operator to repair'));
+
+      // a plain forbidden transition (not validationFailed) gets no repair hint
+      final forbidden = StateTransitionOutput(
+        allowed: false,
+        currentState: 'IDLE',
+        event: 'go_execute',
+        nextState: null,
+        operationsExecuted: const ['validate_transition'],
+        promptFragmentId: null,
+        requiredRole: null,
+        requiredInstructions: null,
+        message: 'forbidden',
+        code: 64,
+      );
+      expect(forbidden.toText(), isNot(contains('Do NOT re-run')));
     });
 
     test('surfaces structured metadata for instruction-bearing transitions', () {
