@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.6]
+### Added
+- **`iq host get --host opencode` auto-configures Ollama context** (#259, part 2): after deploying, for each Ollama model in `opencode.jsonc` whose effective `num_ctx < 16384`, it bakes a `<model>-16k` variant (`ollama create`, additive — never deletes the original) and rewrites `opencode.jsonc` (backup: `opencode.jsonc.bak`) so only adequate models remain selectable — leaving `iq doctor` green. No-op when Ollama isn't installed or no Ollama provider is configured. Completes #259.
+
+### Changed
+- **Shared OpenCode/Ollama helpers** extracted to `hosts/ollama_context.dart` (JSONC model parsing, effective-num_ctx query, the 16384 threshold), now used by both `iq doctor` and `iq host get` so the logic can't drift between the verify and configure paths.
+
 ## [0.10.5]
 ### Added
 - **`iq doctor` verifies OpenCode/Ollama context size** (#259, part 1): when OpenCode is the active host, doctor reads the Ollama models from `opencode.jsonc`, queries each model's effective `num_ctx` (`ollama show <model> --modelfile`; absent ⇒ Ollama's 4096 default), and **fails** if any is below 16384. At 4096 the Inquiry firmware + OpenCode tool schemas (~8K tokens) are silently truncated and the harness never runs (the model hallucinates and never executes `iq fsm state`) — this now surfaces with remediation (bake a `num_ctx 16384`, 32768 recommended, variant). Auto-configuration in `iq host get` is tracked as #259 part 2.

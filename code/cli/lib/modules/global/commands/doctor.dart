@@ -3,7 +3,6 @@
 /// Checks: inquiry version, git, gh, gh auth, .inquiry/ init, host deployment.
 library;
 
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:cli_router/cli_router.dart';
@@ -15,6 +14,7 @@ import '../../../src/version.dart' as version_lib;
 import '../../../src/version_check.dart';
 import '../../../hosts/all_adapters.dart';
 import '../../../hosts/host_adapter.dart';
+import '../../../hosts/ollama_context.dart';
 
 /// Function type for running external processes.
 ///
@@ -199,11 +199,6 @@ abstract class FileSystemOps {
   /// Reads a text file, or returns null if it does not exist.
   String? readFile(String path);
 }
-
-/// Minimum Ollama `num_ctx` for the Inquiry firmware + OpenCode tool schemas to
-/// fit (the assembled prompt measures ~7.3–7.9k tokens; a full cycle approaches
-/// 16k). 32768+ is recommended for long cycles.
-const int kInquiryMinNumCtx = 16384;
 
 /// Production implementation using dart:io.
 class RealFileSystemOps implements FileSystemOps {
@@ -401,12 +396,12 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     final raw = _fileSystem.readFile(cfgPath);
     if (raw == null) return null;
 
-    final models = _ollamaModelsFromConfig(raw);
+    final models = ollamaModelsFromConfig(raw);
     if (models.isEmpty) return null;
 
     final tooSmall = <String>[];
     for (final model in models) {
-      final ctx = await _effectiveNumCtx(model);
+      final ctx = await effectiveNumCtx(_runProcess, model);
       if (ctx == null) continue; // can't determine (Ollama absent) — skip
       if (ctx < kInquiryMinNumCtx) tooSmall.add('$model (num_ctx=$ctx)');
     }
@@ -423,87 +418,6 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
           "(32768 recommended) — and point opencode.jsonc at it. "
           "Or run 'iq host get --host opencode' to configure it.",
     );
-  }
-
-  /// Extracts the Ollama provider model names from opencode.jsonc (JSONC).
-  List<String> _ollamaModelsFromConfig(String raw) {
-    try {
-      final json = jsonDecode(_stripJsonComments(raw)) as Map<String, dynamic>;
-      final provider = json['provider'];
-      if (provider is! Map) return [];
-      final ollama = provider['ollama'];
-      if (ollama is! Map) return [];
-      final models = ollama['models'];
-      if (models is! Map) return [];
-      return models.keys.map((k) => k.toString()).toList();
-    } catch (_) {
-      return [];
-    }
-  }
-
-  /// Effective `num_ctx` for an Ollama model: the Modelfile `PARAMETER num_ctx`
-  /// if set, else Ollama's 4096 default. Null if Ollama can't be queried.
-  Future<int?> _effectiveNumCtx(String model) async {
-    try {
-      final res = await _runProcess('ollama', ['show', model, '--modelfile']);
-      if (res.exitCode != 0) return null;
-      final out = res.stdout?.toString() ?? '';
-      final m = RegExp(
-        r'num_ctx\s+(\d+)',
-        caseSensitive: false,
-      ).firstMatch(out);
-      if (m != null) return int.tryParse(m.group(1)!) ?? 4096;
-      return 4096; // Ollama default when unset
-    } catch (_) {
-      return null;
-    }
-  }
-
-  /// Strips `//` and `/* */` comments from JSONC, respecting string literals.
-  String _stripJsonComments(String s) {
-    final buf = StringBuffer();
-    var i = 0;
-    var inStr = false;
-    var esc = false;
-    while (i < s.length) {
-      final c = s[i];
-      if (inStr) {
-        buf.write(c);
-        if (esc) {
-          esc = false;
-        } else if (c == '\\') {
-          esc = true;
-        } else if (c == '"') {
-          inStr = false;
-        }
-        i++;
-        continue;
-      }
-      if (c == '"') {
-        inStr = true;
-        buf.write(c);
-        i++;
-        continue;
-      }
-      if (c == '/' && i + 1 < s.length && s[i + 1] == '/') {
-        i += 2;
-        while (i < s.length && s[i] != '\n') {
-          i++;
-        }
-        continue;
-      }
-      if (c == '/' && i + 1 < s.length && s[i + 1] == '*') {
-        i += 2;
-        while (i + 1 < s.length && !(s[i] == '*' && s[i + 1] == '/')) {
-          i++;
-        }
-        i += 2;
-        continue;
-      }
-      buf.write(c);
-      i++;
-    }
-    return buf.toString();
   }
 
   /// Discovers expected skills from the asset tree.
