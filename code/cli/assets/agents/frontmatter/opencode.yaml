@@ -1,2 +1,17 @@
 description: 'Inquiry — a strict FSM scheduler for structured task delivery. Dispatches sub-agents as thinking tools. User approval only at state completion gates.'
 mode: primary
+# The orchestrator only orchestrates: it runs `iq` commands (bash) and dispatches
+# sub-agents (task). Work tools are disabled so it cannot read/edit/investigate
+# in its own context — that work belongs to isolated sub-agents, keeping the
+# orchestrator context bounded (#260). This enforces the firmware contract.
+tools:
+  read: false
+  write: false
+  edit: false
+  patch: false
+  glob: false
+  grep: false
+  list: false
+  webfetch: false
+  websearch: false
+  todowrite: false

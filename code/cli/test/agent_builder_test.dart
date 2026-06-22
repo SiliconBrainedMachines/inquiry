@@ -48,11 +48,35 @@ void main() {
       expect(fm, contains('tools:'));
     });
 
-    test('opencode build carries OpenCode frontmatter (mode: primary; no name/tools)', () {
+    test('opencode build carries OpenCode frontmatter (mode: primary; no name)', () {
       final fm = _frontmatter(builder.build(OpenCodeAdapter()));
       expect(fm, contains('mode: primary'));
       expect(fm, isNot(contains('name: inquiry')));
-      expect(fm, isNot(contains('tools:')));
+    });
+
+    test('opencode orchestrator disables work tools (only iq+dispatch) (#260)', () {
+      final fm = _frontmatter(builder.build(OpenCodeAdapter()));
+      expect(fm, contains('tools:'));
+      for (final tool in [
+        'read',
+        'write',
+        'edit',
+        'glob',
+        'grep',
+        'webfetch',
+      ]) {
+        expect(fm, contains('$tool: false'),
+            reason: 'orchestrator must not be able to do $tool itself');
+      }
+      // bash (for iq) and task (dispatch) are NOT disabled.
+      expect(fm, isNot(contains('bash: false')));
+      expect(fm, isNot(contains('task: false')));
+    });
+
+    test('copilot frontmatter is unaffected by the opencode tool restriction', () {
+      final fm = _frontmatter(builder.build(CopilotAdapter()));
+      expect(fm, contains('name: inquiry'));
+      expect(fm, isNot(contains('read: false')));
     });
 
     test('rendered bodies are identical EXCEPT the single host-specific init line', () {
