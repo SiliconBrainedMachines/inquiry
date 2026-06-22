@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.5]
+### Added
+- **`iq doctor` verifies OpenCode/Ollama context size** (#259, part 1): when OpenCode is the active host, doctor reads the Ollama models from `opencode.jsonc`, queries each model's effective `num_ctx` (`ollama show <model> --modelfile`; absent ⇒ Ollama's 4096 default), and **fails** if any is below 16384. At 4096 the Inquiry firmware + OpenCode tool schemas (~8K tokens) are silently truncated and the harness never runs (the model hallucinates and never executes `iq fsm state`) — this now surfaces with remediation (bake a `num_ctx 16384`, 32768 recommended, variant). Auto-configuration in `iq host get` is tracked as #259 part 2.
+
 ## [0.10.4]
 ### Fixed
 - **`iq doctor` was blind to non-default hosts** (#257): doctor hardcoded the Copilot adapter, so after `iq host get --host opencode` (an *exclusive* deploy that cleans other hosts) it reported a misleading failure about Copilot's now-absent skills and never verified the OpenCode deployment at all. Doctor now checks every deploy-capable host, locates each host's agent correctly (Copilot repo-scoped `.github/agents/`, OpenCode global `~/.config/opencode/agent/inquiry.md`), and treats a non-active host as informational ("not deployed (inactive)") rather than a failure — passing when the active host is fully deployed and flagging "no host deployed" only when none is active. Removes the last hardcoded single-default-host assumption from the health path.
