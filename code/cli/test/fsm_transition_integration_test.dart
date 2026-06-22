@@ -60,7 +60,10 @@ void main() {
 
         expect(blocked.allowed, isFalse);
         expect(blocked.nextState, isNull);
-        expect(blocked.toText(), equals(blocked.message));
+        // validationFailed output preserves the message and appends the
+        // no-blind-retry / repair hint (#263).
+        expect(blocked.toText(), startsWith(blocked.message));
+        expect(blocked.toText(), contains('Do NOT re-run'));
         expect(
           File(
             p.join(
