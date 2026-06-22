@@ -9,6 +9,7 @@ import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
 import '../../../hosts/deployer.dart';
+import '../../../hosts/opencode_ollama_configurator.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -45,7 +46,11 @@ class HostGetCommand implements Command<HostGetInput, HostGetOutput> {
   final HostGetInput input;
   final HostDeployer deployer;
 
-  HostGetCommand(this.input, {required this.deployer});
+  /// OpenCode-only: ensures the configured Ollama models have an adequate
+  /// `num_ctx` (bakes variants + rewrites opencode.jsonc). Null disables it.
+  final OpenCodeOllamaConfigurator? configurator;
+
+  HostGetCommand(this.input, {required this.deployer, this.configurator});
 
   @override
   String? validate() {
@@ -60,8 +65,10 @@ class HostGetCommand implements Command<HostGetInput, HostGetOutput> {
   @override
   Future<HostGetOutput> execute() async {
     deployer.deployExclusive(input.host);
-    return HostGetOutput(
-      message: 'Inquiry skills deployed to host ${input.host}',
-    );
+    final lines = ['Inquiry skills deployed to host ${input.host}'];
+    if (input.host == 'opencode' && configurator != null) {
+      lines.addAll(await configurator!.configure());
+    }
+    return HostGetOutput(message: lines.join('\n'));
   }
 }
