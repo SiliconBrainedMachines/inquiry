@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.7]
+### Changed
+- **Gate/precondition failures no longer trigger blind retries** (#263): when `iq fsm transition`/`iq ape transition` returns `validationFailed`, the firmware now re-dispatches the operator with the error to repair the artifact and retries, instead of re-firing the same failing event. Previously a weak local model looped `complete_analysis` 5× in one turn and saturated its context (~16k tokens). The transition's failure output also carries an explicit "do not re-run unchanged — fix what the error reports, then retry" hint. Reinforces the artifact-as-function model (inputs/outputs are `.md` files on disk). Verified across conducted trials: `complete_analysis` now fires once per attempt with no consecutive identical retries.
+
 ## [0.10.6]
 ### Added
 - **`iq host get --host opencode` auto-configures Ollama context** (#259, part 2): after deploying, for each Ollama model in `opencode.jsonc` whose effective `num_ctx < 16384`, it bakes a `<model>-16k` variant (`ollama create`, additive — never deletes the original) and rewrites `opencode.jsonc` (backup: `opencode.jsonc.bak`) so only adequate models remain selectable — leaving `iq doctor` green. No-op when Ollama isn't installed or no Ollama provider is configured. Completes #259.
