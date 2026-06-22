@@ -10,11 +10,16 @@ import 'package:test/test.dart';
 class MockFileSystemOps implements FileSystemOps {
   final Map<String, bool> _files = {};
   final Map<String, bool> _dirs = {};
+  final Map<String, String> _contents = {};
   String _home = '/home/testuser';
 
   void setFileExists(String path, bool exists) => _files[path] = exists;
   void setDirectoryExists(String path, bool exists) => _dirs[path] = exists;
   void setHome(String home) => _home = home;
+  void setFileContents(String path, String content) {
+    _contents[path] = content;
+    _files[path] = true;
+  }
 
   @override
   bool fileExists(String path) => _files[path] ?? false;
@@ -24,6 +29,9 @@ class MockFileSystemOps implements FileSystemOps {
 
   @override
   String homeDirectory() => _home;
+
+  @override
+  String? readFile(String path) => _contents[path];
 }
 
 void main() {
@@ -33,12 +41,32 @@ void main() {
       bool gitFails = false,
       bool ghFails = false,
       bool ghAuthFails = false,
+      Map<String, int?>? ollamaCtx,
     }) {
       return (
         String executable,
         List<String> arguments, {
         String? workingDirectory,
       }) async {
+        // ollama show <model> --modelfile
+        if (executable == 'ollama' && arguments.contains('show')) {
+          final model = arguments.firstWhere(
+            (a) => a != 'show' && a != '--modelfile',
+            orElse: () => '',
+          );
+          final ctx = ollamaCtx?[model];
+          if (ctx == null) {
+            // No num_ctx PARAMETER → Ollama default (4096)
+            return ProcessResult(0, 0, 'FROM $model\n', '');
+          }
+          return ProcessResult(
+            0,
+            0,
+            'FROM $model\nPARAMETER num_ctx $ctx\n',
+            '',
+          );
+        }
+
         // git --version
         if (executable == 'git' && arguments.contains('--version')) {
           if (gitFails) {
@@ -602,6 +630,93 @@ void main() {
         expect(output.hostChecks.first.passed, isTrue);
 
         emptyTempDir.deleteSync(recursive: true);
+      });
+    });
+
+    group('OpenCode/Ollama context check (#259)', () {
+      const jsonc = '''
+{
+  // local Ollama provider
+  "\$schema": "https://opencode.ai/config.json",
+  "provider": { "ollama": { "models": {
+    "qwen3-coder:30b": {},
+    "qwen3-coder:30b-16k": {}
+  } } }
+}
+''';
+
+      // Filesystem where OpenCode is the active/deployed host.
+      MockFileSystemOps opencodeActiveFs() {
+        final fs = MockFileSystemOps()..setHome(homeDir);
+        fs.setDirectoryExists('.inquiry', true);
+        fs.setFileExists(
+          p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
+          true,
+        );
+        for (final s in testSkills) {
+          fs.setFileExists(
+            p.join(homeDir, '.config', 'opencode', 'skills', s, 'SKILL.md'),
+            true,
+          );
+        }
+        fs.setFileContents(
+          p.join(homeDir, '.config', 'opencode', 'opencode.jsonc'),
+          jsonc,
+        );
+        return fs;
+      }
+
+      test('FAILS when a configured Ollama model defaults to num_ctx 4096', () async {
+        // 30b-16k is fine; 30b is omitted → fakeRunner emits no num_ctx → 4096.
+        final cmd = makeCmd(
+          fs: opencodeActiveFs(),
+          runProcess: fakeRunner(ollamaCtx: {'qwen3-coder:30b-16k': 16384}),
+        );
+        final output = await cmd.execute();
+
+        expect(output.passed, isFalse);
+        final ctx = output.checks.firstWhere(
+          (c) => c.name == 'opencode/ollama context',
+        );
+        expect(ctx.passed, isFalse);
+        expect(ctx.error, contains('qwen3-coder:30b'));
+        expect(ctx.error, contains('4096'));
+        // the adequate model must NOT be flagged
+        expect(ctx.error, isNot(contains('30b-16k (num_ctx')));
+      });
+
+      test('PASSES when all Ollama models have num_ctx >= 16384', () async {
+        final cmd = makeCmd(
+          fs: opencodeActiveFs(),
+          runProcess: fakeRunner(ollamaCtx: {
+            'qwen3-coder:30b': 16384,
+            'qwen3-coder:30b-16k': 32768,
+          }),
+        );
+        final output = await cmd.execute();
+
+        expect(output.passed, isTrue);
+        expect(
+          output.checks.any((c) => c.name == 'opencode/ollama context'),
+          isFalse,
+        );
+      });
+
+      test('is SKIPPED when OpenCode is not the active host', () async {
+        // Copilot active; OpenCode inactive. A 4096 Ollama model must not fail.
+        final fs = allPassFs(workingDir, homeDir, testSkills);
+        fs.setFileContents(
+          p.join(homeDir, '.config', 'opencode', 'opencode.jsonc'),
+          jsonc,
+        );
+        final cmd = makeCmd(fs: fs, runProcess: fakeRunner(ollamaCtx: {}));
+        final output = await cmd.execute();
+
+        expect(output.passed, isTrue);
+        expect(
+          output.checks.any((c) => c.name == 'opencode/ollama context'),
+          isFalse,
+        );
       });
     });
   });
