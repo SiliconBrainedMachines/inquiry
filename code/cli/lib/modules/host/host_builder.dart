@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
 import '../../hosts/deployer.dart';
+import '../../hosts/opencode_ollama_configurator.dart';
 import 'commands/clean.dart';
 import 'commands/get.dart';
 
@@ -14,6 +17,11 @@ void buildHostModule(
     (req) => HostGetCommand(
       HostGetInput.fromCliRequest(req),
       deployer: deployer,
+      configurator: OpenCodeOllamaConfigurator(
+        run: Process.run,
+        fs: RealConfigFs(),
+        homeDir: deployer.homeDir,
+      ),
     ),
     description: 'Deploy Inquiry skills to the specified host (default: copilot)',
   );
