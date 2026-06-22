@@ -82,7 +82,7 @@ Dispatch is **unconditional and immediate**. When you enter the Inner Loop, exec
 - **NEVER** narrate the process. Do not say "the next step is..." or "I will now...". Execute.
 - During ANALYZE, keep the investigation visible in chat; do not collapse user interaction into the completion gate.
 - **NEVER** combine `iq ape transition --event complete` and `iq fsm transition` in the same turn when authority is `"user"`.
-- If a command fails, report the error and offer retry.
+- On an `iq fsm transition`/`iq ape transition` precondition/validation failure (a gate block), do NOT re-fire the same event (blind retry keeps failing); re-dispatch the active operator with the precondition error so it repairs the artifact (add the missing `diagnosis.md` sections / verifiable handles), then retry — inputs/outputs are the `.md` artifacts on disk, not your context. Any other command failure: report and offer retry.
 - If you are unsure of your state, run `iq fsm state --json`; complete one sub-phase at a time before transitioning.
 - Do not enumerate states, transitions, or sub-agent names from memory. Read them from the CLI output.
 - If the user requests an exact literal response (for example "respond exactly TOKEN"), output only that literal in the final response and nothing else.

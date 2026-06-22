@@ -201,9 +201,18 @@ class StateTransitionOutput extends Output {
 
   @override
   String? toText() {
+    // A gate/precondition block: tell the scheduler to repair the artifact and
+    // retry, NOT to re-fire the same event (which would just fail again).
+    final gateHint = (!allowed && code == ExitCode.validationFailed)
+        ? '\n\n→ Precondition not met. Do NOT re-run "$event" unchanged — that is a '
+              'blind retry and will keep failing. Fix what the error reports above; '
+              'for an artifact gate, re-dispatch the operator to repair the `.md` '
+              '(read it, fix it, write it back), then retry the transition.'
+        : '';
+
     final instructions = requiredInstructions;
     if (instructions == null || instructions.isEmpty) {
-      return message;
+      return '$message$gateHint';
     }
 
     final summary = instructionSummary?.trim();
