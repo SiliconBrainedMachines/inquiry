@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.8]
+### Changed
+- **Operator dispatched as a write-capable function that must produce its artifact** (#266): the firmware Inner Loop now dispatches each phase operator to a **write-capable** sub-agent (not a read-only explorer), declares its deliverable to be **writing the phase artifact** (e.g. `diagnosis.md` at the `authoritative_handoff` path) — returning prose without writing it is a failure — and **verifies the artifact was written/updated before advancing** (`iq ape transition`), re-dispatching if it is still the template. Fixes the observed failure where the operator advanced ANALYZE sub-phases without ever writing `diagnosis.md` (left as scaffold), so the gate could never pass. Realizes the artifact-as-function model: sub-agent inputs/outputs are `.md` files on disk, not the orchestrator's context.
+
 ## [0.10.7]
 ### Changed
 - **Gate/precondition failures no longer trigger blind retries** (#263): when `iq fsm transition`/`iq ape transition` returns `validationFailed`, the firmware now re-dispatches the operator with the error to repair the artifact and retries, instead of re-firing the same failing event. Previously a weak local model looped `complete_analysis` 5× in one turn and saturated its context (~16k tokens). The transition's failure output also carries an explicit "do not re-run unchanged — fix what the error reports, then retry" hint. Reinforces the artifact-as-function model (inputs/outputs are `.md` files on disk). Verified across conducted trials: `complete_analysis` now fires once per attempt with no consecutive identical retries.
