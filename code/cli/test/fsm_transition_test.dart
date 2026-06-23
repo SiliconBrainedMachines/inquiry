@@ -274,6 +274,10 @@ void main() {
           output.message,
           contains('ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_UNVERIFIABLE'),
         );
+        // #268: the error names the offending bullet so the operator can repair
+        // precisely (not re-write the whole diagnosis).
+        expect(output.message, contains('Bullets missing a handle'));
+        expect(output.message, contains('did not reach the END state'));
 
         final traceContent = File(
           p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
