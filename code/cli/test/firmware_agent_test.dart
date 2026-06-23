@@ -45,7 +45,7 @@ void main() {
     });
 
     test('documents generic agent dispatch without ape-bound agentName', () {
-      expect(content, contains('generic/current sub-agent path'));
+      expect(content, contains('invocable generic helper independent of APE identity'));
       expect(content, contains('omit `agentName`'));
       expect(
         content,
@@ -166,6 +166,14 @@ void main() {
       expect(content, contains('repairs the artifact'));
       // the artifact-as-function ideal must be stated
       expect(content, contains('.md` artifacts on disk'));
+    });
+
+    test('operator is dispatched as a write-capable function that must write its artifact (#266)', () {
+      expect(content, contains('write-capable'));
+      expect(content, contains('returning prose without writing the artifact is a failure'));
+      // verify-before-advance: do not transition until the artifact exists
+      expect(content, contains('verify it wrote/updated the phase artifact'));
+      expect(content, contains('do NOT advance'));
     });
   });
 }
