@@ -783,7 +783,8 @@ class StateTransitionCommand
     }
 
     if (prechecks.contains('diagnosis_evidence_verifiable')) {
-      if (!_diagnosisEvidenceIsVerifiable(branch, workingDirectory)) {
+      final unverifiable = _unverifiableEvidenceBullets(branch, workingDirectory);
+      if (unverifiable == null || unverifiable.isNotEmpty) {
         _recordPrecheckSensor(
           executor,
           currentState: currentState,
@@ -793,7 +794,10 @@ class StateTransitionCommand
           issue: issue,
           promptFragmentId: promptFragmentId,
         );
-        return 'ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_UNVERIFIABLE: every diagnosis.md Evidence bullet must carry a re-checkable handle (a file:line reference, a URL, or an inline-code command/test id) so each claim can be reopened and verified';
+        final offenders = (unverifiable == null || unverifiable.isEmpty)
+            ? ''
+            : ' Bullets missing a handle: ${unverifiable.take(3).map((b) => '"${b.length > 70 ? '${b.substring(0, 70)}…' : b}"').join('; ')}';
+        return 'ERROR_PRECONDITION_DIAGNOSIS_EVIDENCE_UNVERIFIABLE: every diagnosis.md Evidence bullet must carry a re-checkable handle (a file:line reference, a URL, or an inline-code command/test id) so each claim can be reopened and verified.$offenders';
       }
       _recordPrecheckSensor(
         executor,
@@ -1033,15 +1037,21 @@ class StateTransitionCommand
     );
   }
 
-  bool _diagnosisEvidenceIsVerifiable(String branch, String workingDirectory) {
+  /// Evidence bullets that lack a re-checkable handle. Empty = all verifiable;
+  /// null = the Evidence section is unreadable/empty (a structural problem
+  /// surfaced by other prechecks).
+  List<String>? _unverifiableEvidenceBullets(
+    String branch,
+    String workingDirectory,
+  ) {
     final content = _readDiagnosisContent(branch, workingDirectory);
-    if (content == null) return false;
+    if (content == null) return null;
 
     final evidenceBody = _diagnosisSectionBody(
       content,
       _diagnosisSectionPatterns['Evidence']!,
     );
-    if (evidenceBody == null) return false;
+    if (evidenceBody == null) return null;
 
     final bullets = evidenceBody
         .split('\n')
@@ -1052,9 +1062,11 @@ class StateTransitionCommand
               line.toLowerCase() != _diagnosisEvidenceBootstrapPlaceholder,
         )
         .toList(growable: false);
-    if (bullets.isEmpty) return false;
+    if (bullets.isEmpty) return null;
 
-    return bullets.every(_evidenceLineHasVerifiableHandle);
+    return bullets
+        .where((b) => !_evidenceLineHasVerifiableHandle(b))
+        .toList(growable: false);
   }
 
   /// A re-checkable evidence handle: a URL, a `file:line` reference, or an
