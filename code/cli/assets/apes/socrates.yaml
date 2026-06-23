@@ -57,6 +57,8 @@ base_prompt: |
   - **Scope** (what enters, what does not)
   - **References** (links to other analysis documents)
 
+  Every **Evidence** bullet MUST carry a re-checkable handle so each claim can be reopened and verified: a `file:line` reference (e.g. `average.py:3`), a URL, or an inline-code span in backticks (a path, command, or test id). A bullet with no handle is invalid and will block the ANALYZE→PLAN gate — add the handle rather than removing the claim.
+
   Treat the diagnosis like a paper: rigorous, well-documented, and grounded in references.
   Keep each contribution focused on clarifying the problem rather than prescribing implementation.
 
