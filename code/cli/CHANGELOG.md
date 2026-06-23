@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.9]
+### Changed
+- **ANALYZE evidence handle: clearer operator contract + targeted gate error** (#268): SOCRATES's diagnosis contract now requires every Evidence bullet to carry a re-checkable handle (a `file:line` like `average.py:3`, a URL, or inline-code in backticks) — a bullet without one is invalid, add the handle rather than dropping the claim. When `complete_analysis` blocks on `DIAGNOSIS_EVIDENCE_UNVERIFIABLE`, the error now **names the offending bullet(s)** so the operator can repair precisely (feeding the #263 repair loop) instead of re-writing the whole diagnosis. Accepted handle forms (URL / file:line / inline-code) are unchanged.
+
 ## [0.10.8]
 ### Changed
 - **Operator dispatched as a write-capable function that must produce its artifact** (#266): the firmware Inner Loop now dispatches each phase operator to a **write-capable** sub-agent (not a read-only explorer), declares its deliverable to be **writing the phase artifact** (e.g. `diagnosis.md` at the `authoritative_handoff` path) — returning prose without writing it is a failure — and **verifies the artifact was written/updated before advancing** (`iq ape transition`), re-dispatching if it is still the template. Fixes the observed failure where the operator advanced ANALYZE sub-phases without ever writing `diagnosis.md` (left as scaffold), so the gate could never pass. Realizes the artifact-as-function model: sub-agent inputs/outputs are `.md` files on disk, not the orchestrator's context.
