@@ -14,16 +14,20 @@ class OpenCodeAdapter extends HostAdapter {
   String skillsDirectory(String homeDir) =>
       p.join(homeDir, '.config', 'opencode', 'skills');
 
-  // OpenCode discovers global agents in `~/.config/opencode/agent/` (singular).
-  // A plural `agents/` directory is ignored, so `opencode agent list` never sees
-  // the deployed agent and `opencode run --agent inquiry` silently falls back to
-  // the default agent (#247).
+  // OpenCode's global agent dir (singular `agent/`, #247). The agent is no
+  // longer deployed here — it is repo-scoped via `iq init` (#272) — but `clean()`
+  // still targets this path to remove any stale global agent from older versions.
   @override
   String agentDirectory(String homeDir) =>
       p.join(homeDir, '.config', 'opencode', 'agent');
 
+  // The agent is repo-scoped (per-project), like git init — never global (#272).
   @override
-  bool get deploysAgent => true;
+  bool get deploysAgent => false;
+
+  // OpenCode discovers repo agents in `.opencode/agent/`.
+  @override
+  String get projectAgentRelPath => p.join('.opencode', 'agent', 'inquiry.md');
 
   // OpenCode is a headless CLI: the install hint points at `iq init`.
   @override

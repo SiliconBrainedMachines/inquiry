@@ -576,9 +576,9 @@ void main() {
       test('Scenario E: OpenCode active, Copilot inactive → exit 0 (regression #257)', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
-        // OpenCode fully deployed: global agent + skills.
+        // OpenCode fully deployed: repo-scoped agent (#272) + skills.
         fs.setFileExists(
-          p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
+          p.join(workingDir, '.opencode', 'agent', 'inquiry.md'),
           true,
         );
         for (final skill in testSkills) {
@@ -650,7 +650,7 @@ void main() {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
         fs.setFileExists(
-          p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
+          p.join(workingDir, '.opencode', 'agent', 'inquiry.md'),
           true,
         );
         for (final s in testSkills) {
