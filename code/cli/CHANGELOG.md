@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.12]
+### Fixed
+- **`iq init` host switch left the old agent and a stale config host** (#274): switching hosts on an existing repo (`iq init`, then `iq init --host copilot`) left the previous host's per-project agent in place — both `.opencode/agent/` and `.github/agents/` present, the cross-host duplication #272 set out to avoid — and `.inquiry/config.yaml` kept the old `host:`. `iq init` now removes the other supported host's agent (exactly one host at a time) and reconciles the `host:` line in config while **preserving** other keys (e.g. `evolution.enabled`). Fresh init is unchanged.
+
 ## [0.10.11]
 ### Fixed
 - **OpenCode agent was deployed globally; now repo-scoped via `iq init`** (#272): `iq host get --host opencode` used to install the inquiry agent to `~/.config/opencode/agent/inquiry.md` (global), so it appeared in **every** OpenCode session in any directory — even repos that never ran `iq init` — and could duplicate across hosts that share discovery dirs (e.g. Copilot also reads `.claude/`). `iq init` now deploys the agent **into the repo**, like `git init`: `iq init [--host copilot|opencode]` (default **opencode**) writes `.opencode/agent/inquiry.md` or `.github/agents/inquiry.agent.md`, records the chosen host in `.inquiry/config.yaml`, and deploys **one host at a time** (no cross-host duplication). `OpenCodeAdapter.deploysAgent` is now `false`; `iq host get` deploys **skills only** and `clean()` removes any stale global agent from older versions. `iq doctor` verifies the per-project agent location via a new host-aware `HostAdapter.projectAgentRelPath`. **Behavior change:** `iq init`'s default host is now `opencode` (was `copilot`). Skills remain global pending a follow-up.
