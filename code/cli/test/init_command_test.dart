@@ -229,27 +229,33 @@ void main() {
       });
     });
 
-    // ─── Step 7: .github/agents/inquiry.agent.md ──────────────────────
+    // ─── Step 7: repo-scoped, host-aware agent deploy (#272) ─────────────
 
     group('Step 7: repo-scoped agent deploy', () {
       late Directory assetsRoot;
 
+      // Per-project agent paths by host.
+      String openCodeAgent(String root) =>
+          p.join(root, '.opencode', 'agent', 'inquiry.md');
+      String copilotAgent(String root) =>
+          p.join(root, '.github', 'agents', 'inquiry.agent.md');
+
       setUp(() {
-        // Minimal assets tree with an agent file
+        // Minimal assets tree with the shared body + both host frontmatters.
         assetsRoot = Directory.systemTemp.createTempSync(
           'inquiry_assets_test_',
         );
         final agentDir = Directory(p.join(assetsRoot.path, 'assets', 'agents'));
         agentDir.createSync(recursive: true);
-        // Firmware is assembled from the shared body + per-host frontmatter.
         File(
           p.join(agentDir.path, 'inquiry.body.md'),
         ).writeAsStringSync('Test agent content.');
         final fmDir = Directory(p.join(agentDir.path, 'frontmatter'))
           ..createSync(recursive: true);
-        File(
-          p.join(fmDir.path, 'copilot.yaml'),
-        ).writeAsStringSync('name: inquiry');
+        File(p.join(fmDir.path, 'copilot.yaml'))
+            .writeAsStringSync('name: inquiry');
+        File(p.join(fmDir.path, 'opencode.yaml'))
+            .writeAsStringSync('name: inquiry');
       });
 
       tearDown(() {
@@ -257,75 +263,87 @@ void main() {
       });
 
       test(
-        'writes inquiry.agent.md to .github/agents/ when assets provided',
+        'default host (opencode): writes .opencode/agent/inquiry.md, not global',
         () async {
-          final assets = Assets(root: assetsRoot.path);
           final command = InitCommand(
             InitInput(workingDirectory: tempDir.path),
-            assets: assets,
+            assets: Assets(root: assetsRoot.path),
           );
           await command.execute();
 
-          final agentFile = File(
-            p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
-          );
+          final agentFile = File(openCodeAgent(tempDir.path));
           expect(agentFile.existsSync(), isTrue);
           expect(agentFile.readAsStringSync(), contains('Test agent content.'));
+          // Repo-scoped: no copilot agent unless requested.
+          expect(File(copilotAgent(tempDir.path)).existsSync(), isFalse);
         },
       );
 
-      test('creates .github/agents/ directory if missing', () async {
-        final assets = Assets(root: assetsRoot.path);
+      test('--host copilot: writes .github/agents/inquiry.agent.md', () async {
         final command = InitCommand(
-          InitInput(workingDirectory: tempDir.path),
-          assets: assets,
+          InitInput(workingDirectory: tempDir.path, host: 'copilot'),
+          assets: Assets(root: assetsRoot.path),
         );
         await command.execute();
 
+        expect(File(copilotAgent(tempDir.path)).existsSync(), isTrue);
+        // One host at a time: no opencode agent.
+        expect(File(openCodeAgent(tempDir.path)).existsSync(), isFalse);
+      });
+
+      test('records the chosen host in .inquiry/config.yaml', () async {
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path, host: 'copilot'),
+          assets: Assets(root: assetsRoot.path),
+        ).execute();
+
+        final config =
+            File('${tempDir.path}/.inquiry/config.yaml').readAsStringSync();
+        expect(config, contains('host: copilot'));
+      });
+
+      test('creates the per-project agent directory if missing', () async {
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: Assets(root: assetsRoot.path),
+        ).execute();
+
         expect(
-          Directory(p.join(tempDir.path, '.github', 'agents')).existsSync(),
+          Directory(p.join(tempDir.path, '.opencode', 'agent')).existsSync(),
           isTrue,
         );
       });
 
-      test(
-        'overwrites existing inquiry.agent.md on re-init (idempotent)',
-        () async {
-          // Write stale content first
-          final agentDir = Directory(p.join(tempDir.path, '.github', 'agents'))
-            ..createSync(recursive: true);
-          File(
-            p.join(agentDir.path, 'inquiry.agent.md'),
-          ).writeAsStringSync('stale content');
+      test('overwrites an existing agent on re-init (idempotent)', () async {
+        final agentDir = Directory(p.join(tempDir.path, '.opencode', 'agent'))
+          ..createSync(recursive: true);
+        File(p.join(agentDir.path, 'inquiry.md'))
+            .writeAsStringSync('stale content');
 
-          final assets = Assets(root: assetsRoot.path);
-          final command = InitCommand(
-            InitInput(workingDirectory: tempDir.path),
-            assets: assets,
-          );
-          await command.execute();
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: Assets(root: assetsRoot.path),
+        ).execute();
 
-          final content = File(
-            p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
-          ).readAsStringSync();
-          expect(content, contains('Test agent content.'));
-          expect(content, isNot(contains('stale content')));
-        },
-      );
+        final content = File(openCodeAgent(tempDir.path)).readAsStringSync();
+        expect(content, contains('Test agent content.'));
+        expect(content, isNot(contains('stale content')));
+      });
 
       test('skips agent deploy silently when assets is null', () async {
-        final command = InitCommand(
+        await InitCommand(
           InitInput(workingDirectory: tempDir.path),
-          // no assets param
-        );
-        await command.execute();
+        ).execute();
 
-        expect(
-          File(
-            p.join(tempDir.path, '.github', 'agents', 'inquiry.agent.md'),
-          ).existsSync(),
-          isFalse,
-        );
+        expect(File(openCodeAgent(tempDir.path)).existsSync(), isFalse);
+      });
+
+      test('rejects an unknown host via validate()', () {
+        final err = InitCommand(
+          InitInput(workingDirectory: tempDir.path, host: 'bogus'),
+        ).validate();
+        expect(err, isNotNull);
+        expect(err, contains('bogus'));
       });
     });
   });

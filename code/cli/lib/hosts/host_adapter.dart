@@ -22,8 +22,15 @@ abstract class HostAdapter {
   /// Whether `host get` should also deploy the inquiry agent to this host.
   ///
   /// Most hosts receive skills only; the inquiry agent is repo-scoped via
-  /// `iq init`. Hosts that expose a global agent directory (OpenCode) opt in.
+  /// `iq init`. Hosts that expose a global agent directory may opt in.
   bool get deploysAgent => false;
+
+  /// Repo-relative path of this host's per-project agent file, e.g.
+  /// `.opencode/agent/inquiry.md` or `.github/agents/inquiry.agent.md`.
+  ///
+  /// `null` when this host has no per-project agent location. Used by `iq init`
+  /// (to deploy, repo-scoped like `git init`) and `iq doctor` (to verify).
+  String? get projectAgentRelPath => null;
 
   /// Asset path of this host's agent frontmatter YAML.
   ///
