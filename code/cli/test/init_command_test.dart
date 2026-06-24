@@ -345,6 +345,64 @@ void main() {
         expect(err, isNotNull);
         expect(err, contains('bogus'));
       });
+
+      test(
+          'switching host removes the previous host agent + updates config (#274)',
+          () async {
+        final assets = Assets(root: assetsRoot.path);
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: assets,
+        ).execute(); // opencode (default)
+        expect(File(openCodeAgent(tempDir.path)).existsSync(), isTrue);
+
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path, host: 'copilot'),
+          assets: assets,
+        ).execute(); // switch
+
+        // Exactly one host at a time: copilot present, opencode removed.
+        expect(File(copilotAgent(tempDir.path)).existsSync(), isTrue);
+        expect(File(openCodeAgent(tempDir.path)).existsSync(), isFalse);
+
+        final config =
+            File('${tempDir.path}/.inquiry/config.yaml').readAsStringSync();
+        expect(config, contains('host: copilot'));
+        expect(config, isNot(contains('host: opencode')));
+      });
+
+      test('reconciling host preserves other config keys (#274)', () async {
+        Directory('${tempDir.path}/.inquiry').createSync(recursive: true);
+        File('${tempDir.path}/.inquiry/config.yaml')
+            .writeAsStringSync('host: opencode\nevolution:\n  enabled: true\n');
+
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path, host: 'copilot'),
+          assets: Assets(root: assetsRoot.path),
+        ).execute();
+
+        final config =
+            File('${tempDir.path}/.inquiry/config.yaml').readAsStringSync();
+        expect(config, contains('host: copilot'));
+        expect(config, contains('enabled: true')); // preserved
+      });
+
+      test('legacy config without a host line gets one recorded (#274)',
+          () async {
+        Directory('${tempDir.path}/.inquiry').createSync(recursive: true);
+        File('${tempDir.path}/.inquiry/config.yaml')
+            .writeAsStringSync('evolution:\n  enabled: false\n');
+
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: Assets(root: assetsRoot.path),
+        ).execute();
+
+        final config =
+            File('${tempDir.path}/.inquiry/config.yaml').readAsStringSync();
+        expect(config, contains('host: opencode'));
+        expect(config, contains('enabled: false'));
+      });
     });
   });
 }
