@@ -4,7 +4,9 @@
 /// 1. Create cleanrooms/ at project root if missing
 /// 2. Add .inquiry/ and cleanrooms/**/.iq.state.yaml to .gitignore
 /// 3. Create .inquiry/config.yaml with defaults (project-scoped)
-/// 4. Deploy inquiry.agent.md to .github/agents/ (repo-scoped)
+/// 4. Deploy the inquiry agent into the repo for the selected host (repo-scoped,
+///    like `git init`): `.opencode/agent/inquiry.md` (default) or
+///    `.github/agents/inquiry.agent.md` (`--host copilot`)
 ///
 /// Cycle runtime (`.iq.state.yaml`, `mutations.md`) is materialized per cycle
 /// under `cleanrooms/<branch>/` by the FSM, not scaffolded at init.
@@ -19,6 +21,8 @@ import 'package:path/path.dart' as p;
 import '../../../assets.dart';
 import '../../../hosts/agent_builder.dart';
 import '../../../hosts/copilot_adapter.dart';
+import '../../../hosts/host_adapter.dart';
+import '../../../hosts/opencode_adapter.dart';
 import '../../../src/git_utils.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
@@ -30,13 +34,33 @@ import '../../../src/git_utils.dart';
 class InitInput extends Input {
   final String workingDirectory;
 
-  InitInput({required this.workingDirectory});
+  /// The host to deploy the repo-scoped agent for. Defaults to `opencode`.
+  final String host;
 
-  factory InitInput.fromCliRequest(CliRequest req) =>
-      InitInput(workingDirectory: Directory.current.path);
+  InitInput({required this.workingDirectory, this.host = 'opencode'});
+
+  factory InitInput.fromCliRequest(CliRequest req) => InitInput(
+        workingDirectory: Directory.current.path,
+        host: req.flagString('host') ?? 'opencode',
+      );
 
   @override
-  Map<String, dynamic> toJson() => {'workingDirectory': workingDirectory};
+  Map<String, dynamic> toJson() => {
+        'workingDirectory': workingDirectory,
+        'host': host,
+      };
+}
+
+/// Resolves a host name to its adapter, or `null` if unknown / no repo agent.
+HostAdapter? _adapterForHost(String host) {
+  switch (host) {
+    case 'opencode':
+      return OpenCodeAdapter();
+    case 'copilot':
+      return CopilotAdapter();
+    default:
+      return null;
+  }
 }
 
 // ─── Output ─────────────────────────────────────────────────────────────────
@@ -68,7 +92,14 @@ class InitCommand implements Command<InitInput, InitOutput> {
   InitCommand(this.input, {this.assets});
 
   @override
-  String? validate() => null;
+  String? validate() {
+    final adapter = _adapterForHost(input.host);
+    if (adapter == null || adapter.projectAgentRelPath == null) {
+      return 'Unknown or unsupported host: "${input.host}". '
+          'Supported hosts: copilot, opencode.';
+    }
+    return null;
+  }
 
   @override
   Future<InitOutput> execute() async {
@@ -107,14 +138,19 @@ class InitCommand implements Command<InitInput, InitOutput> {
     return getProjectRoot(workingDirectory) ?? workingDirectory;
   }
 
+  /// Deploys the inquiry agent into the repo for the selected host — repo-scoped
+  /// like `git init`, never global (#272).
   void _deployAgent(String root, Assets assets, List<String> steps) {
-    final content = AgentBuilder(assets).build(CopilotAdapter());
-    final agentFile = File(
-      p.join(root, '.github', 'agents', 'inquiry.agent.md'),
-    );
+    final adapter = _adapterForHost(input.host)!;
+    final rel = adapter.projectAgentRelPath!;
+    final content = AgentBuilder(assets).build(adapter);
+    final agentFile = File(p.join(root, rel));
     agentFile.parent.createSync(recursive: true);
     agentFile.writeAsStringSync(content);
-    steps.add('Deployed inquiry.agent.md to .github/agents/');
+    steps.add(
+      'Deployed inquiry agent to ${rel.replaceAll(r'\', '/')} '
+      '(host: ${input.host})',
+    );
   }
 
   /// Ensures `.inquiry/` and cycle-local state are in `.gitignore`.
@@ -150,6 +186,7 @@ class InitCommand implements Command<InitInput, InitOutput> {
     if (!configFile.existsSync()) {
       if (!configDir.existsSync()) configDir.createSync(recursive: true);
       configFile.writeAsStringSync(
+        'host: ${input.host}\n'
         'evolution:\n'
         '  enabled: false\n',
       );
