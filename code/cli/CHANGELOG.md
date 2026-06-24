@@ -8,7 +8,9 @@ and the project adheres to [Semantic Versioning](https://semver.org/).
 ### Fixed
 - **OpenCode agent was deployed globally; now repo-scoped via `iq init`** (#272): `iq host get --host opencode` used to install the inquiry agent to `~/.config/opencode/agent/inquiry.md` (global), so it appeared in **every** OpenCode session in any directory — even repos that never ran `iq init` — and could duplicate across hosts that share discovery dirs (e.g. Copilot also reads `.claude/`). `iq init` now deploys the agent **into the repo**, like `git init`: `iq init [--host copilot|opencode]` (default **opencode**) writes `.opencode/agent/inquiry.md` or `.github/agents/inquiry.agent.md`, records the chosen host in `.inquiry/config.yaml`, and deploys **one host at a time** (no cross-host duplication). `OpenCodeAdapter.deploysAgent` is now `false`; `iq host get` deploys **skills only** and `clean()` removes any stale global agent from older versions. `iq doctor` verifies the per-project agent location via a new host-aware `HostAdapter.projectAgentRelPath`. **Behavior change:** `iq init`'s default host is now `opencode` (was `copilot`). Skills remain global pending a follow-up.
 
-> Note (release ordering): branched off 0.10.9; merge after #271 (0.10.10).
+## [0.10.10]
+### Added
+- **`iq fsm state` prescribes the single next action** (#270, lever 1 — "CLI is the brain"): the output now carries a `next` field: the exact next command to run, computed by the CLI from the state, active operator, and completion authority. The model (or a human using the CLI as a dev guide) no longer chooses FSM events or paths. When a real decision is due — a `completion_authority: user` gate, or more than one forward path — `next` hands it to the human ("STOP — present to the human; the human decides"), since decisions carry consequences and responsibility. The firmware's Outer Loop now reduces to "do exactly what `next` says". First step toward shifting decisions from the unreliable model to the deterministic FSM; the firmware also shed a now-redundant rule.
 
 ## [0.10.9]
 ### Changed
