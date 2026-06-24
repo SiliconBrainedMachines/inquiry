@@ -102,6 +102,27 @@ void main() {
         },
       );
 
+      test('prescribes the single next action in `next` (#270)', () async {
+        setupWorkspace(state: 'ANALYZE', issue: '145');
+
+        final result = await FsmStateCommand(
+          FsmStateInput(workingDirectory: tempDir.path),
+        ).execute();
+        final next = result.toJson()['next'] as String;
+
+        expect(next, isNotEmpty);
+        // The CLI prescribes one concrete action: a command to run, or a
+        // hand-off to the human — the model never chooses for itself.
+        expect(
+          next.contains('Run `iq') ||
+              next.contains('STOP') ||
+              next.contains('DECISION FOR THE HUMAN'),
+          isTrue,
+          reason: 'next must prescribe a single action or defer to the human',
+        );
+        expect(result.toText(), contains('Next:'));
+      });
+
       test('returns operational contract sourced from state assets', () async {
         setupWorkspace(state: 'EXECUTE', issue: '145');
 

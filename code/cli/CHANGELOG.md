@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.10]
+### Added
+- **`iq fsm state` prescribes the single next action** (#270, lever 1 — "CLI is the brain"): the output now carries a `next` field: the exact next command to run, computed by the CLI from the state, active operator, and completion authority. The model (or a human using the CLI as a dev guide) no longer chooses FSM events or paths. When a real decision is due — a `completion_authority: user` gate, or more than one forward path — `next` hands it to the human ("STOP — present to the human; the human decides"), since decisions carry consequences and responsibility. The firmware's Outer Loop now reduces to "do exactly what `next` says". First step toward shifting decisions from the unreliable model to the deterministic FSM; the firmware also shed a now-redundant rule.
+
 ## [0.10.9]
 ### Changed
 - **ANALYZE evidence handle: clearer operator contract + targeted gate error** (#268): SOCRATES's diagnosis contract now requires every Evidence bullet to carry a re-checkable handle (a `file:line` like `average.py:3`, a URL, or inline-code in backticks) — a bullet without one is invalid, add the handle rather than dropping the claim. When `complete_analysis` blocks on `DIAGNOSIS_EVIDENCE_UNVERIFIABLE`, the error now **names the offending bullet(s)** so the operator can repair precisely (feeding the #263 repair loop) instead of re-writing the whole diagnosis. Accepted handle forms (URL / file:line / inline-code) are unchanged.

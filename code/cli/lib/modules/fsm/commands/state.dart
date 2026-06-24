@@ -38,6 +38,11 @@ class FsmStateOutput extends Output {
   final Map<String, dynamic>? ape;
   final String completionAuthority;
 
+  /// The single next action the CLI prescribes — the model executes it, it does
+  /// not decide. When a real choice is due, this hands the decision to the
+  /// human (#270).
+  final String next;
+
   FsmStateOutput({
     required this.state,
     required this.issue,
@@ -47,6 +52,7 @@ class FsmStateOutput extends Output {
     required this.operationalContract,
     this.ape,
     required this.completionAuthority,
+    required this.next,
   });
 
   @override
@@ -54,6 +60,7 @@ class FsmStateOutput extends Output {
     'state': state,
     'issue': issue,
     'completion_authority': completionAuthority,
+    'next': next,
     'transitions': transitions,
     'apes': apes,
     'instructions': instructions,
@@ -73,6 +80,8 @@ class FsmStateOutput extends Output {
     if (apes.isNotEmpty) {
       buf.writeln('APEs:  ${apes.map((a) => a['name']).join(', ')}');
     }
+
+    buf.writeln('Next:  $next');
 
     if (transitions.isNotEmpty) {
       buf.writeln('Valid transitions:');
@@ -126,7 +135,54 @@ class FsmStateCommand implements Command<FsmStateInput, FsmStateOutput> {
       operationalContract: operationalContract.toJson(),
       ape: apeInfo,
       completionAuthority: completionAuthority,
+      next: _computeNext(validTransitions, apeInfo, completionAuthority),
     );
+  }
+
+  /// Computes the single next action the model should take. The model never
+  /// chooses an event or a path — the CLI does; genuine choices are handed to
+  /// the human (#270).
+  String _computeNext(
+    List<Map<String, String>> transitions,
+    Map<String, dynamic>? apeInfo,
+    String completionAuthority,
+  ) {
+    // 1. An operator is still working: dispatch it; do not transition yet.
+    if (apeInfo != null && apeInfo['state'] != '_DONE') {
+      final name = apeInfo['name'];
+      final apeEvents = ((apeInfo['transitions'] as List?) ?? const [])
+          .map((t) => (t as Map)['event'] as String)
+          .where((e) => e != 'block')
+          .toList(growable: false);
+      final after = apeEvents.length == 1
+          ? ' Then run `iq ape transition --event ${apeEvents.first}`.'
+          : ' Then advance the operator with `iq ape transition` and re-run `iq fsm state --json` for the next step.';
+      return 'Run `iq ape prompt --name $name`, dispatch a write-capable '
+          'sub-agent with that prompt; it MUST write the phase deliverable '
+          'before you continue.$after Do not transition the main FSM yet.';
+    }
+
+    // 2. At a main-FSM transition point.
+    final forward = transitions
+        .map((t) => t['event']!)
+        .where((e) => e != 'block')
+        .toList(growable: false);
+    if (forward.isEmpty) {
+      return 'No forward transition is available from this state. '
+          'Run `iq doctor` if you are stuck.';
+    }
+    if (forward.length > 1) {
+      return 'DECISION FOR THE HUMAN: multiple paths are available '
+          '(${forward.join(', ')}). Present the situation and the options to '
+          'the human and let them choose — do not decide yourself.';
+    }
+    final event = forward.first;
+    if (completionAuthority == 'user') {
+      return 'STOP — the deliverable is ready. Present it to the human and ask '
+          'them to approve the transition `$event`. The human decides — do not '
+          'run the transition yourself.';
+    }
+    return 'Run `iq fsm transition --event $event`.';
   }
 
   List<Map<String, String>> _computeTransitions(
