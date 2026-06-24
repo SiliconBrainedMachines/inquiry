@@ -77,15 +77,25 @@ void main() {
     });
   });
 
-  group('deploysAgent capability', () {
-    test('opencode opts into agent deploy', () {
+  group('agent deploy is repo-scoped, never global (#272)', () {
+    test('opencode does not deploy a global agent', () {
       final opencode = deployAdapters.firstWhere((a) => a.name == 'opencode');
-      expect(opencode.deploysAgent, isTrue);
+      expect(opencode.deploysAgent, isFalse);
     });
 
-    test('copilot does not deploy the agent', () {
+    test('copilot does not deploy a global agent', () {
       final copilot = deployAdapters.firstWhere((a) => a.name == 'copilot');
       expect(copilot.deploysAgent, isFalse);
+    });
+
+    test('each host exposes its per-project agent path', () {
+      final opencode = deployAdapters.firstWhere((a) => a.name == 'opencode');
+      final copilot = deployAdapters.firstWhere((a) => a.name == 'copilot');
+      expect(opencode.projectAgentRelPath, p.join('.opencode', 'agent', 'inquiry.md'));
+      expect(
+        copilot.projectAgentRelPath,
+        p.join('.github', 'agents', 'inquiry.agent.md'),
+      );
     });
   });
 }

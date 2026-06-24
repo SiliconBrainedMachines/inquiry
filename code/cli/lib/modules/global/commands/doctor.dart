@@ -430,15 +430,12 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     }
   }
 
-  /// Verifies that the repo-scoped agent exists at .github/agents/.
-  bool _verifyRepoAgent() {
-    final agentPath = p.join(
-      _workingDirectory,
-      '.github',
-      'agents',
-      'inquiry.agent.md',
-    );
-    return _fileSystem.fileExists(agentPath);
+  /// Verifies that the repo-scoped agent exists at this host's per-project
+  /// location (e.g. `.opencode/agent/inquiry.md` or `.github/agents/`).
+  bool _verifyRepoAgent(HostAdapter adapter) {
+    final rel = adapter.projectAgentRelPath;
+    if (rel == null) return false;
+    return _fileSystem.fileExists(p.join(_workingDirectory, rel));
   }
 
   /// Verifies a single host adapter's deployment.
@@ -451,7 +448,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     final agentExists = adapter.deploysAgent
         ? _fileSystem
             .fileExists(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'))
-        : _verifyRepoAgent();
+        : _verifyRepoAgent(adapter);
 
     // Check skills — adapter-scoped
     final missingSkills = <String>[];
