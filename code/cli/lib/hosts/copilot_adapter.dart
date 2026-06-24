@@ -17,6 +17,10 @@ class CopilotAdapter extends HostAdapter {
   String agentDirectory(String homeDir) =>
       p.join(homeDir, '.copilot', 'agents');
 
+  // Copilot discovers repo agents in `.github/agents/`.
+  @override
+  String get projectAgentRelPath => p.join('.github', 'agents', 'inquiry.agent.md');
+
   // Copilot runs inside VS Code: the install hint points at the command palette.
   @override
   Map<String, String> get agentSubstitutions => const {
