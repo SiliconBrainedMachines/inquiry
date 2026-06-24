@@ -4,9 +4,15 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.10.11]
+### Fixed
+- **OpenCode agent was deployed globally; now repo-scoped via `iq init`** (#272): `iq host get --host opencode` used to install the inquiry agent to `~/.config/opencode/agent/inquiry.md` (global), so it appeared in **every** OpenCode session in any directory — even repos that never ran `iq init` — and could duplicate across hosts that share discovery dirs (e.g. Copilot also reads `.claude/`). `iq init` now deploys the agent **into the repo**, like `git init`: `iq init [--host copilot|opencode]` (default **opencode**) writes `.opencode/agent/inquiry.md` or `.github/agents/inquiry.agent.md`, records the chosen host in `.inquiry/config.yaml`, and deploys **one host at a time** (no cross-host duplication). `OpenCodeAdapter.deploysAgent` is now `false`; `iq host get` deploys **skills only** and `clean()` removes any stale global agent from older versions. `iq doctor` verifies the per-project agent location via a new host-aware `HostAdapter.projectAgentRelPath`. **Behavior change:** `iq init`'s default host is now `opencode` (was `copilot`). Skills remain global pending a follow-up.
+
+> Note (release ordering): branched off 0.10.9; merge after #271 (0.10.10).
+
 ## [0.10.9]
 ### Changed
-- **ANALYZE evidence handle: clearer operator contract + targeted gate error** (#268): SOCRATES's diagnosis contract now requires every Evidence bullet to carry a re-checkable handle (a `file:line` like `average.py:3`, a URL, or inline-code in backticks) — a bullet without one is invalid, add the handle rather than dropping the claim. When `complete_analysis` blocks on `DIAGNOSIS_EVIDENCE_UNVERIFIABLE`, the error now **names the offending bullet(s)** so the operator can repair precisely (feeding the #263 repair loop) instead of re-writing the whole diagnosis. Accepted handle forms (URL / file:line / inline-code) are unchanged.
+- **ANALYZE evidence handle: clearer operator contract + targeted gate error** (#268): SOCRATES's diagnosis contract now requires every Evidence bullet to carry a re-checkable handle (a `file:line` like `average.py:3`, a URL, or inline-code in backticks) — a bullet without one is invalid, add the handle rather than dropping the claim. When `complete_analysis` blocks on `DIAGNOSIS_EVIDENCE_UNVERIFIABLE`, the error now **names the offending bullet(s)** so the operator can repair precisely (feeding the #263 repair loop) instead of re-writing the whole diagnosis. Accepted handle forms (URL / file:line / inline-code) are unchanged. SOCRATES's diagnosis contract now requires every Evidence bullet to carry a re-checkable handle (a `file:line` like `average.py:3`, a URL, or inline-code in backticks) — a bullet without one is invalid, add the handle rather than dropping the claim. When `complete_analysis` blocks on `DIAGNOSIS_EVIDENCE_UNVERIFIABLE`, the error now **names the offending bullet(s)** so the operator can repair precisely (feeding the #263 repair loop) instead of re-writing the whole diagnosis. Accepted handle forms (URL / file:line / inline-code) are unchanged.
 
 ## [0.10.8]
 ### Changed

@@ -30,7 +30,8 @@ void buildGlobalModule(
   m.command<InitInput, InitOutput>(
     'init',
     (req) => InitCommand(InitInput.fromCliRequest(req), assets: assets),
-    description: 'Initialize a new .inquiry/ workspace',
+    description:
+        'Initialize Inquiry in this repo (repo-scoped). --host <copilot|opencode> (default: opencode)',
   );
 
   m.command<VersionInput, VersionOutput>(
