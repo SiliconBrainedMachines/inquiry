@@ -119,8 +119,10 @@ class InitCommand implements Command<InitInput, InitOutput> {
     // Step 3: Create .inquiry/config.yaml with defaults (project-scoped)
     _ensureConfigYaml(root, steps);
 
-    // Step 4: Deploy inquiry.agent.md to .github/agents/ (repo-scoped)
+    // Step 4: Deploy the repo-scoped agent for this host; first remove any
+    // other host's agent so exactly one host is deployed at a time (#274).
     if (assets != null) {
+      _cleanOtherHostAgents(root, steps);
       _deployAgent(root, assets!, steps);
     }
 
@@ -153,6 +155,22 @@ class InitCommand implements Command<InitInput, InitOutput> {
     );
   }
 
+  /// Removes the per-project agent of every supported host other than the one
+  /// being initialized — enforces "one host at a time" even when switching
+  /// hosts on an existing repo (#274). No-op on a fresh init.
+  void _cleanOtherHostAgents(String root, List<String> steps) {
+    for (final host in const ['copilot', 'opencode']) {
+      if (host == input.host) continue;
+      final rel = _adapterForHost(host)?.projectAgentRelPath;
+      if (rel == null) continue;
+      final file = File(p.join(root, rel));
+      if (file.existsSync()) {
+        file.deleteSync();
+        steps.add('Removed $host agent (${rel.replaceAll(r'\', '/')})');
+      }
+    }
+  }
+
   /// Ensures `.inquiry/` and cycle-local state are in `.gitignore`.
   void _ensureGitignore(String root, List<String> steps) {
     const entries = <String>['.inquiry/', 'cleanrooms/**/.iq.state.yaml'];
@@ -178,7 +196,11 @@ class InitCommand implements Command<InitInput, InitOutput> {
     steps.add('Added Inquiry entries to .gitignore');
   }
 
-  /// Ensures `.inquiry/config.yaml` exists with default configuration.
+  /// Ensures `.inquiry/config.yaml` exists and records the chosen host.
+  ///
+  /// On a fresh repo it writes the defaults; on an existing repo it reconciles
+  /// the `host:` line to the chosen host while preserving every other key
+  /// (e.g. `evolution.enabled`), so switching hosts updates the record.
   void _ensureConfigYaml(String root, List<String> steps) {
     final configDir = Directory('$root/.inquiry');
     final configFile = File('$root/.inquiry/config.yaml');
@@ -191,6 +213,21 @@ class InitCommand implements Command<InitInput, InitOutput> {
         '  enabled: false\n',
       );
       steps.add('Created .inquiry/config.yaml');
+      return;
+    }
+
+    final content = configFile.readAsStringSync();
+    final hostLine = RegExp(r'^host:.*$', multiLine: true);
+    final desired = 'host: ${input.host}';
+    if (hostLine.hasMatch(content)) {
+      if (hostLine.firstMatch(content)!.group(0) != desired) {
+        configFile.writeAsStringSync(content.replaceFirst(hostLine, desired));
+        steps.add('Updated host to ${input.host} in .inquiry/config.yaml');
+      }
+    } else {
+      // Legacy config without a host line: prepend it, keep the rest.
+      configFile.writeAsStringSync('$desired\n$content');
+      steps.add('Recorded host: ${input.host} in .inquiry/config.yaml');
     }
   }
 
