@@ -110,19 +110,18 @@ void main() {
     const workingDir = '/repo/current';
     const homeDir = '/home/testuser';
 
-    /// Creates a mock FS where .inquiry/ exists and all hosts are deployed.
-    /// Agent is at the repo-scoped path (E3 contract).
+    /// Creates a mock FS where `.inquiry/` exists and OpenCode is installed
+    /// GLOBALLY (agent + skills) — the default active host (#280).
     MockFileSystemOps allPassFs(String wd, String home, List<String> skills) {
       final fs = MockFileSystemOps()..setHome(home);
       fs.setDirectoryExists('.inquiry', true);
-      // NEW: agent is repo-scoped in .github/agents/
       fs.setFileExists(
-        p.join(wd, '.github', 'agents', 'inquiry.agent.md'),
+        p.join(home, '.config', 'opencode', 'agent', 'inquiry.md'),
         true,
       );
       for (final skill in skills) {
         fs.setFileExists(
-          p.join(home, '.copilot', 'skills', skill, 'SKILL.md'),
+          p.join(home, '.config', 'opencode', 'skills', skill, 'SKILL.md'),
           true,
         );
       }
@@ -200,7 +199,6 @@ void main() {
         inquiryVersionOverride: version,
         fileSystemOps: fs ?? allPassFs(resolvedWd, homeDir, testSkills),
         assets: assets ?? testAssets,
-        workingDirectory: resolvedWd,
         versionChecker: ({required String currentVersion}) async =>
             const VersionCheckResult(updateAvailable: false),
       );
@@ -297,7 +295,7 @@ void main() {
       expect(json['checks'], isList);
       expect((json['checks'] as List).length, 5);
       expect(json['hostChecks'], isList);
-      expect((json['hostChecks'] as List).length, 3);
+      expect((json['hostChecks'] as List).length, 2);
 
       final firstCheck = (json['checks'] as List).first as Map<String, dynamic>;
       expect(firstCheck, containsPair('name', 'inquiry'));
@@ -344,31 +342,28 @@ void main() {
     });
 
     group('Host verification', () {
-      test('Scenario A: all hosts deployed → exit 0', () async {
+      test('Scenario A: active host (opencode) deployed → exit 0', () async {
         final cmd = makeCmd();
         final output = await cmd.execute();
 
         expect(output.passed, isTrue);
         expect(output.exitCode, 0);
-        expect(output.hostChecks.length, 3);
-        final copilot =
-            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
-        expect(copilot.active, isTrue);
-        expect(copilot.passed, isTrue);
-        expect(copilot.agentExists, isTrue);
-        expect(copilot.missingSkills, isEmpty);
-        // OpenCode and Claude are simply not the active host — not a failure.
+        expect(output.hostChecks.length, 2);
         final opencode =
             output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
-        expect(opencode.active, isFalse);
+        expect(opencode.active, isTrue);
+        expect(opencode.passed, isTrue);
+        expect(opencode.agentExists, isTrue);
+        expect(opencode.missingSkills, isEmpty);
+        // Claude is simply not deployed here — not a failure.
         final claude =
             output.hostChecks.firstWhere((h) => h.hostName == 'claude');
         expect(claude.active, isFalse);
 
         final text = output.toText()!;
         expect(text, contains('Checking hosts...'));
-        expect(text, contains('✓ copilot: agent + 9 skills deployed'));
-        expect(text, contains('- opencode: not deployed (inactive)'));
+        expect(text, contains('✓ opencode: agent + 9 skills deployed'));
+        expect(text, contains('- claude: not deployed (inactive)'));
         expect(text, contains('All checks passed.'));
       });
 
@@ -388,7 +383,7 @@ void main() {
         final text = output.toText()!;
         expect(text, contains('✗ no host deployed'));
         expect(text,
-            contains("Run 'inquiry host get --host <copilot|opencode>'"));
+            contains("Run 'inquiry host get --host <opencode|claude>'"));
         expect(text, contains('Some checks failed.'));
       });
 
@@ -418,12 +413,12 @@ void main() {
       test('Scenario D: partial deployment → exit 1', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
-        // Agent in NEW repo-scoped path
+        // OpenCode global agent present
         fs.setFileExists(
-          p.join(workingDir, '.github', 'agents', 'inquiry.agent.md'),
+          p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
           true,
         );
-        // Deploy everything except issue-create.
+        // Deploy everything except issue-create (global skills).
         for (final skill in [
           'doc-read',
           'doc-write',
@@ -435,7 +430,7 @@ void main() {
           'inquiry-end',
         ]) {
           fs.setFileExists(
-            p.join(homeDir, '.copilot', 'skills', skill, 'SKILL.md'),
+            p.join(homeDir, '.config', 'opencode', 'skills', skill, 'SKILL.md'),
             true,
           );
         }
@@ -446,17 +441,17 @@ void main() {
 
         expect(output.passed, isFalse);
         expect(output.exitCode, 1);
-        final copilot =
-            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
-        expect(copilot.active, isTrue);
-        expect(copilot.agentExists, isTrue);
-        expect(copilot.missingSkills, ['issue-create']);
+        final opencode =
+            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
+        expect(opencode.active, isTrue);
+        expect(opencode.agentExists, isTrue);
+        expect(opencode.missingSkills, ['issue-create']);
 
         final text = output.toText()!;
-        expect(text, contains('✓ copilot: agent deployed'));
-        expect(text, contains('✗ copilot: missing skills: issue-create'));
+        expect(text, contains('✓ opencode: agent deployed'));
+        expect(text, contains('✗ opencode: missing skills: issue-create'));
         expect(text,
-            contains("Run 'inquiry host get --host copilot' to deploy skills"));
+            contains("Run 'inquiry host get --host opencode' to deploy skills"));
       });
 
       test('HostCheck.toJson() includes all fields', () {
@@ -559,29 +554,12 @@ void main() {
         expect(text, isNot(contains("'inquiry target get'")));
       });
 
-      test('agent location is host-specific (Copilot repo-scoped, OpenCode global)', () async {
-        // Repo agent + copilot skills present; OpenCode global agent absent.
-        final fs = allPassFs(workingDir, homeDir, testSkills);
-        final cmd = makeCmd(fs: fs);
-
-        final output = await cmd.execute();
-
-        final copilot =
-            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
-        final opencode =
-            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
-        expect(copilot.agentExists, isTrue,
-            reason: 'Copilot agent is repo-scoped (.github/agents/)');
-        expect(opencode.agentExists, isFalse,
-            reason: 'OpenCode agent is global; not deployed in this fixture');
-      });
-
-      test('Scenario E: OpenCode active, Copilot inactive → exit 0 (regression #257)', () async {
+      test('Scenario E: OpenCode active (global), Claude inactive → exit 0', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
-        // OpenCode fully deployed: repo-scoped agent (#272) + skills.
+        // OpenCode installed globally: agent + skills (#280).
         fs.setFileExists(
-          p.join(workingDir, '.opencode', 'agent', 'inquiry.md'),
+          p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
           true,
         );
         for (final skill in testSkills) {
@@ -590,11 +568,6 @@ void main() {
             true,
           );
         }
-        // Copilot skills cleaned by the exclusive deploy; a repo agent lingers.
-        fs.setFileExists(
-          p.join(workingDir, '.github', 'agents', 'inquiry.agent.md'),
-          true,
-        );
 
         final cmd = makeCmd(fs: fs);
         final output = await cmd.execute();
@@ -606,14 +579,14 @@ void main() {
             output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
         expect(opencode.active, isTrue);
         expect(opencode.passed, isTrue);
-        final copilot =
-            output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
-        expect(copilot.active, isFalse,
-            reason: 'Copilot skills cleaned → inactive, not a failure');
+        final claude =
+            output.hostChecks.firstWhere((h) => h.hostName == 'claude');
+        expect(claude.active, isFalse,
+            reason: 'Claude not deployed → inactive, not a failure');
 
         final text = output.toText()!;
         expect(text, contains('✓ opencode: agent + 9 skills deployed'));
-        expect(text, contains('- copilot: not deployed (inactive)'));
+        expect(text, contains('- claude: not deployed (inactive)'));
         expect(text, contains('All checks passed.'));
       });
 
@@ -648,12 +621,12 @@ void main() {
 }
 ''';
 
-      // Filesystem where OpenCode is the active/deployed host.
+      // Filesystem where OpenCode is the active/deployed host (global, #280).
       MockFileSystemOps opencodeActiveFs() {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
         fs.setFileExists(
-          p.join(workingDir, '.opencode', 'agent', 'inquiry.md'),
+          p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
           true,
         );
         for (final s in testSkills) {
@@ -706,8 +679,19 @@ void main() {
       });
 
       test('is SKIPPED when OpenCode is not the active host', () async {
-        // Copilot active; OpenCode inactive. A 4096 Ollama model must not fail.
-        final fs = allPassFs(workingDir, homeDir, testSkills);
+        // Claude active; OpenCode inactive. A 4096 Ollama model must not fail.
+        final fs = MockFileSystemOps()..setHome(homeDir);
+        fs.setDirectoryExists('.inquiry', true);
+        fs.setFileExists(
+          p.join(homeDir, '.claude', 'agents', 'inquiry.md'),
+          true,
+        );
+        for (final s in testSkills) {
+          fs.setFileExists(
+            p.join(homeDir, '.claude', 'skills', s, 'SKILL.md'),
+            true,
+          );
+        }
         fs.setFileContents(
           p.join(homeDir, '.config', 'opencode', 'opencode.jsonc'),
           jsonc,

@@ -19,18 +19,10 @@ abstract class HostAdapter {
   /// Whether this host's base directory exists on disk.
   bool exists(String homeDir) => Directory(baseDirectory(homeDir)).existsSync();
 
-  /// Whether `host get` should also deploy the inquiry agent to this host.
-  ///
-  /// Most hosts receive skills only; the inquiry agent is repo-scoped via
-  /// `iq init`. Hosts that expose a global agent directory may opt in.
+  /// Whether `iq host get` deploys the inquiry agent (globally) for this host.
+  /// Active hosts (OpenCode, Claude) deploy the agent + skills; hosts kept only
+  /// for `host clean` migration leave it `false`.
   bool get deploysAgent => false;
-
-  /// Repo-relative path of this host's per-project agent file, e.g.
-  /// `.opencode/agent/inquiry.md` or `.github/agents/inquiry.agent.md`.
-  ///
-  /// `null` when this host has no per-project agent location. Used by `iq init`
-  /// (to deploy, repo-scoped like `git init`) and `iq doctor` (to verify).
-  String? get projectAgentRelPath => null;
 
   /// Asset path of this host's agent frontmatter YAML.
   ///
