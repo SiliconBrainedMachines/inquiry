@@ -158,7 +158,9 @@ class DoctorOutput extends Output {
         } else {
           if (!tc.agentExists) {
             buffer.writeln('  ✗ ${tc.hostName}: agent not deployed');
-            buffer.writeln("    → Run 'inquiry init' to deploy agent");
+            buffer.writeln(
+              "    → Run 'inquiry host get --host ${tc.hostName}' to install the agent",
+            );
           } else {
             buffer.writeln('  ✓ ${tc.hostName}: agent deployed');
           }
@@ -179,7 +181,7 @@ class DoctorOutput extends Output {
       if (!hostChecks.any((hc) => hc.active)) {
         buffer.writeln('  ✗ no host deployed');
         buffer.writeln(
-          "    → Run 'inquiry host get --host <copilot|opencode>'",
+          "    → Run 'inquiry host get --host <opencode|claude>'",
         );
       }
     }
@@ -232,7 +234,6 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   final FileSystemOps _fileSystem;
   final Assets? _assets;
   final List<HostAdapter> _activeAdapters;
-  final String _workingDirectory;
   final Future<VersionCheckResult> Function({required String currentVersion})?
       _versionChecker;
 
@@ -246,14 +247,12 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     FileSystemOps? fileSystemOps,
     Assets? assets,
     List<HostAdapter>? activeAdapters,
-    String? workingDirectory,
     Future<VersionCheckResult> Function({required String currentVersion})?
         versionChecker,
   }) : _runProcess = runProcess ?? Process.run,
        _fileSystem = fileSystemOps ?? RealFileSystemOps(),
        _assets = assets,
        _activeAdapters = activeAdapters ?? deployAdapters,
-       _workingDirectory = workingDirectory ?? Directory.current.path,
        _versionChecker = versionChecker,
        inquiryVersion = inquiryVersionOverride ?? version_lib.inquiryVersion;
 
@@ -430,25 +429,15 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     }
   }
 
-  /// Verifies that the repo-scoped agent exists at this host's per-project
-  /// location (e.g. `.opencode/agent/inquiry.md` or `.github/agents/`).
-  bool _verifyRepoAgent(HostAdapter adapter) {
-    final rel = adapter.projectAgentRelPath;
-    if (rel == null) return false;
-    return _fileSystem.fileExists(p.join(_workingDirectory, rel));
-  }
-
   /// Verifies a single host adapter's deployment.
   HostCheck _verifyHost(HostAdapter adapter) {
     final homeDir = _fileSystem.homeDirectory();
     final expectedSkills = _getExpectedSkills();
 
-    // Agent location is host-specific: hosts that deploy a global agent
-    // (OpenCode) keep it in their agent dir; others (Copilot) are repo-scoped.
-    final agentExists = adapter.deploysAgent
-        ? _fileSystem
-            .fileExists(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'))
-        : _verifyRepoAgent(adapter);
+    // Agent + skills are installed GLOBALLY per host by `iq host get` (#280).
+    final agentExists = _fileSystem.fileExists(
+      p.join(adapter.agentDirectory(homeDir), 'inquiry.md'),
+    );
 
     // Check skills — adapter-scoped
     final missingSkills = <String>[];

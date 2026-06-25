@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.12.0]
+### Changed
+- **GLOBAL additive deploy via `iq host get`; `iq init` = workspace only; hosts opencode + claude** (#280): reverses the per-repo deploy direction (#272/#274/#278) after it proved more complex than the problem it solved. `iq host get --host <opencode|claude>` (default **opencode**) installs the inquiry **agent + skills GLOBALLY** for that host (`~/.config/opencode/`, `~/.claude/`), **additively** — installing one host no longer removes the others, so one machine can drive OpenCode (the local model) and Claude (to validate) at once. Global host dirs are isolated → no cross-host duplication (Copilot, the only cross-reader, was dropped; hosts are now **opencode + claude**). `iq init` no longer deploys an agent — it only sets up the repo workspace (`cleanrooms/` + `.inquiry/config.yaml`). The OpenCode/Ollama `num_ctx` auto-config stays in `iq host get --host opencode`. `iq doctor` verifies the **global** agent + skills. `iq host clean` removes all global deploys (run once to migrate stale per-repo or pre-0.12 files). Claude adapter + per-host dispatch tool (`task`/`Agent`, #276) are preserved — only the deploy path is global now.
+
 ## [0.11.0]
 ### Added
 - **Claude Code as an `iq init` host + per-host sub-agent dispatch tool** (#276): `iq init --host claude` deploys the firmware to `.claude/agents/inquiry.md` (run as the primary driver with `claude --agent inquiry`), so the **same Inquiry firmware** can run on Claude Code alongside OpenCode and Copilot. This enables a model-vs-system experiment — the identical firmware in front of a weak local model (qwen3-coder:30b via OpenCode) vs a capable one (Claude) — to isolate whether engagement failures are the model or the system. Claude is now a deploy-aware host in `iq doctor`/`iq host get`. (Codex host is a planned Phase 2.)
