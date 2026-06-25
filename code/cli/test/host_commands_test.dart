@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'package:inquiry_cli/assets.dart';
-import 'package:inquiry_cli/modules/host/commands/get.dart';
 import 'package:inquiry_cli/modules/host/commands/clean.dart';
 import 'package:inquiry_cli/hosts/deployer.dart';
 import 'package:inquiry_cli/hosts/host_adapter.dart';
@@ -55,64 +54,6 @@ void main() {
 
   tearDown(() {
     if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
-  });
-
-  group('iq host get', () {
-    test('exits 0 and deploys skills (not agent) to selected host', () async {
-      final command = HostGetCommand(
-        HostGetInput(host: 'fake'),
-        deployer: deployer,
-      );
-
-      final output = await command.execute();
-
-      expect(output.exitCode, ExitCode.ok);
-      expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
-        isTrue,
-      );
-      // agent deploy is repo-scoped via iq init — NOT via host get
-      expect(
-        File(
-          p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'),
-        ).existsSync(),
-        isFalse,
-      );
-    });
-
-    test('HostGetInput defaults host to copilot', () {
-      expect(HostGetInput().host, equals('copilot'));
-    });
-
-    test('validate() returns error for unknown host', () {
-      final command = HostGetCommand(
-        HostGetInput(host: 'vscode'),
-        deployer: deployer,
-      );
-      expect(command.validate(), isNotNull);
-    });
-
-    test('validate() returns null for valid host', () {
-      final command = HostGetCommand(
-        HostGetInput(host: 'fake'),
-        deployer: deployer,
-      );
-      expect(command.validate(), isNull);
-    });
-
-    test('exits 0 on idempotent re-run', () async {
-      final command = HostGetCommand(
-        HostGetInput(host: 'fake'),
-        deployer: deployer,
-      );
-
-      await command.execute();
-      final output = await command.execute();
-
-      expect(output.exitCode, ExitCode.ok);
-    });
   });
 
   group('iq host clean', () {

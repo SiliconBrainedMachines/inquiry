@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.12.0]
+### Changed
+- **Everything repo-local via `iq init`; `iq host get` removed** (#278): `iq init --host X` now deploys BOTH the agent **and the skills** into the repo (`.opencode/skills/`, `.claude/skills/`, `.github/skills/`). Skills are no longer installed globally — previously `iq host get` put them in `~/.claude/skills` etc., so they appeared in **every** session/repo (user-scope). Deployment is now **additive**: a repo can serve multiple hosts at once (e.g. OpenCode for the local model + Claude to validate) without duplication, because each host reads its own isolated dir — `iq init` no longer deletes other hosts' agents (revises #274). The OpenCode/Ollama `num_ctx` auto-config (#259) moved from `iq host get` into `iq init --host opencode`. **`iq host get` is removed**; `iq host clean` remains and now exists to wipe stale **global** deploys from older versions (run it once to migrate).
+
 ## [0.11.0]
 ### Added
 - **Claude Code as an `iq init` host + per-host sub-agent dispatch tool** (#276): `iq init --host claude` deploys the firmware to `.claude/agents/inquiry.md` (run as the primary driver with `claude --agent inquiry`), so the **same Inquiry firmware** can run on Claude Code alongside OpenCode and Copilot. This enables a model-vs-system experiment — the identical firmware in front of a weak local model (qwen3-coder:30b via OpenCode) vs a capable one (Claude) — to isolate whether engagement failures are the model or the system. Claude is now a deploy-aware host in `iq doctor`/`iq host get`. (Codex host is a planned Phase 2.)

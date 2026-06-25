@@ -15,6 +15,7 @@ import 'modules/ape/ape_builder.dart';
 import 'modules/host/host_builder.dart';
 import 'hosts/all_adapters.dart';
 import 'hosts/deployer.dart';
+import 'hosts/opencode_ollama_configurator.dart';
 
 List<String> normalizeInquiryArgs(List<String> args) {
   if (args.length == 1 && (args.first == '--help' || args.first == '-h')) {
@@ -33,29 +34,38 @@ Future<int> runInquiry(List<String> args) async {
   final cli = ModularCli();
 
   final assetsRoot = p.dirname(p.dirname(Platform.resolvedExecutable));
+  final homeDir =
+      Platform.environment['USERPROFILE'] ??
+      Platform.environment['HOME'] ??
+      '';
 
-  final deployer = HostDeployer(
-    assets: Assets(root: assetsRoot),
-    adapters: deployAdapters,
-    homeDir:
-        Platform.environment['USERPROFILE'] ??
-        Platform.environment['HOME'] ??
-        '',
-  );
-
+  // `cleaner` spans ALL adapters so `iq host clean` removes stale global
+  // deploys from any older version (migration).
   final cleaner = HostDeployer(
     assets: Assets(root: assetsRoot),
     adapters: allAdapters,
-    homeDir:
-        Platform.environment['USERPROFILE'] ??
-        Platform.environment['HOME'] ??
-        '',
+    homeDir: homeDir,
   );
 
   final assets = Assets(root: assetsRoot);
 
-  cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
-  cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
+  // OpenCode/Ollama num_ctx auto-config, used by `iq init --host opencode`.
+  final configurator = OpenCodeOllamaConfigurator(
+    run: Process.run,
+    fs: RealConfigFs(),
+    homeDir: homeDir,
+  );
+
+  cli.module(
+    '',
+    (m) => buildGlobalModule(
+      m,
+      cleaner: cleaner,
+      assets: assets,
+      configurator: configurator,
+    ),
+  );
+  cli.module('host', (m) => buildHostModule(m, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
 
