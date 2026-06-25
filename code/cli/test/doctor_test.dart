@@ -297,7 +297,7 @@ void main() {
       expect(json['checks'], isList);
       expect((json['checks'] as List).length, 5);
       expect(json['hostChecks'], isList);
-      expect((json['hostChecks'] as List).length, 2);
+      expect((json['hostChecks'] as List).length, 3);
 
       final firstCheck = (json['checks'] as List).first as Map<String, dynamic>;
       expect(firstCheck, containsPair('name', 'inquiry'));
@@ -350,17 +350,20 @@ void main() {
 
         expect(output.passed, isTrue);
         expect(output.exitCode, 0);
-        expect(output.hostChecks.length, 2);
+        expect(output.hostChecks.length, 3);
         final copilot =
             output.hostChecks.firstWhere((h) => h.hostName == 'copilot');
         expect(copilot.active, isTrue);
         expect(copilot.passed, isTrue);
         expect(copilot.agentExists, isTrue);
         expect(copilot.missingSkills, isEmpty);
-        // OpenCode is simply not the active host — not a failure.
+        // OpenCode and Claude are simply not the active host — not a failure.
         final opencode =
             output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
         expect(opencode.active, isFalse);
+        final claude =
+            output.hostChecks.firstWhere((h) => h.hostName == 'claude');
+        expect(claude.active, isFalse);
 
         final text = output.toText()!;
         expect(text, contains('Checking hosts...'));
