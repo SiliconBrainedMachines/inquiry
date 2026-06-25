@@ -15,12 +15,10 @@ final List<HostAdapter> allAdapters = [
   GeminiAdapter(),
 ];
 
-/// Adapters that receive deploys in the current version.
-/// All deploy skills via `host get`; the inquiry agent is repo-scoped via
-/// `iq init --host <host>` (#272). Claude added for the model-vs-system
-/// experiment (#276).
+/// Active deploy targets (#280): `iq host get` installs the agent + skills
+/// GLOBALLY for these, additively. Copilot/Codex/Gemini are kept only in
+/// [allAdapters] for `host clean` migration.
 final List<HostAdapter> deployAdapters = [
-  CopilotAdapter(),
   OpenCodeAdapter(),
   ClaudeAdapter(),
 ];
