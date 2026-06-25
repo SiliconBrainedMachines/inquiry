@@ -239,6 +239,8 @@ void main() {
           p.join(root, '.opencode', 'agent', 'inquiry.md');
       String copilotAgent(String root) =>
           p.join(root, '.github', 'agents', 'inquiry.agent.md');
+      String claudeAgent(String root) =>
+          p.join(root, '.claude', 'agents', 'inquiry.md');
 
       setUp(() {
         // Minimal assets tree with the shared body + both host frontmatters.
@@ -255,6 +257,8 @@ void main() {
         File(p.join(fmDir.path, 'copilot.yaml'))
             .writeAsStringSync('name: inquiry');
         File(p.join(fmDir.path, 'opencode.yaml'))
+            .writeAsStringSync('name: inquiry');
+        File(p.join(fmDir.path, 'claude.yaml'))
             .writeAsStringSync('name: inquiry');
       });
 
@@ -289,6 +293,19 @@ void main() {
         expect(File(copilotAgent(tempDir.path)).existsSync(), isTrue);
         // One host at a time: no opencode agent.
         expect(File(openCodeAgent(tempDir.path)).existsSync(), isFalse);
+      });
+
+      test('--host claude: writes .claude/agents/inquiry.md (#276)', () async {
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path, host: 'claude'),
+          assets: Assets(root: assetsRoot.path),
+        ).execute();
+
+        expect(File(claudeAgent(tempDir.path)).existsSync(), isTrue);
+        expect(File(openCodeAgent(tempDir.path)).existsSync(), isFalse);
+        final config =
+            File('${tempDir.path}/.inquiry/config.yaml').readAsStringSync();
+        expect(config, contains('host: claude'));
       });
 
       test('records the chosen host in .inquiry/config.yaml', () async {
