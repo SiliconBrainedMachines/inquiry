@@ -54,12 +54,13 @@ void main() {
   });
 
   group('deployAdapters registry', () {
-    test('returns copilot, opencode, and claude', () {
-      expect(deployAdapters, hasLength(3));
+    test('active deploy targets are opencode + claude (#280)', () {
+      expect(deployAdapters, hasLength(2));
       expect(
         deployAdapters.map((a) => a.name),
-        containsAll(<String>['copilot', 'opencode', 'claude']),
+        containsAll(<String>['opencode', 'claude']),
       );
+      expect(deployAdapters.map((a) => a.name), isNot(contains('copilot')));
     });
   });
 
@@ -77,25 +78,12 @@ void main() {
     });
   });
 
-  group('agent deploy is repo-scoped, never global (#272)', () {
-    test('opencode does not deploy a global agent', () {
-      final opencode = deployAdapters.firstWhere((a) => a.name == 'opencode');
-      expect(opencode.deploysAgent, isFalse);
-    });
-
-    test('copilot does not deploy a global agent', () {
-      final copilot = deployAdapters.firstWhere((a) => a.name == 'copilot');
-      expect(copilot.deploysAgent, isFalse);
-    });
-
-    test('each host exposes its per-project agent path', () {
-      final opencode = deployAdapters.firstWhere((a) => a.name == 'opencode');
-      final copilot = deployAdapters.firstWhere((a) => a.name == 'copilot');
-      expect(opencode.projectAgentRelPath, p.join('.opencode', 'agent', 'inquiry.md'));
-      expect(
-        copilot.projectAgentRelPath,
-        p.join('.github', 'agents', 'inquiry.agent.md'),
-      );
+  group('active hosts deploy the agent globally (#280)', () {
+    test('opencode + claude deploy the agent', () {
+      for (final name in ['opencode', 'claude']) {
+        final a = deployAdapters.firstWhere((a) => a.name == name);
+        expect(a.deploysAgent, isTrue, reason: '$name installs a global agent');
+      }
     });
   });
 }

@@ -67,9 +67,9 @@ void main() {
   });
 
   group('HostDeployer', () {
-    test('deployExclusive copies skills to selected adapter skillsDirectory',
+    test('deploy copies skills to selected adapter skillsDirectory',
         () {
-      deployer.deployExclusive('fake');
+      deployer.deploy('fake');
 
       final skillFile = File(
         p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
@@ -84,8 +84,8 @@ void main() {
       expect(skillFile2.readAsStringSync(), '# Doc Write');
     });
 
-    test('deployExclusive does NOT copy agent to adapter agentDirectory', () {
-      deployer.deployExclusive('fake');
+    test('deploy does NOT copy agent to adapter agentDirectory', () {
+      deployer.deploy('fake');
 
       final agentFile = File(
         p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'),
@@ -93,9 +93,9 @@ void main() {
       expect(agentFile.existsSync(), isFalse);
     });
 
-    test('deployExclusive is idempotent — second run produces same result', () {
-      deployer.deployExclusive('fake');
-      deployer.deployExclusive('fake');
+    test('deploy is idempotent — second run produces same result', () {
+      deployer.deploy('fake');
+      deployer.deploy('fake');
 
       final skillFile = File(
         p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
@@ -104,23 +104,23 @@ void main() {
       expect(skillFile.readAsStringSync(), '# Doc Read');
     });
 
-    test('deployExclusive cleans before deploying', () {
-      deployer.deployExclusive('fake');
+    test('deploy is additive — does not clean before deploying (#280)', () {
+      deployer.deploy('fake');
 
-      // Create an extra file that shouldn't survive redeploy
       final extraFile = File(
         p.join(homeDir.path, '.fake', 'skills', 'stale-skill', 'SKILL.md'),
       );
       extraFile.parent.createSync(recursive: true);
       extraFile.writeAsStringSync('# Stale');
 
-      deployer.deployExclusive('fake');
+      deployer.deploy('fake');
 
-      expect(extraFile.existsSync(), isFalse);
+      // Additive: redeploy does not wipe existing files (use `iq host clean`).
+      expect(extraFile.existsSync(), isTrue);
     });
 
     test('clean removes deployed files from all adapters', () {
-      deployer.deployExclusive('fake');
+      deployer.deploy('fake');
       deployer.clean();
 
       final skillsDir = Directory(p.join(homeDir.path, '.fake', 'skills'));
@@ -133,7 +133,7 @@ void main() {
       expect(() => deployer.clean(), returnsNormally);
     });
 
-    test('deployExclusive can target either of two hosts', () {
+    test('deploy can target either of two hosts', () {
       final allDeployer = HostDeployer(
         assets: assets,
         adapters: [
@@ -143,7 +143,7 @@ void main() {
         homeDir: homeDir.path,
       );
 
-      allDeployer.deployExclusive('fake');
+      allDeployer.deploy('fake');
 
       // Only 'fake' received skills
       expect(
@@ -157,10 +157,10 @@ void main() {
         isFalse,
       );
 
-      // Switch to fake2
-      allDeployer.deployExclusive('fake2');
+      // Add fake2 — additive (#280)
+      allDeployer.deploy('fake2');
 
-      // fake2 now has skills; fake is cleaned
+      // fake2 now has skills; fake is KEPT (additive — both coexist).
       expect(
         File(
           p.join(homeDir.path, '.fake2', 'skills', 'doc-read', 'SKILL.md'),
@@ -168,15 +168,17 @@ void main() {
         isTrue,
       );
       expect(
-        Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
-        isFalse,
+        File(
+          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
+        ).existsSync(),
+        isTrue,
       );
     });
   });
 
-  // ─── deployExclusive() ────────────────────────────────────────────────────
+  // ─── deploy() ────────────────────────────────────────────────────
 
-  group('deployExclusive()', () {
+  group('deploy()', () {
     late HostDeployer multiDeployer;
     late _SecondFakeAdapter adapter2;
 
@@ -190,7 +192,7 @@ void main() {
     });
 
     test('deploys skills to the selected adapter only', () {
-      multiDeployer.deployExclusive('fake');
+      multiDeployer.deploy('fake');
 
       expect(
         File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
@@ -204,7 +206,7 @@ void main() {
     });
 
     test('does NOT write agent to adapter agentDirectory', () {
-      multiDeployer.deployExclusive('fake');
+      multiDeployer.deploy('fake');
 
       expect(
         File(p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'))
@@ -213,7 +215,7 @@ void main() {
       );
     });
 
-    test('cleans all adapters before deploying to selected', () {
+    test('is additive — leaves other adapters untouched (#280)', () {
       // Pre-populate both adapters
       for (final a in [adapter, adapter2]) {
         final stale = File(
@@ -223,24 +225,19 @@ void main() {
         stale.writeAsStringSync('stale');
       }
 
-      multiDeployer.deployExclusive('fake');
+      multiDeployer.deploy('fake');
 
-      // Stale files cleaned from BOTH adapters
-      expect(
-        File(p.join(homeDir.path, '.fake', 'skills', 'stale', 'SKILL.md'))
-            .existsSync(),
-        isFalse,
-      );
+      // The OTHER adapter (fake2) is untouched — additive deploy.
       expect(
         File(p.join(homeDir.path, '.fake2', 'skills', 'stale', 'SKILL.md'))
             .existsSync(),
-        isFalse,
+        isTrue,
       );
     });
 
     test('is idempotent — second call to same target produces same result', () {
-      multiDeployer.deployExclusive('fake');
-      multiDeployer.deployExclusive('fake');
+      multiDeployer.deploy('fake');
+      multiDeployer.deploy('fake');
 
       expect(
         File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
@@ -251,7 +248,7 @@ void main() {
 
     test('throws ArgumentError for unknown host name', () {
       expect(
-        () => multiDeployer.deployExclusive('vscode'),
+        () => multiDeployer.deploy('vscode'),
         throwsA(isA<ArgumentError>()),
       );
     });
@@ -276,7 +273,7 @@ void main() {
         homeDir: homeDir.path,
       );
 
-      agentDeployer.deployExclusive('agenthost');
+      agentDeployer.deploy('agenthost');
 
       final agentFile =
           File(p.join(homeDir.path, '.agenthost', 'agents', 'inquiry.md'));
@@ -285,7 +282,7 @@ void main() {
     });
 
     test('does not deploy an agent when the host opts out', () {
-      deployer.deployExclusive('fake'); // FakeAdapter.deploysAgent == false
+      deployer.deploy('fake'); // FakeAdapter.deploysAgent == false
       expect(
         Directory(p.join(homeDir.path, '.fake', 'agents')).existsSync(),
         isFalse,

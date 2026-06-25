@@ -29,9 +29,9 @@ void buildGlobalModule(
 
   m.command<InitInput, InitOutput>(
     'init',
-    (req) => InitCommand(InitInput.fromCliRequest(req), assets: assets),
+    (req) => InitCommand(InitInput.fromCliRequest(req)),
     description:
-        'Initialize Inquiry in this repo (repo-scoped). --host <copilot|opencode> (default: opencode)',
+        'Set up the Inquiry workspace in this repo (cleanrooms + .inquiry). Install a host first with `iq host get`.',
   );
 
   m.command<VersionInput, VersionOutput>(
