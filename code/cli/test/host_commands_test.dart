@@ -58,7 +58,7 @@ void main() {
   });
 
   group('iq host get', () {
-    test('exits 0 and deploys skills (not agent) to selected host', () async {
+    test('exits 0 and deploys skills globally to the selected host', () async {
       final command = HostGetCommand(
         HostGetInput(host: 'fake'),
         deployer: deployer,
@@ -73,17 +73,17 @@ void main() {
         ).existsSync(),
         isTrue,
       );
-      // agent deploy is repo-scoped via iq init — NOT via host get
+      // FakeAdapter.deploysAgent is false → no global agent for it.
       expect(
         File(
-          p.join(homeDir.path, '.fake', 'agents', 'inquiry.agent.md'),
+          p.join(homeDir.path, '.fake', 'agents', 'inquiry.md'),
         ).existsSync(),
         isFalse,
       );
     });
 
-    test('HostGetInput defaults host to copilot', () {
-      expect(HostGetInput().host, equals('copilot'));
+    test('HostGetInput defaults host to opencode (#280)', () {
+      expect(HostGetInput().host, equals('opencode'));
     });
 
     test('validate() returns error for unknown host', () {
@@ -117,8 +117,8 @@ void main() {
 
   group('iq host clean', () {
     test('exits 0 and removes deployed files', () async {
-      // Deploy first using deployExclusive
-      deployer.deployExclusive('fake');
+      // Deploy first using deploy
+      deployer.deploy('fake');
 
       final command = HostCleanCommand(
         HostCleanInput(),
