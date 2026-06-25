@@ -13,17 +13,18 @@ class ClaudeAdapter extends HostAdapter {
   String skillsDirectory(String homeDir) =>
       p.join(homeDir, '.claude', 'skills');
 
+  // Claude Code discovers global agents in `~/.claude/agents/`; run as the
+  // primary driver with `claude --agent inquiry`. `iq host get --host claude`
+  // installs the agent here (global, #280). Dispatch tool is `Agent`.
   @override
   String agentDirectory(String homeDir) => p.join(homeDir, '.claude', 'agents');
 
-  // Claude Code discovers repo agents in `.claude/agents/`; run as the primary
-  // driver with `claude --agent inquiry`. Its sub-agent dispatch tool is `Agent`.
   @override
-  String get projectAgentRelPath => p.join('.claude', 'agents', 'inquiry.md');
+  bool get deploysAgent => true;
 
   @override
   Map<String, String> get agentSubstitutions => const {
-        'INIT_HINT': 'Run `iq init --host claude`',
+        'INIT_HINT': 'Run `iq host get --host claude`',
         'DISPATCH_TOOL': 'Agent',
       };
 }
