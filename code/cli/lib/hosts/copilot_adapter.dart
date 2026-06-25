@@ -22,8 +22,10 @@ class CopilotAdapter extends HostAdapter {
   String get projectAgentRelPath => p.join('.github', 'agents', 'inquiry.agent.md');
 
   // Copilot runs inside VS Code: the install hint points at the command palette.
+  // Copilot's sub-agent dispatch tool is `agent`.
   @override
   Map<String, String> get agentSubstitutions => const {
         'INIT_HINT': 'Tell the user to press `Ctrl+Shift+P` → **Inquiry: Init**',
+        'DISPATCH_TOOL': 'agent',
       };
 }

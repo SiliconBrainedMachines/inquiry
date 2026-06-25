@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.11.0]
+### Added
+- **Claude Code as an `iq init` host + per-host sub-agent dispatch tool** (#276): `iq init --host claude` deploys the firmware to `.claude/agents/inquiry.md` (run as the primary driver with `claude --agent inquiry`), so the **same Inquiry firmware** can run on Claude Code alongside OpenCode and Copilot. This enables a model-vs-system experiment — the identical firmware in front of a weak local model (qwen3-coder:30b via OpenCode) vs a capable one (Claude) — to isolate whether engagement failures are the model or the system. Claude is now a deploy-aware host in `iq doctor`/`iq host get`. (Codex host is a planned Phase 2.)
+
+### Fixed
+- **Firmware told OpenCode to use a non-existent `agent` tool**: OpenCode's sub-agent dispatch tool is `task`, but the firmware hardcoded `agent`, so dispatch failed (the model improvised `task=explore`). The dispatch tool is now host-specific via a `{{DISPATCH_TOOL}}` substitution: `agent` (Copilot), `task` (OpenCode), `Agent` (Claude Code).
+
 ## [0.10.12]
 ### Fixed
 - **`iq init` host switch left the old agent and a stale config host** (#274): switching hosts on an existing repo (`iq init`, then `iq init --host copilot`) left the previous host's per-project agent in place — both `.opencode/agent/` and `.github/agents/` present, the cross-host duplication #272 set out to avoid — and `.inquiry/config.yaml` kept the old `host:`. `iq init` now removes the other supported host's agent (exactly one host at a time) and reconciles the `host:` line in config while **preserving** other keys (e.g. `evolution.enabled`). Fresh init is unchanged.
