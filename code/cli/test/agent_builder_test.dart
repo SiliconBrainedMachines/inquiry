@@ -72,20 +72,19 @@ void main() {
     });
 
     test('host-specific init hint is substituted; no placeholder leaks', () {
-      final c = builder.build(CopilotAdapter());
       final o = builder.build(OpenCodeAdapter());
-      expect(c, isNot(contains('{{')));
+      final cl = builder.build(ClaudeAdapter());
       expect(o, isNot(contains('{{')));
-      expect(c, contains('Inquiry: Init'), reason: 'Copilot/VS Code hint');
-      expect(o, contains('Run `iq init`'), reason: 'CLI hint');
+      expect(cl, isNot(contains('{{')));
+      expect(o, contains('iq host get --host opencode'));
+      expect(cl, contains('iq host get --host claude'));
     });
 
     test('dispatch tool name is substituted per host (#276)', () {
       // OpenCode has no `agent` tool — it is `task`; Claude uses `Agent`.
-      expect(builder.build(CopilotAdapter()), contains('use the `agent` tool'));
       expect(builder.build(OpenCodeAdapter()), contains('use the `task` tool'));
       expect(builder.build(ClaudeAdapter()), contains('use the `Agent` tool'));
-      for (final a in [CopilotAdapter(), OpenCodeAdapter(), ClaudeAdapter()]) {
+      for (final a in [OpenCodeAdapter(), ClaudeAdapter()]) {
         expect(builder.build(a), isNot(contains('{{DISPATCH_TOOL}}')));
       }
     });
