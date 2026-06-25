@@ -16,5 +16,11 @@ final List<HostAdapter> allAdapters = [
 ];
 
 /// Adapters that receive deploys in the current version.
-/// Copilot deploys skills; OpenCode deploys skills + the inquiry agent (#247, D1).
-final List<HostAdapter> deployAdapters = [CopilotAdapter(), OpenCodeAdapter()];
+/// All deploy skills via `host get`; the inquiry agent is repo-scoped via
+/// `iq init --host <host>` (#272). Claude added for the model-vs-system
+/// experiment (#276).
+final List<HostAdapter> deployAdapters = [
+  CopilotAdapter(),
+  OpenCodeAdapter(),
+  ClaudeAdapter(),
+];

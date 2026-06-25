@@ -20,6 +20,7 @@ import 'package:path/path.dart' as p;
 
 import '../../../assets.dart';
 import '../../../hosts/agent_builder.dart';
+import '../../../hosts/claude_adapter.dart';
 import '../../../hosts/copilot_adapter.dart';
 import '../../../hosts/host_adapter.dart';
 import '../../../hosts/opencode_adapter.dart';
@@ -58,6 +59,8 @@ HostAdapter? _adapterForHost(String host) {
       return OpenCodeAdapter();
     case 'copilot':
       return CopilotAdapter();
+    case 'claude':
+      return ClaudeAdapter();
     default:
       return null;
   }
@@ -96,7 +99,7 @@ class InitCommand implements Command<InitInput, InitOutput> {
     final adapter = _adapterForHost(input.host);
     if (adapter == null || adapter.projectAgentRelPath == null) {
       return 'Unknown or unsupported host: "${input.host}". '
-          'Supported hosts: copilot, opencode.';
+          'Supported hosts: claude, copilot, opencode.';
     }
     return null;
   }
@@ -159,7 +162,7 @@ class InitCommand implements Command<InitInput, InitOutput> {
   /// being initialized — enforces "one host at a time" even when switching
   /// hosts on an existing repo (#274). No-op on a fresh init.
   void _cleanOtherHostAgents(String root, List<String> steps) {
-    for (final host in const ['copilot', 'opencode']) {
+    for (final host in const ['claude', 'copilot', 'opencode']) {
       if (host == input.host) continue;
       final rel = _adapterForHost(host)?.projectAgentRelPath;
       if (rel == null) continue;

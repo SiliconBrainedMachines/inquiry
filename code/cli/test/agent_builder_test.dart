@@ -4,6 +4,7 @@ import 'package:test/test.dart';
 
 import 'package:inquiry_cli/assets.dart';
 import 'package:inquiry_cli/hosts/agent_builder.dart';
+import 'package:inquiry_cli/hosts/claude_adapter.dart';
 import 'package:inquiry_cli/hosts/copilot_adapter.dart';
 import 'package:inquiry_cli/hosts/opencode_adapter.dart';
 
@@ -55,15 +56,18 @@ void main() {
       expect(fm, isNot(contains('tools:')));
     });
 
-    test('rendered bodies are identical EXCEPT the single host-specific init line', () {
-      List<String> withoutInit(String md) => _body(md)
+    test('rendered bodies are identical EXCEPT the host-specific lines (init hint + dispatch tool)', () {
+      // Two lines carry per-host substitutions: the init hint and the
+      // sub-agent dispatch tool name ({{DISPATCH_TOOL}}: agent/task/Agent).
+      List<String> withoutHostSpecific(String md) => _body(md)
           .split('\n')
           .where((l) => !l.contains('the CLI is not installed'))
+          .where((l) => !l.contains('**Dispatch** that sub-agent'))
           .toList();
       expect(
-        withoutInit(builder.build(CopilotAdapter())),
-        equals(withoutInit(builder.build(OpenCodeAdapter()))),
-        reason: 'single source of truth: bodies share everything but the init hint',
+        withoutHostSpecific(builder.build(CopilotAdapter())),
+        equals(withoutHostSpecific(builder.build(OpenCodeAdapter()))),
+        reason: 'single source of truth: bodies share everything but the per-host lines',
       );
     });
 
@@ -74,6 +78,16 @@ void main() {
       expect(o, isNot(contains('{{')));
       expect(c, contains('Inquiry: Init'), reason: 'Copilot/VS Code hint');
       expect(o, contains('Run `iq init`'), reason: 'CLI hint');
+    });
+
+    test('dispatch tool name is substituted per host (#276)', () {
+      // OpenCode has no `agent` tool — it is `task`; Claude uses `Agent`.
+      expect(builder.build(CopilotAdapter()), contains('use the `agent` tool'));
+      expect(builder.build(OpenCodeAdapter()), contains('use the `task` tool'));
+      expect(builder.build(ClaudeAdapter()), contains('use the `Agent` tool'));
+      for (final a in [CopilotAdapter(), OpenCodeAdapter(), ClaudeAdapter()]) {
+        expect(builder.build(a), isNot(contains('{{DISPATCH_TOOL}}')));
+      }
     });
 
     test('exact-literal rule (#240) is present for BOTH hosts (drift fixed)', () {
