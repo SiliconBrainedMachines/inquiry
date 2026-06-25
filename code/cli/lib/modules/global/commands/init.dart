@@ -4,9 +4,11 @@
 /// 1. Create cleanrooms/ at project root if missing
 /// 2. Add .inquiry/ and cleanrooms/**/.iq.state.yaml to .gitignore
 /// 3. Create .inquiry/config.yaml with defaults (project-scoped)
-/// 4. Deploy the inquiry agent into the repo for the selected host (repo-scoped,
-///    like `git init`): `.opencode/agent/inquiry.md` (default) or
-///    `.github/agents/inquiry.agent.md` (`--host copilot`)
+/// 4. Deploy the inquiry agent + skills into the repo for the selected host
+///    (repo-scoped, like `git init`; additive across hosts): e.g.
+///    `.opencode/agent/inquiry.md` + `.opencode/skills/` (default), or
+///    `.claude/agents/inquiry.md` + `.claude/skills/` (`--host claude`)
+/// 5. OpenCode only: auto-configure Ollama num_ctx (#259)
 ///
 /// Cycle runtime (`.iq.state.yaml`, `mutations.md`) is materialized per cycle
 /// under `cleanrooms/<branch>/` by the FSM, not scaffolded at init.
@@ -24,6 +26,7 @@ import '../../../hosts/claude_adapter.dart';
 import '../../../hosts/copilot_adapter.dart';
 import '../../../hosts/host_adapter.dart';
 import '../../../hosts/opencode_adapter.dart';
+import '../../../hosts/opencode_ollama_configurator.dart';
 import '../../../src/git_utils.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
@@ -92,7 +95,11 @@ class InitCommand implements Command<InitInput, InitOutput> {
 
   final Assets? assets;
 
-  InitCommand(this.input, {this.assets});
+  /// OpenCode-only: ensures configured Ollama models have an adequate `num_ctx`
+  /// (#259). Injected; null disables it (e.g. in tests).
+  final OpenCodeOllamaConfigurator? configurator;
+
+  InitCommand(this.input, {this.assets, this.configurator});
 
   @override
   String? validate() {
@@ -122,11 +129,21 @@ class InitCommand implements Command<InitInput, InitOutput> {
     // Step 3: Create .inquiry/config.yaml with defaults (project-scoped)
     _ensureConfigYaml(root, steps);
 
-    // Step 4: Deploy the repo-scoped agent for this host; first remove any
-    // other host's agent so exactly one host is deployed at a time (#274).
+    // Step 4: Deploy the repo-scoped agent + skills for this host. Additive —
+    // other hosts deployed in this repo are left in place, so one repo can
+    // serve multiple hosts (e.g. OpenCode + Claude) without duplication, since
+    // each host reads its own isolated dir (#278).
     if (assets != null) {
-      _cleanOtherHostAgents(root, steps);
-      _deployAgent(root, assets!, steps);
+      final adapter = _adapterForHost(input.host)!;
+      _deployAgent(root, adapter, assets!, steps);
+      _deploySkills(root, adapter, assets!, steps);
+    }
+
+    // Step 5: OpenCode silently truncates the firmware when Ollama's num_ctx is
+    // too small (#259). Auto-configure it here (moved from the removed
+    // `iq host get`).
+    if (input.host == 'opencode' && configurator != null) {
+      steps.addAll(await configurator!.configure());
     }
 
     if (steps.isEmpty) {
@@ -145,8 +162,12 @@ class InitCommand implements Command<InitInput, InitOutput> {
 
   /// Deploys the inquiry agent into the repo for the selected host — repo-scoped
   /// like `git init`, never global (#272).
-  void _deployAgent(String root, Assets assets, List<String> steps) {
-    final adapter = _adapterForHost(input.host)!;
+  void _deployAgent(
+    String root,
+    HostAdapter adapter,
+    Assets assets,
+    List<String> steps,
+  ) {
     final rel = adapter.projectAgentRelPath!;
     final content = AgentBuilder(assets).build(adapter);
     final agentFile = File(p.join(root, rel));
@@ -158,19 +179,32 @@ class InitCommand implements Command<InitInput, InitOutput> {
     );
   }
 
-  /// Removes the per-project agent of every supported host other than the one
-  /// being initialized — enforces "one host at a time" even when switching
-  /// hosts on an existing repo (#274). No-op on a fresh init.
-  void _cleanOtherHostAgents(String root, List<String> steps) {
-    for (final host in const ['claude', 'copilot', 'opencode']) {
-      if (host == input.host) continue;
-      final rel = _adapterForHost(host)?.projectAgentRelPath;
-      if (rel == null) continue;
-      final file = File(p.join(root, rel));
-      if (file.existsSync()) {
-        file.deleteSync();
-        steps.add('Removed $host agent (${rel.replaceAll(r'\', '/')})');
-      }
+  /// Deploys the inquiry skills into the repo for the selected host — repo-local,
+  /// not global, so they appear only in this repo (#278).
+  void _deploySkills(
+    String root,
+    HostAdapter adapter,
+    Assets assets,
+    List<String> steps,
+  ) {
+    final rel = adapter.projectSkillsRelPath;
+    if (rel == null) return;
+    final List<String> skillNames;
+    try {
+      skillNames = assets.listDirectory('skills');
+    } catch (_) {
+      return; // no skills bundled
+    }
+    for (final name in skillNames) {
+      final content = assets.loadString('skills/$name/SKILL.md');
+      final file = File(p.join(root, rel, name, 'SKILL.md'));
+      file.parent.createSync(recursive: true);
+      file.writeAsStringSync(content);
+    }
+    if (skillNames.isNotEmpty) {
+      steps.add(
+        'Deployed ${skillNames.length} skills to ${rel.replaceAll(r'\', '/')}/',
+      );
     }
   }
 

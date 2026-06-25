@@ -22,6 +22,9 @@ class ClaudeAdapter extends HostAdapter {
   String get projectAgentRelPath => p.join('.claude', 'agents', 'inquiry.md');
 
   @override
+  String get projectSkillsRelPath => p.join('.claude', 'skills');
+
+  @override
   Map<String, String> get agentSubstitutions => const {
         'INIT_HINT': 'Run `iq init --host claude`',
         'DISPATCH_TOOL': 'Agent',

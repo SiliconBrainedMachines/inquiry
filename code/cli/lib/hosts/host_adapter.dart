@@ -32,6 +32,11 @@ abstract class HostAdapter {
   /// (to deploy, repo-scoped like `git init`) and `iq doctor` (to verify).
   String? get projectAgentRelPath => null;
 
+  /// Repo-relative directory where this host discovers per-project skills, e.g.
+  /// `.claude/skills` or `.opencode/skills`; each skill lives in a `name/`
+  /// subdirectory holding a `SKILL.md`. `null` when unsupported.
+  String? get projectSkillsRelPath => null;
+
   /// Asset path of this host's agent frontmatter YAML.
   ///
   /// [AgentBuilder] assembles it with the shared firmware body

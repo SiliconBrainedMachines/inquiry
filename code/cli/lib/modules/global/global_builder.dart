@@ -9,11 +9,13 @@ import 'commands/uninstall.dart';
 import 'commands/upgrade.dart';
 import 'commands/version.dart';
 import '../../hosts/deployer.dart';
+import '../../hosts/opencode_ollama_configurator.dart';
 
 void buildGlobalModule(
   ModuleBuilder m, {
   required HostDeployer cleaner,
   Assets? assets,
+  OpenCodeOllamaConfigurator? configurator,
 }) {
   m.command<TuiInput, TuiOutput>(
     '',
@@ -29,9 +31,13 @@ void buildGlobalModule(
 
   m.command<InitInput, InitOutput>(
     'init',
-    (req) => InitCommand(InitInput.fromCliRequest(req), assets: assets),
+    (req) => InitCommand(
+      InitInput.fromCliRequest(req),
+      assets: assets,
+      configurator: configurator,
+    ),
     description:
-        'Initialize Inquiry in this repo (repo-scoped). --host <copilot|opencode> (default: opencode)',
+        'Initialize Inquiry in this repo (repo-scoped: agent + skills). --host <claude|copilot|opencode> (default: opencode)',
   );
 
   m.command<VersionInput, VersionOutput>(

@@ -29,6 +29,10 @@ class OpenCodeAdapter extends HostAdapter {
   @override
   String get projectAgentRelPath => p.join('.opencode', 'agent', 'inquiry.md');
 
+  // OpenCode discovers repo skills in `.opencode/skills/` (plural).
+  @override
+  String get projectSkillsRelPath => p.join('.opencode', 'skills');
+
   // OpenCode is a headless CLI: the install hint points at `iq init`.
   // OpenCode's sub-agent dispatch tool is `task` (there is no `agent` tool).
   @override

@@ -21,6 +21,10 @@ class CopilotAdapter extends HostAdapter {
   @override
   String get projectAgentRelPath => p.join('.github', 'agents', 'inquiry.agent.md');
 
+  // Copilot discovers repo skills in `.github/skills/`.
+  @override
+  String get projectSkillsRelPath => p.join('.github', 'skills');
+
   // Copilot runs inside VS Code: the install hint points at the command palette.
   // Copilot's sub-agent dispatch tool is `agent`.
   @override

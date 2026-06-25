@@ -260,6 +260,12 @@ void main() {
             .writeAsStringSync('name: inquiry');
         File(p.join(fmDir.path, 'claude.yaml'))
             .writeAsStringSync('name: inquiry');
+        // A bundled skill, to verify per-repo skills deployment (#278).
+        final skillDir = Directory(
+          p.join(assetsRoot.path, 'assets', 'skills', 'research'),
+        )..createSync(recursive: true);
+        File(p.join(skillDir.path, 'SKILL.md'))
+            .writeAsStringSync('---\nname: research\n---\nbody');
       });
 
       tearDown(() {
@@ -306,6 +312,32 @@ void main() {
         final config =
             File('${tempDir.path}/.inquiry/config.yaml').readAsStringSync();
         expect(config, contains('host: claude'));
+      });
+
+      test('deploys skills repo-locally for the host, not global (#278)', () async {
+        await InitCommand(
+          InitInput(workingDirectory: tempDir.path),
+          assets: Assets(root: assetsRoot.path),
+        ).execute(); // opencode
+        expect(
+          File(p.join(tempDir.path, '.opencode', 'skills', 'research',
+                  'SKILL.md'))
+              .existsSync(),
+          isTrue,
+        );
+
+        // Claude lands skills under .claude/skills/
+        final t2 = Directory.systemTemp.createTempSync('iq_skills_claude_');
+        await InitCommand(
+          InitInput(workingDirectory: t2.path, host: 'claude'),
+          assets: Assets(root: assetsRoot.path),
+        ).execute();
+        expect(
+          File(p.join(t2.path, '.claude', 'skills', 'research', 'SKILL.md'))
+              .existsSync(),
+          isTrue,
+        );
+        t2.deleteSync(recursive: true);
       });
 
       test('records the chosen host in .inquiry/config.yaml', () async {
@@ -364,7 +396,7 @@ void main() {
       });
 
       test(
-          'switching host removes the previous host agent + updates config (#274)',
+          'adding a second host is ADDITIVE — keeps both agents, updates config host (#278)',
           () async {
         final assets = Assets(root: assetsRoot.path);
         await InitCommand(
@@ -376,16 +408,17 @@ void main() {
         await InitCommand(
           InitInput(workingDirectory: tempDir.path, host: 'copilot'),
           assets: assets,
-        ).execute(); // switch
+        ).execute(); // add a second host
 
-        // Exactly one host at a time: copilot present, opencode removed.
+        // Additive (#278): both hosts coexist in the repo — isolated dirs, no
+        // duplication; one repo can serve OpenCode + Copilot/Claude.
         expect(File(copilotAgent(tempDir.path)).existsSync(), isTrue);
-        expect(File(openCodeAgent(tempDir.path)).existsSync(), isFalse);
+        expect(File(openCodeAgent(tempDir.path)).existsSync(), isTrue);
 
+        // config `host:` still reconciles to the most recent host.
         final config =
             File('${tempDir.path}/.inquiry/config.yaml').readAsStringSync();
         expect(config, contains('host: copilot'));
-        expect(config, isNot(contains('host: opencode')));
       });
 
       test('reconciling host preserves other config keys (#274)', () async {
