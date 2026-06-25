@@ -54,11 +54,11 @@ void main() {
   });
 
   group('deployAdapters registry', () {
-    test('returns copilot and opencode', () {
-      expect(deployAdapters, hasLength(2));
+    test('returns copilot, opencode, and claude', () {
+      expect(deployAdapters, hasLength(3));
       expect(
         deployAdapters.map((a) => a.name),
-        containsAll(<String>['copilot', 'opencode']),
+        containsAll(<String>['copilot', 'opencode', 'claude']),
       );
     });
   });

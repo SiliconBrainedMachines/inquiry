@@ -30,8 +30,10 @@ class OpenCodeAdapter extends HostAdapter {
   String get projectAgentRelPath => p.join('.opencode', 'agent', 'inquiry.md');
 
   // OpenCode is a headless CLI: the install hint points at `iq init`.
+  // OpenCode's sub-agent dispatch tool is `task` (there is no `agent` tool).
   @override
   Map<String, String> get agentSubstitutions => const {
         'INIT_HINT': 'Run `iq init`',
+        'DISPATCH_TOOL': 'task',
       };
 }
