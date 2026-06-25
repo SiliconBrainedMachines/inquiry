@@ -23,7 +23,8 @@ void buildHostModule(
         homeDir: deployer.homeDir,
       ),
     ),
-    description: 'Deploy Inquiry skills to the specified host (default: copilot)',
+    description:
+        'Install Inquiry (agent + skills) globally for a host. --host <opencode|claude> (default: opencode)',
   );
 
   m.command<HostCleanInput, HostCleanOutput>(

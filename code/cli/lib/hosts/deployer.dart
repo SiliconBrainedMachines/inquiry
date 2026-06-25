@@ -18,20 +18,19 @@ class HostDeployer {
     required this.homeDir,
   });
 
-  /// Deploys skills exclusively to the named adapter, cleaning all adapters first.
-  ///
-  /// Only one host is active at a time — all other adapter directories are
-  /// cleaned before deploying to the selected one.
+  /// Deploys the inquiry agent + skills GLOBALLY for [hostName], **additively** —
+  /// other hosts are left untouched, so one machine can serve multiple hosts
+  /// (e.g. OpenCode + Claude) at once. Global host dirs are isolated, so there
+  /// is no cross-host duplication (#280).
   ///
   /// Throws [ArgumentError] if [hostName] is not in [adapters].
-  void deployExclusive(String hostName) {
+  void deploy(String hostName) {
     final validNames = adapters.map((a) => a.name).toSet();
     if (!validNames.contains(hostName)) {
       throw ArgumentError(
         'Unknown host: "$hostName". Valid hosts: ${validNames.join(", ")}',
       );
     }
-    clean();
     final selected = adapters.firstWhere((a) => a.name == hostName);
     _deploySkills(selected);
     if (selected.deploysAgent) _deployAgent(selected);
