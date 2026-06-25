@@ -1,8 +1,8 @@
-/// `iq host get` — deploys Inquiry skills to the specified host.
+/// `iq host get` — installs the Inquiry agent + skills GLOBALLY for a host.
 ///
-/// Only one host is active at a time. Cleans all adapter directories
-/// before deploying to the selected host. Agent deploy is repo-scoped
-/// via `iq init`, not duplicated here.
+/// Additive (#280): other hosts are left untouched, so one machine can serve
+/// OpenCode + Claude at once. Global host dirs are isolated → no duplication.
+/// `iq init` (repo-scoped) only sets up the cleanroom workspace.
 library;
 
 import 'package:cli_router/cli_router.dart';
@@ -16,10 +16,10 @@ import '../../../hosts/opencode_ollama_configurator.dart';
 class HostGetInput extends Input {
   final String host;
 
-  HostGetInput({this.host = 'copilot'});
+  HostGetInput({this.host = 'opencode'});
 
   factory HostGetInput.fromCliRequest(CliRequest req) =>
-      HostGetInput(host: req.flagString('host') ?? 'copilot');
+      HostGetInput(host: req.flagString('host') ?? 'opencode');
 
   @override
   Map<String, dynamic> toJson() => {'host': host};
@@ -64,8 +64,8 @@ class HostGetCommand implements Command<HostGetInput, HostGetOutput> {
 
   @override
   Future<HostGetOutput> execute() async {
-    deployer.deployExclusive(input.host);
-    final lines = ['Inquiry skills deployed to host ${input.host}'];
+    deployer.deploy(input.host);
+    final lines = ['Inquiry agent + skills deployed (global) to host ${input.host}'];
     if (input.host == 'opencode' && configurator != null) {
       lines.addAll(await configurator!.configure());
     }
