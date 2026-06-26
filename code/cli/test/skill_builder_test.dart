@@ -1,0 +1,134 @@
+import 'dart:io';
+
+import 'package:path/path.dart' as p;
+import 'package:test/test.dart';
+
+import 'package:inquiry_cli/assets.dart';
+import 'package:inquiry_cli/hosts/skill_builder.dart';
+import 'package:inquiry_cli/modules/fsm/commands/transition.dart';
+
+void main() {
+  group('SkillBuilder', () {
+    final builder = SkillBuilder(Assets(root: Directory.current.path));
+
+    test('phaseSkillNames ships iq-analyze (US1 MVP)', () {
+      expect(builder.phaseSkillNames, contains('iq-analyze'));
+    });
+
+    test('throws on an unknown phase', () {
+      expect(() => builder.build('bogus'), throwsArgumentError);
+    });
+
+    group("build('analyze') — generated from contracts", () {
+      late String md;
+      setUp(() => md = builder.build('analyze'));
+
+      test('frontmatter names the skill', () {
+        expect(md, startsWith('---\nname: iq-analyze\n'));
+      });
+
+      test('mechanics layer: the exact iq commands for the phase', () {
+        expect(md, contains('iq fsm state --json'));
+        expect(md, contains('iq ape prompt --name socrates'));
+        expect(md, contains('iq fsm transition --event complete_analysis'));
+        // Events are read at runtime, never hardcoded as a guess (Principle I).
+        expect(md, contains('Use only the events `iq fsm state` lists'));
+      });
+
+      test('shape layer: embeds the diagnosis artifact template', () {
+        for (final section in const [
+          '## Evidence',
+          '## Hypotheses',
+          '## Constraints',
+          '## Open Questions',
+        ]) {
+          expect(md, contains(section));
+        }
+      });
+
+      test('judgment layer: goal derived from the FSM state contract', () {
+        // analyze.yaml description / first instruction line.
+        expect(md, contains('## Goal'));
+        expect(md, contains('diagnosis.md'));
+      });
+
+      test('has a Done-when checklist tied to the gate', () {
+        expect(md, contains('## Done when'));
+        expect(md, contains('exits 0'));
+      });
+
+      test('methodology core stays brief (SC-004) — under the artifact', () {
+        // The part the reader reasons over (everything before the embedded
+        // artifact template) must be short.
+        final core = md.split('## Artifact').first;
+        expect(core.split('\n').length, lessThan(40));
+      });
+    });
+
+    test('template ⇄ gate consistency: a template-shaped diagnosis passes '
+        'complete_analysis (T009)', () async {
+      final tempDir = Directory.systemTemp.createTempSync('iq_skill_gate_');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      const branch = '901-fix';
+      _initGitRepo(tempDir.path, branch: branch);
+      _copyAsset('fsm/transition_contract.yaml', tempDir.path);
+      _writeState(tempDir.path, 'ANALYZE', branch: branch, issue: '901');
+      _write(tempDir.path, branch, 'index.md', '# Analyze — Index\n');
+      _write(tempDir.path, branch, 'confirmations.md', '# Confirmations\n');
+
+      // Use the real artifact template as the produced diagnosis.md.
+      final template = Assets(root: Directory.current.path)
+          .loadString('artifacts/diagnosis.template.md');
+      _write(tempDir.path, branch, 'diagnosis.md', template);
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'complete_analysis',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+
+      expect(output.allowed, isTrue,
+          reason: 'diagnosis.template.md must satisfy its own gate:\n'
+              '${output.message}');
+    });
+  });
+}
+
+void _copyAsset(String rel, String root) {
+  final src = File(p.join(Directory.current.path, 'assets', rel));
+  final dst = File(p.join(root, 'assets', rel));
+  dst.createSync(recursive: true);
+  dst.writeAsStringSync(src.readAsStringSync());
+}
+
+void _write(String root, String branch, String name, String content) {
+  final file = File(p.join(root, 'cleanrooms', branch, 'analyze', name));
+  file.createSync(recursive: true);
+  file.writeAsStringSync(content);
+}
+
+void _writeState(String root, String state,
+    {required String branch, String? issue}) {
+  final file = File(p.join(root, 'cleanrooms', branch, '.iq.state.yaml'));
+  file.createSync(recursive: true);
+  final issueLine = issue != null ? 'issue: "$issue"' : 'issue: null';
+  file.writeAsStringSync('version: 1\nstate: $state\n$issueLine\nstatus: active\n');
+}
+
+void _initGitRepo(String root, {required String branch}) {
+  void git(List<String> args) {
+    final r = Process.runSync('git', args, workingDirectory: root);
+    if (r.exitCode != 0) throw StateError('git ${args.join(' ')}: ${r.stderr}');
+  }
+
+  git(['init']);
+  git(['config', 'user.email', 'test@test.com']);
+  git(['config', 'user.name', 'Test']);
+  File(p.join(root, '.gitkeep')).writeAsStringSync('');
+  git(['add', '.']);
+  git(['commit', '-m', 'init']);
+  git(['checkout', '-b', branch]);
+}
