@@ -4,7 +4,7 @@
 
 A methodology for AI-assisted software development that models coding agents as a cooperative finite state machine — **Analyze → Plan → Execute → End → [Evolution] → Idle** — where the value is in the process, not the model.
 
-**Status:** `v0.7.2` · Windows + Linux · Copilot-first runtime
+**Status:** `v0.14.0` · Windows + Linux · OpenCode + Claude runtime
 
 This README is the public entry surface. The living repository doctrine is intentionally small in `docs/architecture.md` and `docs/roadmap.md`.
 
@@ -21,7 +21,7 @@ The insight: **AI capability only becomes trustworthy when governed by rigorous 
 - **Thinking tools before improvisation** — quality comes from disciplined inquiry, not from unstructured prompting
 - **Memory as Code** — project memory lives as version-controlled markdown, readable by both humans and AI. No vector DB, no hosted memory service
 - **Agents as FSM states** — each phase activates one specialized agent; transitions are declarative, total, and validated
-- **CLI carries methodology** — the CLI resolves paths, injects context, and enforces constraints; the AI focuses on reasoning
+- **The model is the brain; the CLI is the tool** — the CLI does the established mechanics (scaffolds each phase's artifact from a single-source template, injects context, runs the gates); the model or human does the thinking. The CLI prescribes and verifies; it does not decide
 - **Antifragile by design** — if tools change, the methodology remains legible and portable; if tools improve, the methodology amplifies gains
 
 ## The Inquiry cycle
@@ -81,10 +81,13 @@ curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 
 # Setup
 iq doctor               # verify prerequisites
-iq host get             # deploy skills to Copilot
+iq host get             # deploy agent + skills to OpenCode (or: --host claude)
 cd your-repo
-iq init                 # scaffold .inquiry/ + repo agent
+iq init                 # scaffold .inquiry/ workspace
 iq                      # show current state
+
+# Run a phase by hand (no scheduler agent): use the per-phase skills
+#   /iq-analyze   /iq-plan   /iq-execute
 ```
 
 For the current system model, see [`docs/architecture.md`](docs/architecture.md). For forward direction, see [`docs/roadmap.md`](docs/roadmap.md).
@@ -94,10 +97,10 @@ For the current system model, see [`docs/architecture.md`](docs/architecture.md)
 - **CLI:** Dart, single cross-platform binary, built on [`modular_cli_sdk`](https://github.com/ccisnedev/modular_cli_sdk)
 - **FSM:** declarative `transition_contract.yaml` — every (state, event) pair is total
 - **Context injection:** `iq ape prompt` assembles base prompt + sub-state + dynamic paths as fenced YAML
-- **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`
-- **Memory:** `.inquiry/` (runtime state) and `cleanrooms/` (per-cycle artifacts created on demand)
+- **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik` — and the **per-phase skills `iq-analyze` / `iq-plan` / `iq-execute`**, assembled from the FSM/APE contracts so a human can drive any phase by hand
+- **Memory:** `.inquiry/` (runtime state) and `cleanrooms/` (per-cycle artifacts the CLI scaffolds from single-source templates)
 - **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
-- **Host:** Copilot only at present. Multi-host deferred until reactivation
+- **Host:** OpenCode (default) and Claude — `iq host get` deploys the agent + skills globally and additively
 
 ## Documentation
 
