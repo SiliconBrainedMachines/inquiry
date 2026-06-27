@@ -14,7 +14,11 @@ cleanrooms/**/.iq.state.yaml
 code/cli/tmp/
 
 # spec-kit tooling (regenerable via `specify init`; design artifacts under specs/ ARE tracked)
-.specify/
+# Exception: the Inquiry Constitution is a tracked project artifact (referenced by plans + CHANGELOG).
+.specify/*
+!.specify/memory/
+.specify/memory/*
+!.specify/memory/constitution.md
 .claude/skills/speckit-*/
 .github/agents/speckit.*
 .github/prompts/speckit.*
