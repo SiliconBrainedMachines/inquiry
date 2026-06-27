@@ -1,20 +1,21 @@
-# Diagnosis: <state the problem in one line>
+---
+id: diagnosis
+title: "Diagnosis"
+date: {{DATE}}
+status: active
+tags: [diagnosis, evidence-first]
+---
 
-<!--
-  This file is the SOLE input to PLAN. Keep it verifiable, not speculative.
-  RULE: every Evidence bullet MUST end with a re-checkable handle — a file:line
-  (e.g. `lib/foo.dart:42`), a URL, or an inline-code command/test id. A bullet
-  with no handle is rejected by the `complete_analysis` gate.
--->
+# Diagnosis
 
 ## Evidence
-- One observed fact per bullet, each ending in a re-checkable handle — e.g. `lib/foo.dart:42`, a URL, or an inline-code command. Replace this with real evidence; add as many bullets as needed.
+- Record observed repo, artifact, test, runtime, or research evidence here.
 
 ## Hypotheses
-- The most likely explanation, grounded only in the Evidence above.
+- State the current explanation or candidate cause licensed by the evidence.
 
 ## Constraints
-- A bounded constraint or risk that shapes the solution.
+- Capture bounded constraints, invariants, or environmental limits here.
 
 ## Open Questions
-- An unresolved factual gap or human judgment that evidence cannot recover (or "None").
+- List only unresolved questions that evidence could not yet answer.

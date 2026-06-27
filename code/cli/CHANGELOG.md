@@ -4,9 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
-## [0.13.0]
+## [0.14.0]
 ### Added
-- **`/iq-analyze` phase skill — run ANALYZE by hand, no scheduler agent** (#282, US1 MVP): a new `SkillBuilder` (mirroring `AgentBuilder`) assembles an `iq-analyze` skill **at deploy time from the existing contracts** — the goal from the FSM state contract, the mechanics as `iq` commands (leaning on the CLI, not embedding the method), and the artifact shape from a new first-class `assets/artifacts/diagnosis.template.md` — and `iq host get` deploys it globally alongside research/legion/kritik. It gives a human or a weak model a brief (~40-line) on-demand guide to produce a gate-passing `diagnosis.md` when the `inquiry` scheduler agent can't autonomously drive the cycle. A test proves the template satisfies its own `complete_analysis` gate (no drift). Built spec-first via dogfooded Spec-Driven Development — see `specs/001-iq-phase-skills/` (constitution, spec, plan, tasks). `iq-plan` and `iq-execute` follow (US2).
+- **Per-phase skills `/iq-analyze`, `/iq-plan`, `/iq-execute` — run any phase by hand, without the scheduler agent** (#282): a new `SkillBuilder` (mirroring `AgentBuilder`) assembles each `iq-<phase>` skill **at deploy time from the existing contracts** — the goal from the FSM state contract, the mechanics as `iq` commands (the method comes from `iq ape prompt` at runtime, so each skill stays ~20–30 lines), and the artifact shape from the first-class templates. `iq host get` deploys all three globally beside research/legion/kritik. They give a human (or a capable model) a brief, on-demand guide to drive ANALYZE/PLAN/EXECUTE to a passing gate when the `inquiry` scheduler agent isn't driving. Built spec-first via dogfooded Spec-Driven Development — see `specs/001-iq-phase-skills/`.
+
+### Changed
+- **The CLI is now the hands, not the brain (Constitution v2.0.0).** Under the refined principle *the model is the brain; the CLI is the tool*, the CLI does the established, repetitive mechanics so the brain only thinks. On entering a phase the CLI **scaffolds the phase artifact on disk from a single-source template** — `diagnosis.md` from `assets/artifacts/diagnosis.template.md` (ANALYZE) and `plan.md` from `assets/artifacts/plan.template.md` (PLAN, new `generate_plan` effect). The scaffold that `effect_executor` writes and the template the skills reference are now **one source of truth** (no drift, Principle V); the phase skills are thinned to *"the CLI already scaffolded X — fill it"*. Tests prove each unfilled scaffold is correctly rejected by its own gate until the brain fills it.
+
+> Note: 0.13.0 (the `/iq-analyze` MVP) was developed on this branch and folded into 0.14.0; it was never released on its own.
 
 ## [0.12.0]
 ### Changed

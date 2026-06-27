@@ -11,12 +11,48 @@ void main() {
   group('SkillBuilder', () {
     final builder = SkillBuilder(Assets(root: Directory.current.path));
 
-    test('phaseSkillNames ships iq-analyze (US1 MVP)', () {
-      expect(builder.phaseSkillNames, contains('iq-analyze'));
+    test('phaseSkillNames ships analyze, plan, execute (US2)', () {
+      expect(builder.phaseSkillNames,
+          containsAll(<String>['iq-analyze', 'iq-plan', 'iq-execute']));
     });
 
     test('throws on an unknown phase', () {
       expect(() => builder.build('bogus'), throwsArgumentError);
+    });
+
+    group("build('plan') — CLI scaffolds plan.md, brain fills", () {
+      late String md;
+      setUp(() => md = builder.build('plan'));
+
+      test('frontmatter, descartes operator, plan gate', () {
+        expect(md, startsWith('---\nname: iq-plan\n'));
+        expect(md, contains('iq ape prompt --name descartes'));
+        expect(md, contains('iq fsm transition --event approve_plan'));
+        expect(md, contains('Use only the events `iq fsm state` lists'));
+      });
+
+      test('references the scaffolded plan.md (not embedded)', () {
+        expect(md, contains('The CLI already scaffolded'));
+        expect(md, contains('cleanrooms/<branch>/plan.md'));
+      });
+
+      test('stays brief', () => expect(md.split('\n').length, lessThan(45)));
+    });
+
+    group("build('execute') — implement the plan, no scaffolded artifact", () {
+      late String md;
+      setUp(() => md = builder.build('execute'));
+
+      test('frontmatter, ada operator, execute gate', () {
+        expect(md, startsWith('---\nname: iq-execute\n'));
+        expect(md, contains('iq ape prompt --name ada'));
+        expect(md, contains('iq fsm transition --event finish_execute'));
+      });
+
+      test('guides implementing the plan phase by phase (no artifact to fill)', () {
+        expect(md.toLowerCase(), contains('phase by phase'));
+        expect(md, isNot(contains('fill these sections')));
+      });
     });
 
     group("build('analyze') — generated from contracts", () {
@@ -35,15 +71,17 @@ void main() {
         expect(md, contains('Use only the events `iq fsm state` lists'));
       });
 
-      test('shape layer: embeds the diagnosis artifact template', () {
+      test('shape layer: lists the artifact sections (from template, not embedded)', () {
         for (final section in const [
-          '## Evidence',
-          '## Hypotheses',
-          '## Constraints',
-          '## Open Questions',
+          '- **Evidence**',
+          '- **Hypotheses**',
+          '- **Constraints**',
+          '- **Open Questions**',
         ]) {
           expect(md, contains(section));
         }
+        // The CLI scaffolds the file; the skill points at it, not embeds it.
+        expect(md, contains('The CLI already scaffolded'));
       });
 
       test('judgment layer: goal derived from the FSM state contract', () {
@@ -57,16 +95,16 @@ void main() {
         expect(md, contains('exits 0'));
       });
 
-      test('methodology core stays brief (SC-004) — under the artifact', () {
+      test('methodology core stays brief (SC-004) — whole skill is short', () {
         // The part the reader reasons over (everything before the embedded
         // artifact template) must be short.
-        final core = md.split('## Artifact').first;
+        final core = md;
         expect(core.split('\n').length, lessThan(40));
       });
     });
 
-    test('template ⇄ gate consistency: a template-shaped diagnosis passes '
-        'complete_analysis (T009)', () async {
+    test('scaffold ⇄ gate: the UNFILLED diagnosis template is rejected until '
+        'filled (the CLI scaffolds, the brain fills) (T009)', () async {
       final tempDir = Directory.systemTemp.createTempSync('iq_skill_gate_');
       addTearDown(() => tempDir.deleteSync(recursive: true));
       const branch = '901-fix';
@@ -76,9 +114,11 @@ void main() {
       _write(tempDir.path, branch, 'index.md', '# Analyze — Index\n');
       _write(tempDir.path, branch, 'confirmations.md', '# Confirmations\n');
 
-      // Use the real artifact template as the produced diagnosis.md.
+      // The CLI scaffolds diagnosis.md from this template; unfilled, the gate
+      // must reject it (its Evidence bullet IS the gate's bootstrap placeholder).
       final template = Assets(root: Directory.current.path)
-          .loadString('artifacts/diagnosis.template.md');
+          .loadString('artifacts/diagnosis.template.md')
+          .replaceAll('{{DATE}}', '2026-01-01');
       _write(tempDir.path, branch, 'diagnosis.md', template);
 
       final output = await StateTransitionCommand(
@@ -90,9 +130,41 @@ void main() {
         branchProvider: (_) async => branch,
       ).execute();
 
-      expect(output.allowed, isTrue,
-          reason: 'diagnosis.template.md must satisfy its own gate:\n'
+      expect(output.allowed, isFalse,
+          reason: 'the unfilled scaffold must require filling:\n'
               '${output.message}');
+      expect(output.message, contains('DIAGNOSIS_EVIDENCE_MISSING'));
+    });
+
+    test('scaffold ⇄ gate: the UNFILLED plan template is rejected by the plan '
+        'gate until filled with executable checks', () async {
+      final tempDir = Directory.systemTemp.createTempSync('iq_plan_gate_');
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      const branch = '901-fix';
+      _initGitRepo(tempDir.path, branch: branch);
+      _copyAsset('fsm/transition_contract.yaml', tempDir.path);
+      _writeState(tempDir.path, 'PLAN', branch: branch, issue: '901');
+
+      final template = Assets(root: Directory.current.path)
+          .loadString('artifacts/plan.template.md')
+          .replaceAll('{{DATE}}', '2026-01-01');
+      File(p.join(tempDir.path, 'cleanrooms', branch, 'plan.md'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(template);
+
+      final output = await StateTransitionCommand(
+        StateTransitionInput(
+          currentState: null,
+          event: 'approve_plan',
+          workingDirectory: tempDir.path,
+        ),
+        branchProvider: (_) async => branch,
+      ).execute();
+
+      expect(output.allowed, isFalse,
+          reason: 'unfilled plan (no real executable check) must be rejected:\n'
+              '${output.message}');
+      expect(output.message, contains('PLAN_CHECKS_NOT_EXECUTABLE'));
     });
   });
 }
