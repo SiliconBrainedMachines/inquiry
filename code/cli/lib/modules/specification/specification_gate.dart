@@ -29,11 +29,13 @@ class SpecificationGateResult {
 }
 
 class SpecificationGate {
-  /// Evaluates [specificationMd] (the file content) plus the [issueFiles]
-  /// derived for the slug (the `issue-*.md` file names).
+  /// Evaluates [specificationMd] (the file content) plus the [issues] derived
+  /// for the slug — the **contents** of each `issue-<slug>.md`, so the gate can
+  /// verify that every acceptance criterion is traced to an issue (the QA→Dev
+  /// handoff: AC → issue).
   SpecificationGateResult evaluate(
     String specificationMd, {
-    required List<String> issueFiles,
+    required List<String> issues,
   }) {
     final violations = <SpecificationViolation>[];
     final sections = _splitSections(specificationMd);
@@ -43,12 +45,15 @@ class SpecificationGate {
     _checkScope(sections, violations);
     _checkDecisions(sections, violations);
 
-    if (issueFiles.where((f) => f.trim().isNotEmpty).isEmpty) {
+    final realIssues = issues.where((i) => i.trim().isNotEmpty).toList();
+    if (realIssues.isEmpty) {
       violations.add(const SpecificationViolation(
         'SPEC_NO_ISSUE',
         'No issue derived — create at least one issue-<slug>.md tracing to the '
             'acceptance criteria.',
       ));
+    } else {
+      _checkAcTraceability(sections, realIssues, violations);
     }
 
     return SpecificationGateResult(violations);
@@ -143,6 +148,37 @@ class SpecificationGate {
         'No decision cites evidence — at least one Decisions (evidence) bullet '
             'must carry a filled Decision and Evidence (an experiment handle).',
       ));
+    }
+  }
+
+  /// Every filled AC declared in the User Stories must be referenced by at least
+  /// one derived issue — the AC → issue link of the traceability spine. An AC
+  /// `AC-N` is "traced" when the token `AC-N` appears in some issue body.
+  void _checkAcTraceability(
+    Map<String, String> sections,
+    List<String> issues,
+    List<SpecificationViolation> violations,
+  ) {
+    final body = _sectionStartingWith(sections, '1. User Stories');
+    if (body == null) return;
+
+    final declared = <String>{};
+    for (final story in _splitStories(body)) {
+      for (final row in _acRows(story.body)) {
+        declared.add(row.first); // the AC-id cell, e.g. "AC-1"
+      }
+    }
+
+    for (final ac in declared) {
+      final token = RegExp('\\b${RegExp.escape(ac)}\\b', caseSensitive: false);
+      final traced = issues.any((issue) => token.hasMatch(issue));
+      if (!traced) {
+        violations.add(SpecificationViolation(
+          'SPEC_AC_NOT_TRACED',
+          '$ac is declared in specification.md but no derived issue references '
+              'it — every acceptance criterion must trace to an issue.',
+        ));
+      }
     }
   }
 
