@@ -5,6 +5,7 @@ import 'package:path/path.dart' as p;
 import '../assets.dart';
 import 'agent_builder.dart';
 import 'host_adapter.dart';
+import 'skill_builder.dart';
 
 /// Orchestrates deploying skills to host tool directories.
 class HostDeployer {
@@ -51,6 +52,24 @@ class HostDeployer {
     for (final skillName in skillNames) {
       final content = assets.loadString('skills/$skillName/SKILL.md');
       final hostFile = File(p.join(hostSkillsDir, skillName, 'SKILL.md'));
+      hostFile.parent.createSync(recursive: true);
+      hostFile.writeAsStringSync(content);
+    }
+
+    // Generated per-phase skills (iq-analyze, ...) — assembled from the FSM/APE
+    // contracts at deploy time so they cannot drift from the gates (#282).
+    // Best-effort per phase: a phase whose contract assets are absent is
+    // skipped, so deploying from an incomplete asset tree never aborts.
+    final skillBuilder = SkillBuilder(assets);
+    for (final name in skillBuilder.phaseSkillNames) {
+      final phase = name.substring('iq-'.length);
+      final String content;
+      try {
+        content = skillBuilder.build(phase);
+      } catch (_) {
+        continue;
+      }
+      final hostFile = File(p.join(hostSkillsDir, name, 'SKILL.md'));
       hostFile.parent.createSync(recursive: true);
       hostFile.writeAsStringSync(content);
     }
