@@ -16,6 +16,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../templates/template_resolver.dart';
+import '../slug.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -30,7 +31,7 @@ class SpecificationNewInput extends Input {
 
   factory SpecificationNewInput.fromCliRequest(CliRequest req) =>
       SpecificationNewInput(
-        slug: req.param('slug')?.trim() ?? '',
+        slug: normalizeSlug(req.param('slug') ?? ''),
         lang: req.flagString('lang') ?? 'en',
       );
 

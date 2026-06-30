@@ -13,6 +13,7 @@ import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
+import '../slug.dart';
 import '../specification_gate.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
@@ -23,7 +24,7 @@ class SpecificationCheckInput extends Input {
   SpecificationCheckInput({required this.slug});
 
   factory SpecificationCheckInput.fromCliRequest(CliRequest req) =>
-      SpecificationCheckInput(slug: req.param('slug')?.trim() ?? '');
+      SpecificationCheckInput(slug: normalizeSlug(req.param('slug') ?? ''));
 
   @override
   Map<String, dynamic> toJson() => {'slug': slug};
