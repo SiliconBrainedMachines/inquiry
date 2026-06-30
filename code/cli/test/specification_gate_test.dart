@@ -54,6 +54,55 @@ const _filledSpec = '''
 ## Annexes
 ''';
 
+/// A fully-filled Spanish (`--lang es`) specification — the gate must accept it
+/// (section headers, scope subheadings and Decision/Evidence markers are all in
+/// Spanish). Regression for the dogfood finding that the gate was English-only.
+const _filledSpecEs = '''
+# Especificación de Requerimiento
+
+## Metadatos
+
+| Campo | Valor |
+| ----- | ----- |
+| ID    | REQ-2026-06-30-001 |
+
+## 1. Historias de Usuario
+
+### HU-1: Registrar una factura
+
+**As a (Como)** analista de facturación,
+**I want (Quiero)** registrar una factura desde un formulario,
+**So that (Para)** no se pierdan registros.
+
+#### Acceptance Criteria
+
+| #    | Given (Dado que)   | When (Cuando)        | Then (Entonces)        |
+| ---- | ------------------ | -------------------- | ---------------------- |
+| AC-1 | el formulario abre | envío datos válidos  | la factura se almacena |
+
+## 2. Estrategia de Testing
+
+| Tipo | Qué debe validar          | AC asociados |
+| ---- | ------------------------- | ------------ |
+| Unit | la regla de no-duplicados | AC-1         |
+
+## 3. Alcance Explícito
+
+### Incluye
+
+- Formulario de registro de facturas.
+
+### NO incluye
+
+- El flujo de aprobación de facturas.
+
+## 4. Decisiones (evidencia)
+
+- **Decisión**: reusar la tabla `billing`. **Evidencia**: `psql -c "\\d billing"` muestra las columnas (corrido 2026-06-30).
+
+## Anexos
+''';
+
 void main() {
   final gate = SpecificationGate();
 
@@ -75,6 +124,12 @@ void main() {
 
     test('a fully-filled spec with one tracing issue passes', () {
       final r = gate.evaluate(_filledSpec, issues: tracingIssues);
+      expect(r.passed, isTrue, reason: r.violations.join('\n'));
+      expect(r.violations, isEmpty);
+    });
+
+    test('a fully-filled Spanish (--lang es) spec passes (bilingual gate)', () {
+      final r = gate.evaluate(_filledSpecEs, issues: const ['Cubre AC-1.']);
       expect(r.passed, isTrue, reason: r.violations.join('\n'));
       expect(r.violations, isEmpty);
     });
