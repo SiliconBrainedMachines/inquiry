@@ -67,17 +67,22 @@ class SkillBuilder {
       operator: 'ada',
       gateEvent: 'finish_execute',
       implementGuide:
-          'Implement plan.md **phase by phase**: for each phase write the test, then the code, keep the full test suite green, and commit. Then do the release prep the plan specifies.',
+          'Implement plan.md **phase by phase**: for each phase, write the test FIRST (it must prove the AC the phase `Covers`), then the code, keep the full test suite green, and commit. Then do the release prep the plan specifies.',
     ),
   };
 
   /// Skill directory names this builder produces (e.g. `iq-analyze`).
+  ///
+  /// The dev-cycle phases (analyze/plan/execute) plus the QA-facing
+  /// `specification` phase, which precedes the cycle and lives outside the FSM.
   List<String> get phaseSkillNames =>
-      phases.keys.map((p) => 'iq-$p').toList(growable: false);
+      [...phases.keys.map((p) => 'iq-$p'), 'iq-specification'];
 
   /// Builds the `SKILL.md` content for [phase]. Throws if [phase] is unknown or
   /// a required contract asset is missing.
   String build(String phase) {
+    if (phase == 'specification') return _buildSpecification();
+
     final cfg = phases[phase];
     if (cfg == null) {
       throw ArgumentError('Unknown phase skill: "$phase"');
@@ -133,6 +138,51 @@ $doneArtifact- [ ] `iq fsm transition --event ${cfg.gateEvent}` exits 0.
 ''';
 
     return '$header\n$steps${shape.isEmpty ? '' : '\n$shape'}\n$done';
+  }
+
+  /// Builds the `iq-specification` skill — the QA-facing specification phase.
+  ///
+  /// Unlike the dev-cycle skills, this phase is **outside the FSM**: there is no
+  /// `iq fsm transition` gate. The CLI is still the hands — `iq specification
+  /// new <slug>` scaffolds the workspace — and DEWEY is the method. The sections
+  /// are read from the single-source `specification` template so the skill never
+  /// drifts from what the CLI scaffolds.
+  String _buildSpecification() {
+    final sections = _sectionHeaders(
+      assets.loadString('artifacts/specification.template.en.md'),
+    ).where((s) => s != 'Metadata' && s != 'Annexes');
+
+    return '''---
+name: iq-specification
+description: Run the QA specification phase by hand — turn a raw requisition into a healthy specification + issues, deciding by evidence (throwaway experiments), without the scheduler agent.
+---
+
+## Goal
+Turn a raw requisition (email, document, chat) into a coherent, actionable specification and the issues it yields — every key decision licensed by evidence from a throwaway experiment, not by inference.
+
+## Steps
+1. `iq specification new <slug>` (add `--lang es` for Spanish) — the CLI scaffolds `requisitions/<slug>/requisition.md` + `specification.md`. Inputs/outputs are files on disk, not your memory.
+2. `iq ape prompt --name dewey` — read the method (Deweyan inquiry) and apply it.
+3. Gather the raw requisition from ALL its sources into `requisition.md` (AS-IS / TO-BE). Capture exactly what was asked — do not invent scope.
+4. For every decision you are unsure of, run a **throwaway experiment** to decide by EVIDENCE, not inference: read the DB, run code in a container, probe the API. These validate spec decisions; they are NOT product code. Record each under **Decisions (evidence)** with a re-checkable handle.
+5. Fill `specification.md` (see sections below). Each user story needs ≥1 Given-When-Then acceptance criterion; state the testing strategy and the explicit scope (includes / does NOT include).
+6. Derive the issues: one tracked `issue-<slug>.md` per unit of work, each tracing to its acceptance criteria.
+7. `iq specification check <slug>` — the CLI runs the `specification_ready` gate. Fix exactly what it reports (do NOT skip a violation) until it exits 0.
+8. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, prepare a `gh issue edit` instead of a new one.
+9. Print the `gh issue create` / `gh issue edit` commands (do NOT run them blind) and present the specification + issues to the human. Stop — the human reviews and approves; the doc lands on `main` via a PR (the QA review gate).
+
+## specification.md — fill these sections
+${sections.map((s) => '- **$s**').join('\n')}
+
+Each user story MUST carry ≥1 Given-When-Then AC; each key decision MUST cite its experiment evidence; the scope MUST state what is excluded; and ≥1 issue MUST be derived.
+
+## Done when
+- [ ] `requisition.md` captures the need (AS-IS / TO-BE) from all sources.
+- [ ] `specification.md` is filled — every user story has ≥1 Given-When-Then AC, explicit scope, testing strategy, and Decisions (evidence) with handles.
+- [ ] `iq specification check <slug>` exits 0.
+- [ ] At least one `issue-<slug>.md` is derived, dedup-checked, with its `gh` command printed.
+- [ ] The specification is presented to the human for review.
+''';
   }
 
   /// A short goal from the FSM state contract — the `description` plus the first
