@@ -67,7 +67,7 @@ class SkillBuilder {
       operator: 'ada',
       gateEvent: 'finish_execute',
       implementGuide:
-          'Implement plan.md **phase by phase**: for each phase write the test, then the code, keep the full test suite green, and commit. Then do the release prep the plan specifies.',
+          'Implement plan.md **phase by phase**: for each phase, write the test FIRST (it must prove the AC the phase `Covers`), then the code, keep the full test suite green, and commit. Then do the release prep the plan specifies.',
     ),
   };
 
