@@ -65,7 +65,7 @@ class SpecificationGate {
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _sectionStartingWith(sections, '1. User Stories');
+    final body = _section(sections, 1);
     if (body == null) {
       violations.add(const SpecificationViolation(
         'SPEC_NO_USER_STORY', 'No "User Stories" section found.'));
@@ -97,7 +97,7 @@ class SpecificationGate {
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _sectionStartingWith(sections, '2. Testing Strategy');
+    final body = _section(sections, 2);
     final hasFilledRow = body != null &&
         _tableDataRows(body).any((cells) =>
             cells.length >= 2 && _isFilled(cells[1]));
@@ -114,10 +114,11 @@ class SpecificationGate {
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _sectionStartingWith(sections, '3. Explicit Scope');
-    final includes = body == null ? false : _hasFilledBullet(body, 'Includes');
+    final body = _section(sections, 3);
+    final includes =
+        body == null ? false : _hasFilledBullet(body, _includesHeadings);
     final excludes =
-        body == null ? false : _hasFilledBullet(body, 'Does NOT include');
+        body == null ? false : _hasFilledBullet(body, _excludesHeadings);
     if (!includes || !excludes) {
       violations.add(const SpecificationViolation(
         'SPEC_SCOPE_INCOMPLETE',
@@ -131,16 +132,15 @@ class SpecificationGate {
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _sectionStartingWith(sections, '4. Decisions');
+    final body = _section(sections, 4);
     final hasEvidence = body != null &&
         body.split('\n').any((line) {
-          if (!line.contains('**Decision**') ||
-              !line.contains('**Evidence**')) {
-            return false;
-          }
-          final decision = _valueAfter(line, '**Decision**');
-          final evidence = _valueAfter(line, '**Evidence**');
-          return _isFilled(decision) && _isFilled(evidence);
+          final decision = _valueAfterAnyMarker(line, _decisionMarkers);
+          final evidence = _valueAfterAnyMarker(line, _evidenceMarkers);
+          return decision != null &&
+              evidence != null &&
+              _isFilled(decision) &&
+              _isFilled(evidence);
         });
     if (!hasEvidence) {
       violations.add(const SpecificationViolation(
@@ -159,7 +159,7 @@ class SpecificationGate {
     List<String> issues,
     List<SpecificationViolation> violations,
   ) {
-    final body = _sectionStartingWith(sections, '1. User Stories');
+    final body = _section(sections, 1);
     if (body == null) return;
 
     final declared = <String>{};
@@ -207,9 +207,13 @@ class SpecificationGate {
     return sections;
   }
 
-  String? _sectionStartingWith(Map<String, String> sections, String prefix) {
+  /// Looks up a section by its leading number (`## 1. …`). The templates number
+  /// the sections identically in every language (`1.` User Stories /
+  /// Historias de Usuario, `2.` Testing Strategy / Estrategia de Testing, …), so
+  /// this is language-agnostic — the gate works on `--lang es` specs too.
+  String? _section(Map<String, String> sections, int number) {
     for (final entry in sections.entries) {
-      if (entry.key.startsWith(prefix)) return entry.value;
+      if (entry.key.startsWith('$number.')) return entry.value;
     }
     return null;
   }
@@ -249,11 +253,15 @@ class SpecificationGate {
         ? title.substring(title.indexOf(':') + 1).trim()
         : title;
     if (!_isFilled(titleValue)) return false;
-    for (final marker in const ['**As a**', '**I want**', '**So that**']) {
+    // Role keywords are English in both templates (the es template embeds them:
+    // `**As a (Como)**`), so matching the English keyword finds the line in
+    // either language; the value is whatever follows the bold label.
+    for (final keyword in const ['As a', 'I want', 'So that']) {
       final line = block
           .split('\n')
-          .firstWhere((l) => l.contains(marker), orElse: () => '');
-      if (line.isEmpty || !_isFilled(_valueAfter(line, marker))) return false;
+          .firstWhere((l) => l.contains('**') && l.contains(keyword),
+              orElse: () => '');
+      if (line.isEmpty || !_isFilled(_valueAfterBold(line))) return false;
     }
     return true;
   }
@@ -287,20 +295,23 @@ class SpecificationGate {
       if (RegExp(r'^\|[\s\-:|]+\|?$').hasMatch(t)) continue; // separator
       final cells = _cells(line);
       if (cells.isEmpty) continue;
-      // Skip the header row (first cell is a known column label).
+      // Skip the header row (first cell is a known column label, en or es).
       final first = cells.first.toLowerCase();
-      if (first == 'type' || first == '#' || first == 'field') continue;
+      if (const {'type', 'tipo', '#', 'field', 'campo'}.contains(first)) {
+        continue;
+      }
       rows.add(cells);
     }
     return rows;
   }
 
-  bool _hasFilledBullet(String scopeBody, String subheading) {
+  bool _hasFilledBullet(String scopeBody, List<String> subheadings) {
     final lines = scopeBody.split('\n');
     var inSub = false;
     for (final line in lines) {
       if (line.startsWith('### ')) {
-        inSub = line.substring(4).trim().startsWith(subheading);
+        final heading = line.substring(4).trim();
+        inSub = subheadings.any((s) => heading.startsWith(s));
         continue;
       }
       if (inSub && line.trimLeft().startsWith('- ')) {
@@ -318,16 +329,42 @@ class SpecificationGate {
       .map((c) => c.trim())
       .toList();
 
-  String _valueAfter(String line, String marker) {
-    final i = line.indexOf(marker);
-    if (i < 0) return '';
-    var rest = line.substring(i + marker.length);
+  /// The text after the first `**…**` bold span on [line] (a role label such as
+  /// `**As a**` / `**As a (Como)**`), up to the next bold span. Language-neutral.
+  String _valueAfterBold(String line) {
+    final open = line.indexOf('**');
+    if (open < 0) return '';
+    final close = line.indexOf('**', open + 2);
+    if (close < 0) return '';
+    var rest = line.substring(close + 2);
     if (rest.startsWith(':')) rest = rest.substring(1);
-    // Stop at the next bold marker on the same line (e.g. **Evidence**).
     final next = rest.indexOf('**');
     if (next >= 0) rest = rest.substring(0, next);
     return rest;
   }
+
+  /// The value after the first matching bold [markers] label (e.g. `**Decision**`
+  /// or `**Decisión**`), stopping at the next bold span. Returns null when no
+  /// marker is present on the line.
+  String? _valueAfterAnyMarker(String line, List<String> markers) {
+    for (final marker in markers) {
+      final token = '**$marker**';
+      final i = line.indexOf(token);
+      if (i < 0) continue;
+      var rest = line.substring(i + token.length);
+      if (rest.startsWith(':')) rest = rest.substring(1);
+      final next = rest.indexOf('**');
+      if (next >= 0) rest = rest.substring(0, next);
+      return rest;
+    }
+    return null;
+  }
+
+  // Bilingual headings/markers (en + es) the templates ship.
+  static const _includesHeadings = ['Includes', 'Incluye'];
+  static const _excludesHeadings = ['Does NOT include', 'NO incluye'];
+  static const _decisionMarkers = ['Decision', 'Decisión'];
+  static const _evidenceMarkers = ['Evidence', 'Evidencia'];
 
   /// A value is "filled" when, after removing HTML comments and trailing
   /// punctuation/whitespace, something real remains.
