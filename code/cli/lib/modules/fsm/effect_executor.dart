@@ -263,7 +263,8 @@ class EffectExecutor {
         '\n'
         '## Phase 1\n'
         '- **Change**: Describe the smallest first slice of the fix here.\n'
-        '- **Verify**: Replace with a real executable verification check (a test-runner command or a test-file reference) for this phase.\n'
+        '- **Covers**: AC-N from specification.md this phase satisfies (omit if the issue has no specification).\n'
+        '- **Verify**: Replace with a real executable verification check (a test-runner command or a test-file reference) that proves the AC above.\n'
         '\n'
         '## Final verification\n'
         '- **Verify**: Replace with the command that runs the full project test suite.\n';

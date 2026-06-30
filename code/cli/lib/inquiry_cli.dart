@@ -13,6 +13,7 @@ import 'modules/global/global_builder.dart';
 import 'modules/fsm/fsm_builder.dart';
 import 'modules/ape/ape_builder.dart';
 import 'modules/host/host_builder.dart';
+import 'modules/specification/specification_builder.dart';
 import 'hosts/all_adapters.dart';
 import 'hosts/deployer.dart';
 
@@ -58,6 +59,10 @@ Future<int> runInquiry(List<String> args) async {
   cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
+  cli.module(
+    'specification',
+    (m) => buildSpecificationModule(m, assets: assets),
+  );
 
   return cli.run(normalizeInquiryArgs(args));
 }
