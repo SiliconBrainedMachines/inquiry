@@ -57,10 +57,10 @@ void main() {
     f.writeAsStringSync(content);
   }
 
-  void writeIssue(String slug, String name) {
+  void writeIssue(String slug, String name, {String covers = 'AC-1'}) {
     File(p.join(tempDir.path, 'requisitions', slug, name))
       ..createSync(recursive: true)
-      ..writeAsStringSync('# issue\n');
+      ..writeAsStringSync('# issue\n\nCovers $covers.\n');
   }
 
   SpecificationCheckCommand cmd(String slug) => SpecificationCheckCommand(
@@ -96,6 +96,15 @@ void main() {
       writeIssue('disc', 'issue-disc.md');
       final out = await cmd('disc').execute();
       expect(out.exitCode, 0);
+    });
+
+    test('an issue that does not reference the AC → SPEC_AC_NOT_TRACED',
+        () async {
+      writeSpec('trace', _filledSpec); // declares AC-1
+      writeIssue('trace', 'issue-trace.md', covers: 'nothing');
+      final out = await cmd('trace').execute();
+      expect(out.exitCode, isNot(0));
+      expect(out.message, contains('SPEC_AC_NOT_TRACED'));
     });
   });
 }

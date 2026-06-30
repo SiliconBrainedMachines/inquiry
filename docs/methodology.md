@@ -60,6 +60,8 @@ same `AC-id` down the line:
 
 ```
 specification.md   AC-1, AC-2 …            (acceptance — outer loop, BDD)
+        │ traces to                        ← gate: every AC referenced by ≥1 issue
+issue-<slug>.md    "Covers: AC-1"          (the QA → Dev handoff)
         │ traces to
 plan.md            Phase N "Covers: AC-1"  + executable Verify check   (unit — inner loop, TDD)
         │ traces to
@@ -69,7 +71,10 @@ specification.md   Decisions (evidence)    (each decision cites its experiment)
 ```
 
 This is SDD's core principle — *the spec is authoritative, enforced by
-automation, not by human discipline* — realized through Inquiry's gates.
+automation, not by human discipline* — realized through Inquiry's gates. The
+first link is enforced in the QA phase: `iq specification check <slug>` rejects
+the spec (`SPEC_AC_NOT_TRACED`) until every acceptance criterion is referenced
+by at least one derived issue.
 
 ## Templates & languages
 
