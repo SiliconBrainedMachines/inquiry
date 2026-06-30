@@ -7,11 +7,30 @@ next stage. Each artifact is named by its **output**, unambiguously, borrowing
 the standard term of its own layer — never a term from another layer (no
 `runbook` for a build plan, no `PRD` for a diagnosis).
 
+## Controlled vocabulary
+
+The method enforces a controlled vocabulary: **each word occupies exactly one
+slot**, in both languages, so no term names two things at different links of the
+chain.
+
+| Term (en / es) | Means | Slot |
+|----------------|-------|------|
+| **requisition** / *solicitud* | a formal request that a change be made (the business need) | stage-1 intake document |
+| **request** | the HTTP transport object | architecture (not a methodology artifact) |
+| **requirement** / *requisito* | a single **verifiable condition** the system must meet | a line item *inside* `specification.md` (a user story + its acceptance criteria) |
+| **specification** / *especificación* | the engineering document that contains the requirements | stage-1 contract (`specification.md`) |
+
+So the chain is **requisition → specification → requirements**, with no overlap.
+The intake document is `requisition.md` (not `requirement.md`): "requirement" is
+a false friend of the Spanish *requerimiento* and collides with the verifiable
+`requirements` living inside the specification — "requisition" (low-frequency,
+single sense) names exactly the petition and clashes with nothing.
+
 ## The six stages
 
 | # | Stage | Owner | Canonical artifact(s) | Answers | Standard basis |
 |---|-------|-------|-----------------------|---------|----------------|
-| 1 | **Specification** | QA | `requirement.md`, `specification.md`, `issue-<slug>.md` | the need + the **what** (the contract) | BABOK Gap Analysis (AS-IS/TO-BE); spec-kit / IEEE SRS; User Stories (INVEST, Cohn); BDD Given-When-Then (North) |
+| 1 | **Specification** | QA | `requisition.md`, `specification.md`, `issue-<slug>.md` | the need + the **what** (the contract) | BABOK Gap Analysis (AS-IS/TO-BE); spec-kit / IEEE SRS; User Stories (INVEST, Cohn); BDD Given-When-Then (North) |
 | 2 | **Analyze** | Dev | `diagnosis.md` (+ `confirmations.md`) | **why it fails** (evidence-first) | Root-Cause Analysis / investigation — ★ *original to Inquiry* |
 | 3 | **Plan** | Dev | `plan.md` | the **how** (verifiable, test-first) | *Implementation Plan*; SDD design |
 | 4 | **Execute** | Dev | code + commits | **built right** | TDD red-green-refactor (Beck) |
@@ -55,7 +74,7 @@ automation, not by human discipline* — realized through Inquiry's gates.
 ## Templates & languages
 
 The CLI scaffolds each artifact from a single-source template in
-`assets/artifacts/`. `requirement.md` and `specification.md` ship `en` (default)
+`assets/artifacts/`. `requisition.md` and `specification.md` ship `en` (default)
 and `es` (via a language flag; more languages may follow). The dev-cycle
 artifacts (`diagnosis.md`, `plan.md`) are English-only, because their gates parse
 English. Requesting a language with no template falls back to English with a
