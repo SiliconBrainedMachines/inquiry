@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.15.2]
+### Fixed
+- **`iq specification new`/`check <slug>` now accept the `requisitions/<slug>` path, so shell tab-completion works** (found by dogfooding): the commands assumed the bare slug and prepended `requisitions/`, so tab-completing the argument (which yields `.\requisitions\<slug>\`) produced a broken `requisitions/.\requisitions\<slug>\` path, and a trailing separator leaked into the slug. The `<slug>` argument is now normalized — a bare slug, a `requisitions/<slug>` path (either separator, optional leading `./` and trailing separator), or even a path into the directory all resolve to the same slug.
+
 ## [0.15.1]
 ### Fixed
 - **The `specification_ready` gate was English-only and rejected every `--lang es` spec** (found by dogfooding a real requirement): the gate matched section headers (`1. User Stories`), scope subheadings (`Includes`/`Does NOT include`) and the `**Decision**`/`**Evidence**` markers by their English text, so a Spanish specification — which the same CLI generates with `iq specification new --lang es` — failed with `SPEC_NO_USER_STORY` even when fully and correctly filled. The gate is now **bilingual / language-agnostic**: sections are matched by their leading number (`1.`/`2.`/`3.`/`4.`, identical across templates), and the scope subheadings and Decision/Evidence markers accept both English and Spanish (`Incluye`/`NO incluye`, `Decisión`/`Evidencia`); role lines are read by the English keyword the es template embeds (`**As a (Como)**`). A filled Spanish spec now passes. Regression test added.
