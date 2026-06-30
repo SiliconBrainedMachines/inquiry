@@ -1,4 +1,6 @@
-# Requirement Request
+# Requisition
+
+> A **requisition** is a formal request that a change be made — the business need that originates the work. (Spanish: *solicitud*.)
 
 > **All fields are mandatory.**
 > Structure based on *Gap Analysis* — BABOK® v3 (IIBA), ch. 8.
