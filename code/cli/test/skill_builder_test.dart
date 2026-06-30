@@ -37,6 +37,11 @@ void main() {
         expect(md, contains('iq ape prompt --name dewey'));
       });
 
+      test('runs the specification_ready gate via the CLI', () {
+        expect(md, contains('iq specification check <slug>'));
+        expect(md, contains('specification_ready'));
+      });
+
       test('is outside the dev FSM — no fsm transition gate', () {
         expect(md, isNot(contains('iq fsm transition')));
       });
