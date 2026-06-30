@@ -4,6 +4,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
 import '../../assets.dart';
 import '../../templates/template_resolver.dart';
+import 'commands/check.dart';
 import 'commands/new.dart';
 
 /// Registers the `specification` module — the QA-facing specification phase.
@@ -24,5 +25,16 @@ void buildSpecificationModule(ModuleBuilder m, {required Assets assets}) {
     description:
         'Scaffold a QA specification workspace requisitions/<slug>/ '
         '(requisition.md + specification.md). --lang <en|es> (default: en)',
+  );
+
+  m.command<SpecificationCheckInput, SpecificationCheckOutput>(
+    'check <slug>',
+    (req) => SpecificationCheckCommand(
+      SpecificationCheckInput.fromCliRequest(req),
+      workingDirectory: Directory.current.path,
+    ),
+    description:
+        'Run the specification_ready gate over requisitions/<slug>/'
+        'specification.md — exits 0 only when the spec is healthy.',
   );
 }
