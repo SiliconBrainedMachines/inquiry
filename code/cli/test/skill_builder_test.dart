@@ -16,8 +16,65 @@ void main() {
           containsAll(<String>['iq-analyze', 'iq-plan', 'iq-execute']));
     });
 
+    test('phaseSkillNames ships the QA specification skill', () {
+      expect(builder.phaseSkillNames, contains('iq-specification'));
+    });
+
     test('throws on an unknown phase', () {
       expect(() => builder.build('bogus'), throwsArgumentError);
+    });
+
+    group("build('specification') — QA phase, outside the dev FSM", () {
+      late String md;
+      setUp(() => md = builder.build('specification'));
+
+      test('frontmatter names the skill', () {
+        expect(md, startsWith('---\nname: iq-specification\n'));
+      });
+
+      test('mechanics: scaffolds via the CLI command + DEWEY operator', () {
+        expect(md, contains('iq specification new'));
+        expect(md, contains('iq ape prompt --name dewey'));
+      });
+
+      test('runs the specification_ready gate via the CLI', () {
+        expect(md, contains('iq specification check <slug>'));
+        expect(md, contains('specification_ready'));
+      });
+
+      test('is outside the dev FSM — no fsm transition gate', () {
+        expect(md, isNot(contains('iq fsm transition')));
+      });
+
+      test('decides by evidence — throwaway experiments, not inference', () {
+        expect(md.toLowerCase(), contains('experiment'));
+        expect(md.toLowerCase(), contains('evidence'));
+      });
+
+      test('lists the specification.md sections (from template, not embedded)',
+          () {
+        for (final section in const [
+          '- **1. User Stories**',
+          '- **2. Testing Strategy**',
+          '- **3. Explicit Scope**',
+          '- **4. Decisions (evidence)**',
+        ]) {
+          expect(md, contains(section));
+        }
+      });
+
+      test('derives + dedup-checks issues via gh', () {
+        expect(md, contains('gh issue list --search'));
+        expect(md, contains('issue-<slug>.md'));
+      });
+
+      test('has a Done-when checklist and presents to the human', () {
+        expect(md, contains('## Done when'));
+        expect(md.toLowerCase(), contains('human'));
+      });
+
+      test('stays brief (SC-004)',
+          () => expect(md.split('\n').length, lessThan(45)));
     });
 
     group("build('plan') — CLI scaffolds plan.md, brain fills", () {
