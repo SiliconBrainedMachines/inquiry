@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.15.1]
+### Fixed
+- **The `specification_ready` gate was English-only and rejected every `--lang es` spec** (found by dogfooding a real requirement): the gate matched section headers (`1. User Stories`), scope subheadings (`Includes`/`Does NOT include`) and the `**Decision**`/`**Evidence**` markers by their English text, so a Spanish specification — which the same CLI generates with `iq specification new --lang es` — failed with `SPEC_NO_USER_STORY` even when fully and correctly filled. The gate is now **bilingual / language-agnostic**: sections are matched by their leading number (`1.`/`2.`/`3.`/`4.`, identical across templates), and the scope subheadings and Decision/Evidence markers accept both English and Spanish (`Incluye`/`NO incluye`, `Decisión`/`Evidencia`); role lines are read by the English keyword the es template embeds (`**As a (Como)**`). A filled Spanish spec now passes. Regression test added.
+
 ## [0.15.0]
 ### Added
 - **The QA specification phase — turn a raw requisition into a healthy specification + issues, deciding by evidence** (#282): a new, independent QA-facing phase that *precedes* the dev cycle (analyze→plan→execute) and produces the issues it hands off. It is the methodology's controlled-vocabulary chain **requisition → specification → requirements**, made executable:
