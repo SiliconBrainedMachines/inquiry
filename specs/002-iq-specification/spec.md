@@ -1,10 +1,10 @@
-# Feature Specification: iq-specification (the QA requirement phase)
+# Feature Specification: iq-specification (the QA specification phase)
 
 **Status**: Draft · **Branch**: `spec/iq-specification` (planned) · **Date**: 2026-06-27
 
 ## Summary
 
-`iq-specification` is the manual, QA-facing **requirement phase** of the Inquiry
+`iq-specification` is the manual, QA-facing **specification phase** of the Inquiry
 method. It turns a raw requirement (arriving as email, documents, chat, a
 message) into a **healthy, coherent, actionable, well-granulated specification**
 plus the GitHub issues that decompose it — deciding by **evidence from
@@ -20,7 +20,7 @@ separate CLI.
 
 | Role | Skill(s) | Workspace | Level |
 |---|---|---|---|
-| **QA** | `iq-specification` | `requirements/<slug>/` | WHAT / why (requirement) |
+| **QA** | `iq-specification` | `requisitions/<slug>/` | WHAT / why (requirement) |
 | **Dev** | `iq-analyze` → `iq-plan` → `iq-execute` | `cleanrooms/<branch>/` + code | HOW (implementation) |
 
 Handoff = the GitHub issues. (Mirrors spec-kit's "spec = what/why, never how".)
@@ -56,7 +56,7 @@ re-checkable evidence handle in the Decisions(evidence) section.
   the **DEWEY** operator. Steps: gather the raw requirement from all sources →
   experiment for evidence → fill `specification.md` → derive `issue-<slug>.md`
   per issue → duplicate-check + print `gh` commands → present to human and stop.
-- **FR-2**: The CLI scaffolds `requirements/<slug>/specification.md` from a
+- **FR-2**: The CLI scaffolds `requisitions/<slug>/specification.md` from a
   single-source template (the hands), in the selected language.
 - **FR-3**: **Bilingual** templates — `en` (default) and `es` via a `--lang`
   flag. (Scope: the QA spec only; dev-cycle artifacts stay English because the
@@ -70,7 +70,7 @@ re-checkable evidence handle in the Decisions(evidence) section.
   derived, and each Decisions bullet carries a re-checkable handle.
 - **FR-6**: Issues live as `issue-<slug>.md` in the repo (source of truth);
   GitHub issues are a projection synced via the printed `gh` commands.
-- **FR-7**: Methodology: `requirements/<slug>/` lands on `main` via a doc-PR
+- **FR-7**: Methodology: `requisitions/<slug>/` lands on `main` via a doc-PR
   from `spec/<slug>` (the QA review gate); main is branch-protected.
 
 ## Success Criteria
@@ -95,7 +95,7 @@ re-checkable evidence handle in the Decisions(evidence) section.
 3. **`--lang` plumbing**: a CLI flag vs a per-project config setting; default
    `en`.
 4. **Gate home**: `specification_ready` as a standalone check (no FSM state) vs
-   a mini-FSM for the requirement phase.
+   a mini-FSM for the specification phase.
 
 ## Out of scope
 
