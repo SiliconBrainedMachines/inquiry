@@ -207,8 +207,85 @@ class EffectExecutor {
 
     final diagnosisFile = File(p.join(cleanroomDir, 'diagnosis.md'));
     if (!diagnosisFile.existsSync()) {
-      diagnosisFile.writeAsStringSync(
+      diagnosisFile.writeAsStringSync(_diagnosisScaffold(today));
+    }
+
+    _writeIssueMirror(
+      cleanroomRoot,
+      branch,
+      issue,
+      today,
+      tracePhase: tracePhase,
+      traceEvent: traceEvent,
+      promptFragmentId: promptFragmentId,
+    );
+  }
+
+  /// Scaffolds `cleanrooms/<branch>/plan/plan.md` from the single-source
+  /// template — the CLI's "hands" work on entering PLAN (effect `generate_plan`),
+  /// so the brain only fills it (Constitution I).
+  void openPlanContext() {
+    final branch = _branch;
+    final cleanroomRoot = _cleanroomRoot;
+    if (branch == null || cleanroomRoot == null) return;
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    // plan.md lives at the cleanroom root (`cleanrooms/<branch>/plan.md`),
+    // where the plan gate reads it — not in a `plan/` subdir.
+    final planFile = File(p.join(cleanroomRoot, 'plan.md'));
+    if (!planFile.existsSync()) {
+      Directory(cleanroomRoot).createSync(recursive: true);
+      planFile.writeAsStringSync(_planScaffold(today));
+    }
+  }
+
+  /// The plan.md scaffold from `assets/artifacts/plan.template.md`, with an
+  /// inline fallback when assets are unavailable.
+  String _planScaffold(String today) {
+    final assets = _assets;
+    if (assets != null) {
+      try {
+        return assets
+            .loadString('artifacts/plan.template.md')
+            .replaceAll('{{DATE}}', today);
+      } catch (_) {
+        // fall through to inline copy
+      }
+    }
+    return '---\n'
+        'id: plan\n'
+        'title: "Plan"\n'
+        'date: $today\n'
+        'status: active\n'
+        'tags: [plan]\n'
         '---\n'
+        '\n'
+        '# Plan\n'
+        '\n'
+        '## Phase 1\n'
+        '- **Change**: Describe the smallest first slice of the fix here.\n'
+        '- **Verify**: Replace with a real executable verification check (a test-runner command or a test-file reference) for this phase.\n'
+        '\n'
+        '## Final verification\n'
+        '- **Verify**: Replace with the command that runs the full project test suite.\n';
+  }
+
+  /// Materializes the diagnosis.md scaffold from the single-source template
+  /// (`assets/artifacts/diagnosis.template.md`) — the CLI's "hands" work, so the
+  /// brain only fills the artifact (Constitution I). The inline fallback (when
+  /// assets are unavailable) keeps the same shape and the gate's bootstrap
+  /// placeholder bullet, so behavior is identical either way.
+  String _diagnosisScaffold(String today) {
+    final assets = _assets;
+    if (assets != null) {
+      try {
+        return assets
+            .loadString('artifacts/diagnosis.template.md')
+            .replaceAll('{{DATE}}', today);
+      } catch (_) {
+        // fall through to the inline copy
+      }
+    }
+    return '---\n'
         'id: diagnosis\n'
         'title: "Diagnosis"\n'
         'date: $today\n'
@@ -228,19 +305,7 @@ class EffectExecutor {
         '- Capture bounded constraints, invariants, or environmental limits here.\n'
         '\n'
         '## Open Questions\n'
-        '- List only unresolved questions that evidence could not yet answer.\n',
-      );
-    }
-
-    _writeIssueMirror(
-      cleanroomRoot,
-      branch,
-      issue,
-      today,
-      tracePhase: tracePhase,
-      traceEvent: traceEvent,
-      promptFragmentId: promptFragmentId,
-    );
+        '- List only unresolved questions that evidence could not yet answer.\n';
   }
 
   /// Best-effort `cleanrooms/<branch>/issue.md` mirror of the GitHub issue.
@@ -453,6 +518,9 @@ class EffectExecutor {
             traceEvent: event,
             promptFragmentId: promptFragmentId,
           );
+          executed.add(effect);
+        case 'generate_plan':
+          openPlanContext();
           executed.add(effect);
         case 'reset_mutations':
           resetMutations();
