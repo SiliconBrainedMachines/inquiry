@@ -167,8 +167,9 @@ Turn a raw requisition (email, document, chat) into a coherent, actionable speci
 4. For every decision you are unsure of, run a **throwaway experiment** to decide by EVIDENCE, not inference: read the DB, run code in a container, probe the API. These validate spec decisions; they are NOT product code. Record each under **Decisions (evidence)** with a re-checkable handle.
 5. Fill `specification.md` (see sections below). Each user story needs ≥1 Given-When-Then acceptance criterion; state the testing strategy and the explicit scope (includes / does NOT include).
 6. Derive the issues: one tracked `issue-<slug>.md` per unit of work, each tracing to its acceptance criteria.
-7. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, prepare a `gh issue edit` instead of a new one.
-8. Print the `gh issue create` / `gh issue edit` commands (do NOT run them blind) and present the specification + issues to the human. Stop — the human reviews and approves; the doc lands on `main` via a PR (the QA review gate).
+7. `iq specification check <slug>` — the CLI runs the `specification_ready` gate. Fix exactly what it reports (do NOT skip a violation) until it exits 0.
+8. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, prepare a `gh issue edit` instead of a new one.
+9. Print the `gh issue create` / `gh issue edit` commands (do NOT run them blind) and present the specification + issues to the human. Stop — the human reviews and approves; the doc lands on `main` via a PR (the QA review gate).
 
 ## specification.md — fill these sections
 ${sections.map((s) => '- **$s**').join('\n')}
@@ -178,6 +179,7 @@ Each user story MUST carry ≥1 Given-When-Then AC; each key decision MUST cite 
 ## Done when
 - [ ] `requisition.md` captures the need (AS-IS / TO-BE) from all sources.
 - [ ] `specification.md` is filled — every user story has ≥1 Given-When-Then AC, explicit scope, testing strategy, and Decisions (evidence) with handles.
+- [ ] `iq specification check <slug>` exits 0.
 - [ ] At least one `issue-<slug>.md` is derived, dedup-checked, with its `gh` command printed.
 - [ ] The specification is presented to the human for review.
 ''';
