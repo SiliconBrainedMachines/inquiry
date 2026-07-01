@@ -11,20 +11,20 @@ void main() {
   group('TemplateResolver', () {
     test('localized artifact: es returns the Spanish template, no notice', () {
       final r = resolver.resolve('specification', lang: 'es');
-      expect(r.content, contains('Especificación de Requerimiento'));
+      expect(r.content, contains('# Especificación'));
       expect(r.notice, isNull);
     });
 
     test('localized artifact: en (default) returns English, no notice', () {
       final r = resolver.resolve('specification');
-      expect(r.content, contains('Requirement Specification'));
+      expect(r.content, contains('# Specification'));
       expect(r.notice, isNull);
     });
 
     test('localized artifact: an unsupported lang falls back to English + notice',
         () {
       final r = resolver.resolve('specification', lang: 'pt');
-      expect(r.content, contains('Requirement Specification'));
+      expect(r.content, contains('# Specification'));
       expect(r.notice, contains('pt'));
       expect(r.notice, contains('English'));
     });
