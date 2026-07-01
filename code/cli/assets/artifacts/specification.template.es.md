@@ -29,9 +29,13 @@
 
 #### Acceptance Criteria
 
-| #    | Given (Dado que)            | When (Cuando)          | Then (Entonces)         |
-| ---- | --------------------------- | ---------------------- | ----------------------- |
-| AC-1 | <!-- Contexto/precondición -->  | <!-- Acción que ocurre --> | <!-- Resultado esperado --> |
+<!-- La columna AC lleva SOLO el número (1, 2, …); el id es AC-<número>. Mantén
+     los guiones del separador moderados — no los amplíes al ancho del texto, o
+     la exportación a PDF parte la columna. -->
+
+| AC  | Given (Dado que)        | When (Cuando)        | Then (Entonces)        |
+| --- | ----------------------- | -------------------- | ---------------------- |
+| 1   | <!-- Contexto/precondición --> | <!-- Acción que ocurre --> | <!-- Resultado esperado --> |
 
 <!-- Duplicar el bloque HU-N para más historias. -->
 
