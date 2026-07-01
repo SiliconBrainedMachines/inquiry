@@ -29,9 +29,13 @@
 
 #### Acceptance Criteria
 
-| #    | Given (context)         | When (action)          | Then (expected result)  |
-| ---- | ----------------------- | ---------------------- | ----------------------- |
-| AC-1 | <!-- precondition -->   | <!-- action -->        | <!-- expected result -->|
+<!-- The AC column holds ONLY the number (1, 2, …); the id is AC-<number>. Keep
+     the separator dashes moderate — do not widen them to the text width, or the
+     PDF export splits the column. -->
+
+| AC  | Given (context)         | When (action)        | Then (expected result) |
+| --- | ----------------------- | -------------------- | ---------------------- |
+| 1   | <!-- precondition -->   | <!-- action -->      | <!-- expected result --> |
 
 <!-- Duplicate the US-N block for more stories. -->
 
