@@ -1,25 +1,44 @@
-# Especificación de Requerimiento
+# Especificación
 
-> **Todos los campos de este documento son obligatorios.**
-> Historias de usuario según *User Stories Applied* (Mike Cohn, 2004).
-> Acceptance Criteria en formato *Given-When-Then* — BDD (Dan North, 2006).
-> Estrategia de testing alineada con *TDD* (Kent Beck, 2002).
-> Las decisiones se sustentan en **evidencia de experimentos, no en inferencia**.
+<!--
+  Todos los campos son obligatorios.
+  Historias de usuario: User Stories Applied (Cohn, 2004).
+  Acceptance Criteria: Given-When-Then — BDD (North, 2006).
+  Estrategia de testing: TDD (Beck, 2002).
+  Decisiones: licenciadas por evidencia de experimentos, no por inferencia.
+-->
 
 ## Metadatos
 
-| Campo          | Valor                                |
-| -------------- | ------------------------------------ |
-| ID             | REQ-{{DATE}}-XXX                     |
-| Sistema        | <!-- Valor del catálogo oficial -->  |
-| Proyecto       | <!-- Nombre del proyecto -->         |
-| Solicitante    | <!-- Área de Procesos -->            |
-| Prioridad      | <!-- Alta / Media / Baja -->         |
-| Analista QA    | <!-- Nombre Apellido -->             |
-| Analista Dev   | <!-- Nombre Apellido -->             |
-| Fecha          | {{DATE}}                             |
+| Campo            | Valor                                |
+| ---------------- | ------------------------------------ |
+| ID               | REQ-{{DATE}}-XXX                     |
+| Sistema          | <!-- Valor del catálogo oficial -->  |
+| Proyecto         | <!-- Nombre del proyecto -->         |
+| Solicitante      | <!-- Área de Procesos -->            |
+| Prioridad        | <!-- Alta / Media / Baja -->         |
+| Analista QA      | <!-- Nombre Apellido -->             |
+| Analista Dev     | <!-- Nombre Apellido -->             |
+| Fecha de emisión | {{DATE}}                             |
 
-## 1. Historias de Usuario
+## Contexto y reglas base
+
+<!-- Contenido de primera clase (no "cita"): glosario de términos del dominio,
+     supuestos y reglas transversales que aplican a todas las HU. Opcional pero
+     recomendado — evita repetir el contexto dentro de cada AC. -->
+
+- <!-- Término, supuesto o regla transversal -->
+
+## 1. Fecha de compromiso
+
+<!-- Fecha comprometida de entrega, en ISO AAAA-MM-DD. Obligatoria: el gate la
+     exige. Puede crecer a un mini-cronograma (hitos + fechas). -->
+
+| Hito                 | Fecha (AAAA-MM-DD)   |
+| -------------------- | -------------------- |
+| Entrega comprometida | <!-- AAAA-MM-DD -->  |
+
+## 2. Historias de Usuario
 
 ### HU-1: <!-- Título descriptivo -->
 
@@ -39,9 +58,10 @@
 
 <!-- Duplicar el bloque HU-N para más historias. -->
 
-## 2. Estrategia de Testing
+## 3. Estrategia de Testing
 
-Definir **qué tipos de tests** se necesitan y **qué validan**, sin entrar en nombres de funciones ni código.
+<!-- Definir QUÉ tipos de tests se necesitan y QUÉ validan, sin nombres de
+     funciones ni código. -->
 
 | Tipo        | Qué debe validar                                            | AC asociados   |
 | ----------- | ----------------------------------------------------------- | -------------- |
@@ -49,21 +69,21 @@ Definir **qué tipos de tests** se necesitan y **qué validan**, sin entrar en n
 | Integration | <!-- Ej. Persistencia correcta en base de datos -->         | <!-- AC-2 -->  |
 | E2E         | <!-- Ej. Flujo completo desde la UI — o N/A -->             | <!-- AC-1 -->  |
 
-## 3. Alcance Explícito
+## 4. Alcance Explícito
 
 ### Incluye
 
-- <!-- Qué SÍ abarca este requerimiento -->
+- <!-- Qué SÍ abarca esta especificación -->
 
 ### NO incluye
 
 - <!-- Qué queda fuera explícitamente -->
 
-## 4. Decisiones (evidencia)
+## 5. Decisiones (evidencia)
 
-> Cada decisión clave debe citar el experimento que la sustenta (una sonda
-> desechable: una consulta a BD, correr un contenedor, llamar un API), con un
-> handle re-verificable — no una suposición.
+<!-- Cada decisión clave debe citar el experimento que la sustenta (una sonda
+     desechable: una consulta a BD, correr un contenedor, llamar un API), con un
+     handle re-verificable — no una suposición. -->
 
 - **Decisión**: <!-- la decisión tomada -->. **Evidencia**: <!-- experimento + resultado, con handle re-verificable: una consulta, un comando, `inline-code`, o un archivo:línea -->.
 
