@@ -1,5 +1,7 @@
 # Specification
 
+<!-- iq:lang=en · Language of this specification and ALL its derived artifacts (issues, requirements, plans). Keep consistent. Not rendered in the PDF/DOCX. -->
+
 <!--
   All fields are mandatory.
   User stories: User Stories Applied (Cohn, 2004).
