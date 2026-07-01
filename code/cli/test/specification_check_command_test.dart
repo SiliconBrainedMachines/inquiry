@@ -6,9 +6,15 @@ import 'package:test/test.dart';
 import 'package:inquiry_cli/modules/specification/commands/check.dart';
 
 const _filledSpec = '''
-# Requirement Specification
+# Specification
 
-## 1. User Stories
+## 1. Commitment date
+
+| Milestone          | Date       |
+| ------------------ | ---------- |
+| Committed delivery | 2026-08-15 |
+
+## 2. User Stories
 
 ### US-1: Register an invoice
 
@@ -22,13 +28,13 @@ const _filledSpec = '''
 | ---- | ---------------- | -------------- | --------------- |
 | AC-1 | the form is open | I submit data  | it is stored    |
 
-## 2. Testing Strategy
+## 3. Testing Strategy
 
 | Type | What it must validate | Related AC |
 | ---- | --------------------- | ---------- |
 | Unit | the no-duplicate rule | AC-1       |
 
-## 3. Explicit Scope
+## 4. Explicit Scope
 
 ### Includes
 
@@ -38,7 +44,7 @@ const _filledSpec = '''
 
 - The approval workflow.
 
-## 4. Decisions (evidence)
+## 5. Decisions (evidence)
 
 - **Decision**: reuse the billing table. **Evidence**: `psql -c "\\d billing"` (run 2026-06-30).
 ''';
