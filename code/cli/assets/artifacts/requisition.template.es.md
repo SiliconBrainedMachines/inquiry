@@ -1,5 +1,7 @@
 # Solicitud
 
+<!-- iq:lang=es · Idioma de esta solicitud y de TODOS sus artefactos derivados (especificación, issues, planes). Mantener consistente. No se renderiza en el PDF/DOCX. -->
+
 > **Todos los campos de esta solicitud son obligatorios.**
 > Estructura basada en *Gap Analysis* — BABOK® v3 (IIBA), cap. 8.
 > Terminología de dominio alineada con *Ubiquitous Language* — Domain-Driven Design (Eric Evans, 2003).

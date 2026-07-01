@@ -12,12 +12,15 @@ void main() {
     test('localized artifact: es returns the Spanish template, no notice', () {
       final r = resolver.resolve('specification', lang: 'es');
       expect(r.content, contains('# Especificación'));
+      // Declares its language for derived artifacts (issues, etc.).
+      expect(r.content, contains('iq:lang=es'));
       expect(r.notice, isNull);
     });
 
     test('localized artifact: en (default) returns English, no notice', () {
       final r = resolver.resolve('specification');
       expect(r.content, contains('# Specification'));
+      expect(r.content, contains('iq:lang=en'));
       expect(r.notice, isNull);
     });
 

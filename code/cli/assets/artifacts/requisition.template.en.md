@@ -1,5 +1,7 @@
 # Requisition
 
+<!-- iq:lang=en · Language of this requisition and ALL its derived artifacts (specification, issues, plans). Keep consistent. Not rendered in the PDF/DOCX. -->
+
 > A **requisition** is a formal request that a change be made — the business need that originates the work. (Spanish: *solicitud*.)
 
 > **All fields are mandatory.**
