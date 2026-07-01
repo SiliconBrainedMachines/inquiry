@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.16.0]
+### Changed
+- **The specification template now leads with schedule, gives domain context a real home, and drops the false-friend title** (found by dogfooding — scope + schedule are both fundamental to a spec, and the `>` preamble/context blocks read as noise). Four coordinated changes to `specification.template.{en,es}.md` and the `specification_ready` gate:
+  - **Commitment date is a first-class, gate-enforced section.** New **`## 1. Commitment date` / `## 1. Fecha de compromiso`** — a milestone+date table (ready to grow into a mini-schedule) that the gate **requires**: the new `SPEC_NO_COMMITMENT_DATE` rejects a spec whose §1 lacks a real ISO `YYYY-MM-DD` date. The document's *issued* date moves to Metadata (`Issued` / `Fecha de emisión`) — it is secondary; the committed delivery date is not.
+  - **Numbered sections shift by one** to make room: `2.` User Stories, `3.` Testing Strategy, `4.` Explicit Scope, `5.` Decisions. The gate's number-based (language-agnostic) section lookup moves with them, so `--lang es` specs keep working.
+  - **Context is content, not an aside.** A new unnumbered **`## Context and ground rules` / `## Contexto y reglas base`** section gives the domain glossary, assumptions and cross-cutting rules a first-class home instead of a wall of `>` block-quotes; the methodology-citation preamble becomes an HTML comment (guidance in the source, no noise in the rendered PDF).
+  - **Titles adopt the controlled vocabulary.** `# Specification` / `# Especificación` and `# Requisition` / `# Solicitud` — the false-friend "Requirement"/"Requerimiento" is dropped from the titles, consistent with the requisition → specification chain.
+
 ## [0.15.3]
 ### Fixed
 - **The acceptance-criteria table collapsed its AC-id column when exported to PDF/DOCX** (found by dogfooding — rendering the spec through a Pandoc-based exporter): the template's id column header was `#` with `AC-N` cells, and because Pandoc allocates pipe-table column widths proportional to the separator dash counts, a narrow id column next to wide prose columns was starved to near-zero width — the `AC-1…AC-N` ids vanished from the PDF (data loss) or wrapped character-by-character. The template now uses an **`AC` column with a short numeric cell** (`1`, `2`, …; the id is `AC-<n>`) and carries a note to keep the separator dashes balanced. The `specification_ready` gate parses **both** forms — inline `AC-3` and a bare `3` under an `AC` header — and normalizes to the canonical `AC-3`, so traceability (`SPEC_AC_NOT_TRACED`) is unaffected.
