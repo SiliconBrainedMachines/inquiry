@@ -1,4 +1,4 @@
-# Solicitud de Requerimiento
+# Solicitud
 
 > **Todos los campos de esta solicitud son obligatorios.**
 > Estructura basada en *Gap Analysis* — BABOK® v3 (IIBA), cap. 8.

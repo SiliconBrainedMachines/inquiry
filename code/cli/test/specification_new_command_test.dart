@@ -42,7 +42,7 @@ void main() {
       expect(read('invoice-form', 'requisition'), contains('# Requisition'));
       expect(
         read('invoice-form', 'specification'),
-        contains('Requirement Specification'),
+        contains('# Specification'),
       );
     });
 
@@ -57,7 +57,7 @@ void main() {
       await cmd('factura', lang: 'es').execute();
       expect(
         read('factura', 'specification'),
-        contains('Especificación de Requerimiento'),
+        contains('# Especificación'),
       );
     });
 
