@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.15.3]
+### Fixed
+- **The acceptance-criteria table collapsed its AC-id column when exported to PDF/DOCX** (found by dogfooding — rendering the spec through a Pandoc-based exporter): the template's id column header was `#` with `AC-N` cells, and because Pandoc allocates pipe-table column widths proportional to the separator dash counts, a narrow id column next to wide prose columns was starved to near-zero width — the `AC-1…AC-N` ids vanished from the PDF (data loss) or wrapped character-by-character. The template now uses an **`AC` column with a short numeric cell** (`1`, `2`, …; the id is `AC-<n>`) and carries a note to keep the separator dashes balanced. The `specification_ready` gate parses **both** forms — inline `AC-3` and a bare `3` under an `AC` header — and normalizes to the canonical `AC-3`, so traceability (`SPEC_AC_NOT_TRACED`) is unaffected.
+
 ## [0.15.2]
 ### Fixed
 - **`iq specification new`/`check <slug>` now accept the `requisitions/<slug>` path, so shell tab-completion works** (found by dogfooding): the commands assumed the bare slug and prepended `requisitions/`, so tab-completing the argument (which yields `.\requisitions\<slug>\`) produced a broken `requisitions/.\requisitions\<slug>\` path, and a trailing separator leaked into the slug. The `<slug>` argument is now normalized — a bare slug, a `requisitions/<slug>` path (either separator, optional leading `./` and trailing separator), or even a path into the directory all resolve to the same slug.
