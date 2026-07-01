@@ -54,10 +54,12 @@ void main() {
       test('lists the specification.md sections (from template, not embedded)',
           () {
         for (final section in const [
-          '- **1. User Stories**',
-          '- **2. Testing Strategy**',
-          '- **3. Explicit Scope**',
-          '- **4. Decisions (evidence)**',
+          '- **Context and ground rules**',
+          '- **1. Commitment date**',
+          '- **2. User Stories**',
+          '- **3. Testing Strategy**',
+          '- **4. Explicit Scope**',
+          '- **5. Decisions (evidence)**',
         ]) {
           expect(md, contains(section));
         }
