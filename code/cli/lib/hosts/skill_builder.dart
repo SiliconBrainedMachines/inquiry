@@ -165,7 +165,7 @@ Turn a raw requisition (email, document, chat) into a coherent, actionable speci
 2. `iq ape prompt --name dewey` — read the method (Deweyan inquiry) and apply it.
 3. Gather the raw requisition from ALL its sources into `requisition.md` (AS-IS / TO-BE). Capture exactly what was asked — do not invent scope.
 4. For every decision you are unsure of, run a **throwaway experiment** to decide by EVIDENCE, not inference: read the DB, run code in a container, probe the API. These validate spec decisions; they are NOT product code. Record each under **Decisions (evidence)** with a re-checkable handle.
-5. Fill `specification.md` (see sections below). Each user story needs ≥1 Given-When-Then acceptance criterion; state the testing strategy and the explicit scope (includes / does NOT include).
+5. Fill `specification.md` (see sections below). Set a committed delivery date (§1, ISO `YYYY-MM-DD` — the gate requires it); each user story needs ≥1 Given-When-Then acceptance criterion; state the testing strategy and the explicit scope (includes / does NOT include).
 6. Derive the issues: one tracked `issue-<slug>.md` per unit of work, each tracing to its acceptance criteria.
 7. `iq specification check <slug>` — the CLI runs the `specification_ready` gate. Fix exactly what it reports (do NOT skip a violation) until it exits 0.
 8. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, prepare a `gh issue edit` instead of a new one.

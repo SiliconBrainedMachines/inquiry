@@ -40,6 +40,7 @@ class SpecificationGate {
     final violations = <SpecificationViolation>[];
     final sections = _splitSections(specificationMd);
 
+    _checkCommitmentDate(sections, violations);
     _checkUserStories(sections, violations);
     _checkTestingStrategy(sections, violations);
     _checkScope(sections, violations);
@@ -61,11 +62,31 @@ class SpecificationGate {
 
   // ─── Rules ──────────────────────────────────────────────────────────────
 
-  void _checkUserStories(
+  /// §1 must carry a committed delivery date — an ISO `YYYY-MM-DD` — so scope
+  /// and schedule are both first-class. A mini-schedule (milestones + dates) is
+  /// welcome; it just has to contain at least one real date.
+  void _checkCommitmentDate(
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
     final body = _section(sections, 1);
+    final stripped = body == null
+        ? ''
+        : body.replaceAll(RegExp(r'<!--.*?-->', dotAll: true), '');
+    if (!RegExp(r'\d{4}-\d{2}-\d{2}').hasMatch(stripped)) {
+      violations.add(const SpecificationViolation(
+        'SPEC_NO_COMMITMENT_DATE',
+        'No committed delivery date — section "1. Commitment date" needs a real '
+            'ISO date (YYYY-MM-DD).',
+      ));
+    }
+  }
+
+  void _checkUserStories(
+    Map<String, String> sections,
+    List<SpecificationViolation> violations,
+  ) {
+    final body = _section(sections, 2);
     if (body == null) {
       violations.add(const SpecificationViolation(
         'SPEC_NO_USER_STORY', 'No "User Stories" section found.'));
@@ -97,7 +118,7 @@ class SpecificationGate {
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _section(sections, 2);
+    final body = _section(sections, 3);
     final hasFilledRow = body != null &&
         _tableDataRows(body).any((cells) =>
             cells.length >= 2 && _isFilled(cells[1]));
@@ -114,7 +135,7 @@ class SpecificationGate {
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _section(sections, 3);
+    final body = _section(sections, 4);
     final includes =
         body == null ? false : _hasFilledBullet(body, _includesHeadings);
     final excludes =
@@ -132,7 +153,7 @@ class SpecificationGate {
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _section(sections, 4);
+    final body = _section(sections, 5);
     final hasEvidence = body != null &&
         body.split('\n').any((line) {
           final decision = _valueAfterAnyMarker(line, _decisionMarkers);
@@ -159,7 +180,7 @@ class SpecificationGate {
     List<String> issues,
     List<SpecificationViolation> violations,
   ) {
-    final body = _section(sections, 1);
+    final body = _section(sections, 2);
     if (body == null) return;
 
     final declared = <String>{};
@@ -206,9 +227,10 @@ class SpecificationGate {
   }
 
   /// Looks up a section by its leading number (`## 1. …`). The templates number
-  /// the sections identically in every language (`1.` User Stories /
-  /// Historias de Usuario, `2.` Testing Strategy / Estrategia de Testing, …), so
-  /// this is language-agnostic — the gate works on `--lang es` specs too.
+  /// the sections identically in every language (`1.` Commitment date / Fecha de
+  /// compromiso, `2.` User Stories / Historias de Usuario, `3.` Testing Strategy
+  /// / Estrategia de Testing, `4.` Scope, `5.` Decisions), so this is
+  /// language-agnostic — the gate works on `--lang es` specs too.
   String? _section(Map<String, String> sections, int number) {
     for (final entry in sections.entries) {
       if (entry.key.startsWith('$number.')) return entry.value;
