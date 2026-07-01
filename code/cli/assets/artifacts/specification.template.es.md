@@ -1,5 +1,7 @@
 # Especificación
 
+<!-- iq:lang=es · Idioma de esta especificación y de TODOS sus artefactos derivados (issues, requirements, planes). Mantener consistente. No se renderiza en el PDF/DOCX. -->
+
 <!--
   Todos los campos son obligatorios.
   Historias de usuario: User Stories Applied (Cohn, 2004).
