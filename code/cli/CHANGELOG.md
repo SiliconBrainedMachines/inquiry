@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.16.1]
+### Added
+- **Explicit artifact-language directive** (`<!-- iq:lang=xx -->`) at the top of the requisition and specification templates (found by dogfooding — issues were being derived in English from a Spanish spec because the language was only implicit in the `--lang` flag at scaffold time). The `es` templates carry `iq:lang=es`, the `en` templates `iq:lang=en`; it is a machine- and human-readable HTML comment (invisible in the PDF/DOCX) that declares the language of the artifact **and all its derived artifacts** (issues, requirements, plans). The `/iq-specification` skill now instructs the brain to read it and write the derived issues in that language, keeping the whole requisition → specification → issues chain consistent.
+
 ## [0.16.0]
 ### Changed
 - **The specification template now leads with schedule, gives domain context a real home, and drops the false-friend title** (found by dogfooding — scope + schedule are both fundamental to a spec, and the `>` preamble/context blocks read as noise). Four coordinated changes to `specification.template.{en,es}.md` and the `specification_ready` gate:
