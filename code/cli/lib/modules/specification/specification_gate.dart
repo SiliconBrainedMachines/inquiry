@@ -164,9 +164,7 @@ class SpecificationGate {
 
     final declared = <String>{};
     for (final story in _splitStories(body)) {
-      for (final row in _acRows(story.body)) {
-        declared.add(row.first); // the AC-id cell, e.g. "AC-1"
-      }
+      declared.addAll(_acRows(story.body)); // canonical AC-N ids
     }
 
     for (final ac in declared) {
@@ -266,24 +264,35 @@ class SpecificationGate {
     return true;
   }
 
-  /// Filled acceptance-criteria rows in a block: `| AC-N | given | when | then |`
-  /// with all three cells filled.
-  List<List<String>> _acRows(String block) {
-    final rows = <List<String>>[];
+  /// The canonical AC ids of the **filled** acceptance-criteria rows in [block]
+  /// (`| id | given | when | then |` with the three cells filled). The id cell
+  /// is read in either form — inline `AC-3`, or a bare number `3` under an "AC"
+  /// column header — and normalized to `AC-3`, so the rendered table can use the
+  /// short numeric form (which survives a narrow PDF column) without breaking
+  /// traceability.
+  List<String> _acRows(String block) {
+    final ids = <String>[];
     for (final line in block.split('\n')) {
-      if (!RegExp(r'^\s*\|\s*AC-\d+', caseSensitive: false).hasMatch(line)) {
-        continue;
-      }
+      if (!line.trimLeft().startsWith('|')) continue;
       final cells = _cells(line);
-      // cells: [AC-N, given, when, then]
-      if (cells.length >= 4 &&
-          _isFilled(cells[1]) &&
-          _isFilled(cells[2]) &&
-          _isFilled(cells[3])) {
-        rows.add(cells);
+      if (cells.length < 4) continue;
+      final id = _acId(cells[0]);
+      if (id == null) continue; // header / separator / non-AC row
+      if (_isFilled(cells[1]) && _isFilled(cells[2]) && _isFilled(cells[3])) {
+        ids.add(id);
       }
     }
-    return rows;
+    return ids;
+  }
+
+  /// Normalizes an AC-id cell to its canonical `AC-N` form: `AC-3` → `AC-3`,
+  /// `3` → `AC-3`. Returns null for headers, separators, or other cells.
+  String? _acId(String cell) {
+    final inline = RegExp(r'^AC-(\d+)$', caseSensitive: false).firstMatch(cell);
+    if (inline != null) return 'AC-${inline.group(1)}';
+    final numeric = RegExp(r'^(\d+)$').firstMatch(cell);
+    if (numeric != null) return 'AC-${numeric.group(1)}';
+    return null;
   }
 
   /// Data rows of any markdown table in [block] (skips header + separator).
