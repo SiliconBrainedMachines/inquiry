@@ -16,7 +16,13 @@ const _filledSpec = '''
 | ID    | REQ-2026-06-30-001 |
 | Date  | 2026-06-30 |
 
-## 1. User Stories
+## 1. Commitment date
+
+| Milestone          | Date       |
+| ------------------ | ---------- |
+| Committed delivery | 2026-08-15 |
+
+## 2. User Stories
 
 ### US-1: Register an invoice
 
@@ -31,13 +37,13 @@ const _filledSpec = '''
 | AC-1 | the form is open       | I submit valid data | the invoice is stored |
 | AC-2 | a duplicate number     | I submit it       | it is rejected         |
 
-## 2. Testing Strategy
+## 3. Testing Strategy
 
 | Type | What it must validate | Related AC |
 | ---- | --------------------- | ---------- |
 | Unit | the no-duplicate rule | AC-2       |
 
-## 3. Explicit Scope
+## 4. Explicit Scope
 
 ### Includes
 
@@ -47,7 +53,7 @@ const _filledSpec = '''
 
 - Invoice approval workflow.
 
-## 4. Decisions (evidence)
+## 5. Decisions (evidence)
 
 - **Decision**: store invoices in the existing `billing` table. **Evidence**: `psql -c "\\d billing"` shows the columns already exist (run 2026-06-30).
 
@@ -66,7 +72,13 @@ const _filledSpecEs = '''
 | ----- | ----- |
 | ID    | REQ-2026-06-30-001 |
 
-## 1. Historias de Usuario
+## 1. Fecha de compromiso
+
+| Hito                 | Fecha      |
+| -------------------- | ---------- |
+| Entrega comprometida | 2026-08-15 |
+
+## 2. Historias de Usuario
 
 ### HU-1: Registrar una factura
 
@@ -80,13 +92,13 @@ const _filledSpecEs = '''
 | ---- | ------------------ | -------------------- | ---------------------- |
 | AC-1 | el formulario abre | envío datos válidos  | la factura se almacena |
 
-## 2. Estrategia de Testing
+## 3. Estrategia de Testing
 
 | Tipo | Qué debe validar          | AC asociados |
 | ---- | ------------------------- | ------------ |
 | Unit | la regla de no-duplicados | AC-1         |
 
-## 3. Alcance Explícito
+## 4. Alcance Explícito
 
 ### Incluye
 
@@ -96,7 +108,7 @@ const _filledSpecEs = '''
 
 - El flujo de aprobación de facturas.
 
-## 4. Decisiones (evidencia)
+## 5. Decisiones (evidencia)
 
 - **Decisión**: reusar la tabla `billing`. **Evidencia**: `psql -c "\\d billing"` muestra las columnas (corrido 2026-06-30).
 
@@ -199,9 +211,24 @@ void main() {
     });
 
     test('no user story at all → SPEC_NO_USER_STORY', () {
-      const empty = '# Requirement Specification\n\n## 1. User Stories\n';
+      const empty = '# Specification\n\n## 2. User Stories\n';
       final r = gate.evaluate(empty, issues: const ['issue']);
       expect(r.violations.map((v) => v.code), contains('SPEC_NO_USER_STORY'));
+    });
+
+    test('no committed delivery date → SPEC_NO_COMMITMENT_DATE', () {
+      // Strip the ISO date from §1 (leave the section, remove the real date).
+      final noDate = _filledSpec.replaceAll('2026-08-15', '<!-- YYYY-MM-DD -->');
+      final r = gate.evaluate(noDate, issues: tracingIssues);
+      expect(r.passed, isFalse);
+      expect(r.violations.map((v) => v.code),
+          contains('SPEC_NO_COMMITMENT_DATE'));
+    });
+
+    test('a committed delivery date in §1 → no SPEC_NO_COMMITMENT_DATE', () {
+      final r = gate.evaluate(_filledSpec, issues: tracingIssues);
+      expect(r.violations.map((v) => v.code),
+          isNot(contains('SPEC_NO_COMMITMENT_DATE')));
     });
 
     test('missing testing strategy rows → SPEC_NO_TESTING_STRATEGY', () {
