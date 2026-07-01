@@ -134,6 +134,22 @@ void main() {
       expect(r.violations, isEmpty);
     });
 
+    test('numeric AC column (header "AC", cell "1") is read as AC-1', () {
+      // The rendered table uses a short numeric id cell so a narrow PDF column
+      // does not wrap "AC-1" character by character; the gate reconstructs AC-1.
+      final numericAc = _filledSpec.replaceAll('| AC-1 |', '| 1    |').replaceAll(
+            '| # ',
+            '| AC ',
+          );
+      final r = gate.evaluate(numericAc, issues: const ['traces AC-1 and AC-2']);
+      expect(r.violations.map((v) => v.code),
+          isNot(contains('SPEC_STORY_MISSING_AC')));
+      // AC-1 (now cell "1") must still be traceable as "AC-1".
+      final notTraced = gate.evaluate(numericAc, issues: const ['only AC-2 here']);
+      expect(notTraced.violations.map((v) => v.code),
+          contains('SPEC_AC_NOT_TRACED'));
+    });
+
     test('no derived issue → SPEC_NO_ISSUE', () {
       final r = gate.evaluate(_filledSpec, issues: const []);
       expect(r.passed, isFalse);
