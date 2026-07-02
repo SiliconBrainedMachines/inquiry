@@ -30,4 +30,4 @@ covers: []
 
 ## Acceptance criteria covered
 
-<!-- Echo here, for human reading, the AC from the front-matter (covers): AC-1, AC-2, … -->
+<!-- Echo here, for human reading, the AC listed in the front-matter `covers:`. The gate's traceability reads `covers:`, not this text. -->
