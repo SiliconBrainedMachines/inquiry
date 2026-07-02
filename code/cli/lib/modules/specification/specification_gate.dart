@@ -3,9 +3,12 @@
 ///
 /// The specification phase is outside the dev FSM, so this gate is not an
 /// `iq fsm transition` event; it is run by `iq specification check <slug>`. The
-/// rules mirror the locked design: each user story carries ≥1 Given-When-Then
-/// acceptance criterion; the testing strategy and explicit scope are filled; at
-/// least one decision cites evidence; and at least one issue is derived.
+/// specification is a lean **business charter** (PO ↔ team contract, in the
+/// domain's ubiquitous language): a committed delivery date; each user story
+/// carries ≥1 Given-When-Then acceptance criterion; the explicit scope is
+/// filled; and at least one issue is derived, tracing every AC. Testing (each AC
+/// is already a test) moves to development, and technical decisions to the
+/// issues — neither is gated here.
 library;
 
 import '../issue/front_matter.dart';
@@ -44,9 +47,7 @@ class SpecificationGate {
 
     _checkCommitmentDate(sections, violations);
     _checkUserStories(sections, violations);
-    _checkTestingStrategy(sections, violations);
     _checkScope(sections, violations);
-    _checkDecisions(sections, violations);
 
     final realIssues = issues.where((i) => i.trim().isNotEmpty).toList();
     if (realIssues.isEmpty) {
@@ -116,28 +117,11 @@ class SpecificationGate {
     }
   }
 
-  void _checkTestingStrategy(
-    Map<String, String> sections,
-    List<SpecificationViolation> violations,
-  ) {
-    final body = _section(sections, 3);
-    final hasFilledRow = body != null &&
-        _tableDataRows(body).any((cells) =>
-            cells.length >= 2 && _isFilled(cells[1]));
-    if (!hasFilledRow) {
-      violations.add(const SpecificationViolation(
-        'SPEC_NO_TESTING_STRATEGY',
-        'Testing strategy has no filled row — state at least one test type and '
-            'what it must validate.',
-      ));
-    }
-  }
-
   void _checkScope(
     Map<String, String> sections,
     List<SpecificationViolation> violations,
   ) {
-    final body = _section(sections, 4);
+    final body = _section(sections, 3);
     final includes =
         body == null ? false : _hasFilledBullet(body, _includesHeadings);
     final excludes =
@@ -147,29 +131,6 @@ class SpecificationGate {
         'SPEC_SCOPE_INCOMPLETE',
         'Explicit scope is incomplete — both "Includes" and "Does NOT include" '
             'need at least one real bullet.',
-      ));
-    }
-  }
-
-  void _checkDecisions(
-    Map<String, String> sections,
-    List<SpecificationViolation> violations,
-  ) {
-    final body = _section(sections, 5);
-    final hasEvidence = body != null &&
-        body.split('\n').any((line) {
-          final decision = _valueAfterAnyMarker(line, _decisionMarkers);
-          final evidence = _valueAfterAnyMarker(line, _evidenceMarkers);
-          return decision != null &&
-              evidence != null &&
-              _isFilled(decision) &&
-              _isFilled(evidence);
-        });
-    if (!hasEvidence) {
-      violations.add(const SpecificationViolation(
-        'SPEC_DECISION_EVIDENCE_MISSING',
-        'No decision cites evidence — at least one Decisions (evidence) bullet '
-            'must carry a filled Decision and Evidence (an experiment handle).',
       ));
     }
   }
@@ -238,9 +199,9 @@ class SpecificationGate {
 
   /// Looks up a section by its leading number (`## 1. …`). The templates number
   /// the sections identically in every language (`1.` Commitment date / Fecha de
-  /// compromiso, `2.` User Stories / Historias de Usuario, `3.` Testing Strategy
-  /// / Estrategia de Testing, `4.` Scope, `5.` Decisions), so this is
-  /// language-agnostic — the gate works on `--lang es` specs too.
+  /// compromiso, `2.` User Stories / Historias de Usuario, `3.` Explicit Scope /
+  /// Alcance Explícito, `4.` Domain and business rules / Dominio y reglas de
+  /// negocio), so this is language-agnostic — the gate works on `--lang es` too.
   String? _section(Map<String, String> sections, int number) {
     for (final entry in sections.entries) {
       if (entry.key.startsWith('$number.')) return entry.value;
@@ -327,25 +288,6 @@ class SpecificationGate {
     return null;
   }
 
-  /// Data rows of any markdown table in [block] (skips header + separator).
-  List<List<String>> _tableDataRows(String block) {
-    final rows = <List<String>>[];
-    for (final line in block.split('\n')) {
-      final t = line.trim();
-      if (!t.startsWith('|')) continue;
-      if (RegExp(r'^\|[\s\-:|]+\|?$').hasMatch(t)) continue; // separator
-      final cells = _cells(line);
-      if (cells.isEmpty) continue;
-      // Skip the header row (first cell is a known column label, en or es).
-      final first = cells.first.toLowerCase();
-      if (const {'type', 'tipo', '#', 'field', 'campo'}.contains(first)) {
-        continue;
-      }
-      rows.add(cells);
-    }
-    return rows;
-  }
-
   bool _hasFilledBullet(String scopeBody, List<String> subheadings) {
     final lines = scopeBody.split('\n');
     var inSub = false;
@@ -384,28 +326,9 @@ class SpecificationGate {
     return rest;
   }
 
-  /// The value after the first matching bold [markers] label (e.g. `**Decision**`
-  /// or `**Decisión**`), stopping at the next bold span. Returns null when no
-  /// marker is present on the line.
-  String? _valueAfterAnyMarker(String line, List<String> markers) {
-    for (final marker in markers) {
-      final token = '**$marker**';
-      final i = line.indexOf(token);
-      if (i < 0) continue;
-      var rest = line.substring(i + token.length);
-      if (rest.startsWith(':')) rest = rest.substring(1);
-      final next = rest.indexOf('**');
-      if (next >= 0) rest = rest.substring(0, next);
-      return rest;
-    }
-    return null;
-  }
-
-  // Bilingual headings/markers (en + es) the templates ship.
+  // Bilingual scope subheadings (en + es) the templates ship.
   static const _includesHeadings = ['Includes', 'Incluye'];
   static const _excludesHeadings = ['Does NOT include', 'NO incluye'];
-  static const _decisionMarkers = ['Decision', 'Decisión'];
-  static const _evidenceMarkers = ['Evidence', 'Evidencia'];
 
   /// A value is "filled" when, after removing HTML comments and trailing
   /// punctuation/whitespace, something real remains.
