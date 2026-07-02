@@ -164,8 +164,8 @@ Turn a raw requisition (email, document, chat) into a coherent, actionable speci
 1. `iq specification new <slug>` (add `--lang es` for Spanish) — the CLI scaffolds `requisitions/<slug>/requisition.md` + `specification.md`. Inputs/outputs are files on disk, not your memory.
 2. `iq ape prompt --name dewey` — read the method (Deweyan inquiry) and apply it.
 3. Gather the raw requisition from ALL its sources into `requisition.md` (AS-IS / TO-BE). Capture exactly what was asked — do not invent scope.
-4. For every decision you are unsure of, run a **throwaway experiment** to decide by EVIDENCE, not inference: read the DB, run code in a container, probe the API. These validate spec decisions; they are NOT product code. Record each under **Decisions (evidence)** with a re-checkable handle.
-5. Fill `specification.md` (see sections below). Set a committed delivery date (§1, ISO `YYYY-MM-DD` — the gate requires it); each user story needs ≥1 Given-When-Then acceptance criterion; state the testing strategy and the explicit scope (includes / does NOT include).
+4. For every decision you are unsure of, run a **throwaway experiment** to decide by EVIDENCE, not inference: read the DB, run code in a container, probe the API. These validate decisions; they are NOT product code. Record each **technical** decision with a re-checkable handle in the **issues** (step 6) — the specification stays business-level.
+5. Fill `specification.md` — a lean **business charter** in the domain language (DDD), not implementation. Set a committed delivery date (§1, ISO `YYYY-MM-DD` — the gate requires it); write each user story with ≥1 Given-When-Then acceptance criterion (§2); state the explicit scope (§3, includes / does NOT include); capture the domain glossary and business rules (§4).
 6. Derive the issues with **`iq issue new <slug> <name> [--repo owner/repo]`** — it scaffolds `requisitions/<slug>/issue-<name>.md` ("issue as code") **inheriting the spec's `iq:lang`** (so a Spanish spec yields Spanish issues). Fill each from evidence and list the acceptance criteria it covers in the front-matter `covers:`. One issue per unit of work (e.g. one per repo).
 7. `iq specification check <slug>` — the CLI runs the `specification_ready` gate. Fix exactly what it reports (do NOT skip a violation) until it exits 0.
 8. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, edit that one instead.
@@ -174,11 +174,11 @@ Turn a raw requisition (email, document, chat) into a coherent, actionable speci
 ## specification.md — fill these sections
 ${sections.map((s) => '- **$s**').join('\n')}
 
-Each user story MUST carry ≥1 Given-When-Then AC; each key decision MUST cite its experiment evidence; the scope MUST state what is excluded; and ≥1 issue MUST be derived.
+Each user story MUST carry ≥1 Given-When-Then AC; the scope MUST state what is excluded; and ≥1 issue MUST be derived (tracing every AC). Keep it business-level — tests are written in development and technical decisions live in the issues.
 
 ## Done when
 - [ ] `requisition.md` captures the need (AS-IS / TO-BE) from all sources.
-- [ ] `specification.md` is filled — every user story has ≥1 Given-When-Then AC, explicit scope, testing strategy, and Decisions (evidence) with handles.
+- [ ] `specification.md` is filled — committed date, every user story with ≥1 Given-When-Then AC, explicit scope (includes/excludes), and the domain glossary + business rules.
 - [ ] `iq specification check <slug>` exits 0.
 - [ ] At least one `issue-<slug>.md` is derived, dedup-checked, with its `gh` command printed.
 - [ ] The specification is presented to the human for review.
