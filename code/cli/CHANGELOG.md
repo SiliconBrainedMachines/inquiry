@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.18.0]
+### Changed
+- **The specification is now a lean business charter — the PO ↔ team contract, in the domain's language (DDD), not a technical document** (found by dogfooding — Context, Decisions and Annexes read as noise in what is essentially a project charter; the document had drifted technical). It should carry only what a business contract needs: **when** (commitment date) and **what** (user stories + acceptance criteria), each in the ubiquitous language of the domain. Coordinated changes to `specification.template.{en,es}.md` and the `specification_ready` gate:
+  - **Testing strategy leaves the spec (→ development).** Each acceptance criterion is *already* its Given-When-Then test; the separate testing-strategy table was redundant. The `SPEC_NO_TESTING_STRATEGY` rule is removed — the tests that verify each AC are written in the dev cycle.
+  - **Technical decisions leave the spec (→ the issues).** Evidence-backed technical decisions now live in the issue bodies (which already have a *Technical decisions (evidence)* section), where the implementation is. The `SPEC_DECISION_EVIDENCE_MISSING` rule is removed; "evidence over inference" is preserved, relocated to where the technical work is.
+  - **`## Context and ground rules` becomes `## 4. Domain and business rules`** — a first-class, numbered home for the DDD ubiquitous language: domain glossary, cross-cutting business rules, and actors/permissions. Purified to business only (implementation detail moves to the issues), so it is signal, not noise.
+  - **Sections renumbered:** `1.` Commitment date, `2.` User Stories, `3.` Explicit Scope (was `4.`), `4.` Domain and business rules. The gate's number-based (language-agnostic) lookup moves with them, so `--lang es` specs keep working. Annexes is dropped; source references move to a `Sources` / `Fuentes` field in Metadata. A one-line charter/DDD framing opens the document.
+  - The gate still enforces the essentials: a committed ISO date (§1), ≥1 Given-When-Then AC per story (§2), an explicit includes/excludes scope (§3), ≥1 derived issue, and full AC→issue traceability via `covers:`.
+
 ## [0.17.1]
 ### Fixed
 - **AC→issue traceability now reads the issue's `covers:` front-matter, not a raw text scan of the whole body** (found by dogfooding the brand-new `iq issue` scaffold — its example comment `AC-1, AC-2` in the body made the gate report those two ACs as "traced" while the `covers:` list was still empty). For an "issue as code" file (with `---` front-matter) the gate now derives the traced ACs from its declared `covers:` — the canonical, machine-readable source — so prose, comments, or template examples in the body never trace falsely. A freehand issue with no front-matter still falls back to the raw-text scan (back-compat). The issue templates also drop the literal example ids.

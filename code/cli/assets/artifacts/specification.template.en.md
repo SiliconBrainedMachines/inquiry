@@ -3,12 +3,12 @@
 <!-- iq:lang=en · Language of this specification and ALL its derived artifacts (issues, requirements, plans). Keep consistent. Not rendered in the PDF/DOCX. -->
 
 <!--
-  All fields are mandatory.
   User stories: User Stories Applied (Cohn, 2004).
   Acceptance Criteria: Given-When-Then — BDD (North, 2006).
-  Testing strategy: TDD (Beck, 2002).
-  Decisions: licensed by evidence from experiments, not by inference.
+  Domain language: Domain-Driven Design (Evans, 2003).
 -->
+
+_This specification is the **business agreement** — like a project charter — between the Product Owner and the team. Write it in the **domain language (DDD)**: business and behavior, not implementation (the technical part lives in the issues)._
 
 ## Metadata
 
@@ -22,14 +22,7 @@
 | QA Analyst    | <!-- Name -->                      |
 | Dev Analyst   | <!-- Name -->                      |
 | Issued        | {{DATE}}                           |
-
-## Context and ground rules
-
-<!-- First-class content (not an "aside"): a glossary of domain terms,
-     assumptions and cross-cutting rules that apply to every user story.
-     Optional but recommended — it avoids repeating context inside each AC. -->
-
-- <!-- Term, assumption, or cross-cutting rule -->
+| Sources       | <!-- PPT, mockups, emails, links --> |
 
 ## 1. Commitment date
 
@@ -52,7 +45,8 @@
 
 <!-- The AC column holds ONLY the number (1, 2, …); the id is AC-<number>. Keep
      the separator dashes moderate — do not widen them to the text width, or the
-     PDF export splits the column. -->
+     PDF export splits the column. Each AC is also its acceptance test (tests are
+     written in development). -->
 
 | AC  | Given (context)         | When (action)        | Then (expected result) |
 | --- | ----------------------- | -------------------- | ---------------------- |
@@ -60,18 +54,7 @@
 
 <!-- Duplicate the US-N block for more stories. -->
 
-## 3. Testing Strategy
-
-<!-- Define WHICH kinds of tests are needed and WHAT they validate — no function
-     names or code. -->
-
-| Type        | What it must validate                       | Related AC      |
-| ----------- | ------------------------------------------- | --------------- |
-| Unit        | <!-- e.g. field validation, no-dup rule --> | <!-- AC-1 -->   |
-| Integration | <!-- e.g. correct DB persistence -->        | <!-- AC-2 -->   |
-| E2E         | <!-- e.g. full UI flow — or N/A -->         | <!-- AC-1 -->   |
-
-## 4. Explicit Scope
+## 3. Explicit Scope
 
 ### Includes
 
@@ -81,14 +64,12 @@
 
 - <!-- what is explicitly out of scope -->
 
-## 5. Decisions (evidence)
+## 4. Domain and business rules
 
-<!-- Each key decision must cite the experiment that licensed it (a throwaway
-     probe: a DB query, a container run, an API call), with a re-checkable
-     handle — not an assumption. -->
+<!-- Ubiquitous language (DDD): domain glossary, cross-cutting business rules and
+     actors/permissions that apply to the stories. Business only — the
+     implementation lives in the issues. -->
 
-- **Decision**: <!-- the decision made -->. **Evidence**: <!-- experiment + result, with a re-checkable handle: a query, a command, `inline-code`, or a file:line -->.
-
-## Annexes
-
-<!-- Diagrams, mockups, technical notes, references, or any supporting material. -->
+- **Actors / permissions:** <!-- who can do what -->
+- **Glossary:** <!-- domain term: definition (each term defined once) -->
+- **Rules:** <!-- cross-cutting business rule shared by the stories -->
