@@ -182,6 +182,28 @@ void main() {
           isNot(contains('SPEC_AC_NOT_TRACED')));
     });
 
+    test('issue-as-code traces via the front-matter covers: list', () {
+      const issue =
+          '---\nkind: iq-issue\ncovers: [AC-1, AC-2]\n---\n\nA body with no ids.\n';
+      final r = gate.evaluate(_filledSpec, issues: const [issue]);
+      expect(r.violations.map((v) => v.code),
+          isNot(contains('SPEC_AC_NOT_TRACED')));
+    });
+
+    test('an AC mentioned only in the body prose (not in covers:) does NOT trace',
+        () {
+      // covers declares AC-1; AC-2 appears in the body but is not declared —
+      // the fix: prose/examples must not trace falsely (issue-as-code source of
+      // truth is covers:).
+      const issue =
+          '---\nkind: iq-issue\ncovers: [AC-1]\n---\n\nRelated to AC-2 somehow.\n';
+      final r = gate.evaluate(_filledSpec, issues: const [issue]);
+      final untraced =
+          r.violations.where((v) => v.code == 'SPEC_AC_NOT_TRACED');
+      expect(untraced.map((v) => v.message).join('\n'), contains('AC-2'));
+      expect(untraced.map((v) => v.message).join('\n'), isNot(contains('AC-1')));
+    });
+
     test('a user story with no acceptance criterion → SPEC_STORY_MISSING_AC', () {
       final noAc = _filledSpec.replaceAll(
         RegExp(r'\| AC-\d+ .*\n'),
