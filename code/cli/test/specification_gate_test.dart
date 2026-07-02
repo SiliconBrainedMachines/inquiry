@@ -37,13 +37,7 @@ const _filledSpec = '''
 | AC-1 | the form is open       | I submit valid data | the invoice is stored |
 | AC-2 | a duplicate number     | I submit it       | it is rejected         |
 
-## 3. Testing Strategy
-
-| Type | What it must validate | Related AC |
-| ---- | --------------------- | ---------- |
-| Unit | the no-duplicate rule | AC-2       |
-
-## 4. Explicit Scope
+## 3. Explicit Scope
 
 ### Includes
 
@@ -53,11 +47,9 @@ const _filledSpec = '''
 
 - Invoice approval workflow.
 
-## 5. Decisions (evidence)
+## 4. Domain and business rules
 
-- **Decision**: store invoices in the existing `billing` table. **Evidence**: `psql -c "\\d billing"` shows the columns already exist (run 2026-06-30).
-
-## Annexes
+- **Glossary:** an *invoice* is a billing document identified by a unique number.
 ''';
 
 /// A fully-filled Spanish (`--lang es`) specification — the gate must accept it
@@ -92,13 +84,7 @@ const _filledSpecEs = '''
 | ---- | ------------------ | -------------------- | ---------------------- |
 | AC-1 | el formulario abre | envío datos válidos  | la factura se almacena |
 
-## 3. Estrategia de Testing
-
-| Tipo | Qué debe validar          | AC asociados |
-| ---- | ------------------------- | ------------ |
-| Unit | la regla de no-duplicados | AC-1         |
-
-## 4. Alcance Explícito
+## 3. Alcance Explícito
 
 ### Incluye
 
@@ -108,11 +94,9 @@ const _filledSpecEs = '''
 
 - El flujo de aprobación de facturas.
 
-## 5. Decisiones (evidencia)
+## 4. Dominio y reglas de negocio
 
-- **Decisión**: reusar la tabla `billing`. **Evidencia**: `psql -c "\\d billing"` muestra las columnas (corrido 2026-06-30).
-
-## Anexos
+- **Glosario:** una *factura* es un documento de facturación con número único.
 ''';
 
 void main() {
@@ -222,14 +206,17 @@ void main() {
       expect(r.violations.map((v) => v.code), contains('SPEC_SCOPE_INCOMPLETE'));
     });
 
-    test('a decision without evidence → SPEC_DECISION_EVIDENCE_MISSING', () {
-      final noEvidence = _filledSpec.replaceAll(
-        RegExp(r'\*\*Evidence\*\*:.*'),
-        '**Evidence**: <!-- experiment + result -->.',
-      );
-      final r = gate.evaluate(noEvidence, issues: tracingIssues);
+    test('a lean charter without Testing or Decisions sections is still ready',
+        () {
+      // The spec is a business charter: testing moves to development (each AC is
+      // already a Given-When-Then test), and technical decisions move to the
+      // issues. Neither is gated any more.
+      final r = gate.evaluate(_filledSpec, issues: tracingIssues);
+      expect(r.passed, isTrue, reason: r.violations.join('\n'));
       expect(r.violations.map((v) => v.code),
-          contains('SPEC_DECISION_EVIDENCE_MISSING'));
+          isNot(contains('SPEC_NO_TESTING_STRATEGY')));
+      expect(r.violations.map((v) => v.code),
+          isNot(contains('SPEC_DECISION_EVIDENCE_MISSING')));
     });
 
     test('no user story at all → SPEC_NO_USER_STORY', () {
@@ -253,14 +240,5 @@ void main() {
           isNot(contains('SPEC_NO_COMMITMENT_DATE')));
     });
 
-    test('missing testing strategy rows → SPEC_NO_TESTING_STRATEGY', () {
-      final noStrategy = _filledSpec.replaceAll(
-        '| Unit | the no-duplicate rule | AC-2       |',
-        '| Unit | <!-- e.g. field validation --> | AC-2 |',
-      );
-      final r = gate.evaluate(noStrategy, issues: tracingIssues);
-      expect(r.violations.map((v) => v.code),
-          contains('SPEC_NO_TESTING_STRATEGY'));
-    });
   });
 }
