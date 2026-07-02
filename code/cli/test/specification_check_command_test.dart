@@ -28,13 +28,7 @@ const _filledSpec = '''
 | ---- | ---------------- | -------------- | --------------- |
 | AC-1 | the form is open | I submit data  | it is stored    |
 
-## 3. Testing Strategy
-
-| Type | What it must validate | Related AC |
-| ---- | --------------------- | ---------- |
-| Unit | the no-duplicate rule | AC-1       |
-
-## 4. Explicit Scope
+## 3. Explicit Scope
 
 ### Includes
 
@@ -44,9 +38,9 @@ const _filledSpec = '''
 
 - The approval workflow.
 
-## 5. Decisions (evidence)
+## 4. Domain and business rules
 
-- **Decision**: reuse the billing table. **Evidence**: `psql -c "\\d billing"` (run 2026-06-30).
+- **Glossary:** an *invoice* is a billing document with a unique number.
 ''';
 
 void main() {
