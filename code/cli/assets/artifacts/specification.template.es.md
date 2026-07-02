@@ -3,12 +3,12 @@
 <!-- iq:lang=es · Idioma de esta especificación y de TODOS sus artefactos derivados (issues, requirements, planes). Mantener consistente. No se renderiza en el PDF/DOCX. -->
 
 <!--
-  Todos los campos son obligatorios.
   Historias de usuario: User Stories Applied (Cohn, 2004).
   Acceptance Criteria: Given-When-Then — BDD (North, 2006).
-  Estrategia de testing: TDD (Beck, 2002).
-  Decisiones: licenciadas por evidencia de experimentos, no por inferencia.
+  Lenguaje del dominio: Domain-Driven Design (Evans, 2003).
 -->
+
+_Esta especificación es el **acuerdo de negocio** —a la manera de un project charter— entre el Product Owner y el equipo. Se escribe en el **lenguaje del dominio (DDD)**: negocio y comportamiento, no implementación (lo técnico vive en los issues)._
 
 ## Metadatos
 
@@ -22,14 +22,7 @@
 | Analista QA      | <!-- Nombre Apellido -->             |
 | Analista Dev     | <!-- Nombre Apellido -->             |
 | Fecha de emisión | {{DATE}}                             |
-
-## Contexto y reglas base
-
-<!-- Contenido de primera clase (no "cita"): glosario de términos del dominio,
-     supuestos y reglas transversales que aplican a todas las HU. Opcional pero
-     recomendado — evita repetir el contexto dentro de cada AC. -->
-
-- <!-- Término, supuesto o regla transversal -->
+| Fuentes          | <!-- PPT, mockups, correos, enlaces --> |
 
 ## 1. Fecha de compromiso
 
@@ -52,7 +45,8 @@
 
 <!-- La columna AC lleva SOLO el número (1, 2, …); el id es AC-<número>. Mantén
      los guiones del separador moderados — no los amplíes al ancho del texto, o
-     la exportación a PDF parte la columna. -->
+     la exportación a PDF parte la columna. Cada AC es, además, su test de
+     aceptación (los tests se escriben en desarrollo). -->
 
 | AC  | Given (Dado que)        | When (Cuando)        | Then (Entonces)        |
 | --- | ----------------------- | -------------------- | ---------------------- |
@@ -60,18 +54,7 @@
 
 <!-- Duplicar el bloque HU-N para más historias. -->
 
-## 3. Estrategia de Testing
-
-<!-- Definir QUÉ tipos de tests se necesitan y QUÉ validan, sin nombres de
-     funciones ni código. -->
-
-| Tipo        | Qué debe validar                                            | AC asociados   |
-| ----------- | ----------------------------------------------------------- | -------------- |
-| Unit        | <!-- Ej. Validación de campos, regla de no-duplicados -->   | <!-- AC-1 -->  |
-| Integration | <!-- Ej. Persistencia correcta en base de datos -->         | <!-- AC-2 -->  |
-| E2E         | <!-- Ej. Flujo completo desde la UI — o N/A -->             | <!-- AC-1 -->  |
-
-## 4. Alcance Explícito
+## 3. Alcance Explícito
 
 ### Incluye
 
@@ -81,14 +64,12 @@
 
 - <!-- Qué queda fuera explícitamente -->
 
-## 5. Decisiones (evidencia)
+## 4. Dominio y reglas de negocio
 
-<!-- Cada decisión clave debe citar el experimento que la sustenta (una sonda
-     desechable: una consulta a BD, correr un contenedor, llamar un API), con un
-     handle re-verificable — no una suposición. -->
+<!-- Lenguaje ubicuo (DDD): glosario del dominio, reglas de negocio transversales
+     y actores/permisos que aplican a las historias. Solo negocio — la
+     implementación va en los issues. -->
 
-- **Decisión**: <!-- la decisión tomada -->. **Evidencia**: <!-- experimento + resultado, con handle re-verificable: una consulta, un comando, `inline-code`, o un archivo:línea -->.
-
-## Anexos
-
-<!-- Diagramas, mockups, notas técnicas, referencias o cualquier material de apoyo. -->
+- **Actores / permisos:** <!-- quién puede hacer qué -->
+- **Glosario:** <!-- término del dominio: definición (cada término una sola vez) -->
+- **Reglas:** <!-- regla de negocio transversal que comparten las historias -->
