@@ -30,4 +30,4 @@ covers: []
 
 ## Criterios de aceptación cubiertos
 
-<!-- Repite aquí, para lectura humana, los AC del front-matter (covers): AC-1, AC-2, … -->
+<!-- Repite aquí, para lectura humana, los AC listados en el front-matter `covers:`. La trazabilidad del gate se toma del `covers:`, no de este texto. -->
