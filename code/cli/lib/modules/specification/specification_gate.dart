@@ -8,6 +8,8 @@
 /// least one decision cites evidence; and at least one issue is derived.
 library;
 
+import '../issue/front_matter.dart';
+
 /// One failed rule, with a stable [code] (mirrors the dev-cycle gate codes such
 /// as `DIAGNOSIS_EVIDENCE_MISSING`) and a human-readable [message].
 class SpecificationViolation {
@@ -173,8 +175,11 @@ class SpecificationGate {
   }
 
   /// Every filled AC declared in the User Stories must be referenced by at least
-  /// one derived issue — the AC → issue link of the traceability spine. An AC
-  /// `AC-N` is "traced" when the token `AC-N` appears in some issue body.
+  /// one derived issue — the AC → issue link of the traceability spine. For an
+  /// "issue as code" file (with `---` front-matter) the trace comes from its
+  /// declared `covers:` list — the canonical, machine-readable source — so prose
+  /// or template examples in the body never trace falsely. A freehand issue (no
+  /// front-matter) falls back to a raw-text scan.
   void _checkAcTraceability(
     Map<String, String> sections,
     List<String> issues,
@@ -188,9 +193,14 @@ class SpecificationGate {
       declared.addAll(_acRows(story.body)); // canonical AC-N ids
     }
 
+    final traceTexts = issues.map((issue) {
+      final doc = parseIssueDoc(issue);
+      return doc != null ? doc.covers.join(' ') : issue;
+    }).toList();
+
     for (final ac in declared) {
       final token = RegExp('\\b${RegExp.escape(ac)}\\b', caseSensitive: false);
-      final traced = issues.any((issue) => token.hasMatch(issue));
+      final traced = traceTexts.any((t) => token.hasMatch(t));
       if (!traced) {
         violations.add(SpecificationViolation(
           'SPEC_AC_NOT_TRACED',
