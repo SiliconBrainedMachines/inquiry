@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.17.1]
+### Fixed
+- **AC→issue traceability now reads the issue's `covers:` front-matter, not a raw text scan of the whole body** (found by dogfooding the brand-new `iq issue` scaffold — its example comment `AC-1, AC-2` in the body made the gate report those two ACs as "traced" while the `covers:` list was still empty). For an "issue as code" file (with `---` front-matter) the gate now derives the traced ACs from its declared `covers:` — the canonical, machine-readable source — so prose, comments, or template examples in the body never trace falsely. A freehand issue with no front-matter still falls back to the raw-text scan (back-compat). The issue templates also drop the literal example ids.
+
 ## [0.17.0]
 ### Added
 - **`iq issue` — "issue as code": derive an issue as a reviewable `.md`, then publish it to GitHub** (found by dogfooding — deriving issues was unstructured freehand, the language was easy to get wrong, and there was no path from the local `.md` to a real GitHub issue). Two commands plus bilingual templates:
