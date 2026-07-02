@@ -166,10 +166,10 @@ Turn a raw requisition (email, document, chat) into a coherent, actionable speci
 3. Gather the raw requisition from ALL its sources into `requisition.md` (AS-IS / TO-BE). Capture exactly what was asked — do not invent scope.
 4. For every decision you are unsure of, run a **throwaway experiment** to decide by EVIDENCE, not inference: read the DB, run code in a container, probe the API. These validate spec decisions; they are NOT product code. Record each under **Decisions (evidence)** with a re-checkable handle.
 5. Fill `specification.md` (see sections below). Set a committed delivery date (§1, ISO `YYYY-MM-DD` — the gate requires it); each user story needs ≥1 Given-When-Then acceptance criterion; state the testing strategy and the explicit scope (includes / does NOT include).
-6. Derive the issues: one tracked `issue-<slug>.md` per unit of work, each tracing to its acceptance criteria. **Write them in the artifact's declared language** — read the `<!-- iq:lang=xx -->` directive at the top of `specification.md` (e.g. `iq:lang=es` → issues in Spanish) and keep it consistent across all derived artifacts.
+6. Derive the issues with **`iq issue new <slug> <name> [--repo owner/repo]`** — it scaffolds `requisitions/<slug>/issue-<name>.md` ("issue as code") **inheriting the spec's `iq:lang`** (so a Spanish spec yields Spanish issues). Fill each from evidence and list the acceptance criteria it covers in the front-matter `covers:`. One issue per unit of work (e.g. one per repo).
 7. `iq specification check <slug>` — the CLI runs the `specification_ready` gate. Fix exactly what it reports (do NOT skip a violation) until it exits 0.
-8. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, prepare a `gh issue edit` instead of a new one.
-9. Print the `gh issue create` / `gh issue edit` commands (do NOT run them blind) and present the specification + issues to the human. Stop — the human reviews and approves; the doc lands on `main` via a PR (the QA review gate).
+8. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, edit that one instead.
+9. Publish with **`iq issue publish <slug> <name> --plan`** (Terraform-style: previews the `gh issue create` from the front-matter) and, once the human approves, `--apply` to create it. Present the specification + issues to the human — the doc lands on `main` via a PR (the QA review gate).
 
 ## specification.md — fill these sections
 ${sections.map((s) => '- **$s**').join('\n')}
