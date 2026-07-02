@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.17.0]
+### Added
+- **`iq issue` — "issue as code": derive an issue as a reviewable `.md`, then publish it to GitHub** (found by dogfooding — deriving issues was unstructured freehand, the language was easy to get wrong, and there was no path from the local `.md` to a real GitHub issue). Two commands plus bilingual templates:
+  - **`iq issue new <slug> <name> [--repo owner/repo] [--lang <en|es>]`** scaffolds `requisitions/<slug>/issue-<name>.md` from the single-source `issue.template.{en,es}.md`, **inheriting the specification's `iq:lang`** so a Spanish spec yields Spanish issues (no flag to remember). The `.md` carries YAML front-matter (`title`, `repo`, `labels`, `spec`, `covers`, `lang`) — the single source of truth — plus a structured body (Context, Scope, Technical decisions/evidence, AC covered). Idempotent. `covers:` feeds the `specification_ready` gate's AC→issue traceability.
+  - **`iq issue publish <slug> <name> [--plan|--apply]`** turns that `.md` into a GitHub issue via `gh`, Terraform-style: **`--plan`** (the default, safe) parses the front-matter and prints the exact `gh issue create` it would run without creating anything; **`--apply`** executes it and returns the new issue URL. The front-matter is the source of truth; only the body is published.
+  - The `/iq-specification` skill now drives the issue step through `iq issue new` / `iq issue publish` instead of freehand `gh issue create`.
+
 ## [0.16.1]
 ### Added
 - **Explicit artifact-language directive** (`<!-- iq:lang=xx -->`) at the top of the requisition and specification templates (found by dogfooding — issues were being derived in English from a Spanish spec because the language was only implicit in the `--lang` flag at scaffold time). The `es` templates carry `iq:lang=es`, the `en` templates `iq:lang=en`; it is a machine- and human-readable HTML comment (invisible in the PDF/DOCX) that declares the language of the artifact **and all its derived artifacts** (issues, requirements, plans). The `/iq-specification` skill now instructs the brain to read it and write the derived issues in that language, keeping the whole requisition → specification → issues chain consistent.
