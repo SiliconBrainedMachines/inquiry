@@ -17,25 +17,25 @@ void buildIssueModule(ModuleBuilder m, {required Assets assets}) {
   final resolver = TemplateResolver(assets);
 
   m.command<IssueNewInput, IssueNewOutput>(
-    'new <slug> <name>',
+    'new <name>',
     (req) => IssueNewCommand(
       IssueNewInput.fromCliRequest(req),
       resolver: resolver,
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Scaffold requisitions/<slug>/issue-<name>.md (issue as code). '
+        'Scaffold issue-<name>.md in the active requisition (or --slug <slug>). '
         '--repo owner/repo pre-fills the target; language inherits from the spec.',
   );
 
   m.command<IssuePublishInput, IssuePublishOutput>(
-    'publish <slug> <name>',
+    'publish <name>',
     (req) => IssuePublishCommand(
       IssuePublishInput.fromCliRequest(req),
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Create the GitHub issue from issue-<name>.md via gh. '
-        '--plan (default) previews the command; --apply runs it.',
+        'Create the GitHub issue from issue-<name>.md via gh (active requisition '
+        'or --slug <slug>). --plan (default) previews; --apply runs it.',
   );
 }

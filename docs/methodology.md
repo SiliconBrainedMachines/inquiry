@@ -37,10 +37,12 @@ single sense) names exactly the petition and clashes with nothing.
 | 5 | **End** | QA + Dev | PR / merge | **accepted** | code review / PR gate |
 | 6 | **Evolution** | — | methodology mutations | improve the method | ★ *original to Inquiry* (Darwinian selection) |
 
-> **Two teams, two workspaces.** QA owns stage 1 in `requisitions/<slug>/` (lands
-> on `main` via a doc-PR — the QA review gate). Dev owns stages 2–4 in
-> `cleanrooms/<branch>/` + the code. The **GitHub issues are the handoff** —
-> tracked in-repo as `issue-<slug>.md` (source of truth; GitHub is a projection).
+> **Two teams, two workspaces.** QA owns stage 1 in
+> `docs/requisitions/<YYYYMMDD>-<slug>/` — a **git-ignored local authoring
+> workspace** (the durable artifacts are the published GitHub issues, plus the
+> code + tests). Dev owns stages 2–4 in `cleanrooms/<branch>/` + the code. The
+> **GitHub issues are the handoff**, published from the local `issue-<name>.md`
+> ("issue as code").
 
 ## `diagnosis` — an original contribution
 

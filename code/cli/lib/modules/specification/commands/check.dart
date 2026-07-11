@@ -1,5 +1,6 @@
-/// `iq specification check <slug>` — runs the `specification_ready` gate over
-/// `requisitions/<slug>/specification.md`.
+/// `iq specification check [--slug <slug>]` — runs the `specification_ready`
+/// gate over the active requisition's `specification.md`
+/// (`.inquiry/specification.yaml`; `--slug` overrides).
 ///
 /// The CLI runs the gate (Constitution I); the brain fixes exactly what it
 /// reports. The specification phase is outside the dev FSM, so this is a
@@ -15,16 +16,19 @@ import 'package:path/path.dart' as p;
 
 import '../slug.dart';
 import '../specification_gate.dart';
+import '../workspace.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
 class SpecificationCheckInput extends Input {
-  final String slug;
+  /// The requisition workspace override; `null` → the active requisition
+  /// recorded in `.inquiry/specification.yaml`.
+  final String? slug;
 
-  SpecificationCheckInput({required this.slug});
+  SpecificationCheckInput({this.slug});
 
   factory SpecificationCheckInput.fromCliRequest(CliRequest req) =>
-      SpecificationCheckInput(slug: normalizeSlug(req.param('slug') ?? ''));
+      SpecificationCheckInput(slug: optionalSlug(req.flagString('slug')));
 
   @override
   Map<String, dynamic> toJson() => {'slug': slug};
@@ -64,18 +68,25 @@ class SpecificationCheckCommand
     SpecificationGate? gate,
   }) : gate = gate ?? SpecificationGate();
 
-  String get _dir => p.join(workingDirectory, 'requisitions', input.slug);
+  String? get _dir => resolveRequisitionDir(workingDirectory, input.slug);
 
-  File get _specFile => File(p.join(_dir, 'specification.md'));
+  File? get _specFile {
+    final d = _dir;
+    return d == null ? null : File(p.join(d, 'specification.md'));
+  }
+
+  /// Display name for messages: the explicit slug, else the resolved folder.
+  String get _name {
+    final d = _dir;
+    return input.slug ?? (d != null ? p.basename(d) : 'active requisition');
+  }
 
   @override
   String? validate() {
-    if (input.slug.isEmpty) {
-      return 'A <slug> is required: iq specification check <slug>';
-    }
-    if (!_specFile.existsSync()) {
-      return 'No specification found at requisitions/${input.slug}/'
-          'specification.md — run `iq specification new ${input.slug}` first.';
+    final spec = _specFile;
+    if (spec == null || !spec.existsSync()) {
+      return 'No specification found — run `iq specification new <slug>` first, '
+          'or point at one with --slug <slug>.';
     }
     return null;
   }
@@ -83,20 +94,20 @@ class SpecificationCheckCommand
   @override
   Future<SpecificationCheckOutput> execute() async {
     final result = gate.evaluate(
-      _specFile.readAsStringSync(),
+      _specFile!.readAsStringSync(),
       issues: _issueBodies(),
     );
 
     if (result.passed) {
       return SpecificationCheckOutput(
         ready: true,
-        message: 'specification "${input.slug}" is ready — '
+        message: 'specification "$_name" is ready — '
             'every rule of the specification_ready gate passes.',
       );
     }
 
     final lines = <String>[
-      'specification "${input.slug}" is NOT ready — fix these and re-run:',
+      'specification "$_name" is NOT ready — fix these and re-run:',
       for (final v in result.violations) '  - ${v.code}: ${v.message}',
     ];
     return SpecificationCheckOutput(ready: false, message: lines.join('\n'));
@@ -105,7 +116,9 @@ class SpecificationCheckCommand
   /// The contents of the `issue-*.md` files derived under the slug's workspace —
   /// the gate reads them to verify AC → issue traceability.
   List<String> _issueBodies() {
-    final dir = Directory(_dir);
+    final d = _dir;
+    if (d == null) return const [];
+    final dir = Directory(d);
     if (!dir.existsSync()) return const [];
     return dir
         .listSync()

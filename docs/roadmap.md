@@ -65,9 +65,15 @@ Concrete friction from real use (two live requirements; see
 - **`iq issue publish --plan` should validate labels** against the target repo and, when a
   label is missing, print the `gh label create …` command to create it. Currently the check
   fails late at `--apply`.
-- **`requisitions/` lifecycle.** The per-requirement artifact directory accumulates over time
-  and will become noise; it needs an archival/rollup answer (and the artifacts are currently
-  vulnerable when uncommitted). Open design question, not yet a decision.
+- **`requisitions/` lifecycle — RESOLVED (2026-07).** Requisitions moved to
+  **`docs/requisitions/<YYYYMMDD>-<slug>/`** (documentation, like ADRs; the date prefix sorts
+  chronologically) and are **git-ignored as a local authoring workspace** — the durable
+  artifacts are the published GitHub issues (+ code + tests carrying the spec→issue→test spine).
+  That removes the accumulation problem from the repo entirely. `iq specification new` records
+  the **active requisition** in `.inquiry/specification.yaml`, so `issue new` / `specification
+  check` / `issue publish` are **slug-less** (with a `--slug` override). `iq init` /
+  `specification new` ensure `.inquiry/` and `docs/requisitions/` are git-ignored. Deferred:
+  an explicit `active/` vs `archive/` split if a team later wants selected requisitions tracked.
 
 ## Anti-goals for 0.7.x
 

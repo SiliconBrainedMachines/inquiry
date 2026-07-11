@@ -1,5 +1,6 @@
-/// `iq issue new <slug> <name> [--repo owner/repo] [--lang <lang>]` — scaffolds
-/// an "issue as code" file `requisitions/<slug>/issue-<name>.md`.
+/// `iq issue new <name> [--slug <slug>] [--repo owner/repo] [--lang <lang>]` —
+/// scaffolds an "issue as code" file `issue-<name>.md` in the active requisition
+/// (`.inquiry/specification.yaml`; `--slug` overrides).
 ///
 /// The CLI is the **hands** (Constitution I): it writes the issue skeleton from
 /// the single-source bilingual template, **inheriting the language** from the
@@ -16,12 +17,14 @@ import 'package:path/path.dart' as p;
 
 import '../../../templates/template_resolver.dart';
 import '../../specification/slug.dart';
+import '../../specification/workspace.dart';
 
 // ─── Input ────────────────────────────────────────────────────────────────
 
 class IssueNewInput extends Input {
-  /// The requisition workspace: `requisitions/<slug>/`.
-  final String slug;
+  /// The requisition workspace override; `null` → the active requisition
+  /// recorded in `.inquiry/specification.yaml`.
+  final String? slug;
 
   /// The issue name → `issue-<name>.md`.
   final String name;
@@ -32,10 +35,10 @@ class IssueNewInput extends Input {
   /// Optional language override; when null it is inherited from the spec.
   final String? lang;
 
-  IssueNewInput({required this.slug, required this.name, this.repo, this.lang});
+  IssueNewInput({this.slug, required this.name, this.repo, this.lang});
 
   factory IssueNewInput.fromCliRequest(CliRequest req) => IssueNewInput(
-        slug: normalizeSlug(req.param('slug') ?? ''),
+        slug: optionalSlug(req.flagString('slug')),
         name: (req.param('name') ?? '').trim(),
         repo: req.flagString('repo'),
         lang: req.flagString('lang'),
@@ -80,38 +83,49 @@ class IssueNewCommand implements Command<IssueNewInput, IssueNewOutput> {
     required this.workingDirectory,
   });
 
-  String get _dir => p.join(workingDirectory, 'requisitions', input.slug);
+  /// The active requisition folder (absolute), or null when none resolves.
+  String? get _dir => resolveRequisitionDir(workingDirectory, input.slug);
 
   @override
   String? validate() {
-    if (input.slug.isEmpty || input.name.isEmpty) {
-      return 'Usage: iq issue new <slug> <name> [--repo owner/repo]';
+    if (input.name.isEmpty) {
+      return 'Usage: iq issue new <name> [--slug <slug>] [--repo owner/repo]';
     }
     if (!_namePattern.hasMatch(input.name)) {
       return 'Invalid name "${input.name}": use lowercase letters, digits and '
           'single hyphens (e.g. db, api, app, erp).';
     }
-    if (!Directory(_dir).existsSync()) {
-      return 'No requisition workspace at requisitions/${input.slug}/ — run '
-          '`iq specification new ${input.slug}` first.';
+    if (_dir == null) {
+      return 'No requisition workspace found — run `iq specification new '
+          '<slug>` first, or point at one with --slug <slug>.';
     }
     return null;
   }
 
   @override
   Future<IssueNewOutput> execute() async {
-    final relPath = p.posix.join('requisitions', input.slug, 'issue-${input.name}.md');
-    final file = File(p.join(_dir, 'issue-${input.name}.md'));
+    final dir = _dir;
+    if (dir == null) {
+      return IssueNewOutput(
+        message: 'No requisition workspace found — run `iq specification new '
+            '<slug>` first, or point at one with --slug <slug>.',
+      );
+    }
+    final relDir =
+        p.posix.joinAll(p.split(p.relative(dir, from: workingDirectory)));
+    final relPath = p.posix.join(relDir, 'issue-${input.name}.md');
+    final file = File(p.join(dir, 'issue-${input.name}.md'));
 
     if (file.existsSync()) {
       return IssueNewOutput(message: '  kept     $relPath (already exists)');
     }
 
-    final lang = input.lang ?? _specLang() ?? 'en';
+    final lang = input.lang ?? _specLang(dir) ?? 'en';
     final resolution = resolver.resolve('issue', lang: lang);
 
     final content = resolution.content
-        .replaceAll('{{SLUG}}', input.slug)
+        .replaceAll('{{SPEC}}', p.posix.join(relDir, 'specification.md'))
+        .replaceAll('{{SLUG}}', input.slug ?? p.basename(dir))
         .replaceAll('{{REPO}}', input.repo ?? '');
     file.writeAsStringSync(content);
 
@@ -121,15 +135,15 @@ class IssueNewCommand implements Command<IssueNewInput, IssueNewOutput> {
       if (resolution.notice != null) '  note     ${resolution.notice}',
       '',
       'Next: fill its Contexto/Alcance/Decisiones from evidence, set `repo:` and '
-          '`covers:` in the front-matter, then `iq issue publish ${input.slug} '
-          '${input.name} --plan`.',
+          '`covers:` in the front-matter, then `iq issue publish ${input.name} '
+          '--plan`.',
     ];
     return IssueNewOutput(message: lines.join('\n'));
   }
 
   /// The language declared by the spec's `<!-- iq:lang=xx -->` directive, if any.
-  String? _specLang() {
-    final spec = File(p.join(_dir, 'specification.md'));
+  String? _specLang(String dir) {
+    final spec = File(p.join(dir, 'specification.md'));
     if (!spec.existsSync()) return null;
     final m = RegExp(r'iq:lang\s*=\s*([A-Za-z-]+)')
         .firstMatch(spec.readAsStringSync());

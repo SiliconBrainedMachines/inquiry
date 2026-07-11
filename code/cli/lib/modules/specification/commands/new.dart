@@ -1,8 +1,9 @@
 /// `iq specification new <slug> [--lang <lang>]` — scaffolds a QA specification
 /// workspace.
 ///
-/// The CLI is the **hands** (Constitution I): it creates `requisitions/<slug>/`
-/// and fills `requisition.md` + `specification.md` from the single-source
+/// The CLI is the **hands** (Constitution I): it creates
+/// `docs/requisitions/<YYYYMMDD>-<slug>/` (git-ignored) and fills
+/// `requisition.md` + `specification.md` from the single-source
 /// templates. The brain (QA analyst or model) then writes the actual content —
 /// the requisition's AS-IS/TO-BE and the specification's user stories +
 /// acceptance criteria. Idempotent: an artifact that already exists is left
@@ -15,8 +16,10 @@ import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
+import '../../../src/gitignore.dart';
 import '../../../templates/template_resolver.dart';
 import '../slug.dart';
+import '../workspace.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -65,8 +68,11 @@ class SpecificationNewCommand
 
   final TemplateResolver resolver;
 
-  /// Where `requisitions/` is rooted — the QA workspace (repo root in prod).
+  /// Where `docs/requisitions/` is rooted — the QA workspace (repo root in prod).
   final String workingDirectory;
+
+  /// Clock, injectable for deterministic dated-folder tests.
+  final DateTime Function() _now;
 
   /// The localized artifacts this phase scaffolds, in display order.
   static const _artifacts = ['requisition', 'specification'];
@@ -77,7 +83,8 @@ class SpecificationNewCommand
     this.input, {
     required this.resolver,
     required this.workingDirectory,
-  });
+    DateTime Function()? now,
+  }) : _now = now ?? DateTime.now;
 
   @override
   String? validate() {
@@ -93,8 +100,15 @@ class SpecificationNewCommand
 
   @override
   Future<SpecificationNewOutput> execute() async {
-    final today = DateTime.now().toIso8601String().substring(0, 10);
-    final dir = p.join(workingDirectory, 'requisitions', input.slug);
+    // Infrastructure first: keep the local workspace (`.inquiry/`,
+    // `docs/requisitions/`) out of git before writing anything into it.
+    final gitignoreStatus = ensureGitignoreEntries(workingDirectory);
+
+    final now = _now();
+    final today = now.toIso8601String().substring(0, 10);
+    final folder = datedFolder(input.slug, now);
+    final relDir = requisitionRelDir(folder);
+    final dir = requisitionDir(workingDirectory, folder);
     Directory(dir).createSync(recursive: true);
 
     final created = <String>[];
@@ -102,7 +116,7 @@ class SpecificationNewCommand
     final notices = <String>[];
 
     for (final artifact in _artifacts) {
-      final relPath = p.posix.join('requisitions', input.slug, '$artifact.md');
+      final relPath = p.posix.join(relDir, '$artifact.md');
       final file = File(p.join(dir, '$artifact.md'));
 
       final resolution = resolver.resolve(artifact, lang: input.lang);
@@ -118,12 +132,25 @@ class SpecificationNewCommand
       created.add(relPath);
     }
 
+    if (gitignoreStatus != null) notices.add(gitignoreStatus);
+
+    // Record the active requisition so `issue new` / `specification check` /
+    // `issue publish` need not repeat the (now dated) slug.
+    writeActiveRequisition(
+      workingDirectory,
+      slug: input.slug,
+      relDir: relDir,
+      lang: input.lang,
+      isoDate: today,
+    );
+
     return SpecificationNewOutput(
-      message: _renderMessage(created, skipped, notices),
+      message: _renderMessage(relDir, created, skipped, notices),
     );
   }
 
   String _renderMessage(
+    String relDir,
     List<String> created,
     List<String> skipped,
     List<String> notices,
@@ -143,9 +170,9 @@ class SpecificationNewCommand
     }
     lines.add('');
     lines.add(
-      'Next: fill requisitions/${input.slug}/requisition.md (the need, '
-      'AS-IS/TO-BE), then specification.md (user stories + acceptance '
-      'criteria), then derive the issues.',
+      'Next: fill $relDir/requisition.md (the need, AS-IS/TO-BE), then '
+      'specification.md (user stories + acceptance criteria), then derive the '
+      'issues.',
     );
     return lines.join('\n');
   }

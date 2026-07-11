@@ -8,6 +8,7 @@ import 'package:inquiry_cli/templates/template_resolver.dart';
 import 'package:inquiry_cli/modules/issue/front_matter.dart';
 import 'package:inquiry_cli/modules/issue/commands/new.dart';
 import 'package:inquiry_cli/modules/issue/commands/publish.dart';
+import 'package:inquiry_cli/modules/specification/workspace.dart';
 
 void main() {
   final resolver = TemplateResolver(Assets(root: Directory.current.path));
@@ -19,17 +20,31 @@ void main() {
     if (tempDir.existsSync()) tempDir.deleteSync(recursive: true);
   });
 
-  // Scaffolds a requisition workspace with a spec carrying the given iq:lang.
+  // Scaffolds a LEGACY requisition workspace (repo-root requisitions/<slug>/).
   void seedSpec(String slug, {String lang = 'es'}) {
     final f = File(p.join(tempDir.path, 'requisitions', slug, 'specification.md'));
     f.createSync(recursive: true);
     f.writeAsStringSync('# Especificación\n\n<!-- iq:lang=$lang -->\n');
   }
 
+  // Seeds a dated requisition under docs/requisitions/ + the active pointer.
+  void seedActive(String slug, {String lang = 'es'}) {
+    final folder = '20260709-$slug';
+    final f = File(
+        p.join(tempDir.path, 'docs', 'requisitions', folder, 'specification.md'));
+    f.createSync(recursive: true);
+    f.writeAsStringSync('# Especificación\n\n<!-- iq:lang=$lang -->\n');
+    writeActiveRequisition(tempDir.path,
+        slug: slug,
+        relDir: 'docs/requisitions/$folder',
+        lang: lang,
+        isoDate: '2026-07-09');
+  }
+
   String issuePath(String slug, String name) =>
       p.join(tempDir.path, 'requisitions', slug, 'issue-$name.md');
 
-  IssueNewCommand newCmd(String slug, String name, {String? repo, String? lang}) =>
+  IssueNewCommand newCmd(String? slug, String name, {String? repo, String? lang}) =>
       IssueNewCommand(
         IssueNewInput(slug: slug, name: name, repo: repo, lang: lang),
         resolver: resolver,
@@ -104,6 +119,18 @@ Some content.
     test('validate rejects a missing workspace', () {
       expect(newCmd('nope', 'db').validate(), contains('No requisition workspace'));
     });
+
+    test('resolves the active requisition from the pointer (no --slug)',
+        () async {
+      seedActive('feat', lang: 'es');
+      final out = await newCmd(null, 'db').execute();
+      expect(out.message, contains('(es)'));
+      final file = File(p.join(
+          tempDir.path, 'docs', 'requisitions', '20260709-feat', 'issue-db.md'));
+      expect(file.existsSync(), isTrue);
+      expect(file.readAsStringSync(),
+          contains('spec: "docs/requisitions/20260709-feat/specification.md"'));
+    });
   });
 
   group('IssuePublishCommand', () {
@@ -113,7 +140,7 @@ Some content.
       f.writeAsStringSync(content);
     }
 
-    IssuePublishCommand pub(String slug, String name,
+    IssuePublishCommand pub(String? slug, String name,
             {bool apply = false, ProcessRunner? runner}) =>
         IssuePublishCommand(
           IssuePublishInput(slug: slug, name: name, apply: apply),
@@ -177,6 +204,17 @@ body
       final out = await pub('feature', 'db').execute();
       expect(out.ok, isFalse);
       expect(out.message, contains('repo: owner/repo'));
+    });
+
+    test('publishes from the active requisition pointer (no --slug)', () async {
+      seedActive('feat');
+      File(p.join(tempDir.path, 'docs', 'requisitions', '20260709-feat',
+          'issue-db.md'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(filled);
+      final out = await pub(null, 'db').execute();
+      expect(out.ok, isTrue);
+      expect(out.message, contains('--repo owner/impulsa-db'));
     });
   });
 }

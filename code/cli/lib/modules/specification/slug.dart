@@ -11,6 +11,12 @@
 ///   requisitions/ticket-purchase/specification.md    → ticket-purchase
 library;
 
+/// The `--slug` override for downstream commands (`issue new/publish`,
+/// `specification check`): `null` when absent/blank (→ use the active
+/// requisition pointer), otherwise the normalized bare slug.
+String? optionalSlug(String? raw) =>
+    (raw == null || raw.trim().isEmpty) ? null : normalizeSlug(raw);
+
 String normalizeSlug(String raw) {
   var s = raw.trim().replaceAll('\\', '/');
   // Drop a leading "./" and any trailing slashes (tab-completion adds one).

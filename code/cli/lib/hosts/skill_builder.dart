@@ -161,15 +161,15 @@ description: Run the QA specification phase by hand — turn a raw requisition i
 Turn a raw requisition (email, document, chat) into a coherent, actionable specification and the issues it yields — every key decision licensed by evidence from a throwaway experiment, not by inference.
 
 ## Steps
-1. `iq specification new <slug>` (add `--lang es` for Spanish) — the CLI scaffolds `requisitions/<slug>/requisition.md` + `specification.md`. Inputs/outputs are files on disk, not your memory.
+1. `iq specification new <slug>` (add `--lang es` for Spanish) — the CLI scaffolds `docs/requisitions/<YYYYMMDD>-<slug>/requisition.md` + `specification.md` (a **git-ignored local workspace**) and records it as the **active requisition**, so the later commands need no slug. Inputs/outputs are files on disk, not your memory.
 2. `iq ape prompt --name dewey` — read the method (Deweyan inquiry) and apply it.
 3. Gather the raw requisition from ALL its sources into `requisition.md` (AS-IS / TO-BE). Capture exactly what was asked — do not invent scope.
 4. For every decision you are unsure of, run a **throwaway experiment** to decide by EVIDENCE, not inference: read the DB, run code in a container, probe the API. These validate decisions; they are NOT product code. Record each **technical** decision with a re-checkable handle in the **issues** (step 6) — the specification stays business-level.
 5. Fill `specification.md` — a lean **business charter** in the domain language (DDD), not implementation. Set a committed delivery date (§1, ISO `YYYY-MM-DD` — the gate requires it); write each user story with ≥1 Given-When-Then acceptance criterion (§2); state the explicit scope (§3, includes / does NOT include); capture the domain glossary and business rules (§4).
-6. Derive the issues with **`iq issue new <slug> <name> [--repo owner/repo]`** — it scaffolds `requisitions/<slug>/issue-<name>.md` ("issue as code") **inheriting the spec's `iq:lang`** (so a Spanish spec yields Spanish issues). Fill each from evidence and list the acceptance criteria it covers in the front-matter `covers:`. One issue per unit of work (e.g. one per repo).
-7. `iq specification check <slug>` — the CLI runs the `specification_ready` gate. Fix exactly what it reports (do NOT skip a violation) until it exits 0.
+6. Derive the issues with **`iq issue new <name> [--repo owner/repo]`** — it scaffolds `issue-<name>.md` in the active requisition ("issue as code") **inheriting the spec's `iq:lang`** (so a Spanish spec yields Spanish issues). Fill each from evidence and list the acceptance criteria it covers in the front-matter `covers:`. One issue per unit of work (e.g. one per repo). (`--slug <slug>` targets a different requisition.)
+7. `iq specification check` — the CLI runs the `specification_ready` gate over the active requisition. Fix exactly what it reports (do NOT skip a violation) until it exits 0.
 8. Dedup-check before creating: `gh issue list --search "<keywords>"`. If a too-similar issue exists, edit that one instead.
-9. Publish with **`iq issue publish <slug> <name> --plan`** (Terraform-style: previews the `gh issue create` from the front-matter) and, once the human approves, `--apply` to create it. Present the specification + issues to the human — the doc lands on `main` via a PR (the QA review gate).
+9. Publish with **`iq issue publish <name> --plan`** (Terraform-style: previews the `gh issue create` from the front-matter) and, once the human approves, `--apply` to create it. The **published GitHub issues are the durable artifacts**; the requisition stays a local (git-ignored) workspace. Present the specification + issues to the human for review.
 
 ## specification.md — fill these sections
 ${sections.map((s) => '- **$s**').join('\n')}
@@ -179,8 +179,8 @@ Each user story MUST carry ≥1 Given-When-Then AC; the scope MUST state what is
 ## Done when
 - [ ] `requisition.md` captures the need (AS-IS / TO-BE) from all sources.
 - [ ] `specification.md` is filled — committed date, every user story with ≥1 Given-When-Then AC, explicit scope (includes/excludes), and the domain glossary + business rules.
-- [ ] `iq specification check <slug>` exits 0.
-- [ ] At least one `issue-<slug>.md` is derived, dedup-checked, with its `gh` command printed.
+- [ ] `iq specification check` exits 0.
+- [ ] At least one `issue-<name>.md` is derived, dedup-checked, with its `gh` command printed.
 - [ ] The specification is presented to the human for review.
 ''';
   }
