@@ -38,7 +38,7 @@ void main() {
       });
 
       test('runs the specification_ready gate via the CLI', () {
-        expect(md, contains('iq specification check <slug>'));
+        expect(md, contains('iq specification check'));
         expect(md, contains('specification_ready'));
       });
 
@@ -65,7 +65,7 @@ void main() {
 
       test('derives + dedup-checks issues via gh', () {
         expect(md, contains('gh issue list --search'));
-        expect(md, contains('issue-<slug>.md'));
+        expect(md, contains('issue-<name>.md'));
       });
 
       test('has a Done-when checklist and presents to the human', () {

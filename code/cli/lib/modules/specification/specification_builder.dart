@@ -28,13 +28,13 @@ void buildSpecificationModule(ModuleBuilder m, {required Assets assets}) {
   );
 
   m.command<SpecificationCheckInput, SpecificationCheckOutput>(
-    'check <slug>',
+    'check',
     (req) => SpecificationCheckCommand(
       SpecificationCheckInput.fromCliRequest(req),
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Run the specification_ready gate over requisitions/<slug>/'
-        'specification.md — exits 0 only when the spec is healthy.',
+        'Run the specification_ready gate over the active requisition '
+        '(or --slug <slug>) — exits 0 only when the spec is healthy.',
   );
 }

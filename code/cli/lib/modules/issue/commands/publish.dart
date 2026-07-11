@@ -1,5 +1,6 @@
-/// `iq issue publish <slug> <name> [--plan|--apply]` — turns an "issue as code"
-/// file into a real GitHub issue via `gh`.
+/// `iq issue publish <name> [--slug <slug>] [--plan|--apply]` — turns an
+/// "issue as code" file (in the active requisition) into a real GitHub issue via
+/// `gh`.
 ///
 /// Terraform-style: **`--plan`** (the default, safe) parses the front-matter and
 /// prints the exact `gh issue create` it would run — nothing is created.
@@ -15,6 +16,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import '../../specification/slug.dart';
+import '../../specification/workspace.dart';
 import '../front_matter.dart';
 
 typedef ProcessRunner = Future<ProcessResult> Function(
@@ -25,16 +27,18 @@ typedef ProcessRunner = Future<ProcessResult> Function(
 // ─── Input ────────────────────────────────────────────────────────────────
 
 class IssuePublishInput extends Input {
-  final String slug;
+  /// The requisition workspace override; `null` → the active requisition
+  /// recorded in `.inquiry/specification.yaml`.
+  final String? slug;
   final String name;
 
   /// When true, execute `gh issue create`; otherwise only plan (the default).
   final bool apply;
 
-  IssuePublishInput({required this.slug, required this.name, this.apply = false});
+  IssuePublishInput({this.slug, required this.name, this.apply = false});
 
   factory IssuePublishInput.fromCliRequest(CliRequest req) => IssuePublishInput(
-        slug: normalizeSlug(req.param('slug') ?? ''),
+        slug: optionalSlug(req.flagString('slug')),
         name: (req.param('name') ?? '').trim(),
         apply: req.flagBool('apply'),
       );
@@ -78,28 +82,27 @@ class IssuePublishCommand
     ProcessRunner? runProcess,
   }) : runProcess = runProcess ?? Process.run;
 
-  File get _file => File(p.join(
-        workingDirectory,
-        'requisitions',
-        input.slug,
-        'issue-${input.name}.md',
-      ));
+  File? get _file {
+    final d = resolveRequisitionDir(workingDirectory, input.slug);
+    return d == null ? null : File(p.join(d, 'issue-${input.name}.md'));
+  }
 
   @override
   String? validate() {
-    if (input.slug.isEmpty || input.name.isEmpty) {
-      return 'Usage: iq issue publish <slug> <name> [--plan|--apply]';
+    if (input.name.isEmpty) {
+      return 'Usage: iq issue publish <name> [--slug <slug>] [--plan|--apply]';
     }
-    if (!_file.existsSync()) {
-      return 'No issue found at requisitions/${input.slug}/issue-${input.name}.md'
-          ' — run `iq issue new ${input.slug} ${input.name}` first.';
+    final f = _file;
+    if (f == null || !f.existsSync()) {
+      return 'No issue "issue-${input.name}.md" found in the active requisition '
+          '— run `iq issue new ${input.name}` first, or pass --slug <slug>.';
     }
     return null;
   }
 
   @override
   Future<IssuePublishOutput> execute() async {
-    final doc = parseIssueDoc(_file.readAsStringSync());
+    final doc = parseIssueDoc(_file!.readAsStringSync());
     if (doc == null) {
       return _fail('The issue file has no valid `---` front-matter block.');
     }
