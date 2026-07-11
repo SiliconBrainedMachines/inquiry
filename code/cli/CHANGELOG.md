@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.19.0]
+### Changed
+- **Requisitions moved to a git-ignored, chronologically-ordered local workspace, and the downstream commands became slug-less** (found by dogfooding — the repo-root `requisitions/` accumulated *alphabetically, not by age*, and committing each requisition forced a redundant "requisition-only" PR when the durable artifacts are really the published GitHub issues).
+  - **Location:** `iq specification new <slug>` now scaffolds **`docs/requisitions/<YYYYMMDD>-<slug>/`** — requisitions are documentation (like ADRs), and the compact hyphen-free date prefix sorts an alphabetical listing **chronologically**.
+  - **Git-ignored authoring workspace:** `docs/requisitions/` is local — the durable artifacts are the **published GitHub issues** (plus the code + tests that carry the spec→issue→test spine). `iq init` **and** `iq specification new` ensure `.inquiry/` and `docs/requisitions/` are in `.gitignore` (shared `ensureGitignoreEntries`). This removes the repo-accumulation problem entirely.
+  - **Active-requisition pointer → slug-less commands:** `iq specification new` records the active requisition in `.inquiry/specification.yaml`, so **`iq issue new <name>`**, **`iq specification check`**, and **`iq issue publish <name>`** no longer repeat the (now dated) slug — they read the pointer. **`--slug <slug>`** overrides to target another requisition.
+  - **Legacy fallback:** a repo-root `requisitions/<slug>/` still resolves, so in-flight requisitions keep working (docs/dated → exact → legacy).
+  - The issue front-matter `spec:` path is computed from the resolved requisition; the `/iq-specification` skill, `docs/methodology.md`, and `docs/roadmap.md` are updated to the new location, the slug-less commands, and the git-ignored model.
+
 ## [0.18.0]
 ### Changed
 - **The specification is now a lean business charter — the PO ↔ team contract, in the domain's language (DDD), not a technical document** (found by dogfooding — Context, Decisions and Annexes read as noise in what is essentially a project charter; the document had drifted technical). It should carry only what a business contract needs: **when** (commitment date) and **what** (user stories + acceptance criteria), each in the ubiquitous language of the domain. Coordinated changes to `specification.template.{en,es}.md` and the `specification_ready` gate:

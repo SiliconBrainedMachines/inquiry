@@ -12,6 +12,7 @@ void main() {
   final resolver = TemplateResolver(Assets(root: Directory.current.path));
 
   late Directory tempDir;
+  final fixedNow = DateTime(2026, 7, 9);
 
   setUp(() {
     tempDir = Directory.systemTemp.createTempSync('iq_spec_new_');
@@ -26,18 +27,22 @@ void main() {
         SpecificationNewInput(slug: slug, lang: lang),
         resolver: resolver,
         workingDirectory: tempDir.path,
+        now: () => fixedNow,
       );
 
   String read(String slug, String artifact) => File(
-        p.join(tempDir.path, 'requisitions', slug, '$artifact.md'),
+        p.join(tempDir.path, 'docs', 'requisitions', '20260709-$slug',
+            '$artifact.md'),
       ).readAsStringSync();
 
   group('SpecificationNewCommand', () {
-    test('scaffolds requisitions/<slug>/ with requisition.md + specification.md',
-        () async {
+    test(
+        'scaffolds docs/requisitions/<YYYYMMDD>-<slug>/ with requisition.md + '
+        'specification.md', () async {
       await cmd('invoice-form').execute();
 
-      final dir = Directory(p.join(tempDir.path, 'requisitions', 'invoice-form'));
+      final dir = Directory(
+          p.join(tempDir.path, 'docs', 'requisitions', '20260709-invoice-form'));
       expect(dir.existsSync(), isTrue);
       expect(read('invoice-form', 'requisition'), contains('# Requisition'));
       expect(
@@ -46,10 +51,36 @@ void main() {
       );
     });
 
+    test('the dated folder prefix is compact YYYYMMDD (no hyphens in the date)',
+        () async {
+      await cmd('order').execute();
+      final base = Directory(p.join(tempDir.path, 'docs', 'requisitions'));
+      final names = base.listSync().map((e) => p.basename(e.path)).toList();
+      expect(names, contains('20260709-order'));
+    });
+
+    test('records the active requisition in .inquiry/specification.yaml',
+        () async {
+      await cmd('pointer', lang: 'es').execute();
+      final yaml =
+          File(p.join(tempDir.path, '.inquiry', 'specification.yaml'))
+              .readAsStringSync();
+      expect(yaml, contains('slug: pointer'));
+      expect(yaml, contains('path: docs/requisitions/20260709-pointer'));
+      expect(yaml, contains('lang: es'));
+    });
+
+    test('ensures .inquiry/ and docs/requisitions/ are git-ignored', () async {
+      await cmd('ignored').execute();
+      final gitignore =
+          File(p.join(tempDir.path, '.gitignore')).readAsStringSync();
+      expect(gitignore, contains('.inquiry/'));
+      expect(gitignore, contains('docs/requisitions/'));
+    });
+
     test('replaces the {{DATE}} placeholder with today (ISO date)', () async {
       await cmd('dated').execute();
-      final today = DateTime.now().toIso8601String().substring(0, 10);
-      expect(read('dated', 'requisition'), contains(today));
+      expect(read('dated', 'requisition'), contains('2026-07-09'));
       expect(read('dated', 'requisition'), isNot(contains('{{DATE}}')));
     });
 
@@ -63,8 +94,9 @@ void main() {
 
     test('is idempotent: an existing artifact is never clobbered', () async {
       await cmd('keep').execute();
-      final file =
-          File(p.join(tempDir.path, 'requisitions', 'keep', 'requisition.md'));
+      final file = File(p.join(
+          tempDir.path, 'docs', 'requisitions', '20260709-keep',
+          'requisition.md'));
       file.writeAsStringSync('EDITED BY HUMAN');
 
       await cmd('keep').execute();
@@ -74,8 +106,10 @@ void main() {
 
     test('output lists the created files and the next step', () async {
       final out = await cmd('listed').execute();
-      expect(out.message, contains('requisitions/listed/requisition.md'));
-      expect(out.message, contains('requisitions/listed/specification.md'));
+      expect(out.message,
+          contains('docs/requisitions/20260709-listed/requisition.md'));
+      expect(out.message,
+          contains('docs/requisitions/20260709-listed/specification.md'));
       expect(out.exitCode, 0);
     });
 

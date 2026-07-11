@@ -18,6 +18,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../src/git_utils.dart';
+import '../../../src/gitignore.dart';
 
 // ─── Input ──────────────────────────────────────────────────────────────────
 
@@ -92,29 +93,11 @@ class InitCommand implements Command<InitInput, InitOutput> {
   String _resolveProjectRoot(String workingDirectory) =>
       getProjectRoot(workingDirectory) ?? workingDirectory;
 
-  /// Ensures `.inquiry/` and cycle-local state are in `.gitignore`.
+  /// Ensures `.inquiry/`, cycle-local state, and `docs/requisitions/` are in
+  /// `.gitignore` (via the shared helper).
   void _ensureGitignore(String root, List<String> steps) {
-    const entries = <String>['.inquiry/', 'cleanrooms/**/.iq.state.yaml'];
-    final gitignore = File('$root/.gitignore');
-
-    if (!gitignore.existsSync()) {
-      gitignore.writeAsStringSync(
-        '# Inquiry — local cycle state\n'
-        '.inquiry/\n'
-        'cleanrooms/**/.iq.state.yaml\n',
-      );
-      steps.add('Created .gitignore with Inquiry entries');
-      return;
-    }
-
-    var content = gitignore.readAsStringSync();
-    final missing = entries.where((e) => !content.contains(e)).toList();
-    if (missing.isEmpty) return;
-
-    if (!content.endsWith('\n')) content = '$content\n';
-    content = '$content# Inquiry — local cycle state\n${missing.join('\n')}\n';
-    gitignore.writeAsStringSync(content);
-    steps.add('Added Inquiry entries to .gitignore');
+    final status = ensureGitignoreEntries(root);
+    if (status != null) steps.add(status);
   }
 
   /// Ensures `.inquiry/config.yaml` exists with default configuration.
