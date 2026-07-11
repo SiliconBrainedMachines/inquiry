@@ -4,7 +4,7 @@ lang: en
 title: "[repo] Short issue title"
 repo: "{{REPO}}"
 labels: []
-spec: "requisitions/{{SLUG}}/specification.md"
+spec: "{{SPEC}}"
 covers: []
 ---
 

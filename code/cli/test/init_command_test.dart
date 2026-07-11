@@ -78,6 +78,14 @@ void main() {
         expect(content, contains('cleanrooms/**/.iq.state.yaml'));
       });
 
+      test('ignores docs/requisitions/ (local authoring workspace)', () async {
+        final command = InitCommand(InitInput(workingDirectory: tempDir.path));
+        await command.execute();
+
+        final content = File('${tempDir.path}/.gitignore').readAsStringSync();
+        expect(content, contains('docs/requisitions/'));
+      });
+
       test('appends .inquiry/ to existing .gitignore that lacks it', () async {
         File('${tempDir.path}/.gitignore').writeAsStringSync('node_modules/\n');
 
@@ -94,7 +102,8 @@ void main() {
         'does not modify .gitignore if all entries already present',
         () async {
           final original =
-              'node_modules/\n.inquiry/\ncleanrooms/**/.iq.state.yaml\nbuild/\n';
+              'node_modules/\n.inquiry/\ncleanrooms/**/.iq.state.yaml\n'
+              'docs/requisitions/\nbuild/\n';
           File('${tempDir.path}/.gitignore').writeAsStringSync(original);
 
           final command = InitCommand(

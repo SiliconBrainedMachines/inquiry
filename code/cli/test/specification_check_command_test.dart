@@ -4,6 +4,7 @@ import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
 import 'package:inquiry_cli/modules/specification/commands/check.dart';
+import 'package:inquiry_cli/modules/specification/workspace.dart';
 
 const _filledSpec = '''
 # Specification
@@ -63,7 +64,7 @@ void main() {
       ..writeAsStringSync('# issue\n\nCovers $covers.\n');
   }
 
-  SpecificationCheckCommand cmd(String slug) => SpecificationCheckCommand(
+  SpecificationCheckCommand cmd(String? slug) => SpecificationCheckCommand(
         SpecificationCheckInput(slug: slug),
         workingDirectory: tempDir.path,
       );
@@ -105,6 +106,26 @@ void main() {
       final out = await cmd('trace').execute();
       expect(out.exitCode, isNot(0));
       expect(out.message, contains('SPEC_AC_NOT_TRACED'));
+    });
+
+    test('checks the active requisition from the pointer (no --slug)', () async {
+      final folder = '20260709-active';
+      File(p.join(tempDir.path, 'docs', 'requisitions', folder,
+          'specification.md'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync(_filledSpec);
+      File(p.join(tempDir.path, 'docs', 'requisitions', folder, 'issue-a.md'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('# issue\n\nCovers AC-1.\n');
+      writeActiveRequisition(tempDir.path,
+          slug: 'active',
+          relDir: 'docs/requisitions/$folder',
+          lang: 'en',
+          isoDate: '2026-07-09');
+
+      final out = await cmd(null).execute();
+      expect(out.exitCode, 0);
+      expect(out.message.toLowerCase(), contains('ready'));
     });
   });
 }
