@@ -57,6 +57,18 @@ These remain real possibilities, but they should land only when the harness earn
 - more opinionated website and distribution surfaces
 - durable metrics backends beyond local YAML when a real consumer exists
 
+### Dogfood-surfaced (2026-07)
+
+Concrete friction from real use (two live requirements; see
+[field-evidence-dogfood-2026-07](../code/paper/field-evidence-dogfood-2026-07.md)):
+
+- **`iq issue publish --plan` should validate labels** against the target repo and, when a
+  label is missing, print the `gh label create …` command to create it. Currently the check
+  fails late at `--apply`.
+- **`requisitions/` lifecycle.** The per-requirement artifact directory accumulates over time
+  and will become noise; it needs an archival/rollup answer (and the artifacts are currently
+  vulnerable when uncommitted). Open design question, not yet a decision.
+
 ## Anti-goals for 0.7.x
 
 - carrying historical planning files as if they were still live doctrine
