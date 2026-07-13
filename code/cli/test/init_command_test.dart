@@ -70,12 +70,15 @@ void main() {
         },
       );
 
-      test('ignores cycle-local state files under cleanrooms/', () async {
+      // The cleanroom is a per-cycle working area; the durable artifacts are the
+      // published issue, the code and the tests. Nothing under it is versioned.
+      test('ignores the whole cleanrooms/ working area', () async {
         final command = InitCommand(InitInput(workingDirectory: tempDir.path));
         await command.execute();
 
         final content = File('${tempDir.path}/.gitignore').readAsStringSync();
-        expect(content, contains('cleanrooms/**/.iq.state.yaml'));
+        expect(content, matches(RegExp(r'^cleanrooms/\s*$', multiLine: true)));
+        expect(content, isNot(contains('cleanrooms/**/.iq.state.yaml')));
       });
 
       test('ignores docs/requisitions/ (local authoring workspace)', () async {
@@ -95,7 +98,7 @@ void main() {
         final content = File('${tempDir.path}/.gitignore').readAsStringSync();
         expect(content, contains('node_modules/'));
         expect(content, contains('.inquiry/'));
-        expect(content, contains('cleanrooms/**/.iq.state.yaml'));
+        expect(content, matches(RegExp(r'^cleanrooms/\s*$', multiLine: true)));
       });
 
       test(
