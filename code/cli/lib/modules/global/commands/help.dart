@@ -1,33 +1,62 @@
-/// `inquiry help` — prints the global CLI help summary.
+/// `inquiry help` — prints the global CLI help.
+///
+/// The listing is rendered from the router's own command registry, never from a
+/// hand-written string: a maintained-by-hand help drifts the moment a module is
+/// added (the `specification` and `issue` modules shipped without ever being
+/// listed). Descriptions come from the `description:` given at registration.
 library;
+
+import 'dart:io';
 
 import 'package:cli_router/cli_router.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
-const String inquiryHelpText =
+/// Collects [IOSink] writes into a string.
+///
+/// `printHelp` renders into an [IOSink]; this captures that output so the help
+/// can be returned as a value (and asserted in tests) instead of only printed.
+class StringIOSink implements IOSink {
+  final StringBuffer _buffer = StringBuffer();
+
+  @override
+  void write(Object? obj) => _buffer.write(obj);
+
+  @override
+  void writeln([Object? obj = '']) => _buffer.writeln(obj);
+
+  @override
+  String toString() => _buffer.toString();
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) =>
+      super.noSuchMethod(invocation);
+}
+
+const String inquiryUsageHeader =
     'Usage:\n'
-    '  inquiry                 Display Inquiry status and FSM diagram\n'
-    '  inquiry help            Show this help\n'
-    '  inquiry --help          Show this help\n'
-    '  inquiry -h             Show this help\n'
-    '  inquiry <command> ...\n'
-    '\n'
-    'Root commands:\n'
-    '  help       Show available commands\n'
-    '  init       Initialize a new .inquiry/ workspace\n'
-    '  version    Print the current CLI version\n'
-    '  doctor     Verify prerequisites (inquiry, git, gh, gh auth, gh copilot)\n'
-    '  upgrade    Download and install the latest Inquiry release\n'
-    '  uninstall  Remove Inquiry CLI from the system\n'
-    '\n'
-    'Modules:\n'
-    '  host get           Deploy Inquiry skills to the specified host (default: copilot)\n'
-    '  host clean         Remove deployed Inquiry files from all hosts\n'
-    '  fsm state          Show current FSM state, valid transitions, and active APEs\n'
-    '  fsm transition     Run deterministic FSM transition by --event (optional --state)\n'
-    '  ape prompt         Assemble a sub-agent prompt from YAML + current FSM state\n'
-    '  ape state          Show current APE sub-state and valid internal transitions\n'
-    '  ape transition     Execute APE internal transition by --event\n';
+    '  iq                      Display Inquiry status and FSM diagram\n'
+    '  iq help | --help | -h   Show this help\n'
+    '  iq <command> [options]\n';
+
+/// A listing line whose command is empty — the bare `iq` route registers as the
+/// empty string, so the router renders it as an orphan dash. It is already
+/// documented in [inquiryUsageHeader].
+final RegExp _orphanDescription = RegExp(r'^\s+-\s');
+
+/// Renders the full help for [cli]: the usage header plus every registered
+/// command, taken from the router.
+String renderInquiryHelp(ModularCli cli) {
+  final sink = StringIOSink();
+  cli.printHelp(sink);
+
+  final listing = sink
+      .toString()
+      .split('\n')
+      .where((line) => !_orphanDescription.hasMatch(line))
+      .join('\n');
+
+  return '$inquiryUsageHeader\n$listing';
+}
 
 class HelpInput extends Input {
   HelpInput();
@@ -57,13 +86,16 @@ class HelpCommand implements Command<HelpInput, HelpOutput> {
   @override
   final HelpInput input;
 
-  HelpCommand(this.input);
+  /// Rendered lazily: `help` is registered before the other modules, and the
+  /// listing must include them, so the registry is only read at execute time.
+  final String Function() _renderHelp;
+
+  HelpCommand(this.input, {required String Function() renderHelp})
+    : _renderHelp = renderHelp;
 
   @override
   String? validate() => null;
 
   @override
-  Future<HelpOutput> execute() async {
-    return HelpOutput(text: inquiryHelpText);
-  }
+  Future<HelpOutput> execute() async => HelpOutput(text: _renderHelp());
 }
