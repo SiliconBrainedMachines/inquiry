@@ -10,8 +10,9 @@ import 'commands/new.dart';
 /// Registers the `specification` module — the QA-facing specification phase.
 ///
 /// `iq specification new <slug> [--lang <lang>]` scaffolds the QA workspace
-/// `requisitions/<slug>/` with `requisition.md` + `specification.md` from the
-/// single-source templates (Constitution I: the CLI is the hands).
+/// `docs/requisitions/<YYYYMMDD>-<slug>/` with `requisition.md` +
+/// `specification.md` from the single-source templates (Constitution I: the CLI
+/// is the hands), and records it as the active requisition.
 void buildSpecificationModule(ModuleBuilder m, {required Assets assets}) {
   final resolver = TemplateResolver(assets);
 
@@ -23,8 +24,9 @@ void buildSpecificationModule(ModuleBuilder m, {required Assets assets}) {
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Scaffold a QA specification workspace requisitions/<slug>/ '
-        '(requisition.md + specification.md). --lang <en|es> (default: en)',
+        'Scaffold a QA specification workspace docs/requisitions/<YYYYMMDD>-<slug>/ '
+        '(requisition.md + specification.md) and make it the active requisition. '
+        '--lang <en|es> (default: en)',
   );
 
   m.command<SpecificationCheckInput, SpecificationCheckOutput>(
