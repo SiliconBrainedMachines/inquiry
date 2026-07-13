@@ -9,6 +9,7 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import 'assets.dart';
+import 'modules/global/commands/help.dart';
 import 'modules/global/global_builder.dart';
 import 'modules/fsm/fsm_builder.dart';
 import 'modules/ape/ape_builder.dart';
@@ -30,8 +31,13 @@ List<String> normalizeInquiryArgs(List<String> args) {
 
 /// Configures the CLI, registers all commands, and dispatches [args].
 ///
-/// Returns a process exit code.
-Future<int> runInquiry(List<String> args) async {
+/// Returns a process exit code. [stdout] / [stderr] default to the process
+/// streams; tests pass their own sinks to assert on what the user actually sees.
+Future<int> runInquiry(
+  List<String> args, {
+  IOSink? stdout,
+  IOSink? stderr,
+}) async {
   final cli = ModularCli();
 
   final assetsRoot = p.dirname(p.dirname(Platform.resolvedExecutable));
@@ -56,7 +62,19 @@ Future<int> runInquiry(List<String> args) async {
 
   final assets = Assets(root: assetsRoot);
 
-  cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
+  // Deferred: `help` is registered first, but must list every module — so the
+  // registry is only read when the command actually runs.
+  String renderHelp() => renderInquiryHelp(cli);
+
+  cli.module(
+    '',
+    (m) => buildGlobalModule(
+      m,
+      cleaner: cleaner,
+      assets: assets,
+      renderHelp: renderHelp,
+    ),
+  );
   cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
@@ -66,5 +84,5 @@ Future<int> runInquiry(List<String> args) async {
   );
   cli.module('issue', (m) => buildIssueModule(m, assets: assets));
 
-  return cli.run(normalizeInquiryArgs(args));
+  return cli.run(normalizeInquiryArgs(args), stdout: stdout, stderr: stderr);
 }

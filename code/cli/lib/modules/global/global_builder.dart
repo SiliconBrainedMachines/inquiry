@@ -13,6 +13,7 @@ import '../../hosts/deployer.dart';
 void buildGlobalModule(
   ModuleBuilder m, {
   required HostDeployer cleaner,
+  required String Function() renderHelp,
   Assets? assets,
 }) {
   m.command<TuiInput, TuiOutput>(
@@ -23,7 +24,8 @@ void buildGlobalModule(
 
   m.command<HelpInput, HelpOutput>(
     'help',
-    (req) => HelpCommand(HelpInput.fromCliRequest(req)),
+    (req) =>
+        HelpCommand(HelpInput.fromCliRequest(req), renderHelp: renderHelp),
     description: 'Show available commands',
   );
 
