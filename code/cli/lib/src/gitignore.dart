@@ -12,7 +12,11 @@ import 'dart:io';
 /// The `.gitignore` entries Inquiry manages (idempotently).
 const inquiryGitignoreEntries = <String>[
   '.inquiry/',
-  'cleanrooms/**/.iq.state.yaml',
+  // The cleanroom is a per-cycle working area, not documentation: the durable
+  // artifacts of a cycle are the published issue, the code and the tests. The
+  // whole directory is local — previously only `.iq.state.yaml` was ignored,
+  // which left diagnosis.md / plan.md accumulating in the repo.
+  'cleanrooms/',
   'docs/requisitions/',
 ];
 
