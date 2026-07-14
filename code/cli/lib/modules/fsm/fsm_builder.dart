@@ -9,12 +9,14 @@ void buildFsmModule(ModuleBuilder m, {Assets? assets}) {
     'state',
     (req) => FsmStateCommand(FsmStateInput.fromCliRequest(req), assets: assets),
     description: 'Show current FSM state, valid transitions, and active APEs',
+    params: FsmStateInput.params,
   );
 
   m.command<StateTransitionInput, StateTransitionOutput>(
     'transition',
     (req) => StateTransitionCommand(StateTransitionInput.fromCliRequest(req), assets: assets),
     description:
-        'Run deterministic FSM transition by --event (optional --state)',
+        'Run a deterministic FSM transition',
+    params: StateTransitionInput.params,
   );
 }

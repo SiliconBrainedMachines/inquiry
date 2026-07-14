@@ -24,9 +24,9 @@ void buildSpecificationModule(ModuleBuilder m, {required Assets assets}) {
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Scaffold a QA specification workspace docs/requisitions/<YYYYMMDD>-<slug>/ '
-        '(requisition.md + specification.md) and make it the active requisition. '
-        '--lang <en|es> (default: en)',
+        'Scaffold a QA specification workspace under docs/requisitions/ '
+        '(requisition.md + specification.md) and make it the active requisition',
+    params: SpecificationNewInput.params,
   );
 
   m.command<SpecificationCheckInput, SpecificationCheckOutput>(
@@ -36,7 +36,8 @@ void buildSpecificationModule(ModuleBuilder m, {required Assets assets}) {
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Run the specification_ready gate over the active requisition '
-        '(or --slug <slug>) — exits 0 only when the spec is healthy.',
+        'Run the specification_ready gate over the active requisition — '
+        'exits 0 only when the spec is healthy',
+    params: SpecificationCheckInput.params,
   );
 }
