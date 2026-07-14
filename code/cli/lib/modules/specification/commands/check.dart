@@ -27,8 +27,18 @@ class SpecificationCheckInput extends Input {
 
   SpecificationCheckInput({this.slug});
 
+  static final List<CliParam> params = [
+    CliParam.string(
+      'slug',
+      description: 'Requisition to check; defaults to the active one',
+    ),
+  ];
+
   factory SpecificationCheckInput.fromCliRequest(CliRequest req) =>
       SpecificationCheckInput(slug: optionalSlug(req.flagString('slug')));
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() => {'slug': slug};
