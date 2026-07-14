@@ -2,7 +2,6 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 
 import '../../assets.dart';
 import 'commands/doctor.dart';
-import 'commands/help.dart';
 import 'commands/init.dart';
 import 'commands/tui.dart';
 import 'commands/uninstall.dart';
@@ -10,23 +9,19 @@ import 'commands/upgrade.dart';
 import 'commands/version.dart';
 import '../../hosts/deployer.dart';
 
+/// `help` is not registered here: `modular_cli_sdk` renders it from the command
+/// catalog these registrations feed, so a command cannot ship without appearing
+/// in it. Inquiry's own hand-written help had already drifted — the
+/// `specification` and `issue` modules were absent from it for two releases.
 void buildGlobalModule(
   ModuleBuilder m, {
   required HostDeployer cleaner,
-  required String Function() renderHelp,
   Assets? assets,
 }) {
   m.command<TuiInput, TuiOutput>(
     '',
     (req) => TuiCommand(TuiInput.fromCliRequest(req)),
     description: 'Display Inquiry status and FSM diagram',
-  );
-
-  m.command<HelpInput, HelpOutput>(
-    'help',
-    (req) =>
-        HelpCommand(HelpInput.fromCliRequest(req), renderHelp: renderHelp),
-    description: 'Show available commands',
   );
 
   m.command<InitInput, InitOutput>(
