@@ -10,17 +10,20 @@ void buildApeModule(ModuleBuilder m, {Assets? assets}) {
     'prompt',
     (req) => ApePromptCommand(ApePromptInput.fromCliRequest(req), assets: assets),
     description: 'Assemble a sub-agent prompt from YAML + current FSM state',
+    params: ApePromptInput.params,
   );
 
   m.command<ApeStateInput, ApeStateOutput>(
     'state',
     (req) => ApeStateCommand(ApeStateInput.fromCliRequest(req), assets: assets),
     description: 'Show current APE sub-state and valid internal transitions',
+    params: ApeStateInput.params,
   );
 
   m.command<ApeTransitionInput, ApeTransitionOutput>(
     'transition',
     (req) => ApeTransitionCommand(ApeTransitionInput.fromCliRequest(req), assets: assets),
-    description: 'Execute APE internal transition by --event',
+    description: 'Execute an APE-internal transition',
+    params: ApeTransitionInput.params,
   );
 }

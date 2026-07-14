@@ -143,6 +143,18 @@ void main() {
       'inquiry-end',
     ];
 
+    /// The skills the deployer *generates* from the FSM/APE contracts — they
+    /// live in no asset directory (deployer.dart `_deploySkills`).
+    const phaseSkills = [
+      'iq-analyze',
+      'iq-plan',
+      'iq-execute',
+      'iq-specification',
+    ];
+
+    /// Everything `iq host get` installs: asset-tree skills + generated ones.
+    final deployedSkills = [...testSkills, ...phaseSkills];
+
     Assets seedAssets(Directory root, {required List<String> apes}) {
       final skillsDir = Directory(p.join(root.path, 'assets', 'skills'));
       for (final skill in testSkills) {
@@ -197,7 +209,7 @@ void main() {
         DoctorInput(),
         runProcess: runProcess ?? fakeRunner(),
         inquiryVersionOverride: version,
-        fileSystemOps: fs ?? allPassFs(resolvedWd, homeDir, testSkills),
+        fileSystemOps: fs ?? allPassFs(resolvedWd, homeDir, deployedSkills),
         assets: assets ?? testAssets,
         versionChecker: ({required String currentVersion}) async =>
             const VersionCheckResult(updateAvailable: false),
@@ -362,7 +374,7 @@ void main() {
 
         final text = output.toText()!;
         expect(text, contains('Checking hosts...'));
-        expect(text, contains('✓ opencode: agent + 9 skills deployed'));
+        expect(text, contains('✓ opencode: agent + ${deployedSkills.length} skills deployed'));
         expect(text, contains('- claude: not deployed (inactive)'));
         expect(text, contains('All checks passed.'));
       });
@@ -419,16 +431,7 @@ void main() {
           true,
         );
         // Deploy everything except issue-create (global skills).
-        for (final skill in [
-          'doc-read',
-          'doc-write',
-          'inquiry-install',
-          'kritik',
-          'legion',
-          'research',
-          'inquiry-start',
-          'inquiry-end',
-        ]) {
+        for (final skill in deployedSkills.where((s) => s != 'issue-create')) {
           fs.setFileExists(
             p.join(homeDir, '.config', 'opencode', 'skills', skill, 'SKILL.md'),
             true,
@@ -502,7 +505,7 @@ void main() {
       // ─── E3: repo-scoped agent tests ───────────────────────────────────────
 
       test('doctor passes when inquiry.agent.md is in .github/agents/', () async {
-        final fs = allPassFs(workingDir, homeDir, testSkills);
+        final fs = allPassFs(workingDir, homeDir, deployedSkills);
         final cmd = makeCmd(fs: fs);
 
         final output = await cmd.execute();
@@ -562,7 +565,7 @@ void main() {
           p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
           true,
         );
-        for (final skill in testSkills) {
+        for (final skill in deployedSkills) {
           fs.setFileExists(
             p.join(homeDir, '.config', 'opencode', 'skills', skill, 'SKILL.md'),
             true,
@@ -585,14 +588,17 @@ void main() {
             reason: 'Claude not deployed → inactive, not a failure');
 
         final text = output.toText()!;
-        expect(text, contains('✓ opencode: agent + 9 skills deployed'));
+        expect(text, contains('✓ opencode: agent + ${deployedSkills.length} skills deployed'));
         expect(text, contains('- claude: not deployed (inactive)'));
         expect(text, contains('All checks passed.'));
       });
 
-      test('no assets available → hosts still checked, 0 skills expected', () async {
-        final fs = allPassFs(workingDir, homeDir, []);
-        // Assets with empty skills dir
+      test('empty skills asset dir → only the generated iq-* skills are expected',
+          () async {
+        // The host carries the generated phase skills but the asset tree ships
+        // no skills of its own: the generated set is a fixed contract, so it is
+        // still expected — and satisfied here.
+        final fs = allPassFs(workingDir, homeDir, phaseSkills);
         final emptyTempDir = Directory.systemTemp.createTempSync('empty_assets_');
         Directory(p.join(emptyTempDir.path, 'assets', 'skills')).createSync(recursive: true);
         final emptyAssets = Assets(root: emptyTempDir.path);
@@ -600,8 +606,8 @@ void main() {
         final cmd = makeCmd(fs: fs, assets: emptyAssets);
         final output = await cmd.execute();
 
-        // Agent exists, 0 skills expected → passes
-        expect(output.hostChecks.first.totalSkills, 0);
+        expect(output.hostChecks.first.totalSkills, phaseSkills.length);
+        expect(output.hostChecks.first.missingSkills, isEmpty);
         expect(output.hostChecks.first.agentExists, isTrue);
         expect(output.hostChecks.first.passed, isTrue);
 
@@ -629,7 +635,7 @@ void main() {
           p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
           true,
         );
-        for (final s in testSkills) {
+        for (final s in deployedSkills) {
           fs.setFileExists(
             p.join(homeDir, '.config', 'opencode', 'skills', s, 'SKILL.md'),
             true,
@@ -686,7 +692,7 @@ void main() {
           p.join(homeDir, '.claude', 'agents', 'inquiry.md'),
           true,
         );
-        for (final s in testSkills) {
+        for (final s in deployedSkills) {
           fs.setFileExists(
             p.join(homeDir, '.claude', 'skills', s, 'SKILL.md'),
             true,
@@ -703,6 +709,45 @@ void main() {
         expect(
           output.checks.any((c) => c.name == 'opencode/ollama context'),
           isFalse,
+        );
+      });
+    });
+
+    // The deployer installs BOTH the asset-tree skills and the skills it
+    // *generates* from the FSM/APE contracts (deployer.dart:48-75:
+    // `assets.listDirectory('skills')` + `SkillBuilder.phaseSkillNames`).
+    // Doctor used to discover expected skills from the asset tree ONLY, so a
+    // missing iq-plan / iq-specification was reported as a healthy host.
+    group('generated iq-* phase skills', () {
+      test('are expected, not only the asset-tree skills', () async {
+        // Home has ONLY the asset-tree skills — every generated skill is absent.
+        final cmd = makeCmd(fs: allPassFs(workingDir, homeDir, testSkills));
+        final output = await cmd.execute();
+
+        final opencode =
+            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
+
+        expect(opencode.missingSkills, containsAll(phaseSkills));
+        expect(opencode.totalSkills, testSkills.length + phaseSkills.length);
+        expect(opencode.passed, isFalse);
+      });
+
+      test('a host with every skill deployed still passes', () async {
+        final cmd = makeCmd(
+          fs: allPassFs(workingDir, homeDir, deployedSkills),
+        );
+        final output = await cmd.execute();
+
+        final opencode =
+            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
+
+        expect(opencode.missingSkills, isEmpty);
+        expect(opencode.passed, isTrue);
+        expect(
+          output.toText()!,
+          contains(
+            '✓ opencode: agent + ${deployedSkills.length} skills deployed',
+          ),
         );
       });
     });

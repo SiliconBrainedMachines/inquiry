@@ -18,10 +18,9 @@ import 'modules/specification/specification_builder.dart';
 import 'hosts/all_adapters.dart';
 import 'hosts/deployer.dart';
 
+/// `--help` / `-h` are NOT normalized here: the SDK routes every help request
+/// itself, including the focused `iq <command> --help`, which this could not.
 List<String> normalizeInquiryArgs(List<String> args) {
-  if (args.length == 1 && (args.first == '--help' || args.first == '-h')) {
-    return const ['help'];
-  }
   if (args.length == 1 && (args.first == '--version' || args.first == '-v')) {
     return const ['version'];
   }
@@ -30,8 +29,13 @@ List<String> normalizeInquiryArgs(List<String> args) {
 
 /// Configures the CLI, registers all commands, and dispatches [args].
 ///
-/// Returns a process exit code.
-Future<int> runInquiry(List<String> args) async {
+/// Returns a process exit code. [stdout] / [stderr] default to the process
+/// streams; tests pass their own sinks to assert on what the user actually sees.
+Future<int> runInquiry(
+  List<String> args, {
+  IOSink? stdout,
+  IOSink? stderr,
+}) async {
   final cli = ModularCli();
 
   final assetsRoot = p.dirname(p.dirname(Platform.resolvedExecutable));
@@ -66,5 +70,5 @@ Future<int> runInquiry(List<String> args) async {
   );
   cli.module('issue', (m) => buildIssueModule(m, assets: assets));
 
-  return cli.run(normalizeInquiryArgs(args));
+  return cli.run(normalizeInquiryArgs(args), stdout: stdout, stderr: stderr);
 }

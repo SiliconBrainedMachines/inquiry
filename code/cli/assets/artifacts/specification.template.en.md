@@ -43,10 +43,11 @@ _This specification is the **business agreement** — like a project charter —
 
 #### Acceptance Criteria
 
-<!-- The AC column holds ONLY the number (1, 2, …); the id is AC-<number>. Keep
-     the separator dashes moderate — do not widen them to the text width, or the
-     PDF export splits the column. Each AC is also its acceptance test (tests are
-     written in development). -->
+<!-- The AC column holds ONLY the number (1, 2, …). Numbering restarts in every
+     story, so the id is qualified by it: the 3rd AC of US-2 is US2-AC3 — that
+     is what an issue's `covers:` must list. Keep the separator dashes moderate
+     — do not widen them to the text width, or the PDF export splits the column.
+     Each AC is also its acceptance test (tests are written in development). -->
 
 | AC  | Given (context)         | When (action)        | Then (expected result) |
 | --- | ----------------------- | -------------------- | ---------------------- |

@@ -4,6 +4,24 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.20.0]
+### Added
+- **Every command declares its contract, and the help *is* that contract.** Each command declares its parameters (`CliParam`) on its `Input`, so one declaration feeds three things that were maintained by hand and drifted apart: the help text, the machine-readable catalog, and the parser.
+  - **`iq <command> --help`** renders that command's full contract — parameters with type, required/optional, default and allowed values — positionals included, *without* having to supply them. **`iq <module> --help`** renders every command under it.
+  - **`iq help --json`** emits the whole catalog as JSON: the machine twin of the text help, and the CLI analogue of the OpenAPI document `modular_api` generates from its registered use cases.
+  - **An option a command never declared is refused, not ignored.** `iq init --host claude` used to run and exit 0 — letting you believe a flag had done something. It now exits 7 and hands back the contract it violated. The 8 commands that take no options declare an **empty** contract, which is a statement, not an absence.
+  - Descriptions no longer restate their own flags (`--lang <en|es> (default: en)`): the contract renders that, and a description repeating it is one more thing to drift.
+
+### Fixed
+- **`iq doctor` could hang forever.** `checkLatestVersion` bounded only the TCP handshake (`HttpClient.connectionTimeout`); neither the response headers nor the body read had a deadline, so a connection that was *accepted but never answered* waited indefinitely — observed as a 1m40s hang, killed by hand. Nothing threw, so the silent-on-failure `catch` never fired. The whole exchange is now bounded.
+- **`iq doctor` was blind to the skills that matter.** It discovered its expectations from the asset tree alone, so it reported `agent + 3 skills deployed` on a host carrying 7 — the four **generated** `iq-*` phase skills (`iq-analyze`, `iq-plan`, `iq-execute`, `iq-specification`) went unverified, and a host missing `iq-plan` read as healthy.
+- **The help had drifted, and could not stop drifting.** It was a hand-written string: the `specification` and `issue` modules shipped and were never listed in it, for two releases. It is now rendered from the command catalog every registration feeds, so a registered command *cannot* be absent from it.
+- **The `specification_ready` gate passed specs with an entire user story unimplemented.** Acceptance-criterion ids were bare `AC-N`, but numbering restarts in every story — so US-1/AC-1 and US-2/AC-1 collapsed onto one id, and an issue covering `AC-1` silently traced both. Reproduced end-to-end: a login issue green-lit a spec whose CSV-export story had no issue at all. **AC ids are now qualified by their story (`US2-AC3`)**, read from the heading (`US-2:` / `HU-2:`) so the id is the same token in both languages. The spec tables are unchanged — the cell still holds the bare number, which is what keeps the PDF column narrow. An issue's `covers:` must now list qualified ids.
+
+### Changed
+- **The whole `cleanrooms/` working area is git-ignored** (only `cleanrooms/**/.iq.state.yaml` was, so `diagnosis.md` and `plan.md` accumulated in the repo). A cleanroom is a per-cycle working area: the durable artifacts of a cycle are the published issue, the code and the tests — the same reasoning that already makes `docs/requisitions/` local.
+- Requires **`modular_cli_sdk` 0.3.3** and **`cli_router` 0.1.0**. Integrating the SDK surfaced three defects in it, each fixed and released upstream: the bare invocation hijacked a registered root route (`iq` printed the help instead of the banner); an *empty* parameter contract was inexpressible, so zero-option commands could not be enforced; and a command with positionals could not answer `--help` without being handed the very argument the user was asking about.
+
 ## [0.19.0]
 ### Changed
 - **Requisitions moved to a git-ignored, chronologically-ordered local workspace, and the downstream commands became slug-less** (found by dogfooding — the repo-root `requisitions/` accumulated *alphabetically, not by age*, and committing each requisition forced a redundant "requisition-only" PR when the durable artifacts are really the published GitHub issues).

@@ -28,6 +28,15 @@ class UpgradeInput extends Input {
     return UpgradeInput(installDir: installDir);
   }
 
+    /// Declares an EMPTY contract: this command accepts no option at all, so any
+  /// option passed to it is refused. Omitting `params` would mean "declares
+  /// nothing" — which is how `iq init --host claude` used to run, doing nothing
+  /// the flag implied.
+  static const List<CliParam> params = [];
+
+  @override
+  List<CliParam> get schemaFields => params;
+
   @override
   Map<String, dynamic> toJson() => {'installDir': installDir};
 }
