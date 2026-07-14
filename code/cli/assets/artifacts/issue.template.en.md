@@ -12,7 +12,9 @@ covers: []
      `iq issue publish <slug> <name> --plan` shows the `gh issue create` it would
      assemble from the front-matter; `--apply` creates it. The body (everything
      after the second `---`) is what gets published; the front-matter is NOT.
-     `covers:` must list the AC this issue covers — the gate enforces it. -->
+     `covers:` must list the AC this issue covers, each qualified by its user
+     story — `covers: [US1-AC1, US1-AC2, US2-AC3]`. The gate enforces it; a bare
+     `AC-1` is ambiguous (every story restarts at 1) and traces nothing. -->
 
 # [repo] Short issue title
 
