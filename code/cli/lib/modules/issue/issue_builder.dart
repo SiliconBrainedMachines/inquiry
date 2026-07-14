@@ -24,8 +24,8 @@ void buildIssueModule(ModuleBuilder m, {required Assets assets}) {
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Scaffold issue-<name>.md in the active requisition (or --slug <slug>). '
-        '--repo owner/repo pre-fills the target; language inherits from the spec.',
+        'Scaffold issue-<name>.md in the active requisition ("issue as code")',
+    params: IssueNewInput.params,
   );
 
   m.command<IssuePublishInput, IssuePublishOutput>(
@@ -35,7 +35,7 @@ void buildIssueModule(ModuleBuilder m, {required Assets assets}) {
       workingDirectory: Directory.current.path,
     ),
     description:
-        'Create the GitHub issue from issue-<name>.md via gh (active requisition '
-        'or --slug <slug>). --plan (default) previews; --apply runs it.',
+        'Create the GitHub issue from issue-<name>.md via gh — previews by default',
+    params: IssuePublishInput.params,
   );
 }

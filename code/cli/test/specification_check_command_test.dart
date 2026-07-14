@@ -58,7 +58,7 @@ void main() {
     f.writeAsStringSync(content);
   }
 
-  void writeIssue(String slug, String name, {String covers = 'AC-1'}) {
+  void writeIssue(String slug, String name, {String covers = 'US1-AC1'}) {
     File(p.join(tempDir.path, 'requisitions', slug, name))
       ..createSync(recursive: true)
       ..writeAsStringSync('# issue\n\nCovers $covers.\n');
@@ -101,7 +101,7 @@ void main() {
 
     test('an issue that does not reference the AC → SPEC_AC_NOT_TRACED',
         () async {
-      writeSpec('trace', _filledSpec); // declares AC-1
+      writeSpec('trace', _filledSpec); // declares US1-AC1
       writeIssue('trace', 'issue-trace.md', covers: 'nothing');
       final out = await cmd('trace').execute();
       expect(out.exitCode, isNot(0));
@@ -116,7 +116,7 @@ void main() {
         ..writeAsStringSync(_filledSpec);
       File(p.join(tempDir.path, 'docs', 'requisitions', folder, 'issue-a.md'))
         ..createSync(recursive: true)
-        ..writeAsStringSync('# issue\n\nCovers AC-1.\n');
+        ..writeAsStringSync('# issue\n\nCovers US1-AC1.\n');
       writeActiveRequisition(tempDir.path,
           slug: 'active',
           relDir: 'docs/requisitions/$folder',

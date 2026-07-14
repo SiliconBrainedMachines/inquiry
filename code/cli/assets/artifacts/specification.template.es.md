@@ -43,9 +43,11 @@ _Esta especificación es el **acuerdo de negocio** —a la manera de un project 
 
 #### Acceptance Criteria
 
-<!-- La columna AC lleva SOLO el número (1, 2, …); el id es AC-<número>. Mantén
-     los guiones del separador moderados — no los amplíes al ancho del texto, o
-     la exportación a PDF parte la columna. Cada AC es, además, su test de
+<!-- La columna AC lleva SOLO el número (1, 2, …). La numeración reinicia en cada
+     historia, así que el id se califica con ella: el 3er AC de la HU-2 es
+     US2-AC3 — eso es lo que debe listar el `covers:` de una issue. Mantén los
+     guiones del separador moderados — no los amplíes al ancho del texto, o la
+     exportación a PDF parte la columna. Cada AC es, además, su test de
      aceptación (los tests se escriben en desarrollo). -->
 
 | AC  | Given (Dado que)        | When (Cuando)        | Then (Entonces)        |

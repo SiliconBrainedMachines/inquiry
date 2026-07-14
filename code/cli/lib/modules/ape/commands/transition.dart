@@ -19,12 +19,24 @@ class ApeTransitionInput extends Input {
 
   ApeTransitionInput({required this.event, required this.workingDirectory});
 
+  static final List<CliParam> params = [
+    CliParam.string(
+      'event',
+      abbr: 'e',
+      required: true,
+      description: 'The APE-internal transition to execute',
+    ),
+  ];
+
   factory ApeTransitionInput.fromCliRequest(CliRequest req) {
     return ApeTransitionInput(
       event: req.flagString('event', aliases: const ['e']),
       workingDirectory: Directory.current.path,
     );
   }
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() => {
