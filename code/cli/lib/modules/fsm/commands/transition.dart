@@ -137,6 +137,27 @@ class StateTransitionInput extends Input {
     required this.workingDirectory,
   });
 
+  static final List<CliParam> params = [
+    CliParam.string(
+      'event',
+      abbr: 'e',
+      required: true,
+      allowed: [for (final e in FsmEvent.values) e.value],
+      description: 'The transition to execute',
+    ),
+    CliParam.string(
+      'state',
+      abbr: 's',
+      allowed: [for (final s in FsmState.values) s.value],
+      description: 'State to transition from; read from the cycle when omitted',
+    ),
+    CliParam.string(
+      'issue',
+      abbr: 'i',
+      description: 'Issue the cycle is opened for (start_analyze)',
+    ),
+  ];
+
   factory StateTransitionInput.fromCliRequest(CliRequest req) {
     return StateTransitionInput(
       currentState: req.flagString('state', aliases: const ['s']),
@@ -145,6 +166,9 @@ class StateTransitionInput extends Input {
       workingDirectory: Directory.current.path,
     );
   }
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() => {

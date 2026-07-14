@@ -21,6 +21,18 @@ class HostGetInput extends Input {
   factory HostGetInput.fromCliRequest(CliRequest req) =>
       HostGetInput(host: req.flagString('host') ?? 'opencode');
 
+  static final List<CliParam> params = [
+    CliParam.string(
+      'host',
+      defaultValue: 'opencode',
+      allowed: ['opencode', 'claude'],
+      description: 'AI coding host to install the agent + skills into',
+    ),
+  ];
+
+  @override
+  List<CliParam> get schemaFields => params;
+
   @override
   Map<String, dynamic> toJson() => {'host': host};
 }

@@ -15,6 +15,7 @@ import '../../../src/version_check.dart';
 import '../../../hosts/all_adapters.dart';
 import '../../../hosts/host_adapter.dart';
 import '../../../hosts/ollama_context.dart';
+import '../../../hosts/skill_builder.dart';
 
 /// Function type for running external processes.
 ///
@@ -95,9 +96,18 @@ class DoctorInput extends Input {
 
   DoctorInput({this.fix = false});
 
-  factory DoctorInput.fromCliRequest(CliRequest req) => DoctorInput(
-    fix: req.flagBool('fix'),
-  );
+  static final List<CliParam> params = [
+    CliParam.boolean(
+      'fix',
+      description: 'Re-download the internal assets when they are missing',
+    ),
+  ];
+
+  factory DoctorInput.fromCliRequest(CliRequest req) =>
+      DoctorInput(fix: req.flagBool('fix'));
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() => {'fix': fix};
@@ -419,13 +429,25 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
     );
   }
 
-  /// Discovers expected skills from the asset tree.
+  /// The skills a deployed host is expected to carry — exactly what the
+  /// deployer installs: the asset-tree skills **plus** the ones it generates
+  /// from the FSM/APE contracts (`SkillBuilder.phaseSkillNames`, see
+  /// deployer.dart `_deploySkills`). Discovering only the asset tree left the
+  /// `iq-*` phase skills unverified, so a host missing `iq-plan` reported clean.
   List<String> _getExpectedSkills() {
-    if (_assets == null) return [];
+    final assets = _assets;
+    if (assets == null) return [];
+    // The generated skills are a FIXED contract, not a function of what happens
+    // to build today: the deployer skips a phase whose contract assets are
+    // missing, and mirroring that would make doctor quietly expect less and
+    // call a host with no `iq-plan` healthy — the very blindness this check
+    // exists to remove. A phase skill that cannot be built is a real defect,
+    // reported here as missing (and by the asset-integrity check as its cause).
+    final generated = SkillBuilder(assets).phaseSkillNames;
     try {
-      return _assets.listDirectory('skills');
+      return [...assets.listDirectory('skills'), ...generated];
     } catch (_) {
-      return [];
+      return generated;
     }
   }
 

@@ -107,7 +107,7 @@ class SpecificationGate {
     }
 
     for (final story in stories) {
-      if (_acRows(story.body).isEmpty) {
+      if (!_hasAcRow(story.body)) {
         violations.add(SpecificationViolation(
           'SPEC_STORY_MISSING_AC',
           'User story "${story.title}" has no filled Given-When-Then '
@@ -150,8 +150,10 @@ class SpecificationGate {
     if (body == null) return;
 
     final declared = <String>{};
-    for (final story in _splitStories(body)) {
-      declared.addAll(_acRows(story.body)); // canonical AC-N ids
+    final stories = _splitStories(body);
+    for (var i = 0; i < stories.length; i++) {
+      final story = stories[i];
+      declared.addAll(_acIds(story.title, story.body, i)); // US<n>-AC<m>
     }
 
     final traceTexts = issues.map((issue) {
@@ -257,34 +259,51 @@ class SpecificationGate {
     return true;
   }
 
-  /// The canonical AC ids of the **filled** acceptance-criteria rows in [block]
-  /// (`| id | given | when | then |` with the three cells filled). The id cell
-  /// is read in either form — inline `AC-3`, or a bare number `3` under an "AC"
-  /// column header — and normalized to `AC-3`, so the rendered table can use the
-  /// short numeric form (which survives a narrow PDF column) without breaking
-  /// traceability.
-  List<String> _acRows(String block) {
+  /// The canonical ids of the **filled** acceptance-criteria rows of the story
+  /// titled [title] (`| id | given | when | then |`, the three cells filled).
+  ///
+  /// The id is qualified by its story — `US2-AC3` — because AC numbering
+  /// restarts inside every story (the templates say the id cell holds only the
+  /// number). Bare `AC-N` ids collapsed US-1/AC-1 onto US-2/AC-1, so one issue
+  /// covering `AC-1` traced both and the gate passed a spec whose second story
+  /// had no issue at all.
+  ///
+  /// The story number is read from the heading (`US-2:` in English, `HU-2:` in
+  /// Spanish), falling back to the story's position, so the id is the same in
+  /// both languages — like `AC`, it is a machine token, not prose.
+  List<String> _acIds(String title, String block, int index) {
+    final story = 'US${_storyNumber(title, index)}';
     final ids = <String>[];
     for (final line in block.split('\n')) {
       if (!line.trimLeft().startsWith('|')) continue;
       final cells = _cells(line);
       if (cells.length < 4) continue;
-      final id = _acId(cells[0]);
-      if (id == null) continue; // header / separator / non-AC row
+      final number = _acNumber(cells[0]);
+      if (number == null) continue; // header / separator / non-AC row
       if (_isFilled(cells[1]) && _isFilled(cells[2]) && _isFilled(cells[3])) {
-        ids.add(id);
+        ids.add('$story-AC$number');
       }
     }
     return ids;
   }
 
-  /// Normalizes an AC-id cell to its canonical `AC-N` form: `AC-3` → `AC-3`,
-  /// `3` → `AC-3`. Returns null for headers, separators, or other cells.
-  String? _acId(String cell) {
+  /// Whether [block] declares at least one filled acceptance-criteria row.
+  bool _hasAcRow(String block) => _acIds('', block, 0).isNotEmpty;
+
+  /// The story's number, from `US-2: …` / `HU-2: …`; its 0-based [index]
+  /// position is the fallback when the heading carries no number.
+  int _storyNumber(String title, int index) {
+    final match = RegExp(r'\d+').firstMatch(title);
+    return match != null ? int.parse(match.group(0)!) : index + 1;
+  }
+
+  /// The AC number in an id cell: `AC-3` → `3`, `3` → `3`. Null for headers,
+  /// separators, and other cells.
+  String? _acNumber(String cell) {
     final inline = RegExp(r'^AC-(\d+)$', caseSensitive: false).firstMatch(cell);
-    if (inline != null) return 'AC-${inline.group(1)}';
+    if (inline != null) return inline.group(1);
     final numeric = RegExp(r'^(\d+)$').firstMatch(cell);
-    if (numeric != null) return 'AC-${numeric.group(1)}';
+    if (numeric != null) return numeric.group(1);
     return null;
   }
 
