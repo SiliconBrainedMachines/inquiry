@@ -1,44 +1,25 @@
 import 'package:inquiry_cli/inquiry_cli.dart';
-import 'package:inquiry_cli/modules/global/commands/help.dart';
 import 'package:test/test.dart';
+
+import 'support/string_io_sink.dart';
+
+/// The help is the SDK's — `modular_cli_sdk` renders it from the command
+/// catalog every registration feeds. Inquiry maintains no help text of its own:
+/// the hand-written one drifted, and the `specification` and `issue` modules
+/// shipped without ever appearing in it.
+Future<({int code, String out, String err})> _run(List<String> args) async {
+  final out = StringIOSink();
+  final err = StringIOSink();
+  final code = await runInquiry(args, stdout: out, stderr: err);
+  return (code: code, out: out.toString(), err: err.toString());
+}
 
 void main() {
   group('inquiry help', () {
-    late String text;
+    test('lists every registered command', () async {
+      final r = await _run(const ['help']);
 
-    setUp(() async {
-      final sink = StringIOSink();
-      await runInquiry(const ['help'], stdout: sink);
-      text = sink.toString();
-    });
-
-    test('shows the usage header', () {
-      expect(text, contains('Usage:'));
-      expect(text, contains('iq <command>'));
-    });
-
-    /// `iq` with no arguments is NOT a help request — it is a registered route:
-    /// the banner + FSM diagram. modular_cli_sdk 0.3.0 rewrites the empty
-    /// invocation into `help` unconditionally, which silently replaced the TUI.
-    test('bare `iq` runs the TUI, not the help', () async {
-      final sink = StringIOSink();
-      final code = await runInquiry(const [], stdout: sink);
-      final out = sink.toString();
-
-      expect(code, 0);
-      expect(out, contains('Inquiry'), reason: 'the banner should be printed');
-      expect(out, contains('Analyze'), reason: 'the FSM diagram should be printed');
-      expect(out, isNot(contains('Available commands')),
-          reason: 'the empty invocation was hijacked by the help command');
-    });
-
-    /// The help used to be a hand-written string, and it silently drifted: the
-    /// `specification` and `issue` modules shipped and were never listed in it.
-    /// It is now rendered from the router's own registry, so a registered
-    /// command cannot be absent.
-    test('lists every registered command', () {
       const registered = [
-        'help',
         'init',
         'version',
         'doctor',
@@ -57,44 +38,71 @@ void main() {
         'issue publish',
       ];
 
+      expect(r.code, 0);
+      expect(r.err, isEmpty);
       for (final route in registered) {
         expect(
-          text,
+          r.out,
           contains(route),
           reason: '`$route` is registered but missing from the help',
         );
       }
     });
 
-    /// The bare `iq` route registers as the empty string, which the router
-    /// renders as a listing line with no command — an orphan dash. It is
-    /// already documented in the usage header.
-    test('has no listing line with an empty command', () {
-      for (final line in text.split('\n')) {
-        expect(
-          line,
-          isNot(matches(RegExp(r'^\s+-\s'))),
-          reason: 'orphan description with no command: "$line"',
-        );
-      }
+    test('names the TUI by how it is invoked, and documents global options',
+        () async {
+      final r = await _run(const ['help']);
+
+      expect(r.out, contains('(no arguments)'));
+      expect(r.out, contains('Global options'));
     });
 
-    test('carries each command description, not just its route', () {
-      expect(text, contains('Print the current CLI version'));
-      expect(text, contains('specification_ready gate'));
+    test('carries each command description, not just its route', () async {
+      final r = await _run(const ['help']);
+
+      expect(r.out, contains('Print the current CLI version'));
+      expect(r.out, contains('specification_ready gate'));
     });
 
-    /// The `specification new` description still pointed at the pre-0.19.0
-    /// layout (`requisitions/<slug>/`), which no longer exists.
-    test('describes specification new with the path it actually creates', () {
-      expect(text, contains('docs/requisitions/'));
-      expect(text, isNot(contains('requisitions/<slug>/')));
+    /// The `specification new` description pointed at the pre-0.19.0 layout.
+    test('describes specification new with the path it actually creates',
+        () async {
+      final r = await _run(const ['help']);
+
+      expect(r.out, contains('docs/requisitions/'));
+      expect(r.out, isNot(contains('requisitions/<slug>/')));
     });
 
-    test('normalizes global help flags to the help command', () {
-      expect(normalizeInquiryArgs(const ['--help']), equals(const ['help']));
-      expect(normalizeInquiryArgs(const ['-h']), equals(const ['help']));
-      expect(normalizeInquiryArgs(const ['help']), equals(const ['help']));
+    /// Every deliberate help request is a success on stdout — never an error.
+    for (final args in [
+      ['help'],
+      ['--help'],
+      ['-h'],
+    ]) {
+      test('`iq ${args.join(' ')}` prints help on stdout, exit 0', () async {
+        final r = await _run(args);
+
+        expect(r.code, 0);
+        expect(r.err, isEmpty);
+        expect(r.out, contains('Global options'));
+      });
+    }
+
+    /// `iq` with no arguments is NOT a help request — it is a registered route:
+    /// the banner + FSM diagram.
+    test('bare `iq` runs the TUI, not the help', () async {
+      final r = await _run(const []);
+
+      expect(r.code, 0);
+      expect(r.out, contains('Inquiry'), reason: 'the banner should print');
+      expect(r.out, contains('Analyze'), reason: 'the FSM diagram should print');
+      expect(r.out, isNot(contains('Global options')),
+          reason: 'the empty invocation was hijacked by the help');
+    });
+
+    test('normalizes the version flags to the version command', () {
+      expect(normalizeInquiryArgs(const ['--version']), equals(const ['version']));
+      expect(normalizeInquiryArgs(const ['-v']), equals(const ['version']));
       expect(
         normalizeInquiryArgs(const ['fsm', 'state']),
         equals(const ['fsm', 'state']),

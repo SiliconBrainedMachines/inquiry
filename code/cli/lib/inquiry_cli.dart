@@ -9,7 +9,6 @@ import 'package:modular_cli_sdk/modular_cli_sdk.dart';
 import 'package:path/path.dart' as p;
 
 import 'assets.dart';
-import 'modules/global/commands/help.dart';
 import 'modules/global/global_builder.dart';
 import 'modules/fsm/fsm_builder.dart';
 import 'modules/ape/ape_builder.dart';
@@ -19,10 +18,9 @@ import 'modules/specification/specification_builder.dart';
 import 'hosts/all_adapters.dart';
 import 'hosts/deployer.dart';
 
+/// `--help` / `-h` are NOT normalized here: the SDK routes every help request
+/// itself, including the focused `iq <command> --help`, which this could not.
 List<String> normalizeInquiryArgs(List<String> args) {
-  if (args.length == 1 && (args.first == '--help' || args.first == '-h')) {
-    return const ['help'];
-  }
   if (args.length == 1 && (args.first == '--version' || args.first == '-v')) {
     return const ['version'];
   }
@@ -62,19 +60,7 @@ Future<int> runInquiry(
 
   final assets = Assets(root: assetsRoot);
 
-  // Deferred: `help` is registered first, but must list every module — so the
-  // registry is only read when the command actually runs.
-  String renderHelp() => renderInquiryHelp(cli);
-
-  cli.module(
-    '',
-    (m) => buildGlobalModule(
-      m,
-      cleaner: cleaner,
-      assets: assets,
-      renderHelp: renderHelp,
-    ),
-  );
+  cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
   cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
