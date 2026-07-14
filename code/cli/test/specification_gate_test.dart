@@ -103,8 +103,8 @@ void main() {
   final gate = SpecificationGate();
 
   group('SpecificationGate', () {
-    // An issue body that traces both ACs of _filledSpec (AC-1, AC-2).
-    const tracingIssues = ['# Issue\n\nCovers AC-1 and AC-2.\n'];
+    // An issue body that traces both ACs of _filledSpec (US1-AC1, US1-AC2).
+    const tracingIssues = ['# Issue\n\nCovers US1-AC1 and US1-AC2.\n'];
 
     test('the unfilled scaffold (template) is rejected with violations', () {
       final template =
@@ -125,23 +125,25 @@ void main() {
     });
 
     test('a fully-filled Spanish (--lang es) spec passes (bilingual gate)', () {
-      final r = gate.evaluate(_filledSpecEs, issues: const ['Cubre AC-1.']);
+      final r = gate.evaluate(_filledSpecEs, issues: const ['Cubre US1-AC1.']);
       expect(r.passed, isTrue, reason: r.violations.join('\n'));
       expect(r.violations, isEmpty);
     });
 
-    test('numeric AC column (header "AC", cell "1") is read as AC-1', () {
+    test('numeric AC column (header "AC", cell "1") is read as US1-AC1', () {
       // The rendered table uses a short numeric id cell so a narrow PDF column
-      // does not wrap "AC-1" character by character; the gate reconstructs AC-1.
+      // does not wrap the id character by character; the gate reconstructs it.
       final numericAc = _filledSpec.replaceAll('| AC-1 |', '| 1    |').replaceAll(
             '| # ',
             '| AC ',
           );
-      final r = gate.evaluate(numericAc, issues: const ['traces AC-1 and AC-2']);
+      final r =
+          gate.evaluate(numericAc, issues: const ['traces US1-AC1 and US1-AC2']);
       expect(r.violations.map((v) => v.code),
           isNot(contains('SPEC_STORY_MISSING_AC')));
-      // AC-1 (now cell "1") must still be traceable as "AC-1".
-      final notTraced = gate.evaluate(numericAc, issues: const ['only AC-2 here']);
+      // AC 1 (now cell "1") must still be traceable as "US1-AC1".
+      final notTraced =
+          gate.evaluate(numericAc, issues: const ['only US1-AC2 here']);
       expect(notTraced.violations.map((v) => v.code),
           contains('SPEC_AC_NOT_TRACED'));
     });
@@ -153,11 +155,11 @@ void main() {
     });
 
     test('an AC referenced by no issue → SPEC_AC_NOT_TRACED', () {
-      // Issue traces AC-1 only; AC-2 is left untraced.
-      final r = gate.evaluate(_filledSpec, issues: const ['Covers AC-1.']);
+      // Issue traces US1-AC1 only; US1-AC2 is left untraced.
+      final r = gate.evaluate(_filledSpec, issues: const ['Covers US1-AC1.']);
       final traced = r.violations.where((v) => v.code == 'SPEC_AC_NOT_TRACED');
       expect(traced, isNotEmpty);
-      expect(traced.first.message, contains('AC-2'));
+      expect(traced.first.message, contains('US1-AC2'));
     });
 
     test('every AC traced by some issue → no SPEC_AC_NOT_TRACED', () {
@@ -168,7 +170,7 @@ void main() {
 
     test('issue-as-code traces via the front-matter covers: list', () {
       const issue =
-          '---\nkind: iq-issue\ncovers: [AC-1, AC-2]\n---\n\nA body with no ids.\n';
+          '---\nkind: iq-issue\ncovers: [US1-AC1, US1-AC2]\n---\n\nA body with no ids.\n';
       final r = gate.evaluate(_filledSpec, issues: const [issue]);
       expect(r.violations.map((v) => v.code),
           isNot(contains('SPEC_AC_NOT_TRACED')));
@@ -176,16 +178,125 @@ void main() {
 
     test('an AC mentioned only in the body prose (not in covers:) does NOT trace',
         () {
-      // covers declares AC-1; AC-2 appears in the body but is not declared —
-      // the fix: prose/examples must not trace falsely (issue-as-code source of
+      // covers declares US1-AC1; US1-AC2 appears in the body but is not declared
+      // — prose/examples must not trace falsely (the issue-as-code source of
       // truth is covers:).
       const issue =
-          '---\nkind: iq-issue\ncovers: [AC-1]\n---\n\nRelated to AC-2 somehow.\n';
+          '---\nkind: iq-issue\ncovers: [US1-AC1]\n---\n\nRelated to US1-AC2 somehow.\n';
       final r = gate.evaluate(_filledSpec, issues: const [issue]);
       final untraced =
           r.violations.where((v) => v.code == 'SPEC_AC_NOT_TRACED');
-      expect(untraced.map((v) => v.message).join('\n'), contains('AC-2'));
-      expect(untraced.map((v) => v.message).join('\n'), isNot(contains('AC-1')));
+      expect(untraced.map((v) => v.message).join('\n'), contains('US1-AC2'));
+      expect(
+          untraced.map((v) => v.message).join('\n'), isNot(contains('US1-AC1')));
+    });
+
+    group('AC ids are qualified by their user story', () {
+      /// AC numbering restarts inside every story (the templates say the id cell
+      /// holds only the number). With bare `AC-N` ids, US-1/AC-1 and US-2/AC-1
+      /// collapsed onto one id: an issue covering only the first story silently
+      /// traced the second, and the gate passed a spec with a whole story
+      /// unimplemented.
+      const twoStories = '''
+# Specification
+
+## Metadata
+
+| Field | Value |
+| ----- | ----- |
+| ID    | REQ-1 |
+
+## 1. Commitment date
+
+| Milestone          | Date       |
+| ------------------ | ---------- |
+| Committed delivery | 2026-08-15 |
+
+## 2. User Stories
+
+### US-1: Log in
+
+**As a** user,
+**I want** to log in,
+**So that** I can see my account.
+
+| AC  | Given            | When     | Then           |
+| --- | ---------------- | -------- | -------------- |
+| 1   | valid password   | I submit | I am logged in |
+| 2   | invalid password | I submit | I see an error |
+
+### US-2: Export invoices
+
+**As an** accountant,
+**I want** to export invoices to CSV,
+**So that** I can reconcile them.
+
+| AC  | Given             | When           | Then                 |
+| --- | ----------------- | -------------- | -------------------- |
+| 1   | invoices exist    | I click export | a CSV is downloaded  |
+| 2   | no invoices exist | I click export | I see an empty state |
+
+## 3. Explicit Scope
+
+### Includes
+
+- Login and CSV export.
+
+### Does NOT include
+
+- Anything else.
+
+## 4. Domain and business rules
+
+- **Glossary:** an *invoice* is a billing document.
+''';
+
+      test('an issue covering only the first story leaves the second untraced',
+          () {
+        const loginOnly =
+            '---\nkind: iq-issue\ncovers: [US1-AC1, US1-AC2]\n---\n\nLogin only.\n';
+
+        final r = gate.evaluate(twoStories, issues: const [loginOnly]);
+        final untraced = r.violations
+            .where((v) => v.code == 'SPEC_AC_NOT_TRACED')
+            .map((v) => v.message)
+            .join('\n');
+
+        expect(r.passed, isFalse);
+        expect(untraced, contains('US2-AC1'));
+        expect(untraced, contains('US2-AC2'));
+        expect(untraced, isNot(contains('US1-AC')));
+      });
+
+      test('covering every story passes', () {
+        const both =
+            '---\nkind: iq-issue\ncovers: [US1-AC1, US1-AC2, US2-AC1, US2-AC2]\n---\n\nBoth.\n';
+
+        final r = gate.evaluate(twoStories, issues: const [both]);
+        expect(r.violations.map((v) => v.code),
+            isNot(contains('SPEC_AC_NOT_TRACED')));
+        expect(r.passed, isTrue);
+      });
+
+      test('a bare AC-1 no longer traces anything — it is ambiguous', () {
+        const bare =
+            '---\nkind: iq-issue\ncovers: [AC-1, AC-2]\n---\n\nWhich story?\n';
+
+        final r = gate.evaluate(twoStories, issues: const [bare]);
+        final untraced = r.violations
+            .where((v) => v.code == 'SPEC_AC_NOT_TRACED')
+            .map((v) => v.message)
+            .join('\n');
+
+        expect(untraced, contains('US1-AC1'));
+        expect(untraced, contains('US2-AC1'));
+      });
+
+      test('the id is language-agnostic: a Spanish HU-1 yields US1-AC1', () {
+        final r = gate.evaluate(_filledSpecEs, issues: const ['Cubre US1-AC1.']);
+        expect(r.violations.map((v) => v.code),
+            isNot(contains('SPEC_AC_NOT_TRACED')));
+      });
     });
 
     test('a user story with no acceptance criterion → SPEC_STORY_MISSING_AC', () {
