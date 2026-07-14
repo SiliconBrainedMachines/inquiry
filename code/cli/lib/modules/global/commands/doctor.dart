@@ -96,9 +96,18 @@ class DoctorInput extends Input {
 
   DoctorInput({this.fix = false});
 
-  factory DoctorInput.fromCliRequest(CliRequest req) => DoctorInput(
-    fix: req.flagBool('fix'),
-  );
+  static final List<CliParam> params = [
+    CliParam.boolean(
+      'fix',
+      description: 'Re-download the internal assets when they are missing',
+    ),
+  ];
+
+  factory DoctorInput.fromCliRequest(CliRequest req) =>
+      DoctorInput(fix: req.flagBool('fix'));
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() => {'fix': fix};

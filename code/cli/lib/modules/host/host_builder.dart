@@ -24,7 +24,8 @@ void buildHostModule(
       ),
     ),
     description:
-        'Install Inquiry (agent + skills) globally for a host. --host <opencode|claude> (default: opencode)',
+        'Install Inquiry (agent + skills) globally for a host',
+    params: HostGetInput.params,
   );
 
   m.command<HostCleanInput, HostCleanOutput>(
@@ -34,5 +35,6 @@ void buildHostModule(
       deployer: cleaner,
     ),
     description: 'Remove deployed Inquiry files from all hosts',
+    params: HostCleanInput.params,
   );
 }

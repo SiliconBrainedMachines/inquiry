@@ -34,6 +34,19 @@ class ApePromptInput extends Input {
     required this.workingDirectory,
   });
 
+  static final List<CliParam> params = [
+    CliParam.string(
+      'name',
+      abbr: 'n',
+      description: 'APE whose prompt to assemble (socrates, dewey, descartes, ada, darwin)',
+    ),
+    CliParam.string(
+      'state',
+      abbr: 's',
+      description: 'APE sub-state to assemble the prompt for',
+    ),
+  ];
+
   factory ApePromptInput.fromCliRequest(CliRequest req) {
     return ApePromptInput(
       name: req.flagString('name', aliases: const ['n']),
@@ -41,6 +54,9 @@ class ApePromptInput extends Input {
       workingDirectory: Directory.current.path,
     );
   }
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() => {

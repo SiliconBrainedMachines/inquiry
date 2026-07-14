@@ -37,12 +37,29 @@ class IssueNewInput extends Input {
 
   IssueNewInput({this.slug, required this.name, this.repo, this.lang});
 
+  static final List<CliParam> params = [
+    CliParam.positional('name', description: 'Name of the issue → issue-<name>.md'),
+    CliParam.string(
+      'slug',
+      description: 'Requisition to scaffold into; defaults to the active one',
+    ),
+    CliParam.string('repo', description: 'Target GitHub repo, as owner/repo'),
+    CliParam.string(
+      'lang',
+      allowed: ['en', 'es'],
+      description: "Language of the issue; inherits the specification's when omitted",
+    ),
+  ];
+
   factory IssueNewInput.fromCliRequest(CliRequest req) => IssueNewInput(
         slug: optionalSlug(req.flagString('slug')),
         name: (req.param('name') ?? '').trim(),
         repo: req.flagString('repo'),
         lang: req.flagString('lang'),
       );
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() =>

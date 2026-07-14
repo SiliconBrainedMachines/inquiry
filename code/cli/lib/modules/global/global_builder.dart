@@ -22,6 +22,7 @@ void buildGlobalModule(
     '',
     (req) => TuiCommand(TuiInput.fromCliRequest(req)),
     description: 'Display Inquiry status and FSM diagram',
+    params: TuiInput.params,
   );
 
   m.command<InitInput, InitOutput>(
@@ -29,24 +30,28 @@ void buildGlobalModule(
     (req) => InitCommand(InitInput.fromCliRequest(req)),
     description:
         'Set up the Inquiry workspace in this repo (cleanrooms + .inquiry). Install a host first with `iq host get`.',
+    params: InitInput.params,
   );
 
   m.command<VersionInput, VersionOutput>(
     'version',
     (req) => VersionCommand(VersionInput.fromCliRequest(req)),
     description: 'Print the current CLI version',
+    params: VersionInput.params,
   );
 
   m.command<DoctorInput, DoctorOutput>(
     'doctor',
     (req) => DoctorCommand(DoctorInput.fromCliRequest(req), assets: assets),
     description: 'Verify prerequisites (inquiry, git, gh, gh auth, gh copilot)',
+    params: DoctorInput.params,
   );
 
   m.command<UpgradeInput, UpgradeOutput>(
     'upgrade',
     (req) => UpgradeCommand(UpgradeInput.fromCliRequest(req)),
     description: 'Download and install the latest Inquiry release',
+    params: UpgradeInput.params,
   );
 
   m.command<UninstallInput, UninstallOutput>(
@@ -56,5 +61,6 @@ void buildGlobalModule(
       deployer: cleaner,
     ),
     description: 'Remove Inquiry CLI from the system',
+    params: UninstallInput.params,
   );
 }
