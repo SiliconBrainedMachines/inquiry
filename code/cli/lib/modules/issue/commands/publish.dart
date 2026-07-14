@@ -37,11 +37,26 @@ class IssuePublishInput extends Input {
 
   IssuePublishInput({this.slug, required this.name, this.apply = false});
 
+  static final List<CliParam> params = [
+    CliParam.positional('name', description: 'Name of the issue → issue-<name>.md'),
+    CliParam.string(
+      'slug',
+      description: 'Requisition to publish from; defaults to the active one',
+    ),
+    // `--plan` is the default and carries no value the command reads, but it is
+    // a documented way to ask for it — declared so it is accepted, not refused.
+    CliParam.boolean('plan', description: 'Preview the gh issue create (default)'),
+    CliParam.boolean('apply', description: 'Actually create the GitHub issue'),
+  ];
+
   factory IssuePublishInput.fromCliRequest(CliRequest req) => IssuePublishInput(
         slug: optionalSlug(req.flagString('slug')),
         name: (req.param('name') ?? '').trim(),
         apply: req.flagBool('apply'),
       );
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() =>

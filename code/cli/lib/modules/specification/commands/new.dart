@@ -32,11 +32,24 @@ class SpecificationNewInput extends Input {
 
   SpecificationNewInput({required this.slug, this.lang = 'en'});
 
+  static final List<CliParam> params = [
+    CliParam.positional('slug', description: 'Kebab-case name of the requisition'),
+    CliParam.string(
+      'lang',
+      defaultValue: 'en',
+      allowed: ['en', 'es'],
+      description: 'Language of the specification and every artifact derived from it',
+    ),
+  ];
+
   factory SpecificationNewInput.fromCliRequest(CliRequest req) =>
       SpecificationNewInput(
         slug: normalizeSlug(req.param('slug') ?? ''),
         lang: req.flagString('lang') ?? 'en',
       );
+
+  @override
+  List<CliParam> get schemaFields => params;
 
   @override
   Map<String, dynamic> toJson() => {'slug': slug, 'lang': lang};
