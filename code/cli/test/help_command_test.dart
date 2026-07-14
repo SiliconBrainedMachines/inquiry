@@ -17,6 +17,21 @@ void main() {
       expect(text, contains('iq <command>'));
     });
 
+    /// `iq` with no arguments is NOT a help request — it is a registered route:
+    /// the banner + FSM diagram. modular_cli_sdk 0.3.0 rewrites the empty
+    /// invocation into `help` unconditionally, which silently replaced the TUI.
+    test('bare `iq` runs the TUI, not the help', () async {
+      final sink = StringIOSink();
+      final code = await runInquiry(const [], stdout: sink);
+      final out = sink.toString();
+
+      expect(code, 0);
+      expect(out, contains('Inquiry'), reason: 'the banner should be printed');
+      expect(out, contains('Analyze'), reason: 'the FSM diagram should be printed');
+      expect(out, isNot(contains('Available commands')),
+          reason: 'the empty invocation was hijacked by the help command');
+    });
+
     /// The help used to be a hand-written string, and it silently drifted: the
     /// `specification` and `issue` modules shipped and were never listed in it.
     /// It is now rendered from the router's own registry, so a registered
