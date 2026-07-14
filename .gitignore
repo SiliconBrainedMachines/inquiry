@@ -22,3 +22,5 @@ code/cli/tmp/
 .claude/skills/speckit-*/
 .github/agents/speckit.*
 .github/prompts/speckit.*
+# Inquiry — local workspace & cycle state
+docs/requisitions/
