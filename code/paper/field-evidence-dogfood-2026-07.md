@@ -17,8 +17,12 @@ harness *in production use*, not a claim of effect size.
   existing screen, taken **all the way through development**. Specification → 2 issues → 2 PRs,
   every AC covered by a passing test. Cross-**org**: the app fix lives in `bitstream-sac/socia`,
   the API fix in `cacsi-dev/impulsa_api`.
+- **modular_cli_sdk — "native help command"** (`--lang en`): a requirement on the *dependency*
+  Inquiry's own CLI is built on. 3 user stories, 15 AC, one issue, one PR. Run with Inquiry
+  v0.19.0 against a foreign repo — the first time the tool was pointed at a package it does not
+  live in.
 
-Both requirements evolved the tool itself: Inquiry went **0.15.0 → 0.18.0 (8 releases)**, each
+All three requirements evolved the tool itself: Inquiry went **0.15.0 → 0.20.0**, each release
 driven by a concrete friction surfaced by real use — not by speculation.
 
 ## Observations relevant to the thesis
@@ -64,6 +68,35 @@ driven by a concrete friction surfaced by real use — not by speculation.
    The thinking — Deweyan investigation, authoring, the content-vs-presentation layer decision —
    was the model's. The tool never reasoned; it enforced completeness and left a reviewable trail.
 
+7. **Use is a discovery procedure that tests and review are not.** The `modular_cli_sdk` case is
+   the sharpest datum in this record, because the defects it surfaced were *unreachable* by the
+   two methods a normal project would trust. The SDK was **already published**, with **102 green
+   tests** and a passing review. Integrating it into a real consumer — Inquiry's 18 commands —
+   surfaced **three defects in three days**, each shipped upstream as a release:
+   - **0.3.1** — the bare invocation (`iq`) hijacked a *registered root route*. The SDK's own
+     `example/` had no root command, so no test could see it. Found the moment a real CLI whose
+     bare form is a TUI took the dependency.
+   - **0.3.2** — an **empty** parameter contract was inexpressible (`params: []` was
+     indistinguishable from "declares nothing"), so a zero-option command could not be enforced.
+     This is the *original* reported bug: `iq init --host claude` accepted a parameter it does not
+     have and exited 0 — "I ran something, but it did something else."
+   - **0.3.3** — a command with positionals could not answer `--help` without being handed the
+     very argument the user was asking about (`iq specification new --help` → exit 64).
+   None of the three is a coding error visible in isolation; each is a **contract error at the
+   integration boundary**, and the boundary is the only place it exists. The SDK's tests were green
+   *and correct* — they tested the CLI the example described, not the CLI a user builds. This is
+   the empirical form of the paper's own commitment: **evidence over inference**. A green suite is
+   inference about a system's behaviour; use is evidence of it. Dogfood is not a virtue signal
+   here, it is the measuring instrument.
+
+8. **The requirement propagated the right way: upstream, not around.** The requisition targeted a
+   *dependency*, and the three defects were fixed **in the SDK and published**, not patched around
+   in the consumer. Two of them (0.3.2, 0.3.3) then became enforced behaviour for every command in
+   Inquiry v0.20.0 — an unknown parameter now *fails* instead of being silently accepted. The
+   traceability spine held across the repository boundary (spec → AC → issue in *another* repo →
+   test → release), which is the same shape as the cross-org Socia case and the external-ERP
+   prerequisite in Impulsa: the method does not require the work to live where the story does.
+
 ## Honest limitations and open items (antifragility inputs)
 
 - **Field N is tiny and uncontrolled.** These cases show the method *delivering*; they do not
@@ -81,7 +114,8 @@ driven by a concrete friction surfaced by real use — not by speculation.
 
 ## One-line takeaway
 
-Across two real requirements, Inquiry behaved as a **coherent methodology for evidence-based,
-traceable delivery** whose separation of *definedness* (specification) from *construction*
-(TDD-applied FSM) held — and it is earning that design by use, which is precisely the claim an
-agentic-development paper must substantiate.
+Across three real requirements — one of them against the tool's own dependency — Inquiry behaved
+as a **coherent methodology for evidence-based, traceable delivery** whose separation of
+*definedness* (specification) from *construction* (TDD-applied FSM) held; and in the SDK case the
+methodology *found what a green test suite could not*, which is the claim an agentic-development
+paper must substantiate: not that the harness produces confidence, but that it produces evidence.
