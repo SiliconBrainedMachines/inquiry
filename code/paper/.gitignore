@@ -1,0 +1,17 @@
+# Secrets — arXiv / ORCID credentials. NEVER track.
+.env
+*.env
+
+# LaTeX build outputs — regenerable from source, never tracked.
+output/
+*.pdf
+*.bbl
+*.synctex.gz
+*.aux
+*.log
+*.out
+*.fls
+*.fdb_latexmk
+
+# Submission bundle — a build artifact.
+arxiv-submission.zip
