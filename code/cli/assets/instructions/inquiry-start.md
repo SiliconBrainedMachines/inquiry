@@ -1,6 +1,6 @@
 ---
 name: inquiry-start
-description: 'Protocol for starting work on an existing GitHub issue. Verifies the issue, prepares the branch and cleanroom, and transitions to ANALYZE state.'
+description: 'Protocol for starting work on an existing GitHub issue. Verifies the issue and opens the cycle with a single command, which prepares the branch and cleanroom and transitions to ANALYZE.'
 ---
 
 # inquiry-start - Operational Start Protocol
@@ -9,9 +9,7 @@ description: 'Protocol for starting work on an existing GitHub issue. Verifies t
 
 Run iq doctor first and stop on any failed check.
 Verify the issue already exists with gh issue view.
-Create branch NNN-slug and cleanrooms/NNN-slug/analyze.
-Create analyze/index.md for the cleanroom.
-Transition with iq fsm transition --event start_analyze --issue NNN.
+Open the implementation with iq implementation start --issue NNN, which derives the NNN-slug branch, checks it out, scaffolds the cleanroom, and transitions to ANALYZE.
 Confirm iq fsm state reports ANALYZE for that issue.
 
 ## When to Use
@@ -49,91 +47,51 @@ All checks must pass. Do not proceed if any check fails.
 gh issue view <NNN> --json number,title,state
 ```
 
-Confirm the issue already exists and extract `number` and `title` from the JSON response.
+Confirm the issue already exists. You do NOT need to read the title to build a
+branch name — `iq implementation start` derives it from the issue itself.
 
-### Step 3: Generate Slug
-
-Transform the confirmed issue title into a slug:
-
-1. Lowercase the title
-2. Replace spaces with hyphens (`-`)
-3. Remove special characters (keep only `a-z`, `0-9`, `-`)
-4. Limit to 50 characters
-5. Trim trailing hyphens
-
-**Examples:**
-- "Fix login timeout" -> `fix-login-timeout`
-- "Add dark mode support!!!" -> `add-dark-mode-support`
-- "URGENT: Database migration script" -> `urgent-database-migration-script`
-
-### Step 4: Create Branch
-
-Format: `<NNN>-<slug>`
+### Step 3: Open the Cycle
 
 ```bash
-git checkout -b <NNN>-<slug>
+iq implementation start --issue <NNN>
 ```
 
-**Examples:**
-- Issue #37 "Fix login timeout" -> `git checkout -b 037-fix-login-timeout`
-- Issue #142 "Add dark mode" -> `git checkout -b 142-add-dark-mode`
+This single command owns every mechanical step of the bootstrap — there is no
+`git checkout -b`, no `mkdir`, no hand-writing of scaffold files:
 
-Note: Pad issue numbers less than 100 with leading zeros for sort consistency.
+1. Initializes the Inquiry workspace if it is missing (no separate `iq init`).
+2. Reads the issue title and derives the branch `<NNN>-<slug>` (issue number
+   left-padded to three digits, e.g. `#37 → 037-fix-login-timeout`).
+3. Creates and checks out that branch (or checks it out if it already exists).
+4. Fires the `start_analyze` transition, whose effect scaffolds
+   `cleanrooms/<NNN>-<slug>/analyze/` (index.md, confirmations.md, diagnosis.md)
+   and the issue mirror.
 
-### Step 5: Create Working Directory
+The command reports the branch, the cleanroom path, and the new state. Do NOT
+write `.inquiry` state directly — all state mutations go through `iq` commands.
+
+### Step 4: Verify
 
 ```bash
-mkdir -p cleanrooms/<NNN>-<slug>/analyze/
+iq fsm state
 ```
 
-This creates the analysis directory for SOCRATES to work in during ANALYZE phase.
-
-### Step 6: Create index.md
-
-Create `cleanrooms/<NNN>-<slug>/analyze/index.md` with this template:
-
-```markdown
-# Analyze Phase - Index
-
-**Issue:** #<NNN> - <title>
-**Branch:** <NNN>-<slug>
-**Phase:** ANALYZE
-**Status:** In progress
-
----
-
-## Documents
-
-| # | File | Description |
-|---|------|-------------|
-```
-
-### Step 7: Transition to ANALYZE
-
-Execute the CLI transition command with the issue number:
-
-```
-iq fsm transition --event start_analyze --issue <NNN>
-```
-
-This transitions the FSM to ANALYZE and auto-activates the analysis sub-agent. Do NOT write `.inquiry/state.yaml` directly - all state mutations go through `iq` commands.
-
-### Step 8: Verify Transition
-
-Run `iq fsm state` to confirm the state is now ANALYZE with the correct issue number.
+Confirm the state is now ANALYZE with the correct issue number.
 
 ## Verification
 
 After completing all steps, verify:
 
 - [ ] The issue already exists and `gh issue view <NNN> --json number,title,state` succeeds
+- [ ] `iq implementation start --issue <NNN>` reported ANALYZE
 - [ ] Branch exists: `git branch --show-current` returns `<NNN>-<slug>`
-- [ ] Directory exists: `cleanrooms/<NNN>-<slug>/analyze/index.md`
+- [ ] Directory exists: `cleanrooms/<NNN>-<slug>/analyze/`
 - [ ] State updated: `iq fsm state` shows ANALYZE with the issue number
 
 ## Notes
 
 - This skill is executed by the scheduler APE, not by a human
 - TRIAGE owns issue creation or confirmation through `issue-create`
-- The scheduler reads this document and executes commands step by step
+- Mechanical bootstrap (slug, branch, cleanroom, transition) is owned by
+  `iq implementation start` — the scheduler invokes it, it does not reproduce those steps
 - If any step fails, the scheduler should report the error and remain in IDLE
