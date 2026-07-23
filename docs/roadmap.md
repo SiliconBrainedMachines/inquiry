@@ -207,6 +207,35 @@ The original [lore.md](lore.md) sketched 9+ apes. After two months of building A
 
 The lesson: **the framework wants fewer, sharper agents, not more**. Each absorption was driven by a real cycle where two agents were doing what one could do better.
 
+## Design direction: a module per stage (`iq <stage> <verb>`)
+
+Adopted 2026-07. The CLI is being reorganized so its command surface mirrors the
+cycle's stages instead of its internals. Today commands are grouped by mechanism
+(`iq fsm transition`, `iq ape prompt`) — names that leak how the engine works and
+force the user to translate "I want to start analyzing" into "run an FSM
+transition". The direction is one **module per stage**, each with a small set of
+common verbs:
+
+- `iq requisition`, `iq specification`, `iq implementation`, `iq analyze`,
+  `iq plan`, `iq execute`, `iq verification` — one module each.
+- Shared verbs where they make sense: `start` (enter the stage),
+  `skill` (show the stage's operating instruction), `check` (run the stage gate).
+  e.g. `iq analyze start`, `iq analyze skill`, `iq plan check`.
+- Every argument explicit and named: `--issue 40`, not a positional. A required
+  input is declared `required`, so the CLI refuses to run without it.
+
+**`iq implementation start --issue <N>` is the first module built to this
+pattern** (issue #295): it replaces the cryptic `iq cycle start 40` and folds the
+whole manual bootstrap (slug + branch + cleanroom + transition) into one explicit
+command. It is the template the remaining stages migrate toward — incrementally,
+each stage keeping its old command working until its module lands.
+
+Two principles this direction locks in (see the `mejora-ux` requisition):
+- **Every mechanical process is an `iq` command**, never an instruction that has
+  the model run `git`/`mkdir`/write scaffold by hand.
+- **Commands are not flow-aware**: they do their job and report it; they do not
+  print a "next step" that would bias what the user does next.
+
 ## How this roadmap is updated
 
 - Keep this file forward-looking.
