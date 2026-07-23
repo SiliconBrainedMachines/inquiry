@@ -161,13 +161,16 @@ void main() {
       expect(t1.promptFragmentId, isNotNull);
       current = t1.nextState!;
 
+      // cleanrooms/ is ephemeral and git-ignored: the analysis and plan
+      // boundaries no longer create commits (a boundary commit would fail on a
+      // real repo, where cleanrooms/ is ignored).
       final analysisCommitsBefore = _commitCount(tempDir.path);
       _writeDiagnosis(tempDir.path, branch, 'diagnosis ready');
       final t2 = await transition('complete_analysis');
       expect(t2.allowed, isTrue);
       expect(t2.nextState, 'PLAN');
       expect(t2.promptFragmentId, isNotNull);
-      expect(_commitCount(tempDir.path), analysisCommitsBefore + 1);
+      expect(_commitCount(tempDir.path), analysisCommitsBefore);
       current = t2.nextState!;
 
       final planCommitsBefore = _commitCount(tempDir.path);
@@ -176,7 +179,7 @@ void main() {
       expect(t3.allowed, isTrue);
       expect(t3.nextState, 'EXECUTE');
       expect(t3.promptFragmentId, isNotNull);
-      expect(_commitCount(tempDir.path), planCommitsBefore + 1);
+      expect(_commitCount(tempDir.path), planCommitsBefore);
       current = t3.nextState!;
 
       final t4 = await transition('finish_execute');
