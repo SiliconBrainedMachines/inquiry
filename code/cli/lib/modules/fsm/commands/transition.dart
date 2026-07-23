@@ -720,7 +720,7 @@ class StateTransitionCommand
           issue: issue,
           promptFragmentId: promptFragmentId,
         );
-        return 'ERROR_PRECONDITION_BRANCH_POLICY: Use issue-linked feature branch matching active issue';
+        return _branchPolicyError(branch: branch, issue: issue);
       }
       _recordPrecheckSensor(
         executor,
@@ -1262,6 +1262,22 @@ class StateTransitionCommand
     return const _BoundaryCommitResult.success(
       operationsExecuted: ['create_boundary_commit'],
     );
+  }
+
+  /// The branch-policy failure, written to teach: it names the expected pattern,
+  /// gives a concrete example, shows the actual branch, and points at the command
+  /// that produces a valid branch in one step (AC2).
+  String _branchPolicyError({required String branch, String? issue}) {
+    final issueRef = (issue != null && issue.trim().isNotEmpty)
+        ? issue.trim()
+        : '<issue>';
+    final actual = branch.trim().isEmpty ? '(no branch)' : branch.trim();
+    return 'ERROR_PRECONDITION_BRANCH_POLICY: the current branch "$actual" is not '
+        'linked to issue #$issueRef.\n'
+        'Expected a branch named "<NNN>-<slug>" that starts with "$issueRef-" '
+        '(e.g. "$issueRef-fix-login"). A branch under a prefix like '
+        '"feat/$issueRef-…" does NOT qualify — the name must be a single segment.\n'
+        'Create it and enter ANALYZE in one step with: iq implementation start --issue $issueRef';
   }
 
   bool _isIssueLinkedFeatureBranch(String branch, String? issue) {
