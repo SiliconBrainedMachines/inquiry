@@ -4,6 +4,10 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.21.1]
+### Fixed
+- **The analysis/plan boundary commits blocked every cycle.** Since 0.20.0 git-ignored the whole `cleanrooms/` area, the `commit_analysis_boundary` (ANALYZE→PLAN) and `commit_plan_boundary` (→EXECUTE) policies could never run — `git add -- cleanrooms/<branch>/…` refuses ignored paths, so the transition failed closed with `ERROR_BOUNDARY_COMMIT_FAILED`. The two decisions contradicted each other: a working area that is intentionally ephemeral has no boundary snapshot to commit. Both transitions are now `commit_policy: none`; their gates still validate `diagnosis.md`/`plan.md`. The gap survived because the FSM tests ran in a temp repo that did **not** git-ignore `cleanrooms/`, so the boundary commit succeeded there while failing in every real repo (where `iq init` ignores it) — the tests now assert no commit is made. Found by dogfooding a real cycle (cacsi-dev/impulsa #40).
+
 ## [0.21.0]
 ### Added
 - **`iq implementation start --issue <N>` — one explicit command opens a cycle.** It is the whole mechanical bootstrap that used to be handed to the model step by step in `inquiry-start.md` (derive the slug, `git checkout -b`, `mkdir` the cleanroom, hand-write `index.md`, then transition): now a single deterministic command. It resolves the project root, **initializes the workspace itself if `.inquiry/` is missing** (no separate `iq init`), reads the issue title from GitHub, derives the `<NNN>-<slug>` branch and checks it out, and fires `start_analyze` — whose existing effect scaffolds `cleanrooms/<branch>/analyze/`. The result: `main` → one command → linked branch + cleanroom + ANALYZE. This is the first module built to the **module-per-stage** direction (`iq <stage> <verb>`, every argument explicit and named) recorded in `docs/roadmap.md`.
