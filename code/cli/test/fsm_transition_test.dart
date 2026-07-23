@@ -42,7 +42,7 @@ void main() {
     });
 
     test(
-      'returns prompt descriptor for ANALYZE -> PLAN after boundary commit',
+      'returns prompt descriptor for ANALYZE -> PLAN without a boundary commit',
       () async {
         const branch = '51-idle-execution-guardrails';
         _initGitRepo(tempDir.path, branch: branch);
@@ -76,7 +76,9 @@ void main() {
           output.toText(),
           contains('Write inside the CLI-created template and keep frontmatter unchanged.'),
         );
-        expect(_commitCount(tempDir.path), commitsBefore + 1);
+        // cleanrooms/ is ephemeral and git-ignored: the transition must NOT
+        // create a commit (a boundary commit would fail on a real repo).
+        expect(_commitCount(tempDir.path), commitsBefore);
 
         // Verify state was actually updated
         final stateContent = File(
@@ -91,18 +93,9 @@ void main() {
         expect(runTrace.existsSync(), isTrue);
         final traceContent = runTrace.readAsStringSync();
         expect(traceContent, contains('event_class: sensor_run'));
-        expect(traceContent, contains('event_class: tool_activity'));
-        expect(traceContent, contains('tool_class: git'));
-        expect(traceContent, contains('command_family: add'));
-        expect(traceContent, contains('command_family: commit'));
-        expect(traceContent, contains('gate: commit_analysis_boundary'));
-        expect(traceContent, contains('verdict: APPROVED'));
-        expect(
-          traceContent,
-          contains(
-            'authority: "cleanrooms/51-idle-execution-guardrails/analyze"',
-          ),
-        );
+        // No boundary-commit machinery runs anymore.
+        expect(traceContent, isNot(contains('gate: commit_analysis_boundary')));
+        expect(traceContent, isNot(contains('command_family: commit')));
       },
     );
 
@@ -373,67 +366,6 @@ void main() {
     });
 
     test(
-      'fails closed when ANALYZE -> PLAN cannot create boundary commit',
-      () async {
-        const branch = '51-idle-execution-guardrails';
-
-        _initGitRepo(tempDir.path, branch: branch);
-        _writeAnalyzeIndex(tempDir.path, branch);
-        _writeConfirmations(tempDir.path, branch);
-        _writeDiagnosis(tempDir.path, branch, 'diagnosis already committed');
-        _git(tempDir.path, [
-          'add',
-          '--',
-          p.posix.join('cleanrooms', branch, 'analyze'),
-        ]);
-        _git(tempDir.path, [
-          'commit',
-          '-m',
-          'analysis ready',
-          '--only',
-          '--',
-          p.posix.join('cleanrooms', branch, 'analyze'),
-        ]);
-        _writeState(tempDir.path, 'ANALYZE', issue: '51');
-        final commitsBefore = _commitCount(tempDir.path);
-
-        final output = await StateTransitionCommand(
-          StateTransitionInput(
-            currentState: null,
-            event: 'complete_analysis',
-            workingDirectory: tempDir.path,
-          ),
-          branchProvider: (_) async => branch,
-        ).execute();
-
-        expect(output.allowed, isFalse);
-        expect(output.nextState, isNull);
-        expect(output.message, contains('commit'));
-        expect(_commitCount(tempDir.path), commitsBefore);
-
-        final stateContent = File(
-          _cycleStatePath(tempDir.path, branch),
-        ).readAsStringSync();
-        expect(stateContent, contains('state: ANALYZE'));
-
-        final runTrace = File(
-          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
-        );
-        expect(runTrace.existsSync(), isTrue);
-        final traceContent = runTrace.readAsStringSync();
-        expect(traceContent, contains('event_class: sensor_run'));
-        expect(traceContent, contains('gate: commit_analysis_boundary'));
-        expect(traceContent, contains('verdict: FAILED'));
-        expect(
-          traceContent,
-          contains(
-            'authority: "cleanrooms/51-idle-execution-guardrails/analyze"',
-          ),
-        );
-      },
-    );
-
-    test(
       'fails precheck when commitment needs issue/branch and issue missing',
       () async {
         const branch = '51-idle-execution-guardrails';
@@ -668,7 +600,7 @@ void main() {
     );
 
     test(
-      'transitions PLAN -> EXECUTE only after plan boundary commit',
+      'transitions PLAN -> EXECUTE without a boundary commit',
       () async {
         const branch = '51-idle-execution-guardrails';
         _initGitRepo(tempDir.path, branch: branch);
@@ -690,7 +622,8 @@ void main() {
         expect(output.promptFragmentId, 'plan_to_execute');
         expect(output.requiredInstructions, ['coding-manifesto-review']);
         expect(output.toText(), startsWith(output.message));
-        expect(_commitCount(tempDir.path), commitsBefore + 1);
+        // cleanrooms/ is ephemeral and git-ignored: no boundary commit.
+        expect(_commitCount(tempDir.path), commitsBefore);
 
         final stateContent = File(
           _cycleStatePath(tempDir.path, branch),
@@ -705,89 +638,14 @@ void main() {
         final traceContent = runTrace.readAsStringSync();
         expect(traceContent, contains('task_id: "51"'));
         expect(traceContent, contains('event_class: sensor_run'));
-        expect(traceContent, contains('event_class: tool_activity'));
-        expect(traceContent, contains('tool_class: git'));
-        expect(traceContent, contains('command_family: add'));
-        expect(traceContent, contains('command_family: commit'));
         expect(traceContent, contains('gate: plan_approved'));
-        expect(traceContent, contains('gate: commit_plan_boundary'));
         expect(traceContent, contains('sensor_category: pre_transition'));
         expect(traceContent, contains('verdict: APPROVED'));
-        expect(
-          traceContent,
-          contains(
-            'authority: "cleanrooms/51-idle-execution-guardrails/plan.md"',
-          ),
-        );
         expect(traceContent, contains('transition_event: approve_plan'));
         expect(traceContent, contains('outcome: allowed'));
-      },
-    );
-
-    test(
-      'fails closed when PLAN -> EXECUTE cannot create boundary commit',
-      () async {
-        const branch = '51-idle-execution-guardrails';
-        final planPath = p.posix.join('cleanrooms', branch, 'plan.md');
-
-        _initGitRepo(tempDir.path, branch: branch);
-        _writePlan(tempDir.path, branch, '# committed plan\n');
-        _git(tempDir.path, ['add', '--', planPath]);
-        _git(tempDir.path, [
-          'commit',
-          '-m',
-          'plan ready',
-          '--only',
-          '--',
-          planPath,
-        ]);
-        _writeState(tempDir.path, 'PLAN', issue: '51');
-        final commitsBefore = _commitCount(tempDir.path);
-
-        final output = await StateTransitionCommand(
-          StateTransitionInput(
-            currentState: null,
-            event: 'approve_plan',
-            workingDirectory: tempDir.path,
-          ),
-          branchProvider: (_) async => branch,
-        ).execute();
-
-        expect(output.allowed, isFalse);
-        expect(output.nextState, isNull);
-        expect(output.message, contains('commit'));
-        expect(_commitCount(tempDir.path), commitsBefore);
-
-        final stateContent = File(
-          _cycleStatePath(tempDir.path, branch),
-        ).readAsStringSync();
-        expect(stateContent, contains('state: PLAN'));
-
-        final runTrace = File(
-          p.join(tempDir.path, 'cleanrooms', branch, 'run_trace.yaml'),
-        );
-        expect(runTrace.existsSync(), isTrue);
-        final traceContent = runTrace.readAsStringSync();
-        expect(traceContent, contains('event_class: transition'));
-        expect(traceContent, contains('event_class: sensor_run'));
-        expect(traceContent, contains('event_class: tool_activity'));
-        expect(traceContent, contains('tool_class: git'));
-        expect(traceContent, contains('command_family: add'));
-        expect(traceContent, contains('command_family: commit'));
-        expect(traceContent, contains('outcome: failed'));
-        expect(traceContent, contains('transition_event: approve_plan'));
-        expect(traceContent, contains('gate: commit_plan_boundary'));
-        expect(traceContent, contains('verdict: FAILED'));
-        expect(traceContent, contains('to_state: EXECUTE'));
-        expect(traceContent, contains('outcome: blocked'));
-        expect(traceContent, contains('event_class: block'));
-        expect(traceContent, contains('blocking_boundary: boundary_commit'));
-        expect(
-          traceContent,
-          contains(
-            'authoritative_surface: "cleanrooms/51-idle-execution-guardrails/plan.md"',
-          ),
-        );
+        // No boundary-commit machinery runs anymore.
+        expect(traceContent, isNot(contains('gate: commit_plan_boundary')));
+        expect(traceContent, isNot(contains('command_family: commit')));
       },
     );
 
