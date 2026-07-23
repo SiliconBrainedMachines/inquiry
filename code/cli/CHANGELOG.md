@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.21.0]
+### Added
+- **`iq implementation start --issue <N>` — one explicit command opens a cycle.** It is the whole mechanical bootstrap that used to be handed to the model step by step in `inquiry-start.md` (derive the slug, `git checkout -b`, `mkdir` the cleanroom, hand-write `index.md`, then transition): now a single deterministic command. It resolves the project root, **initializes the workspace itself if `.inquiry/` is missing** (no separate `iq init`), reads the issue title from GitHub, derives the `<NNN>-<slug>` branch and checks it out, and fires `start_analyze` — whose existing effect scaffolds `cleanrooms/<branch>/analyze/`. The result: `main` → one command → linked branch + cleanroom + ANALYZE. This is the first module built to the **module-per-stage** direction (`iq <stage> <verb>`, every argument explicit and named) recorded in `docs/roadmap.md`.
+
+### Changed
+- **The branch-policy failure now teaches instead of asserting.** `feature_branch_selected` returned a bare `Use issue-linked feature branch matching active issue`. It now names the expected pattern, gives an example, shows the actual branch, states why a `feat/<n>-…` prefix is rejected (the name must be a single segment), and points at `iq implementation start --issue <N>` — the command that produces a valid branch in one step.
+- **`inquiry-start.md` no longer teaches the model to run `git`/`mkdir` or hand-write scaffold files.** The bootstrap is owned by the CLI; the instruction simply invokes `iq implementation start --issue <N>`, honoring the principle that every mechanical process is an `iq` command.
+
 ## [0.20.0]
 ### Added
 - **Every command declares its contract, and the help *is* that contract.** Each command declares its parameters (`CliParam`) on its `Input`, so one declaration feeds three things that were maintained by hand and drifted apart: the help text, the machine-readable catalog, and the parser.
