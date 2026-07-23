@@ -12,6 +12,7 @@ import 'assets.dart';
 import 'modules/global/global_builder.dart';
 import 'modules/fsm/fsm_builder.dart';
 import 'modules/ape/ape_builder.dart';
+import 'modules/implementation/implementation_builder.dart';
 import 'modules/host/host_builder.dart';
 import 'modules/issue/issue_builder.dart';
 import 'modules/specification/specification_builder.dart';
@@ -64,6 +65,7 @@ Future<int> runInquiry(
   cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
+  cli.module('implementation', (m) => buildImplementationModule(m, assets: assets));
   cli.module(
     'specification',
     (m) => buildSpecificationModule(m, assets: assets),
