@@ -113,7 +113,10 @@ transitions:
       prechecks: [issue_selected_or_created, diagnosis_exists, diagnosis_structured, diagnosis_evidence_present, diagnosis_evidence_verifiable, index_exists, confirmations_exists]
       effects: [generate_plan]
       artifacts: [plan.md]
-      commit_policy: commit_analysis_boundary
+      # cleanrooms/ is intentionally git-ignored (ephemeral working area; durable
+      # artifacts are the issue, code, and tests). A boundary commit of it can
+      # never succeed and blocks the transition — so there is nothing to commit.
+      commit_policy: none
       prompt_fragment_id: analyze_to_plan
 
   - from: ANALYZE
@@ -188,7 +191,9 @@ transitions:
       prechecks: [issue_selected, feature_branch_selected, plan_approved, plan_executable_checks]
       effects: [prepare_execute]
       artifacts: [execution_log.md]
-      commit_policy: commit_plan_boundary
+      # See complete_analysis: cleanrooms/ is git-ignored, so a plan boundary
+      # commit can never succeed. The plan gate still validates plan.md.
+      commit_policy: none
       prompt_fragment_id: plan_to_execute
 
   - from: PLAN

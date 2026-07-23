@@ -132,20 +132,15 @@ void main() {
       analyzeTransition.operations!.prechecks,
       containsAll(['diagnosis_exists', 'index_exists', 'confirmations_exists']),
     );
-    expect(
-      analyzeTransition.operations!.commitPolicy,
-      'commit_analysis_boundary',
-    );
+    // cleanrooms/ is git-ignored, so no boundary commit is attempted.
+    expect(analyzeTransition.operations!.commitPolicy, 'none');
     expect(analyzeTransition.operations!.promptFragmentId, 'analyze_to_plan');
 
     expect(planTransition.allowed, isTrue);
     expect(planTransition.to, FsmState.execute);
     expect(planTransition.operations, isNotNull);
     expect(planTransition.operations!.prechecks, contains('plan_approved'));
-    expect(
-      planTransition.operations!.commitPolicy,
-      'commit_plan_boundary',
-    );
+    expect(planTransition.operations!.commitPolicy, 'none');
     expect(planTransition.operations!.promptFragmentId, 'plan_to_execute');
   });
 
