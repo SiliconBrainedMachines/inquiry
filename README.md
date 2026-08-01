@@ -86,8 +86,9 @@ cd your-repo
 iq init                 # scaffold .inquiry/ workspace
 iq                      # show current state
 
-# Run a phase by hand (no scheduler agent): use the per-phase skills
-#   /iq-analyze   /iq-plan   /iq-execute
+# Run a phase by hand (no scheduler agent): use the MACSS lifecycle skills
+#   /macss-analyze   /macss-plan   /macss-execute
+#   installed with: macss skill deploy
 ```
 
 For the current system model, see [`docs/architecture.md`](docs/architecture.md). For forward direction, see [`docs/roadmap.md`](docs/roadmap.md).
@@ -97,7 +98,7 @@ For the current system model, see [`docs/architecture.md`](docs/architecture.md)
 - **CLI:** Dart, single cross-platform binary, built on [`modular_cli_sdk`](https://github.com/ccisnedev/modular_cli_sdk)
 - **FSM:** declarative `transition_contract.yaml` — every (state, event) pair is total
 - **Context injection:** `iq ape prompt` assembles base prompt + sub-state + dynamic paths as fenced YAML
-- **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik` — and the **per-phase skills `iq-analyze` / `iq-plan` / `iq-execute`**, assembled from the FSM/APE contracts so a human can drive any phase by hand
+- **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`. The per-phase skills that drive a cycle by hand now ship with [MACSS](https://github.com/ccisnedev/macss) as `macss-analyze` / `macss-plan` / `macss-execute`; they delegate the mechanics back to `iq fsm state` and `iq fsm transition`, so this CLI stays the authority on the gates
 - **Memory:** `.inquiry/` (runtime state) and `cleanrooms/` (per-cycle artifacts the CLI scaffolds from single-source templates)
 - **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
 - **Host:** OpenCode (default) and Claude — `iq host get` deploys the agent + skills globally and additively

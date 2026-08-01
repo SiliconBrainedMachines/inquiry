@@ -5,8 +5,8 @@ import 'support/string_io_sink.dart';
 
 /// The help is the SDK's — `modular_cli_sdk` renders it from the command
 /// catalog every registration feeds. Inquiry maintains no help text of its own:
-/// the hand-written one drifted, and the `specification` and `issue` modules
-/// shipped without ever appearing in it.
+/// the hand-written one drifted, and two modules once shipped without ever
+/// appearing in it.
 Future<({int code, String out, String err})> _run(List<String> args) async {
   final out = StringIOSink();
   final err = StringIOSink();
@@ -32,10 +32,7 @@ void main() {
         'ape prompt',
         'ape state',
         'ape transition',
-        'specification new',
-        'specification check',
-        'issue new',
-        'issue publish',
+        'implementation start',
       ];
 
       expect(r.code, 0);
@@ -61,16 +58,18 @@ void main() {
       final r = await _run(const ['help']);
 
       expect(r.out, contains('Print the current CLI version'));
-      expect(r.out, contains('specification_ready gate'));
+      expect(r.out, contains('Run a deterministic FSM transition'));
     });
 
-    /// The `specification new` description pointed at the pre-0.19.0 layout.
-    test('describes specification new with the path it actually creates',
-        () async {
+    /// The lifecycle commands moved to MACSS; the help must not keep offering
+    /// them, or users are pointed at routes that no longer exist.
+    test('no longer advertises the migrated lifecycle commands', () async {
       final r = await _run(const ['help']);
 
-      expect(r.out, contains('docs/requisitions/'));
-      expect(r.out, isNot(contains('requisitions/<slug>/')));
+      for (final gone in ['specification', 'issue new', 'issue publish']) {
+        expect(r.out, isNot(contains(gone)),
+            reason: '`$gone` moved to macss and must not appear in iq help');
+      }
     });
 
     /// Every deliberate help request is a success on stdout — never an error.
