@@ -4,6 +4,21 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.24.0]
+
+### Fixed
+- **Deployment could add but never retire.** A skill dropped from a release
+  survived forever in the host as a frozen copy nothing would ever update —
+  which is what left `iq-analyze`, `iq-plan`, `iq-execute` and
+  `iq-specification` behind when the lifecycle moved to MACSS in 0.22.0. Users
+  upgrading saw those alongside the `macss-*` ones, with no way to tell which
+  was live. `iq host get` now removes them.
+
+  Scoped by prefix rather than a hand-maintained list of retirements: the `iq-`
+  namespace is Inquiry's, so anything under it that Inquiry does not ship is
+  Inquiry's to remove. Skills outside it — `kritik`, `legion`, `research`, and
+  anything you wrote — are never touched.
+
 ## [0.23.1]
 
 ### Fixed
