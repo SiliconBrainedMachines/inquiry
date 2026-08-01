@@ -82,8 +82,73 @@ void main() {
       );
     });
 
-    test('HostGetInput defaults host to opencode (#280)', () {
-      expect(HostGetInput().host, equals('opencode'));
+    test('HostGetInput defaults to no host, meaning every detected one (#300)',
+        () {
+      // Defaulting to opencode deployed into a host the user might not have,
+      // and dragged the OpenCode/Ollama configurator into every `iq upgrade`.
+      expect(HostGetInput().host, isNull);
+      expect(HostGetInput().configureOllama, isFalse);
+    });
+
+    group('host detection (#300)', () {
+      /// The host tool is present when its own config directory exists — the
+      /// directory the tool itself creates on first run.
+      void installFakeHost() =>
+          Directory(p.join(homeDir.path, '.fake')).createSync(recursive: true);
+
+      test('no host installed → nothing deployed, and that is not a failure',
+          () async {
+        final out = await HostGetCommand(
+          HostGetInput(),
+          deployer: deployer,
+        ).execute();
+
+        expect(out.exitCode, ExitCode.ok);
+        expect(out.hosts, isEmpty);
+        expect(out.message, contains('No AI coding host found'));
+        expect(out.message, contains('--host'));
+        expect(
+          Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+          isFalse,
+        );
+      });
+
+      test('a detected host is deployed into without being named', () async {
+        installFakeHost();
+
+        final out = await HostGetCommand(
+          HostGetInput(),
+          deployer: deployer,
+        ).execute();
+
+        expect(out.hosts, ['fake']);
+        expect(
+          File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
+              .existsSync(),
+          isTrue,
+        );
+      });
+
+      test('--host deploys even when the host looks absent', () async {
+        // Priming a machine before the host tool has ever run.
+        final out = await HostGetCommand(
+          HostGetInput(host: 'fake'),
+          deployer: deployer,
+        ).execute();
+
+        expect(out.hosts, ['fake']);
+        expect(
+          File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
+              .existsSync(),
+          isTrue,
+        );
+      });
+
+      test('detectedHosts reports only what exists on disk', () {
+        expect(deployer.detectedHosts, isEmpty);
+        installFakeHost();
+        expect(deployer.detectedHosts.map((a) => a.name), ['fake']);
+      });
     });
 
     test('validate() returns error for unknown host', () {
