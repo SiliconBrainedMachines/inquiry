@@ -15,7 +15,6 @@ import '../../../src/version_check.dart';
 import '../../../hosts/all_adapters.dart';
 import '../../../hosts/host_adapter.dart';
 import '../../../hosts/ollama_context.dart';
-import '../../../hosts/skill_builder.dart';
 
 /// Function type for running external processes.
 ///
@@ -430,24 +429,18 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   }
 
   /// The skills a deployed host is expected to carry — exactly what the
-  /// deployer installs: the asset-tree skills **plus** the ones it generates
-  /// from the FSM/APE contracts (`SkillBuilder.phaseSkillNames`, see
-  /// deployer.dart `_deploySkills`). Discovering only the asset tree left the
-  /// `iq-*` phase skills unverified, so a host missing `iq-plan` reported clean.
+  /// deployer installs from the asset tree (see deployer.dart `_deploySkills`).
+  ///
+  /// The lifecycle skills are deliberately absent: they moved to MACSS, which
+  /// installs them with `macss skill deploy`. Expecting them here would report
+  /// every host as unhealthy for a deployment inquiry no longer performs.
   List<String> _getExpectedSkills() {
     final assets = _assets;
     if (assets == null) return [];
-    // The generated skills are a FIXED contract, not a function of what happens
-    // to build today: the deployer skips a phase whose contract assets are
-    // missing, and mirroring that would make doctor quietly expect less and
-    // call a host with no `iq-plan` healthy — the very blindness this check
-    // exists to remove. A phase skill that cannot be built is a real defect,
-    // reported here as missing (and by the asset-integrity check as its cause).
-    final generated = SkillBuilder(assets).phaseSkillNames;
     try {
-      return [...assets.listDirectory('skills'), ...generated];
+      return assets.listDirectory('skills');
     } catch (_) {
-      return generated;
+      return [];
     }
   }
 

@@ -143,17 +143,17 @@ void main() {
       'inquiry-end',
     ];
 
-    /// The skills the deployer *generates* from the FSM/APE contracts — they
-    /// live in no asset directory (deployer.dart `_deploySkills`).
-    const phaseSkills = [
+    /// The lifecycle skills that moved to MACSS. `iq host get` no longer
+    /// installs them, so doctor must not expect them either.
+    const migratedSkills = [
       'iq-analyze',
       'iq-plan',
       'iq-execute',
       'iq-specification',
     ];
 
-    /// Everything `iq host get` installs: asset-tree skills + generated ones.
-    final deployedSkills = [...testSkills, ...phaseSkills];
+    /// Everything `iq host get` installs: the asset-tree skills, and only those.
+    final deployedSkills = [...testSkills];
 
     Assets seedAssets(Directory root, {required List<String> apes}) {
       final skillsDir = Directory(p.join(root.path, 'assets', 'skills'));
@@ -593,12 +593,10 @@ void main() {
         expect(text, contains('All checks passed.'));
       });
 
-      test('empty skills asset dir → only the generated iq-* skills are expected',
-          () async {
-        // The host carries the generated phase skills but the asset tree ships
-        // no skills of its own: the generated set is a fixed contract, so it is
-        // still expected — and satisfied here.
-        final fs = allPassFs(workingDir, homeDir, phaseSkills);
+      test('empty skills asset dir → nothing is expected', () async {
+        // Expectations come from the asset tree alone. An asset tree shipping no
+        // skills expects none, so a host carrying unrelated ones still passes.
+        final fs = allPassFs(workingDir, homeDir, migratedSkills);
         final emptyTempDir = Directory.systemTemp.createTempSync('empty_assets_');
         Directory(p.join(emptyTempDir.path, 'assets', 'skills')).createSync(recursive: true);
         final emptyAssets = Assets(root: emptyTempDir.path);
@@ -606,7 +604,7 @@ void main() {
         final cmd = makeCmd(fs: fs, assets: emptyAssets);
         final output = await cmd.execute();
 
-        expect(output.hostChecks.first.totalSkills, phaseSkills.length);
+        expect(output.hostChecks.first.totalSkills, 0);
         expect(output.hostChecks.first.missingSkills, isEmpty);
         expect(output.hostChecks.first.agentExists, isTrue);
         expect(output.hostChecks.first.passed, isTrue);
@@ -713,35 +711,21 @@ void main() {
       });
     });
 
-    // The deployer installs BOTH the asset-tree skills and the skills it
-    // *generates* from the FSM/APE contracts (deployer.dart:48-75:
-    // `assets.listDirectory('skills')` + `SkillBuilder.phaseSkillNames`).
-    // Doctor used to discover expected skills from the asset tree ONLY, so a
-    // missing iq-plan / iq-specification was reported as a healthy host.
-    group('generated iq-* phase skills', () {
-      test('are expected, not only the asset-tree skills', () async {
-        // Home has ONLY the asset-tree skills — every generated skill is absent.
+    // The lifecycle skills moved to MACSS, which installs them with
+    // `macss skill deploy`. Doctor must expect exactly what this deployer
+    // installs — the asset tree — or every host reports unhealthy for a
+    // deployment inquiry no longer performs.
+    group('migrated lifecycle skills', () {
+      test('are not expected: the asset-tree skills alone are healthy',
+          () async {
         final cmd = makeCmd(fs: allPassFs(workingDir, homeDir, testSkills));
         final output = await cmd.execute();
 
         final opencode =
             output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
 
-        expect(opencode.missingSkills, containsAll(phaseSkills));
-        expect(opencode.totalSkills, testSkills.length + phaseSkills.length);
-        expect(opencode.passed, isFalse);
-      });
-
-      test('a host with every skill deployed still passes', () async {
-        final cmd = makeCmd(
-          fs: allPassFs(workingDir, homeDir, deployedSkills),
-        );
-        final output = await cmd.execute();
-
-        final opencode =
-            output.hostChecks.firstWhere((h) => h.hostName == 'opencode');
-
         expect(opencode.missingSkills, isEmpty);
+        expect(opencode.totalSkills, testSkills.length);
         expect(opencode.passed, isTrue);
         expect(
           output.toText()!,
@@ -749,6 +733,17 @@ void main() {
             '✓ opencode: agent + ${deployedSkills.length} skills deployed',
           ),
         );
+      });
+
+      test('their absence is never reported as missing', () async {
+        final cmd = makeCmd(fs: allPassFs(workingDir, homeDir, testSkills));
+        final output = await cmd.execute();
+
+        for (final host in output.hostChecks) {
+          for (final skill in migratedSkills) {
+            expect(host.missingSkills, isNot(contains(skill)));
+          }
+        }
       });
     });
   });

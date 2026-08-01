@@ -81,12 +81,15 @@ void main() {
         expect(content, isNot(contains('cleanrooms/**/.iq.state.yaml')));
       });
 
-      test('ignores docs/requisitions/ (local authoring workspace)', () async {
+      test('leaves docs/requisitions/ to macss', () async {
+        // The requisitions workspace is created by `macss specification new`,
+        // which manages that entry itself. Claiming it here would have iq write
+        // a rule for a directory it no longer produces.
         final command = InitCommand(InitInput(workingDirectory: tempDir.path));
         await command.execute();
 
         final content = File('${tempDir.path}/.gitignore').readAsStringSync();
-        expect(content, contains('docs/requisitions/'));
+        expect(content, isNot(contains('docs/requisitions/')));
       });
 
       test('appends .inquiry/ to existing .gitignore that lacks it', () async {
