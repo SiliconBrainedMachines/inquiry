@@ -206,13 +206,29 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       // The binary and assets are already in place, so the upgrade has
       // succeeded by this point. Redeploying reaches into third-party tools'
       // directories and can fail or stall for reasons that have nothing to do
-      // with the upgrade — so it is reported and swallowed, never fatal (#300).
+      // with the upgrade — so it stops and reports, never blocks and never
+      // takes the upgrade down with it (#300).
       stderr.writeln('Deploying hosts...');
       try {
-        await platformOps.runPostInstall(installDir);
+        final result = await platformOps.runPostInstall(installDir);
+        // Echo what the child actually did. Swallowing it made a deploy to
+        // nothing look identical to a deploy to everything.
+        for (final line in postInstallOutputLines(result)) {
+          stderr.writeln('  $line');
+        }
+        if (result.exitCode != 0) {
+          stderr.writeln('Host deployment failed (exit ${result.exitCode}).');
+          stderr.writeln(
+            'The CLI is upgraded. Run `iq host get` to retry, '
+            'or `iq doctor` to inspect.',
+          );
+        }
       } catch (e) {
-        stderr.writeln('Host deployment skipped: $e');
-        stderr.writeln('Run `iq host get` to retry, or `iq doctor` to inspect.');
+        stderr.writeln('Host deployment stopped: $e');
+        stderr.writeln(
+          'The CLI is upgraded. Run `iq host get` to retry, '
+          'or `iq doctor` to inspect.',
+        );
       }
       stderr.writeln('Upgrade completed successfully.');
 
@@ -227,3 +243,19 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
     }
   }
 }
+
+/// The child's combined output, trimmed and split — stdout first, then stderr.
+///
+/// `Process.run` buffers both; printing them is what lets a user see which
+/// hosts were deployed to, or that none were. Blank lines are dropped so the
+/// echoed block stays tight under `Deploying hosts...`.
+///
+/// Visible for testing.
+List<String> postInstallOutputLines(ProcessResult result) => [
+      '${result.stdout}',
+      '${result.stderr}',
+    ]
+        .expand((s) => s.split('\n'))
+        .map((l) => l.trimRight())
+        .where((l) => l.isNotEmpty)
+        .toList(growable: false);
