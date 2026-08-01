@@ -26,8 +26,8 @@ void main() {
       expect(r.err, contains('unknown option --host'));
     });
 
-    test('`iq specification check --bogus x` is rejected', () async {
-      final r = await _run(const ['specification', 'check', '--bogus', 'x']);
+    test('`iq implementation start --bogus x` is rejected', () async {
+      final r = await _run(const ['implementation', 'start', '--bogus', 'x']);
 
       expect(r.code, ExitCode.validationFailed);
       expect(r.err, contains('unknown option --bogus'));
@@ -42,15 +42,14 @@ void main() {
   });
 
   group('the help renders each command contract', () {
-    test('`iq specification new --help` shows --lang, its default and its values',
+    test('`iq fsm transition --help` shows --event and its allowed values',
         () async {
-      final r = await _run(const ['specification', 'new', '--help']);
+      final r = await _run(const ['fsm', 'transition', '--help']);
 
       expect(r.code, 0);
-      expect(r.out, contains('--lang'));
-      expect(r.out, contains('default: en'));
-      expect(r.out, contains('es'));
-      expect(r.out, contains('<slug>'));
+      expect(r.out, contains('--event'));
+      expect(r.out, contains('complete_analysis'));
+      expect(r.out, contains('approve_plan'));
     });
 
     test('`iq host get --help` shows the allowed hosts', () async {
@@ -81,18 +80,33 @@ void main() {
       final commands = (catalog['commands'] as List).cast<Map<String, dynamic>>();
       final routes = commands.map((c) => c['route']).toList();
 
-      expect(routes, contains('specification new <slug>'));
-      expect(routes, contains('issue publish <name>'));
+      expect(routes, contains('fsm transition'));
+      expect(routes, contains('implementation start'));
 
-      final specNew = commands.firstWhere(
-        (c) => c['route'] == 'specification new <slug>',
+      // A declared `allowed` set reaches the machine contract, not just the help
+      // text: this is what lets a caller enumerate the legal events.
+      final transition =
+          commands.firstWhere((c) => c['route'] == 'fsm transition');
+      final params =
+          (transition['params'] as List).cast<Map<String, dynamic>>();
+      final event = params.firstWhere((p) => p['name'] == 'event');
+
+      expect(
+        event['allowed'],
+        containsAll(<String>['complete_analysis', 'approve_plan']),
       );
-      final params = (specNew['params'] as List).cast<Map<String, dynamic>>();
-      final lang = params.firstWhere((p) => p['name'] == 'lang');
 
-      expect(lang['default'], 'en');
-      expect(lang['allowed'], containsAll(<String>['en', 'es']));
-      expect(params.any((p) => p['kind'] == 'positional'), isTrue);
+      // And a declared default reaches it too.
+      final hostGet = commands.firstWhere((c) => c['route'] == 'host get');
+      final hostParams =
+          (hostGet['params'] as List).cast<Map<String, dynamic>>();
+      expect(
+        hostParams.firstWhere((p) => p['name'] == 'host')['default'],
+        'opencode',
+      );
+
+      // Positional parameters are no longer exercised here: inquiry has none
+      // left. That coverage moved to macss with `specification new <slug>`.
     });
   });
 }

@@ -62,17 +62,17 @@ These remain real possibilities, but they should land only when the harness earn
 Concrete friction from real use (two live requirements; see
 [field-evidence-dogfood-2026-07](../code/paper/field-evidence-dogfood-2026-07.md)):
 
-- **`iq issue publish --plan` should validate labels** against the target repo and, when a
+- **`issue publish --plan` should validate labels** against the target repo and, when a
   label is missing, print the `gh label create …` command to create it. Currently the check
-  fails late at `--apply`.
+  fails late at `--apply`. *Carried over to MACSS, which now owns that command.*
 - **`requisitions/` lifecycle — RESOLVED (2026-07).** Requisitions moved to
   **`docs/requisitions/<YYYYMMDD>-<slug>/`** (documentation, like ADRs; the date prefix sorts
   chronologically) and are **git-ignored as a local authoring workspace** — the durable
   artifacts are the published GitHub issues (+ code + tests carrying the spec→issue→test spine).
-  That removes the accumulation problem from the repo entirely. `iq specification new` records
-  the **active requisition** in `.inquiry/specification.yaml`, so `issue new` / `specification
-  check` / `issue publish` are **slug-less** (with a `--slug` override). `iq init` /
-  `specification new` ensure `.inquiry/` and `docs/requisitions/` are git-ignored. Deferred:
+  That removes the accumulation problem from the repo entirely. *(These commands moved to
+  MACSS in 0.22.0; the pointer is now `.macss/specification.yaml`.)* `specification new` records
+  the **active requisition**, so `issue new` / `specification check` / `issue publish` are
+  **slug-less** (with a `--slug` override). Deferred:
   an explicit `active/` vs `archive/` split if a team later wants selected requisitions tracked.
 
 ## Anti-goals for 0.7.x
@@ -209,15 +209,21 @@ The lesson: **the framework wants fewer, sharper agents, not more**. Each absorp
 
 ## Design direction: a module per stage (`iq <stage> <verb>`)
 
-Adopted 2026-07. The CLI is being reorganized so its command surface mirrors the
-cycle's stages instead of its internals. Today commands are grouped by mechanism
-(`iq fsm transition`, `iq ape prompt`) — names that leak how the engine works and
-force the user to translate "I want to start analyzing" into "run an FSM
-transition". The direction is one **module per stage**, each with a small set of
-common verbs:
+Adopted 2026-07, **narrowed 0.22.0**. The CLI is being reorganized so its command
+surface mirrors the cycle's stages instead of its internals. Today commands are
+grouped by mechanism (`iq fsm transition`, `iq ape prompt`) — names that leak how
+the engine works and force the user to translate "I want to start analyzing" into
+"run an FSM transition". The direction is one **module per stage**, each with a
+small set of common verbs.
 
-- `iq requisition`, `iq specification`, `iq implementation`, `iq analyze`,
-  `iq plan`, `iq execute`, `iq verification` — one module each.
+**The scope of "stage" is now the implementation stage only.** Requisition,
+specification, issue, verification and deploy belong to
+[MACSS](https://github.com/ccisnedev/macss), which owns the lifecycle; inquiry is
+the state machine that drives an already specified issue. This roadmap no longer
+plans `iq requisition` or `iq specification` modules — building them would
+re-absorb what 0.22.0 deliberately handed over.
+
+- `iq implementation`, `iq analyze`, `iq plan`, `iq execute` — one module each.
 - Shared verbs where they make sense: `start` (enter the stage),
   `skill` (show the stage's operating instruction), `check` (run the stage gate).
   e.g. `iq analyze start`, `iq analyze skill`, `iq plan check`.

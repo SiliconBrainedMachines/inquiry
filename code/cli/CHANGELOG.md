@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.22.0]
+
+Inquiry goes back to being one thing: the state machine that drives an already
+specified issue through `analyze → plan → execute`. The lifecycle stages it had
+absorbed move to [MACSS](https://github.com/ccisnedev/macss), which defines them.
+
+### Removed — BREAKING
+- **`iq specification new` / `iq specification check`** and **`iq issue new` /
+  `iq issue publish`** move to MACSS as `macss specification …` and
+  `macss issue …`. They are pre-implementation work owned by QA, not steps of the
+  development cycle. Their gate, templates and workspace helpers went with them.
+- **The generated `iq-analyze` / `iq-plan` / `iq-execute` / `iq-specification`
+  skills**, and the `SkillBuilder` that assembled them from the FSM contracts.
+  MACSS now ships them as static skills named `macss-*`, installed with
+  `macss skill deploy`. They delegate back to `iq fsm state` and
+  `iq fsm transition`, so this CLI remains the authority on the gates rather than
+  a place their text is copied to.
+- `docs/requisitions/` from the `.gitignore` entries `iq init` manages: MACSS
+  creates that workspace and manages the entry itself.
+
+### Changed
+- `iq host get` keeps deploying the agent and inquiry's own skills (`kritik`,
+  `legion`, `research`). It only loses the four that migrated.
+- `iq doctor` no longer expects the migrated skills on a host. Expecting them
+  would have reported every host as unhealthy for a deployment this CLI no longer
+  performs.
+- `docs/roadmap.md` narrows the module-per-stage direction to the implementation
+  stage. Planning `iq requisition` or `iq specification` modules would re-absorb
+  what this release deliberately handed over.
+
+### Migration
+- Install MACSS and run `macss skill deploy` to get the lifecycle skills, then
+  `iq host clean && iq host get` to drop the stale `iq-*` copies.
+- Requisitions already on disk keep working: pass `--slug <slug>` to the MACSS
+  commands, which resolves the folder without the active-requisition pointer.
+
 ## [0.21.1]
 ### Fixed
 - **The analysis/plan boundary commits blocked every cycle.** Since 0.20.0 git-ignored the whole `cleanrooms/` area, the `commit_analysis_boundary` (ANALYZE→PLAN) and `commit_plan_boundary` (→EXECUTE) policies could never run — `git add -- cleanrooms/<branch>/…` refuses ignored paths, so the transition failed closed with `ERROR_BOUNDARY_COMMIT_FAILED`. The two decisions contradicted each other: a working area that is intentionally ephemeral has no boundary snapshot to commit. Both transitions are now `commit_policy: none`; their gates still validate `diagnosis.md`/`plan.md`. The gap survived because the FSM tests ran in a temp repo that did **not** git-ignore `cleanrooms/`, so the boundary commit succeeded there while failing in every real repo (where `iq init` ignores it) — the tests now assert no commit is made. Found by dogfooding a real cycle (cacsi-dev/impulsa #40).

@@ -14,8 +14,6 @@ import 'modules/fsm/fsm_builder.dart';
 import 'modules/ape/ape_builder.dart';
 import 'modules/implementation/implementation_builder.dart';
 import 'modules/host/host_builder.dart';
-import 'modules/issue/issue_builder.dart';
-import 'modules/specification/specification_builder.dart';
 import 'hosts/all_adapters.dart';
 import 'hosts/deployer.dart';
 
@@ -66,11 +64,6 @@ Future<int> runInquiry(
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
   cli.module('implementation', (m) => buildImplementationModule(m, assets: assets));
-  cli.module(
-    'specification',
-    (m) => buildSpecificationModule(m, assets: assets),
-  );
-  cli.module('issue', (m) => buildIssueModule(m, assets: assets));
 
   return cli.run(normalizeInquiryArgs(args), stdout: stdout, stderr: stderr);
 }
