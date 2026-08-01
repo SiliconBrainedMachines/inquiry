@@ -74,9 +74,10 @@ specification.md   Decisions (evidence)    (each decision cites its experiment)
 
 This is SDD's core principle — *the spec is authoritative, enforced by
 automation, not by human discipline* — realized through Inquiry's gates. The
-first link is enforced in the QA phase: `iq specification check <slug>` rejects
-the spec (`SPEC_AC_NOT_TRACED`) until every acceptance criterion is referenced
-by at least one derived issue.
+first link is enforced in the QA phase, which now belongs to MACSS:
+`macss specification check` rejects the spec (`SPEC_AC_NOT_TRACED`) until every
+acceptance criterion is referenced by at least one derived issue. Inquiry picks
+the work up from the published issue onwards.
 
 ## Templates & languages
 

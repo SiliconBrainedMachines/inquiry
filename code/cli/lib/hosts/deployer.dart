@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 import '../assets.dart';
 import 'agent_builder.dart';
 import 'host_adapter.dart';
-import 'skill_builder.dart';
 
 /// Orchestrates deploying skills to host tool directories.
 class HostDeployer {
@@ -45,31 +44,17 @@ class HostDeployer {
     }
   }
 
+  /// Deploys inquiry's own skills from the asset tree.
+  ///
+  /// The lifecycle skills (`specification`, `analyze`, `plan`, `execute`) are no
+  /// longer generated here: they belong to MACSS, which ships them as static
+  /// assets and installs them with `macss skill deploy`.
   void _deploySkills(HostAdapter adapter) {
-    final skillNames = assets.listDirectory('skills');
     final hostSkillsDir = adapter.skillsDirectory(homeDir);
 
-    for (final skillName in skillNames) {
+    for (final skillName in assets.listDirectory('skills')) {
       final content = assets.loadString('skills/$skillName/SKILL.md');
       final hostFile = File(p.join(hostSkillsDir, skillName, 'SKILL.md'));
-      hostFile.parent.createSync(recursive: true);
-      hostFile.writeAsStringSync(content);
-    }
-
-    // Generated per-phase skills (iq-analyze, ...) — assembled from the FSM/APE
-    // contracts at deploy time so they cannot drift from the gates (#282).
-    // Best-effort per phase: a phase whose contract assets are absent is
-    // skipped, so deploying from an incomplete asset tree never aborts.
-    final skillBuilder = SkillBuilder(assets);
-    for (final name in skillBuilder.phaseSkillNames) {
-      final phase = name.substring('iq-'.length);
-      final String content;
-      try {
-        content = skillBuilder.build(phase);
-      } catch (_) {
-        continue;
-      }
-      final hostFile = File(p.join(hostSkillsDir, name, 'SKILL.md'));
       hostFile.parent.createSync(recursive: true);
       hostFile.writeAsStringSync(content);
     }
