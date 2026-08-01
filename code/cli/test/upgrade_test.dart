@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 
 import 'package:inquiry_cli/modules/global/commands/upgrade.dart';
@@ -55,6 +57,50 @@ void main() {
         upgraded: false,
       );
       expect(output.toText(), equals('Already on the latest version'));
+    });
+  });
+
+  // `Deploying hosts...` used to be the last thing a user saw: the child's
+  // output was captured and thrown away, so deploying to two hosts, to one, or
+  // to none all looked identical (#300).
+  group('post-install output is echoed', () {
+    const nl = '\n';
+
+    test('reports what the child actually deployed', () {
+      final lines = postInstallOutputLines(
+        ProcessResult(
+          0,
+          0,
+          'deployed to host claude${nl}deployed to host opencode$nl',
+          '',
+        ),
+      );
+
+      expect(lines, ['deployed to host claude', 'deployed to host opencode']);
+    });
+
+    test('carries stderr too, so a failure explains itself', () {
+      final lines = postInstallOutputLines(
+        ProcessResult(0, 1, '', 'Unknown host: "vscode"'),
+      );
+
+      expect(lines, ['Unknown host: "vscode"']);
+    });
+
+    test('drops blank lines rather than echoing empty rows', () {
+      final lines = postInstallOutputLines(
+        ProcessResult(0, 0, '$nl${nl}first$nl$nl', nl),
+      );
+
+      expect(lines, ['first']);
+    });
+
+    test('a deploy to nothing is visible, not silent', () {
+      final lines = postInstallOutputLines(
+        ProcessResult(0, 0, 'No AI coding host found on this machine', ''),
+      );
+
+      expect(lines, ['No AI coding host found on this machine']);
     });
   });
 }

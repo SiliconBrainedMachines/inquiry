@@ -82,11 +82,11 @@ class WindowsPlatformOps implements PlatformOps {
   }
 
   @override
-  Future<void> runPostInstall(String installDir) async {
+  Future<ProcessResult> runPostInstall(String installDir) async {
     // Bounded: `host get` only touches the filesystem now, but it runs the
     // freshly written binary and its output is buffered rather than streamed,
     // so an unbounded wait here is indistinguishable from a crash (#300).
-    await Process.run(p.join(installDir, 'bin', binaryName), const [
+    return Process.run(p.join(installDir, 'bin', binaryName), const [
       'host',
       'get',
     ]).timeout(

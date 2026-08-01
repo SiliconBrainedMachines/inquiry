@@ -6,7 +6,8 @@
 /// Path manipulation is NOT part of this abstraction — use `package:path`.
 library;
 
-import 'dart:io' show Platform;
+import 'dart:io';
+
 
 import 'linux_platform_ops.dart';
 import 'windows_platform_ops.dart';
@@ -41,9 +42,13 @@ abstract class PlatformOps {
 
   /// Run post-install steps (e.g. `iq host get`) using the correct binary.
   ///
+  /// Returns the child's result so the caller can report what was deployed —
+  /// a step whose output is swallowed is indistinguishable from one that did
+  /// nothing (#300).
+  ///
   /// Implementations must be bounded by [postInstallTimeout]: this runs after
   /// the upgrade has already succeeded, so it may fail but must never block.
-  Future<void> runPostInstall(String installDir);
+  Future<ProcessResult> runPostInstall(String installDir);
 
   /// Schedule deletion of a directory after the current process exits.
   ///
