@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.23.1]
+
+### Fixed
+- **`iq upgrade` said "Deploying hosts..." and nothing else.** The post-install
+  child's output was captured and discarded, so deploying to two hosts, to one,
+  or to none all printed the same thing — and a failure printed only the
+  exception. The step now echoes what it actually did, reports a non-zero exit
+  with the child's own message, and always ends by stating the CLI is upgraded
+  and how to retry. It still never blocks and never fails the upgrade.
+
 ## [0.23.0]
 
 ### Fixed

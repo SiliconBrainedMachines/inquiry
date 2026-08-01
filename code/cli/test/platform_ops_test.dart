@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:test/test.dart';
 
 import 'package:inquiry_cli/hosts/platform_ops.dart';
@@ -47,9 +49,15 @@ class FakePlatformOps implements PlatformOps {
     calls.add('selfReplace($newBinaryPath, $currentBinaryPath)');
   }
 
+  /// What the fake child reports back. `upgrade` echoes this, so a test can
+  /// assert the user is shown which hosts were deployed to.
+  ProcessResult postInstallResult =
+      ProcessResult(0, 0, 'Inquiry agent + skills deployed to host claude', '');
+
   @override
-  Future<void> runPostInstall(String installDir) async {
+  Future<ProcessResult> runPostInstall(String installDir) async {
     calls.add('runPostInstall($installDir)');
+    return postInstallResult;
   }
 
   @override
@@ -106,9 +114,12 @@ void main() {
       expect(fake.calls, contains('selfReplace(/new/ape, /old/ape)'));
     });
 
-    test('runPostInstall completes without error', () async {
-      await fake.runPostInstall('/opt/ape');
+    test('runPostInstall completes and returns the child result', () async {
+      final result = await fake.runPostInstall('/opt/ape');
       expect(fake.calls, contains('runPostInstall(/opt/ape)'));
+      // The caller needs the result to report what was deployed (#300).
+      expect(result.exitCode, 0);
+      expect(result.stdout, contains('deployed'));
     });
 
     test('scheduleDeletion records call', () {
