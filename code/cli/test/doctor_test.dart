@@ -115,6 +115,9 @@ void main() {
     MockFileSystemOps allPassFs(String wd, String home, List<String> skills) {
       final fs = MockFileSystemOps()..setHome(home);
       fs.setDirectoryExists('.inquiry', true);
+      // The host tool itself is present: `iq host get` only deploys where the
+      // host exists, so a deployed fixture implies an installed one (#300).
+      fs.setDirectoryExists(p.join(home, '.config', 'opencode'), true);
       fs.setFileExists(
         p.join(home, '.config', 'opencode', 'agent', 'inquiry.md'),
         true,
@@ -375,28 +378,47 @@ void main() {
         final text = output.toText()!;
         expect(text, contains('Checking hosts...'));
         expect(text, contains('✓ opencode: agent + ${deployedSkills.length} skills deployed'));
-        expect(text, contains('- claude: not deployed (inactive)'));
+        expect(text, contains('- claude: not installed'));
         expect(text, contains('All checks passed.'));
       });
 
-      test('Scenario B: nothing deployed → exit 1', () async {
+      test('Scenario B1: host installed but nothing deployed → exit 1',
+          () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
-        // Agent and skills do NOT exist
+        // OpenCode is on the machine; inquiry was never deployed into it.
+        fs.setDirectoryExists(p.join(homeDir, '.config', 'opencode'), true);
 
         final cmd = makeCmd(fs: fs);
         final output = await cmd.execute();
 
         expect(output.passed, isFalse);
         expect(output.exitCode, 1);
-        // No host has skills → none active.
         expect(output.hostChecks.every((h) => !h.active), isTrue);
 
         final text = output.toText()!;
         expect(text, contains('✗ no host deployed'));
-        expect(text,
-            contains("Run 'inquiry host get --host <opencode|claude>'"));
+        expect(text, contains("Run 'iq host get'"));
         expect(text, contains('Some checks failed.'));
+      });
+
+      test('Scenario B2: no host installed → not a failure', () async {
+        // A machine may carry the CLI and no AI assistant at all. Nothing to
+        // deploy into is a legitimate state, not a missing step (#300).
+        final fs = MockFileSystemOps()..setHome(homeDir);
+        fs.setDirectoryExists('.inquiry', true);
+
+        final cmd = makeCmd(fs: fs);
+        final output = await cmd.execute();
+
+        expect(output.hostChecks.every((h) => !h.installed), isTrue);
+        expect(output.hostChecks.every((h) => h.passed), isTrue);
+
+        final text = output.toText()!;
+        expect(text, contains('- opencode: not installed'));
+        expect(text, contains('- claude: not installed'));
+        expect(text, contains('no AI coding host installed on this machine'));
+        expect(text, isNot(contains('✗ no host deployed')));
       });
 
       test('Scenario C: no .inquiry/ directory → exit 1', () async {
@@ -418,13 +440,15 @@ void main() {
         final text = output.toText()!;
         expect(text, contains('✗ inquiry init'));
         expect(text, contains("Run 'inquiry init' to initialize"));
-        // Nothing deployed → no active host.
-        expect(text, contains('✗ no host deployed'));
+        // The hosts are simply absent from this machine, which is not what
+        // this scenario is about.
+        expect(text, contains('no AI coding host installed on this machine'));
       });
 
       test('Scenario D: partial deployment → exit 1', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
+        fs.setDirectoryExists(p.join(homeDir, '.config', 'opencode'), true);
         // OpenCode global agent present
         fs.setFileExists(
           p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),
@@ -546,20 +570,25 @@ void main() {
       test('doctor remediation suggests host get when no host is deployed', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
-        // No agent, no skills → no active host
+        // A host exists to deploy into; no agent, no skills → no active host.
+        fs.setDirectoryExists(p.join(homeDir, '.claude'), true);
 
         final cmd = makeCmd(fs: fs);
         final output = await cmd.execute();
         final text = output.toText()!;
 
         expect(text, contains('✗ no host deployed'));
-        expect(text, contains('inquiry host get --host'));
+        expect(text, contains("Run 'iq host get'"));
         expect(text, isNot(contains("'inquiry target get'")));
       });
 
       test('Scenario E: OpenCode active (global), Claude inactive → exit 0', () async {
         final fs = MockFileSystemOps()..setHome(homeDir);
         fs.setDirectoryExists('.inquiry', true);
+        // Both hosts are on the machine; only OpenCode was deployed into. This
+        // is what distinguishes "inactive" from "not installed" (#300).
+        fs.setDirectoryExists(p.join(homeDir, '.config', 'opencode'), true);
+        fs.setDirectoryExists(p.join(homeDir, '.claude'), true);
         // OpenCode installed globally: agent + skills (#280).
         fs.setFileExists(
           p.join(homeDir, '.config', 'opencode', 'agent', 'inquiry.md'),

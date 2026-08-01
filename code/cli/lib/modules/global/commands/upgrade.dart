@@ -201,9 +201,19 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
 
       tempDir.deleteSync(recursive: true);
 
-      // 5. Redeploy hosts using the new binary
+      // 5. Redeploy hosts using the new binary.
+      //
+      // The binary and assets are already in place, so the upgrade has
+      // succeeded by this point. Redeploying reaches into third-party tools'
+      // directories and can fail or stall for reasons that have nothing to do
+      // with the upgrade — so it is reported and swallowed, never fatal (#300).
       stderr.writeln('Deploying hosts...');
-      await platformOps.runPostInstall(installDir);
+      try {
+        await platformOps.runPostInstall(installDir);
+      } catch (e) {
+        stderr.writeln('Host deployment skipped: $e');
+        stderr.writeln('Run `iq host get` to retry, or `iq doctor` to inspect.');
+      }
       stderr.writeln('Upgrade completed successfully.');
 
       return UpgradeOutput(
