@@ -36,6 +36,16 @@ class HostDeployer {
     if (selected.deploysAgent) _deployAgent(selected);
   }
 
+  /// The deploy targets actually present on this machine.
+  ///
+  /// A host counts as installed when its own config directory exists — the same
+  /// signal the host tool itself creates on first run. Deploying to a host the
+  /// user does not have writes a tree nothing will ever read, and asking a
+  /// third-party tool whether it is installed is what made `iq upgrade` hang
+  /// (#300).
+  List<HostAdapter> get detectedHosts =>
+      adapters.where((a) => a.exists(homeDir)).toList(growable: false);
+
   /// Removes all deployed files from **all** adapter directories.
   void clean() {
     for (final adapter in adapters) {

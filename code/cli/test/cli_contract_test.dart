@@ -96,17 +96,23 @@ void main() {
         containsAll(<String>['complete_analysis', 'approve_plan']),
       );
 
-      // And a declared default reaches it too.
+      // Param kinds reach it too, so a caller can tell a flag from an option.
       final hostGet = commands.firstWhere((c) => c['route'] == 'host get');
       final hostParams =
           (hostGet['params'] as List).cast<Map<String, dynamic>>();
       expect(
+        hostParams.firstWhere((p) => p['name'] == 'configure-ollama')['kind'],
+        'flag',
+      );
+      // `--host` deliberately carries no default: defaulting to one made
+      // `iq host get` deploy to a host the user might not have (#300).
+      expect(
         hostParams.firstWhere((p) => p['name'] == 'host')['default'],
-        'opencode',
+        isNull,
       );
 
-      // Positional parameters are no longer exercised here: inquiry has none
-      // left. That coverage moved to macss with `specification new <slug>`.
+      // Defaults and positionals are no longer exercised here: no inquiry
+      // command declares either. That coverage lives in macss.
     });
   });
 }

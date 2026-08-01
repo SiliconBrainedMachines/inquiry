@@ -40,6 +40,9 @@ abstract class PlatformOps {
   Future<void> selfReplace(String newBinaryPath, String currentBinaryPath);
 
   /// Run post-install steps (e.g. `iq host get`) using the correct binary.
+  ///
+  /// Implementations must be bounded by [postInstallTimeout]: this runs after
+  /// the upgrade has already succeeded, so it may fail but must never block.
   Future<void> runPostInstall(String installDir);
 
   /// Schedule deletion of a directory after the current process exits.
@@ -57,3 +60,9 @@ abstract class PlatformOps {
     );
   }
 }
+
+/// How long post-install deployment may take before it is abandoned.
+///
+/// Generous enough for a cold filesystem, short enough that a stalled step
+/// reports rather than hanging the terminal (#300).
+const postInstallTimeout = Duration(seconds: 60);

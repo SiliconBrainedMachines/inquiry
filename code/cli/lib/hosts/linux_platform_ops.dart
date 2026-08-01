@@ -3,6 +3,7 @@
 /// Uses tar for archive extraction and shell environment for variables.
 library;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:path/path.dart' as p;
@@ -70,10 +71,18 @@ class LinuxPlatformOps implements PlatformOps {
 
   @override
   Future<void> runPostInstall(String installDir) async {
-    await Process.run(p.join(installDir, 'bin', binaryName), [
+    // Bounded: `host get` only touches the filesystem now, but it runs the
+    // freshly written binary and its output is buffered rather than streamed,
+    // so an unbounded wait here is indistinguishable from a crash (#300).
+    await Process.run(p.join(installDir, 'bin', binaryName), const [
       'host',
       'get',
-    ]);
+    ]).timeout(
+      postInstallTimeout,
+      onTimeout: () => throw TimeoutException(
+        'host get did not finish within ${postInstallTimeout.inSeconds}s',
+      ),
+    );
   }
 
   @override

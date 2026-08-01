@@ -64,6 +64,13 @@ class HostCheck {
   /// inactive host is not a failure (it was simply not the chosen host).
   final bool active;
 
+  /// Whether the host tool itself is present on this machine.
+  ///
+  /// `iq host get` only deploys to hosts that are installed, so "not installed"
+  /// is the reason an absent deployment is fine — and reporting it here is what
+  /// makes that legible instead of looking like a missing step (#300).
+  final bool installed;
+
   HostCheck({
     required this.hostName,
     required this.agentExists,
@@ -71,11 +78,15 @@ class HostCheck {
     required this.totalSkills,
     this.error,
     this.active = true,
+    this.installed = true,
   });
 
-  /// An inactive host never fails the doctor; an active host must be complete.
+  /// A host that is not installed, or not the active one, never fails the
+  /// doctor. An active, installed host must be complete.
   bool get passed =>
-      !active || (agentExists && missingSkills.isEmpty && error == null);
+      !installed ||
+      !active ||
+      (agentExists && missingSkills.isEmpty && error == null);
 
   Map<String, dynamic> toJson() => {
     'hostName': hostName,
@@ -83,6 +94,7 @@ class HostCheck {
     'missingSkills': missingSkills,
     'totalSkills': totalSkills,
     'active': active,
+    'installed': installed,
     if (error != null) 'error': error,
   };
 }
@@ -156,6 +168,10 @@ class DoctorOutput extends Output {
       for (final tc in hostChecks) {
         if (tc.error != null) {
           buffer.writeln('  ✗ ${tc.hostName}: ${tc.error}');
+        } else if (!tc.installed) {
+          // The host tool is not on this machine. Nothing to deploy into, and
+          // nothing wrong: a machine may carry the CLI and no AI assistant.
+          buffer.writeln('  - ${tc.hostName}: not installed');
         } else if (!tc.active) {
           // Not the active host — informational, not a failure.
           buffer.writeln('  - ${tc.hostName}: not deployed (inactive)');
@@ -187,11 +203,11 @@ class DoctorOutput extends Output {
           }
         }
       }
-      if (!hostChecks.any((hc) => hc.active)) {
+      if (!hostChecks.any((hc) => hc.installed)) {
+        buffer.writeln('  - no AI coding host installed on this machine');
+      } else if (!hostChecks.any((hc) => hc.active)) {
         buffer.writeln('  ✗ no host deployed');
-        buffer.writeln(
-          "    → Run 'inquiry host get --host <opencode|claude>'",
-        );
+        buffer.writeln("    → Run 'iq host get'");
       }
     }
 
@@ -448,6 +464,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
   HostCheck _verifyHost(HostAdapter adapter) {
     final homeDir = _fileSystem.homeDirectory();
     final expectedSkills = _getExpectedSkills();
+    final installed = _fileSystem.directoryExists(adapter.baseDirectory(homeDir));
 
     // Agent + skills are installed GLOBALLY per host by `iq host get` (#280).
     final agentExists = _fileSystem.fileExists(
@@ -480,6 +497,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
       missingSkills: missingSkills,
       totalSkills: expectedSkills.length,
       active: active,
+      installed: installed,
     );
   }
 
