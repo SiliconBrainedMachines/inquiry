@@ -151,6 +151,79 @@ void main() {
       });
     });
 
+    group('retiring skills the CLI no longer ships', () {
+      /// Writes a skill directly into the host, as an older release would have.
+      void seedDeployed(String name) {
+        final f = File(
+          p.join(homeDir.path, '.fake', 'skills', name, 'SKILL.md'),
+        );
+        f.createSync(recursive: true);
+        f.writeAsStringSync('# frozen copy from an older release');
+      }
+
+      bool deployed(String name) => Directory(
+            p.join(homeDir.path, '.fake', 'skills', name),
+          ).existsSync();
+
+      test('removes namespaced skills that are no longer shipped', () async {
+        // Exactly the state a user upgrading from before the lifecycle moved
+        // to MACSS was left in: frozen copies nothing would update again.
+        for (final name in const [
+          'iq-analyze',
+          'iq-plan',
+          'iq-execute',
+          'iq-specification',
+        ]) {
+          seedDeployed(name);
+        }
+
+        final out = await HostGetCommand(
+          HostGetInput(host: 'fake'),
+          deployer: deployer,
+        ).execute();
+
+        expect(deployed('iq-analyze'), isFalse);
+        expect(deployed('iq-specification'), isFalse);
+        expect(out.message, contains('removed  iq-analyze (no longer shipped)'));
+      });
+
+      test('never touches skills outside the namespace', () async {
+        // Inquiry's own direct-use skills, and anything a user wrote.
+        seedDeployed('kritik');
+        seedDeployed('legion');
+        seedDeployed('my-own-skill');
+        seedDeployed('iq-analyze');
+
+        await HostGetCommand(
+          HostGetInput(host: 'fake'),
+          deployer: deployer,
+        ).execute();
+
+        expect(deployed('kritik'), isTrue);
+        expect(deployed('legion'), isTrue);
+        expect(deployed('my-own-skill'), isTrue);
+        expect(deployed('iq-analyze'), isFalse);
+      });
+
+      test('keeps a namespaced skill that is still shipped', () {
+        // Guards the rule: the prefix marks ownership, not obsolescence.
+        final shipped = Directory(
+          p.join(tempDir.path, 'assets', 'skills', 'iq-still-here'),
+        )..createSync(recursive: true);
+        File(p.join(shipped.path, 'SKILL.md')).writeAsStringSync('# live');
+
+        seedDeployed('iq-still-here');
+        final retired = deployer.deploy('fake');
+
+        expect(retired, isEmpty);
+        expect(deployed('iq-still-here'), isTrue);
+      });
+
+      test('reports nothing when there is nothing to retire', () {
+        expect(deployer.deploy('fake'), isEmpty);
+      });
+    });
+
     test('validate() returns error for unknown host', () {
       final command = HostGetCommand(
         HostGetInput(host: 'vscode'),

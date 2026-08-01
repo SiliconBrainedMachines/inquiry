@@ -124,8 +124,11 @@ class HostGetCommand implements Command<HostGetInput, HostGetOutput> {
 
     final lines = <String>[];
     for (final host in targets) {
-      deployer.deploy(host);
+      final retired = deployer.deploy(host);
       lines.add('Inquiry agent + skills deployed (global) to host $host');
+      for (final skill in retired) {
+        lines.add('  removed  $skill (no longer shipped)');
+      }
 
       if (host == 'opencode' && input.configureOllama && configurator != null) {
         lines.addAll(await configurator!.configure());
