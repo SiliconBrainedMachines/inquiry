@@ -6,6 +6,13 @@ import '../assets.dart';
 import 'agent_builder.dart';
 import 'host_adapter.dart';
 
+/// The prefix Inquiry's own skills carry in a host's skills directory.
+///
+/// It marks what Inquiry owns and may therefore retire. Skills without it —
+/// `kritik`, `legion`, `research`, and anything the user wrote — belong to
+/// someone else.
+const inquirySkillNamespace = 'iq-';
+
 /// Orchestrates deploying skills to host tool directories.
 class HostDeployer {
   final Assets assets;
@@ -23,8 +30,10 @@ class HostDeployer {
   /// (e.g. OpenCode + Claude) at once. Global host dirs are isolated, so there
   /// is no cross-host duplication (#280).
   ///
+  /// Returns the names of the skills it retired, so the caller can report them.
+  ///
   /// Throws [ArgumentError] if [hostName] is not in [adapters].
-  void deploy(String hostName) {
+  List<String> deploy(String hostName) {
     final validNames = adapters.map((a) => a.name).toSet();
     if (!validNames.contains(hostName)) {
       throw ArgumentError(
@@ -33,7 +42,9 @@ class HostDeployer {
     }
     final selected = adapters.firstWhere((a) => a.name == hostName);
     _deploySkills(selected);
+    final retired = _pruneRetiredSkills(selected);
     if (selected.deploysAgent) _deployAgent(selected);
+    return retired;
   }
 
   /// The deploy targets actually present on this machine.
@@ -68,6 +79,37 @@ class HostDeployer {
       hostFile.parent.createSync(recursive: true);
       hostFile.writeAsStringSync(content);
     }
+  }
+
+  /// Removes deployed skills that belong to Inquiry's namespace but are no
+  /// longer shipped.
+  ///
+  /// Deployment could add but never retire, so a skill dropped from a release
+  /// survived forever as a frozen copy nothing would update again — the
+  /// `iq-analyze` / `iq-plan` / `iq-execute` / `iq-specification` left behind
+  /// when the lifecycle moved to MACSS (#299). Users then saw both those and
+  /// the `macss-*` ones, with no way to tell which was live.
+  ///
+  /// Scoped by prefix rather than a hand-maintained list of retirements: the
+  /// `iq-` namespace is Inquiry's, so anything under it that Inquiry does not
+  /// ship is Inquiry's to remove. Skills outside the namespace — `kritik`,
+  /// `legion`, `research`, and anything a user wrote — are never touched.
+  List<String> _pruneRetiredSkills(HostAdapter adapter) {
+    final hostSkillsDir = Directory(adapter.skillsDirectory(homeDir));
+    if (!hostSkillsDir.existsSync()) return const [];
+
+    final shipped = assets.listDirectory('skills').toSet();
+    final retired = <String>[];
+
+    for (final entry in hostSkillsDir.listSync().whereType<Directory>()) {
+      final name = p.basename(entry.path);
+      if (!name.startsWith(inquirySkillNamespace)) continue;
+      if (shipped.contains(name)) continue;
+      entry.deleteSync(recursive: true);
+      retired.add(name);
+    }
+
+    return retired..sort();
   }
 
   /// Deploys the inquiry agent to the host's agent dir as `inquiry.md`,
