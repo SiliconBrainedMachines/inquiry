@@ -4,6 +4,36 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.23.0]
+
+### Fixed
+- **`iq upgrade` could hang forever after the install already succeeded (#300).**
+  Post-install ran `iq host get` with no argument, which defaulted to `opencode`
+  and assumed it — even on a machine that only has Claude, or neither. That
+  pulled in the OpenCode/Ollama configurator, whose `ollama create` blocks
+  indefinitely when the daemon is not running. Two nested `Process.run` calls
+  buffered the output, so nothing was printed and a stalled step was
+  indistinguishable from a crash.
+
+  An upgrade now never fails or blocks on deployment: the binary and assets are
+  already in place by then, so a post-install failure is reported and swallowed,
+  and the step is bounded by a timeout.
+
+### Changed — BREAKING
+- **`iq host get` deploys to the hosts actually present**, detected by their own
+  config directory, instead of defaulting to `opencode`. With no host installed
+  it deploys nothing and says so — a machine may carry the CLI and no AI
+  assistant at all, which is a legitimate state and not a missing step.
+  `--host <host>` still installs into one whether or not it looks present, so a
+  fresh setup can be primed. `--host` no longer has a default.
+- **The Ollama model baking is opt-in**, behind `--configure-ollama`. Baking
+  `num_ctx` variants is an optimization, not part of installing a CLI, and it
+  must never sit on the critical path of an upgrade.
+- `iq doctor` reports a host that is **not installed** distinctly from one that
+  is installed but not deployed into. Only the second is a problem. This is
+  where host state belongs — read when you ask for it, not enforced inside an
+  unrelated command.
+
 ## [0.22.0]
 
 Inquiry goes back to being one thing: the state machine that drives an already
