@@ -4,6 +4,25 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.24.1]
+
+### Fixed
+- **A leftover `inquiry.exe.bak` could block every future upgrade on Windows.**
+  `selfReplace` renames the running exe out of the way, and it deleted any
+  previous backup **unguarded**. Windows refuses to remove the image of a
+  running process, so a backup left behind by an upgrade whose child process
+  outlived it stayed locked — and every later upgrade aborted with
+  `PathAccessException: Cannot delete file ... inquiry.exe.bak`, an error naming
+  a temp file rather than the cause.
+
+  The code had anticipated the leftover — the second cleanup was already
+  best-effort, with a comment saying it would be handled "on next upgrade" —
+  but the next upgrade removed it without a guard.
+
+  A locked leftover is now stepped over: numbered candidates are tried until
+  one is free. If none can be, the error says what is actually wrong and how to
+  check it.
+
 ## [0.24.0]
 
 ### Fixed

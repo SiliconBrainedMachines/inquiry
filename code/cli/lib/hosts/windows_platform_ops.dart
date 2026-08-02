@@ -61,11 +61,7 @@ class WindowsPlatformOps implements PlatformOps {
     String newBinaryPath,
     String currentBinaryPath,
   ) async {
-    final bakPath = '$currentBinaryPath.bak';
-    final bakFile = File(bakPath);
-
-    // Clean up leftover .bak from a previous upgrade
-    if (bakFile.existsSync()) bakFile.deleteSync();
+    final bakPath = freeBackupPath(currentBinaryPath);
 
     // Rename the running exe — Windows allows renaming a locked file
     File(currentBinaryPath).renameSync(bakPath);
@@ -75,11 +71,12 @@ class WindowsPlatformOps implements PlatformOps {
 
     // Best-effort cleanup
     try {
-      if (bakFile.existsSync()) bakFile.deleteSync();
+      File(bakPath).deleteSync();
     } on FileSystemException {
-      // Still locked — will be cleaned up on next upgrade
+      // Still locked — swept on a later upgrade.
     }
   }
+
 
   @override
   Future<ProcessResult> runPostInstall(String installDir) async {
@@ -124,4 +121,39 @@ class WindowsPlatformOps implements PlatformOps {
       mode: ProcessStartMode.detached,
     );
   }
+}
+
+/// A backup path the rename can use, sweeping what it can along the way.
+///
+/// `<exe>.bak` may exist *and* be undeletable: Windows refuses to remove the
+/// image of a running process, so a backup left by an upgrade whose child
+/// outlived it stays locked indefinitely. Deleting it unguarded aborted the
+/// entire upgrade — with an error naming a temp file rather than the cause,
+/// and no way forward short of finding the stray process by hand.
+///
+/// A locked leftover is now stepped over rather than fatal: numbered
+/// candidates are tried until one is free. Failing that, the error says what
+/// is actually wrong.
+String freeBackupPath(String currentBinaryPath) {
+  for (var i = 0; i < 20; i++) {
+    final path = '$currentBinaryPath.bak${i == 0 ? '' : i}';
+    // `File.existsSync` is false for a directory at the same path, which would
+    // report an occupied name as free and then fail the rename instead.
+    if (FileSystemEntity.typeSync(path) == FileSystemEntityType.notFound) {
+      return path;
+    }
+    try {
+      File(path).deleteSync();
+      return path;
+    } on FileSystemException {
+      // Locked by a live process — try the next name.
+    }
+  }
+
+  throw FileSystemException(
+    'Could not free a backup path for the running binary. An inquiry '
+    "process is probably still running: check with 'Get-Process inquiry', "
+    'stop it, and retry the upgrade',
+    currentBinaryPath,
+  );
 }
