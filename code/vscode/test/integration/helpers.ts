@@ -41,8 +41,35 @@ export function createCycleWorkspace(
   return { root, cyclePath, statePath };
 }
 
+/**
+ * Best-effort removal of a temp workspace. **Never throws.**
+ *
+ * Cleanup must not be able to fail the suite. When it can, a race in teardown
+ * does not merely report a failure that is not one — mocha abandons the rest of
+ * the `describe` after a failing hook, so the tests that never ran are counted
+ * as absent rather than failing. That is what happened here: three status-bar
+ * tests stopped running on Windows and the total stayed plausible enough that
+ * nothing looked wrong for a month.
+ *
+ * The race is real and not ours to win. VS Code's `FileSystemWatcher` is served
+ * by a separate process; `dispose()` sends an unsubscribe but the OS handle is
+ * released asynchronously, and Windows refuses to remove a directory anything
+ * still holds open. `maxRetries` gives it a few milliseconds to let go, and if
+ * it still has not, the directory is left for the OS to reclaim — which is what
+ * a temp directory is for.
+ */
 export function removeTempWorkspace(root: string): void {
-  fs.rmSync(root, { recursive: true, force: true });
+  try {
+    fs.rmSync(root, {
+      recursive: true,
+      force: true,
+      maxRetries: 10,
+      retryDelay: 50,
+    });
+  } catch {
+    // Left behind under %TEMP%; the OS reclaims it. A test that fails only in
+    // cleanup is asserting nothing.
+  }
 }
 
 export function stubWindowMethod(
