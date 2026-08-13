@@ -40,7 +40,7 @@ abstract class PlatformOps {
   /// Handles OS-specific locking and permission issues.
   Future<void> selfReplace(String newBinaryPath, String currentBinaryPath);
 
-  /// Run post-install steps (e.g. `iq host get`) using the correct binary.
+  /// Run post-install steps ([postInstallArguments]) using the correct binary.
   ///
   /// Returns the child's result so the caller can report what was deployed —
   /// a step whose output is swallowed is indistinguishable from one that did
@@ -71,3 +71,16 @@ abstract class PlatformOps {
 /// Generous enough for a cold filesystem, short enough that a stalled step
 /// reports rather than hanging the terminal (#300).
 const postInstallTimeout = Duration(seconds: 60);
+
+/// What the freshly installed binary is asked to do after an upgrade.
+///
+/// `--apply --autoapprove` is not a shortcut past the gate — it is the gate,
+/// honored. The user already approved this upgrade, of which redeploying the
+/// hosts is a named step; there is no second decision to take, and no terminal
+/// to take it on. Without the flags the child would ask "--plan or --apply?"
+/// into a pipe nobody reads and exit non-zero, and every upgrade would report a
+/// failed redeploy.
+///
+/// Shared by both platforms so the two cannot drift, and named so a test can
+/// pin it.
+const postInstallArguments = ['host', 'get', '--apply', '--autoapprove'];

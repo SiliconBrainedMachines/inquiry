@@ -82,7 +82,7 @@ inquiry-vscode/
 │   │   ├── mutations.ts         ← add mutation note
 │   │   ├── doctor.ts            ← ape.doctor
 │   │   ├── install.ts           ← install/update CLI
-│   │   ├── installer.ts         ← install/update CLI + `inquiry host get`
+│   │   ├── installer.ts         ← install/update CLI + `host get --apply --autoapprove`
 │   │   └── state.ts             ← ape state transition wrapper
 │   │
 │   ├── views/                   ← Sidebar panels

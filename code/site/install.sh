@@ -10,7 +10,7 @@
 #   3. Extracts to ~/.inquiry/
 #   4. Symlinks to ~/.local/bin (XDG standard, in default PATH)
 #   5. Symlinks `iq` alias
-#   6. Runs `inquiry host get` for the active host (OpenCode or Copilot)
+#   6. Runs `inquiry host get --apply --autoapprove` for every detected host
 #   7. Verifies with `inquiry version`
 
 set -euo pipefail
@@ -113,7 +113,9 @@ done
 # ─── Deploy and verify ───────────────────────────────────────────────────────
 
 echo ">>> Deploying Inquiry skills to the active host..."
-"$BIN_DIR/inquiry" host get
+# `--apply --autoapprove`: the user approved this by running the installer,
+# and there is no terminal to ask on inside `curl ... | bash`.
+"$BIN_DIR/inquiry" host get --apply --autoapprove
 
 echo ">>> Verifying installation..."
 VERSION_OUTPUT=$("$BIN_DIR/inquiry" version)

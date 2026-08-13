@@ -125,7 +125,7 @@ Ignored.
         equals(
           'Run iq doctor first and stop on any failed check.\n'
           'Verify the issue already exists with gh issue view.\n'
-          'Open the implementation with iq implementation start --issue NNN, which derives the NNN-slug branch, checks it out, scaffolds the cleanroom, and transitions to ANALYZE.\n'
+          'Open the implementation with iq implementation start --issue NNN --apply --autoapprove, which derives the NNN-slug branch, checks it out, scaffolds the cleanroom, and transitions to ANALYZE.\n'
           'Confirm iq fsm state reports ANALYZE for that issue.',
         ),
       );

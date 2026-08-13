@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.4.2]
+
+### Fixed
+- **The post-install deploy would have silently stopped deploying anything.**
+  From CLI 0.25.0, `iq host get` writes into third-party tools' own directories
+  and so refuses to act until told which of `--plan` and `--apply` was meant.
+  The extension ran a bare `host get`, whose usage error was swallowed by the
+  surrounding `catch` — the CLI would install, no agent or skill would be
+  deployed, and the notification would still report success. It now passes
+  `--apply --autoapprove`: the user approved this by installing the extension,
+  and a progress notification is not somewhere an approval can be taken. A test
+  pins the exact argument list, since the failure mode here is silence.
+
 ## [0.4.1] - 2026-06-01
 
 ### Fixed

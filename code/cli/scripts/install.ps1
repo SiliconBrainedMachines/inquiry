@@ -9,7 +9,7 @@
 #   3. Extracts to $env:LOCALAPPDATA\inquiry\
 #   4. Adds inquiry\bin\ to the user PATH
 #   5. Creates `iq.cmd` batch shim
-#   6. Runs `inquiry host get`
+#   6. Runs `inquiry host get --apply --autoapprove`
 #   7. Verifies with `inquiry version`
 
 $ErrorActionPreference = 'Stop'
@@ -90,7 +90,9 @@ if ($userPath -notlike "*$binDir*") {
 # ─── Deploy and verify ───────────────────────────────────────────────────────
 
 Write-Host '>>> Deploying Inquiry skills to the active host...'
-& (Join-Path $binDir 'inquiry.exe') host get
+# `--apply --autoapprove`: the user approved this by running the installer,
+# and there is no terminal to ask on inside `irm ... | iex`.
+& (Join-Path $binDir 'inquiry.exe') host get --apply --autoapprove
 
 Write-Host '>>> Verifying installation...'
 $versionOutput = & (Join-Path $binDir 'inquiry.exe') version

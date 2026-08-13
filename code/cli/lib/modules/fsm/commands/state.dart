@@ -104,7 +104,7 @@ class FsmStateOutput extends Output {
   String toJsonString() => const JsonEncoder.withIndent('  ').convert(toJson());
 }
 
-class FsmStateCommand implements Command<FsmStateInput, FsmStateOutput> {
+class FsmStateCommand implements Query<FsmStateInput, FsmStateOutput> {
   @override
   final FsmStateInput input;
   final Assets? _assets;

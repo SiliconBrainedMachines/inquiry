@@ -136,4 +136,20 @@ void main() {
       expect(ops.assetName, isNotEmpty);
     });
   });
+
+  // `iq host get` is a command now, so it refuses to act unless told which of
+  // --plan and --apply was meant. The post-install child has no terminal to be
+  // asked on, and the upgrade it belongs to was already approved — so it
+  // carries the approval rather than asking for a second one. Drop either flag
+  // and every upgrade reports a failed redeploy.
+  group('post-install arguments', () {
+    test('carry the approval the upgrade already took', () {
+      expect(postInstallArguments, [
+        'host',
+        'get',
+        '--apply',
+        '--autoapprove',
+      ]);
+    });
+  });
 }

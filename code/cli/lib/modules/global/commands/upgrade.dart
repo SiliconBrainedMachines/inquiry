@@ -1,7 +1,7 @@
 /// `inquiry upgrade` — downloads and installs the latest Inquiry release.
 ///
-/// Fetches the latest release from GitHub, downloads the zip,
-/// extracts it over the current installation, and redeploys hosts.
+/// Fetches the latest release from GitHub, downloads the zip, extracts it over
+/// the current installation, and redeploys hosts.
 library;
 
 import 'dart:convert';
@@ -28,10 +28,10 @@ class UpgradeInput extends Input {
     return UpgradeInput(installDir: installDir);
   }
 
-    /// Declares an EMPTY contract: this command accepts no option at all, so any
-  /// option passed to it is refused. Omitting `params` would mean "declares
-  /// nothing" — which is how `iq init --host claude` used to run, doing nothing
-  /// the flag implied.
+  /// Declares an EMPTY contract: this command accepts no option of its own, so
+  /// any option beyond `--plan` / `--apply` / `--autoapprove` is refused.
+  /// Omitting `params` would mean "declares nothing" — which is how
+  /// `iq init --host claude` used to run, doing nothing the flag implied.
   static const List<CliParam> params = [];
 
   @override
@@ -41,38 +41,222 @@ class UpgradeInput extends Input {
   Map<String, dynamic> toJson() => {'installDir': installDir};
 }
 
+// ─── Steps ──────────────────────────────────────────────────────────────────
+
+/// Fetches [url] into the file at [destination].
+///
+/// A function rather than an `HttpClient`, so the step that replaces the
+/// installation does not have to know how bytes arrive — and so a test can
+/// stand in for the network without faking an interface it never uses.
+typedef Downloader = Future<void> Function(String url, String destination);
+
+/// Downloads over HTTP, which is how it happens outside a test.
+Future<void> downloadOverHttp(String url, String destination) async {
+  final client = HttpClient();
+  try {
+    final request = await client.getUrl(Uri.parse(url));
+    request.headers.set('User-Agent', 'inquiry-cli/$inquiryVersion');
+    final response = await request.close();
+    await response.pipe(File(destination).openWrite());
+  } finally {
+    client.close();
+  }
+}
+
+/// Downloads a release and extracts it over the installation.
+///
+/// Everything this needs — which version, which asset, which URL — was settled
+/// when the step was built, from **one** call to the releases API. Asking again
+/// at perform time could answer differently: a release published in between
+/// would be downloaded without ever having been approved.
+///
+/// **It says what it is doing while it does it.** The plan states what *will*
+/// happen; this states that it *is* happening, which is a different thing and
+/// the only one that helps during a download of several megabytes. It goes to
+/// [progress] — stderr by default — so `--json` stays machine-readable.
+class ReplaceInstallation implements Step {
+  ReplaceInstallation({
+    required this.platformOps,
+    required this.installDir,
+    required this.from,
+    required this.to,
+    required this.asset,
+    required this.downloadUrl,
+    Downloader? download,
+    IOSink? progress,
+    String? runningExecutable,
+  }) : download = download ?? downloadOverHttp,
+       progress = progress ?? stderr,
+       runningExecutable = runningExecutable ?? Platform.resolvedExecutable;
+
+  final PlatformOps platformOps;
+  final Downloader download;
+  final String installDir;
+  final String from;
+  final String to;
+  final String asset;
+  final String downloadUrl;
+  final IOSink progress;
+
+  /// The binary this step is replacing, which on Windows has to be moved aside
+  /// before it can be overwritten.
+  ///
+  /// **Injected, and that is not optional.** `Platform.resolvedExecutable` is
+  /// the Inquiry binary only when a compiled binary is what runs. Under
+  /// `dart test` and `dart run` it is the Dart VM — so a test that reached the
+  /// default would rename the Dart SDK's own `dart.exe` and take the toolchain
+  /// down with it.
+  final String runningExecutable;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'replace',
+    target: installDir,
+    detail: ['$from → $to', 'asset $asset', 'from $downloadUrl'].join('; '),
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    final tempDir = Directory.systemTemp.createTempSync('inquiry_upgrade_');
+    try {
+      progress.writeln('Downloading $asset ($from → $to)...');
+      final zipFile = File(p.join(tempDir.path, asset));
+      await download(downloadUrl, zipFile.path);
+
+      if (Platform.isWindows) {
+        // Windows locks running executables, so the outgoing binary is moved
+        // aside before extraction and cleaned up afterwards — or on the next
+        // upgrade, if the file is still locked.
+        final bak = File('$runningExecutable.bak');
+        if (bak.existsSync()) bak.deleteSync();
+        File(runningExecutable).renameSync(bak.path);
+      }
+
+      progress.writeln('Extracting into $installDir...');
+      await platformOps.expandArchive(zipFile.path, installDir);
+
+      if (Platform.isWindows) {
+        try {
+          final bak = File('$runningExecutable.bak');
+          if (bak.existsSync()) bak.deleteSync();
+        } on FileSystemException {
+          // Still locked — cleaned up on the next upgrade.
+        }
+      }
+    } finally {
+      tempDir.deleteSync(recursive: true);
+    }
+
+    return Outcome(
+      verb: 'replace',
+      target: installDir,
+      values: {'from': from, 'to': to},
+    );
+  }
+}
+
+/// Redeploys the agent and skills into every host, using the new binary.
+///
+/// **Best effort, and that is deliberate (#300).** By the time this runs the
+/// binary and its assets are in place, so the upgrade has already succeeded.
+/// Redeploying reaches into third-party tools' directories and can fail or
+/// stall for reasons that have nothing to do with the upgrade — so this reports
+/// and never throws. A failure here must not take the upgrade down with it.
+class RedeployHosts implements Step {
+  RedeployHosts({
+    required this.platformOps,
+    required this.installDir,
+    IOSink? progress,
+  }) : progress = progress ?? stderr;
+
+  final PlatformOps platformOps;
+  final String installDir;
+  final IOSink progress;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'deploy',
+    target: 'every host on this machine',
+    detail: 'best effort — the upgrade stands whether or not this succeeds',
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    progress.writeln('Deploying hosts...');
+    try {
+      final result = await platformOps.runPostInstall(installDir);
+      // Echo what the child actually did. Swallowing it made a deploy to
+      // nothing look identical to a deploy to everything.
+      for (final line in postInstallOutputLines(result)) {
+        progress.writeln('  $line');
+      }
+      if (result.exitCode != 0) {
+        return Outcome(
+          verb: 'deploy',
+          target: 'every host on this machine',
+          detail: 'failed (exit ${result.exitCode}) — run `iq host get` to '
+              'retry, or `iq doctor` to inspect',
+          values: {'deployed': false},
+        );
+      }
+      return Outcome(
+        verb: 'deploy',
+        target: 'every host on this machine',
+        values: {'deployed': true},
+      );
+    } on Object catch (error) {
+      return Outcome(
+        verb: 'deploy',
+        target: 'every host on this machine',
+        detail: 'stopped: $error — run `iq host get` to retry, or `iq doctor` '
+            'to inspect',
+        values: {'deployed': false},
+      );
+    }
+  }
+}
+
 // ─── Output ─────────────────────────────────────────────────────────────────
 
 class UpgradeOutput extends Output {
-  final String message;
+  UpgradeOutput({
+    required this.previousVersion,
+    required this.newVersion,
+    required this.upgraded,
+    this.deployed = true,
+    this.reason,
+  });
+
   final String previousVersion;
   final String newVersion;
   final bool upgraded;
 
-  UpgradeOutput({
-    required this.message,
-    required this.previousVersion,
-    required this.newVersion,
-    required this.upgraded,
-  });
+  /// Whether the hosts were redeployed. False does not mean the upgrade failed.
+  final bool deployed;
+
+  /// Why nothing happened, when nothing did.
+  final String? reason;
 
   @override
   Map<String, dynamic> toJson() => {
-    'message': message,
     'previousVersion': previousVersion,
     'newVersion': newVersion,
     'upgraded': upgraded,
+    'deployed': deployed,
+    if (reason != null) 'reason': reason,
   };
 
   @override
   int get exitCode => ExitCode.ok;
 
-  /// Returns human-friendly upgrade status.
   @override
-  String? toText() {
-    if (!upgraded) return message;
-    return '✓ Upgraded: $previousVersion → $newVersion';
-  }
+  String? toText() => upgraded
+      ? [
+          '✓ Upgraded: $previousVersion → $newVersion',
+          if (!deployed)
+            '  The CLI is upgraded. Run `iq host get` to deploy the hosts.',
+        ].join('\n')
+      : (reason ?? 'Already on the latest version');
 }
 
 // ─── Command ────────────────────────────────────────────────────────────────
@@ -81,25 +265,51 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
   @override
   final UpgradeInput input;
   final PlatformOps platformOps;
+
+  /// Answers the releases API. Overridden by the tests that exercise what the
+  /// lookup returns.
   final HttpClient? httpClientOverride;
+
+  /// How the release archive is fetched. A seam for the tests, and the reason
+  /// the step itself knows nothing about HTTP.
+  final Downloader? download;
+
+  /// Where the steps' running commentary goes. A seam for the tests.
+  final IOSink? progress;
+
+  /// The binary being replaced. A seam for the tests, and never optional —
+  /// see [ReplaceInstallation.runningExecutable].
+  final String? runningExecutable;
 
   UpgradeCommand(
     this.input, {
     PlatformOps? platformOps,
     this.httpClientOverride,
+    this.download,
+    this.progress,
+    this.runningExecutable,
   }) : platformOps = platformOps ?? PlatformOps.current();
 
   @override
   String? validate() => null;
 
-  @override
-  Future<UpgradeOutput> execute() async {
-    final client = httpClientOverride ?? HttpClient();
-    try {
-      // 1. Fetch latest release metadata
-      stderr.writeln('Current version: $inquiryVersion');
-      stderr.writeln('Checking for updates...');
+  String _latest = inquiryVersion;
+  String? _reason;
 
+  /// Two steps, and everything they need read before the plan is built.
+  ///
+  /// The releases API is asked **once**, here. That is what makes the plan
+  /// honest: the version, the asset and the URL a person approves are the ones
+  /// that get downloaded. Asking again inside the step could resolve a release
+  /// published in the meantime, and the upgrade would not be the one shown.
+  ///
+  /// Nothing to upgrade to is not a failure, so it builds no steps and says
+  /// why.
+  @override
+  Future<List<Step>> steps() async {
+    final client = httpClientOverride ?? HttpClient();
+    final Map<String, dynamic> release;
+    try {
       final releaseUrl = Uri.parse(
         'https://api.github.com/repos/$_repo/releases/latest',
       );
@@ -109,138 +319,74 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
       final metaResponse = await metaRequest.close();
 
       if (metaResponse.statusCode != 200) {
-        return UpgradeOutput(
+        throw CommandException(
+          code: 'RELEASE_LOOKUP_FAILED',
           message:
               'Failed to fetch release info (HTTP ${metaResponse.statusCode})',
-          previousVersion: inquiryVersion,
-          newVersion: inquiryVersion,
-          upgraded: false,
+          exitCode: ExitCode.apiError,
+          isRetryable: true,
         );
       }
 
-      final body = await metaResponse.transform(utf8.decoder).join();
-      final release = jsonDecode(body) as Map<String, dynamic>;
-      final tagName = release['tag_name'] as String;
-      final latestVersion = tagName.startsWith('v')
-          ? tagName.substring(1)
-          : tagName;
-
-      stderr.writeln('Latest version available: $latestVersion');
-
-      if (latestVersion == inquiryVersion) {
-        return UpgradeOutput(
-          message: 'Already on the latest version',
-          previousVersion: inquiryVersion,
-          newVersion: inquiryVersion,
-          upgraded: false,
-        );
-      }
-
-      stderr.writeln('Found v$latestVersion, downloading...');
-
-      // 2. Find the asset for this platform
-      final expectedAsset = platformOps.assetName;
-      final assets = release['assets'] as List<dynamic>;
-      final asset = assets.cast<Map<String, dynamic>>().firstWhere(
-        (a) => (a['name'] as String) == expectedAsset,
-        orElse: () => throw CommandException(
-          code: 'ASSET_NOT_FOUND',
-          message: 'No $expectedAsset asset in release $tagName',
-          exitCode: ExitCode.notFound,
-        ),
-      );
-
-      final downloadUrl = asset['browser_download_url'] as String;
-
-      // 3. Download to temp
-      final tempDir = Directory.systemTemp.createTempSync('ape_upgrade_');
-      final zipFile = File(p.join(tempDir.path, expectedAsset));
-
-      final dlRequest = await client.getUrl(Uri.parse(downloadUrl));
-      dlRequest.headers.set('User-Agent', 'inquiry-cli/$inquiryVersion');
-      final dlResponse = await dlRequest.close();
-
-      // Follow redirect if needed
-      stderr.writeln('Downloading asset: $expectedAsset');
-      final sink = zipFile.openWrite();
-      await dlResponse.pipe(sink);
-
-      // 4. Extract over current installation via PlatformOps
-      final installDir = input.installDir;
-      stderr.writeln('Applying update in: $installDir');
-
-      try {
-        // Windows locks running executables — rename before extraction
-        if (Platform.isWindows) {
-          final bakFile = File('${Platform.resolvedExecutable}.bak');
-          if (bakFile.existsSync()) bakFile.deleteSync();
-          File(Platform.resolvedExecutable).renameSync(bakFile.path);
-        }
-
-        await platformOps.expandArchive(zipFile.path, installDir);
-
-        // Best-effort cleanup of old binary
-        if (Platform.isWindows) {
-          try {
-            final bakFile = File('${Platform.resolvedExecutable}.bak');
-            if (bakFile.existsSync()) bakFile.deleteSync();
-          } on FileSystemException {
-            // Still locked — will be cleaned up on next upgrade
-          }
-        }
-      } catch (e) {
-        stderr.writeln('Upgrade failed during apply step: $e');
-        tempDir.deleteSync(recursive: true);
-        return UpgradeOutput(
-          message: 'Failed to extract: $e',
-          previousVersion: inquiryVersion,
-          newVersion: latestVersion,
-          upgraded: false,
-        );
-      }
-
-      tempDir.deleteSync(recursive: true);
-
-      // 5. Redeploy hosts using the new binary.
-      //
-      // The binary and assets are already in place, so the upgrade has
-      // succeeded by this point. Redeploying reaches into third-party tools'
-      // directories and can fail or stall for reasons that have nothing to do
-      // with the upgrade — so it stops and reports, never blocks and never
-      // takes the upgrade down with it (#300).
-      stderr.writeln('Deploying hosts...');
-      try {
-        final result = await platformOps.runPostInstall(installDir);
-        // Echo what the child actually did. Swallowing it made a deploy to
-        // nothing look identical to a deploy to everything.
-        for (final line in postInstallOutputLines(result)) {
-          stderr.writeln('  $line');
-        }
-        if (result.exitCode != 0) {
-          stderr.writeln('Host deployment failed (exit ${result.exitCode}).');
-          stderr.writeln(
-            'The CLI is upgraded. Run `iq host get` to retry, '
-            'or `iq doctor` to inspect.',
-          );
-        }
-      } catch (e) {
-        stderr.writeln('Host deployment stopped: $e');
-        stderr.writeln(
-          'The CLI is upgraded. Run `iq host get` to retry, '
-          'or `iq doctor` to inspect.',
-        );
-      }
-      stderr.writeln('Upgrade completed successfully.');
-
-      return UpgradeOutput(
-        message: 'Upgraded from $inquiryVersion to $latestVersion',
-        previousVersion: inquiryVersion,
-        newVersion: latestVersion,
-        upgraded: true,
-      );
+      release =
+          jsonDecode(await metaResponse.transform(utf8.decoder).join())
+              as Map<String, dynamic>;
     } finally {
       if (httpClientOverride == null) client.close();
     }
+
+    final tagName = release['tag_name'] as String;
+    _latest = tagName.startsWith('v') ? tagName.substring(1) : tagName;
+    if (_latest == inquiryVersion) {
+      _reason = 'Already on the latest version';
+      return const [];
+    }
+
+    final expectedAsset = platformOps.assetName;
+    final asset = (release['assets'] as List<dynamic>)
+        .cast<Map<String, dynamic>>()
+        .where((a) => a['name'] == expectedAsset)
+        .firstOrNull;
+    if (asset == null) {
+      throw CommandException(
+        code: 'ASSET_NOT_FOUND',
+        message: 'No $expectedAsset asset in release $tagName',
+        exitCode: ExitCode.notFound,
+      );
+    }
+
+    return [
+      ReplaceInstallation(
+        platformOps: platformOps,
+        download: download,
+        installDir: input.installDir,
+        from: inquiryVersion,
+        to: _latest,
+        asset: expectedAsset,
+        downloadUrl: asset['browser_download_url'] as String,
+        progress: progress,
+        runningExecutable: runningExecutable,
+      ),
+      RedeployHosts(
+        platformOps: platformOps,
+        installDir: input.installDir,
+        progress: progress,
+      ),
+    ];
+  }
+
+  @override
+  UpgradeOutput describe(Execution execution) {
+    final deploy = execution.outcomes
+        .where((o) => o.verb == 'deploy')
+        .firstOrNull;
+    return UpgradeOutput(
+      previousVersion: inquiryVersion,
+      newVersion: _latest,
+      upgraded: execution.outcomes.any((o) => o.verb == 'replace'),
+      deployed: deploy?.values['deployed'] as bool? ?? true,
+      reason: _reason,
+    );
   }
 }
 
@@ -252,10 +398,6 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
 ///
 /// Visible for testing.
 List<String> postInstallOutputLines(ProcessResult result) => [
-      '${result.stdout}',
-      '${result.stderr}',
-    ]
-        .expand((s) => s.split('\n'))
-        .map((l) => l.trimRight())
-        .where((l) => l.isNotEmpty)
-        .toList(growable: false);
+  '${result.stdout}',
+  '${result.stderr}',
+].expand((s) => s.split('\n')).map((l) => l.trimRight()).where((l) => l.isNotEmpty).toList(growable: false);

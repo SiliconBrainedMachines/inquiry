@@ -72,16 +72,21 @@ The current Inquiry CLI already enforces the runtime FSM and deployment operatio
 
 ### Existing
 
-| Command | Description |
-|---------|-------------|
-| `iq init` | Initialize Inquiry in a repo (`.inquiry/` runtime files) |
-| `iq doctor` | Verify prerequisites and environment readiness |
-| `iq host get` | Deploy skills to the active host |
-| `iq host clean` | Remove deployed skills from all known hosts |
-| `iq fsm transition --event <e>` | Execute a declared FSM transition |
-| `iq upgrade` | Upgrade CLI binary |
-| `iq version` | Show version |
-| `iq uninstall` | Remove Inquiry completely |
+Routes marked **command** change something outside the CLI's own files and take
+`--plan` / `--apply`; the rest answer on the spot. The line between the two is
+drawn in [ADR 0002](../adr/0002-a-query-may-write-what-the-cli-itself-owns.md).
+
+| Command | Description | Kind |
+|---------|-------------|------|
+| `iq init` | Initialize Inquiry in a repo (`.inquiry/` runtime files) | query |
+| `iq doctor` | Verify prerequisites and environment readiness | query |
+| `iq host get` | Deploy skills to every detected host | command |
+| `iq host clean` | Remove deployed skills from all known hosts | command |
+| `iq fsm transition --event <e>` | Execute a declared FSM transition | query |
+| `iq implementation start --issue <N>` | Open a cycle: branch, cleanroom, ANALYZE | command |
+| `iq upgrade` | Upgrade CLI binary | command |
+| `iq version` | Show version | query |
+| `iq uninstall` | Remove Inquiry completely | command |
 
 ### Planned
 
