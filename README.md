@@ -80,11 +80,12 @@ irm https://inquiry.ccisne.dev/install.ps1 | iex
 curl -fsSL https://inquiry.ccisne.dev/install.sh | bash
 
 # Setup
-iq doctor               # verify prerequisites
-iq host get             # deploy agent + skills to every host detected (or: --host claude)
+iq doctor                # verify prerequisites
+iq host get --plan       # what deploying would change — nothing is touched
+iq host get --apply      # show it, ask for approval, then do it (or: --host claude)
 cd your-repo
-iq init                 # scaffold .inquiry/ workspace
-iq                      # show current state
+iq init                  # scaffold .inquiry/ workspace
+iq                       # show current state
 
 # Run a phase by hand (no scheduler agent): use the MACSS lifecycle skills
 #   /macss-analyze   /macss-plan   /macss-execute
@@ -101,7 +102,7 @@ For the current system model, see [`docs/architecture.md`](docs/architecture.md)
 - **Skills:** operational protocols such as `issue-create`, `inquiry-start`, `inquiry-end`, `doc-read`, `doc-write`, `inquiry-install`, plus direct-use skills such as `research`, `legion`, and `kritik`. The per-phase skills that drive a cycle by hand now ship with [MACSS](https://github.com/ccisnedev/macss) as `macss-analyze` / `macss-plan` / `macss-execute`; they delegate the mechanics back to `iq fsm state` and `iq fsm transition`, so this CLI stays the authority on the gates
 - **Memory:** `.inquiry/` (runtime state) and `cleanrooms/` (per-cycle artifacts the CLI scaffolds from single-source templates)
 - **Book:** Markdown-first manuscript and editorial pipeline under [`code/book/`](code/book)
-- **Host:** OpenCode and Claude — `iq host get` deploys the agent + skills globally and additively, to the hosts actually present on the machine
+- **Host:** OpenCode and Claude — `iq host get` deploys the agent + skills globally and additively, to the hosts actually present on the machine. It writes into those tools' own directories, so like `upgrade`, `uninstall`, `host clean` and `implementation start` it says what it would do and takes approval first (`--plan` / `--apply`); every other route answers on the spot. See [ADR 0002](docs/adr/0002-a-query-may-write-what-the-cli-itself-owns.md)
 
 ## Documentation
 

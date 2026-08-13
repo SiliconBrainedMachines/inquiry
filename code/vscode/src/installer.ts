@@ -254,10 +254,17 @@ export async function installInquiryCli(deps?: Partial<InstallerDeps>): Promise<
       }
 
       // 6. Deploy to active host
+      //
+      // `--apply --autoapprove`: `host get` writes into third-party tools' own
+      // directories, so the CLI refuses to act until told which of --plan and
+      // --apply was meant. The user approved this by installing the extension,
+      // and a progress notification is not somewhere an approval can be taken.
+      // Without the flags the child exits with a usage error that the catch
+      // below swallows — CLI installed, nothing deployed, nothing said.
       progress.report({ message: 'Deploying to active host...' });
       const binaryPath = path.join(binDir, platform === 'win32' ? 'inquiry.exe' : 'inquiry');
       try {
-        await execFileFn(binaryPath, ['host', 'get']);
+        await execFileFn(binaryPath, ['host', 'get', '--apply', '--autoapprove']);
       } catch { /* non-fatal */ }
 
       // 7. Verify

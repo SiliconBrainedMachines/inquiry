@@ -39,18 +39,123 @@ class UninstallInput extends Input {
   Map<String, dynamic> toJson() => {'installDir': installDir};
 }
 
+// ─── Steps ──────────────────────────────────────────────────────────────────
+
+/// Removes the agent and skills deployed into every host.
+class CleanDeployedHosts implements Step {
+  CleanDeployedHosts(this.deployer);
+
+  final HostDeployer deployer;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'clean',
+    target: 'every host this machine deployed to',
+    detail: 'the Inquiry agent and its skills',
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    deployer.clean();
+    return Outcome(verb: 'clean', target: 'every host this machine deployed to');
+  }
+}
+
+/// Removes the repository-scoped agent file, when one is there.
+class RemoveRepoScopedAgent implements Step {
+  RemoveRepoScopedAgent(this.path);
+
+  final String path;
+
+  bool get _exists => File(path).existsSync();
+
+  @override
+  Preview preview() => _exists
+      ? Preview(verb: 'remove', target: path)
+      : Preview(verb: 'absent', target: path);
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    if (!_exists) return Outcome(verb: 'absent', target: path);
+    File(path).deleteSync();
+    return Outcome(verb: 'remove', target: path);
+  }
+}
+
+/// Takes the CLI's `bin/` off the user's PATH.
+class UnsetFromPath implements Step {
+  UnsetFromPath({required this.platformOps, required this.binDir});
+
+  final PlatformOps platformOps;
+  final String binDir;
+
+  String get _target => '$binDir from your PATH';
+
+  @override
+  Preview preview() => Preview(verb: 'unset', target: _target);
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    final userPath = platformOps.getEnvVariable('PATH') ?? '';
+    final separator = Platform.isWindows ? ';' : ':';
+    final parts = userPath
+        .split(separator)
+        .where((part) => part.isNotEmpty)
+        .where((part) => !_pathEquals(part, binDir))
+        .toList();
+    final newPath = parts.join(separator);
+
+    if (newPath != userPath) {
+      platformOps.setEnvVariable('PATH', newPath);
+    }
+    return Outcome(verb: 'unset', target: _target);
+  }
+
+  bool _pathEquals(String a, String b) =>
+      p.normalize(a).toLowerCase() == p.normalize(b).toLowerCase();
+}
+
+/// Schedules the installation directory for deletion.
+///
+/// Scheduled rather than done: on Windows the running executable lives inside
+/// it and cannot delete itself.
+class DeleteInstallation implements Step {
+  DeleteInstallation({required this.platformOps, required this.installDir});
+
+  final PlatformOps platformOps;
+  final String installDir;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'delete',
+    target: installDir,
+    detail: 'your repositories and their cleanrooms are not touched — this '
+        'removes the tool, not your work',
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    await platformOps.scheduleDeletion(installDir);
+    return Outcome(verb: 'delete', target: installDir);
+  }
+}
+
 // ─── Output ─────────────────────────────────────────────────────────────────
 
 class UninstallOutput extends Output {
-  final String message;
+  UninstallOutput({required this.installDir});
 
-  UninstallOutput({required this.message});
+  final String installDir;
 
   @override
-  Map<String, dynamic> toJson() => {'message': message};
+  Map<String, dynamic> toJson() => {'installDir': installDir};
 
   @override
   int get exitCode => ExitCode.ok;
+
+  @override
+  String? toText() =>
+      'Inquiry uninstalled. Restart your terminal to apply PATH changes.';
 }
 
 // ─── Command ────────────────────────────────────────────────────────────────
@@ -73,46 +178,29 @@ class UninstallCommand implements Command<UninstallInput, UninstallOutput> {
   @override
   String? validate() => null;
 
+  /// Hosts, then the repository's agent, then PATH, then the directory.
+  ///
+  /// The order is not cosmetic. PATH is unset before the installation is
+  /// scheduled for deletion, so there is never a window in which the entry
+  /// points at a directory already on its way out. And the hosts are cleaned
+  /// first, while the assets they were deployed from are still there.
   @override
-  Future<UninstallOutput> execute() async {
-    // 1. Clean all hosts (adapter paths + old global agent paths)
-    deployer.clean();
-
-    // 2. Clean repo-scoped agent
-    _cleanRepoScopedAgent();
-
-    // 3. Remove ape\bin\ from user PATH (via PlatformOps)
-    _removeFromPath(p.join(input.installDir, 'bin'));
-
-    // 4. Spawn background process to delete install directory
-    await platformOps.scheduleDeletion(input.installDir);
-
-    return UninstallOutput(
-      message: 'Inquiry uninstalled. Restart your terminal to apply PATH changes.',
-    );
-  }
-
-  void _cleanRepoScopedAgent() {
-    final agentFile = File(
+  Future<List<Step>> steps() async => [
+    CleanDeployedHosts(deployer),
+    RemoveRepoScopedAgent(
       p.join(_workingDirectory, '.github', 'agents', 'inquiry.agent.md'),
-    );
-    if (agentFile.existsSync()) agentFile.deleteSync();
-  }
+    ),
+    UnsetFromPath(
+      platformOps: platformOps,
+      binDir: p.join(input.installDir, 'bin'),
+    ),
+    DeleteInstallation(
+      platformOps: platformOps,
+      installDir: input.installDir,
+    ),
+  ];
 
-  void _removeFromPath(String binDir) {
-    final userPath = platformOps.getEnvVariable('PATH') ?? '';
-    final parts = userPath
-        .split(Platform.isWindows ? ';' : ':')
-        .where((p) => p.isNotEmpty)
-        .where((p) => !_pathEquals(p, binDir))
-        .toList();
-    final newPath = parts.join(Platform.isWindows ? ';' : ':');
-
-    if (newPath != userPath) {
-      platformOps.setEnvVariable('PATH', newPath);
-    }
-  }
-
-  bool _pathEquals(String a, String b) =>
-      p.normalize(a).toLowerCase() == p.normalize(b).toLowerCase();
+  @override
+  UninstallOutput describe(Execution execution) =>
+      UninstallOutput(installDir: input.installDir);
 }

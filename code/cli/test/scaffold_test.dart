@@ -4,15 +4,43 @@ import 'package:test/test.dart';
 
 void main() {
   group('CLI scaffold', () {
-    test('responds to a registered command with exit code 0', () async {
+    test('responds to a registered query with exit code 0', () async {
       final cli = ModularCli();
-      cli.command<PingInput, PingOutput>(
+      cli.query<PingInput, PingOutput>(
         'ping',
-        (req) => PingCommand(PingInput.fromCliRequest(req)),
+        (req) => PingQuery(PingInput.fromCliRequest(req)),
         description: 'Ping test',
       );
 
       final code = await cli.run(['ping']);
+      expect(code, ExitCode.ok);
+    });
+
+    // A query answers on the spot; a command does not. The scaffold has to
+    // dispatch both kinds, and the difference between them is the whole point
+    // of registering them apart — so it belongs in the scaffold's own test.
+    test('refuses a registered command that names neither --plan nor --apply',
+        () async {
+      final cli = ModularCli();
+      cli.command<PingInput, PingOutput>(
+        'touch',
+        (req) => PingCommand(PingInput.fromCliRequest(req)),
+        description: 'Command test',
+      );
+
+      final code = await cli.run(['touch']);
+      expect(code, ExitCode.validationFailed);
+    });
+
+    test('runs a registered command under --plan', () async {
+      final cli = ModularCli();
+      cli.command<PingInput, PingOutput>(
+        'touch',
+        (req) => PingCommand(PingInput.fromCliRequest(req)),
+        description: 'Command test',
+      );
+
+      final code = await cli.run(['touch', '--plan']);
       expect(code, ExitCode.ok);
     });
 
@@ -25,7 +53,7 @@ void main() {
   });
 }
 
-// ─── Dummy command for scaffold validation ──────────────────────────────────
+// ─── Dummy routes for scaffold validation ───────────────────────────────────
 
 class PingInput extends Input {
   PingInput();
@@ -45,6 +73,18 @@ class PingOutput extends Output {
   int get exitCode => ExitCode.ok;
 }
 
+class PingQuery implements Query<PingInput, PingOutput> {
+  @override
+  final PingInput input;
+  PingQuery(this.input);
+
+  @override
+  String? validate() => null;
+
+  @override
+  Future<PingOutput> execute() async => PingOutput();
+}
+
 class PingCommand implements Command<PingInput, PingOutput> {
   @override
   final PingInput input;
@@ -54,5 +94,17 @@ class PingCommand implements Command<PingInput, PingOutput> {
   String? validate() => null;
 
   @override
-  Future<PingOutput> execute() async => PingOutput();
+  Future<List<Step>> steps() async => [PingStep()];
+
+  @override
+  PingOutput describe(Execution execution) => PingOutput();
+}
+
+class PingStep implements Step {
+  @override
+  Preview preview() => Preview(verb: 'ping', target: 'nothing at all');
+
+  @override
+  Future<Outcome> perform(StepContext context) async =>
+      Outcome(verb: 'ping', target: 'nothing at all');
 }

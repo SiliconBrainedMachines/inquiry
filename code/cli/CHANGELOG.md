@@ -4,6 +4,71 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.25.0]
+
+### Changed — BREAKING
+
+- **Five commands now refuse to act until you say `--plan` or `--apply`.**
+  `iq upgrade`, `iq uninstall`, `iq host get`, `iq host clean` and
+  `iq implementation start` install, remove, or write into your repository.
+  Each now shows what it would do and takes approval before doing it:
+
+  ```
+  iq host get --plan                 # say what would change; change nothing
+  iq host get --apply                # say it, ask for approval, then do it
+  iq host get --apply --autoapprove  # act without asking — agents and CI
+  ```
+
+  Neither mode is the default. A command that changes things does not decide
+  for you which one you wanted, so `iq host get` on its own is now a usage
+  error that names both options. **Every script, alias or agent instruction
+  that invokes one of these five must add a mode.** The installers, the
+  post-upgrade redeploy, `iq doctor`'s remediation hints, the branch-policy
+  error and `inquiry-start.md` were all updated.
+
+  Every other route is unchanged: `iq fsm transition`, `iq ape prompt`,
+  `iq init`, `iq doctor` and the rest answer on the spot and **reject** the two
+  flags. Which kind a route is, is now a fact about its registration rather
+  than a comment — see
+  [ADR 0002](../../docs/adr/0002-a-query-may-write-what-the-cli-itself-owns.md)
+  for where the line falls and why `iq fsm transition` stays a query despite
+  writing `.iq.state.yaml`.
+
+- **`iq host get --host opencode` no longer configures Ollama unless asked.**
+  Baking `num_ctx` variants shells out to `ollama create`, which is slow and
+  blocks when the daemon is not running — an optimization, not part of
+  installing a CLI. It moved behind `--configure-ollama`, where it is a named
+  step of its own in the plan. `iq doctor`'s remediation now suggests the flag.
+
+### Added
+
+- **A plan is a list of steps, each of which says what it would do.** Commands
+  are built on [`preview_executor`](https://pub.dev/packages/preview_executor)
+  through `modular_cli_sdk` 0.4: a command declares an ordered list of steps,
+  and under `--apply` the executor previews each one again immediately before
+  running it and compares. What you approved and what ran are held together by
+  the engine rather than by everyone remembering. An upgrade that resolves the
+  releases API **once** — at plan time — can no longer download a release
+  published between the plan and the approval.
+
+- **Orderings that were comments are now assertable.** `iq uninstall` takes
+  PATH off *before* scheduling the installation for deletion, and cleans the
+  hosts *first*, while the assets they were deployed from are still there. That
+  was a paragraph; it is now a list a test reads.
+
+### Fixed
+
+- **`iq upgrade`'s redeploy would have reported failure on every upgrade.** The
+  post-install child runs the freshly written binary as `host get`, which is a
+  command now — without a mode it would exit with a usage error into a pipe
+  nobody reads. Both platforms now share one named argument list
+  (`postInstallArguments`), pinned by a test.
+
+- **The CLI README's command table was split in half** by an unrelated
+  benchmark section, leaving ten command rows orphaned below it and rendering
+  as loose pipes. Repaired, and it now lists `iq implementation start` and
+  marks which routes take `--plan`/`--apply`.
+
 ## [0.24.1]
 
 ### Fixed

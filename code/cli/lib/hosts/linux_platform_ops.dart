@@ -74,10 +74,10 @@ class LinuxPlatformOps implements PlatformOps {
     // Bounded: `host get` only touches the filesystem now, but it runs the
     // freshly written binary and its output is buffered rather than streamed,
     // so an unbounded wait here is indistinguishable from a crash (#300).
-    return Process.run(p.join(installDir, 'bin', binaryName), const [
-      'host',
-      'get',
-    ]).timeout(
+    return Process.run(
+      p.join(installDir, 'bin', binaryName),
+      postInstallArguments,
+    ).timeout(
       postInstallTimeout,
       onTimeout: () => throw TimeoutException(
         'host get did not finish within ${postInstallTimeout.inSeconds}s',

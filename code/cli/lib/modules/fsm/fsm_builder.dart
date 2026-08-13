@@ -5,14 +5,14 @@ import 'commands/state.dart';
 import 'commands/transition.dart';
 
 void buildFsmModule(ModuleBuilder m, {Assets? assets}) {
-  m.command<FsmStateInput, FsmStateOutput>(
+  m.query<FsmStateInput, FsmStateOutput>(
     'state',
     (req) => FsmStateCommand(FsmStateInput.fromCliRequest(req), assets: assets),
     description: 'Show current FSM state, valid transitions, and active APEs',
     params: FsmStateInput.params,
   );
 
-  m.command<StateTransitionInput, StateTransitionOutput>(
+  m.query<StateTransitionInput, StateTransitionOutput>(
     'transition',
     (req) => StateTransitionCommand(StateTransitionInput.fromCliRequest(req), assets: assets),
     description:

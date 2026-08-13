@@ -214,9 +214,12 @@ SKILL.md files are **shared across hosts** (same SKILL.md for Copilot, Claude, e
 ## Host deployment model
 
 The command surface is `iq host get`; the operational model is host-bound.
+It deploys into third-party tools' own directories, so it is a `Command`: it
+says what it would deploy and takes approval before it does
+(`--plan` / `--apply`).
 
 ```
-iq host get
+iq host get --apply
     │
     ├── Reads bundled assets/ from alongside the inquiry binary
   ├── Cleans ~/.copilot/skills/  (idempotent reset)
@@ -270,3 +273,21 @@ A complete APE cycle from issue to merge:
 | **Single host until MVP** | Copilot only (D20) | Prove methodology on one tool before fragmenting |
 | **Prompt delivery is explicit** | `iq ape prompt` prints identity + contract + context | The effective prompt stays inspectable; no hidden glue in standard APE YAMLs |
 | **EVOLUTION is opt-in** | config.yaml flag | Self-modification is powerful but must be conscious |
+| **Queries answer, commands plan** | A route that reaches outside the CLI's own files is registered as a `Command` and takes `--plan`/`--apply`; everything else is a `Query` ([ADR 0002](adr/0002-a-query-may-write-what-the-cli-itself-owns.md)) | The kind is a fact about the registration, not a comment — a query cannot be given the flags and a command cannot skip them |
+
+## What the CLI is built on
+
+The CLI is a Dart package (`code/cli/`) assembled from three of its own
+dependencies, each owning one layer of the request path:
+
+| Package | Owns | Why it is separate |
+|---|---|---|
+| [`cli_router`](https://pub.dev/packages/cli_router) | Parsing `argv` into a routed request: segments, flags, two-phase dispatch of root routes vs mounted modules | Routing is not Inquiry-specific; the FSM has no opinion about how a flag is spelled |
+| [`modular_cli_sdk`](https://pub.dev/packages/modular_cli_sdk) | The shape of a route — `Input`, `Output`, `Query`, `Command`, the module builder, `--json`/`--quiet`, exit codes, and the approval gate between `--plan` and `--apply` | Every Inquiry route has the same lifecycle; describing it once is what keeps `iq host get` and `iq upgrade` from each inventing their own idea of "would change" |
+| [`preview_executor`](https://pub.dev/packages/preview_executor) | Running a command's steps: previewing them, performing them, and checking that what happened is what was announced | Reached only through `modular_cli_sdk` — a command that could reach the executor directly could run steps with no plan shown and no approval taken, which is the one thing the arrangement exists to prevent |
+
+A command declares an ordered list of steps; each step says what it would do
+(`preview()`) and does it (`perform()`). Under `--apply` the executor previews
+each step again immediately before running it and compares — so what a person
+approved and what the run did are held together by the engine rather than by
+everyone remembering.

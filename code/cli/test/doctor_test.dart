@@ -398,7 +398,7 @@ void main() {
 
         final text = output.toText()!;
         expect(text, contains('✗ no host deployed'));
-        expect(text, contains("Run 'iq host get'"));
+        expect(text, contains("Run 'iq host get --apply'"));
         expect(text, contains('Some checks failed.'));
       });
 
@@ -478,7 +478,7 @@ void main() {
         expect(text, contains('✓ opencode: agent deployed'));
         expect(text, contains('✗ opencode: missing skills: issue-create'));
         expect(text,
-            contains("Run 'inquiry host get --host opencode' to deploy skills"));
+            contains("Run 'iq host get --host opencode --apply' to deploy skills"));
       });
 
       test('HostCheck.toJson() includes all fields', () {
@@ -578,7 +578,7 @@ void main() {
         final text = output.toText()!;
 
         expect(text, contains('✗ no host deployed'));
-        expect(text, contains("Run 'iq host get'"));
+        expect(text, contains("Run 'iq host get --apply'"));
         expect(text, isNot(contains("'inquiry target get'")));
       });
 

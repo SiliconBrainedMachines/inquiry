@@ -1,0 +1,6 @@
+# MACSS — this workspace ignores itself.
+# Everything here is machine-written and reproducible, except what is named
+# below: those are decisions a human made, and they travel with the repository.
+*
+!.gitignore
+!config.yaml
