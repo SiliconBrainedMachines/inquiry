@@ -218,4 +218,21 @@ describe('installInquiryCli', () => {
     assert.ok(commands.some(c => c.includes('host') && c.includes('get')));
     assert.ok(commands.some(c => c.includes('version')));
   });
+
+  // `host get` changes things outside the CLI, so it refuses to act unless
+  // told which of --plan and --apply was meant. The deploy is wrapped in a
+  // catch, so getting this wrong is silent: the CLI installs, nothing is
+  // deployed, and the user is told the install succeeded.
+  it('deploys with --apply --autoapprove, not a bare `host get`', async () => {
+    const commands: string[][] = [];
+    const deps: InstallerDeps = {
+      ...baseDeps('win32'),
+      execFile: async (_cmd, args) => { commands.push(args); return 'v1.0.0'; },
+    };
+
+    await installInquiryCli(deps);
+
+    const deploy = commands.find(c => c.includes('host') && c.includes('get'));
+    assert.deepStrictEqual(deploy, ['host', 'get', '--apply', '--autoapprove']);
+  });
 });
