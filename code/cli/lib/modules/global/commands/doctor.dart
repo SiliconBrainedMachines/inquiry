@@ -671,7 +671,7 @@ class DoctorCommand implements Query<DoctorInput, DoctorOutput> {
           name: 'update',
           passed: true,
           version: '${result.latestVersion} available',
-          remediation: "Run 'iq upgrade' to update",
+          remediation: "Run 'iq upgrade --apply' to update",
         );
       }
       return null; // No update, no check to show

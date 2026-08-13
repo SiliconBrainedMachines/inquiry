@@ -194,8 +194,8 @@ class RedeployHosts implements Step {
         return Outcome(
           verb: 'deploy',
           target: 'every host on this machine',
-          detail: 'failed (exit ${result.exitCode}) — run `iq host get` to '
-              'retry, or `iq doctor` to inspect',
+          detail: 'failed (exit ${result.exitCode}) — run '
+              '`iq host get --apply` to retry, or `iq doctor` to inspect',
           values: {'deployed': false},
         );
       }
@@ -208,8 +208,8 @@ class RedeployHosts implements Step {
       return Outcome(
         verb: 'deploy',
         target: 'every host on this machine',
-        detail: 'stopped: $error — run `iq host get` to retry, or `iq doctor` '
-            'to inspect',
+        detail: 'stopped: $error — run `iq host get --apply` to retry, or '
+            '`iq doctor` to inspect',
         values: {'deployed': false},
       );
     }
@@ -254,7 +254,8 @@ class UpgradeOutput extends Output {
       ? [
           '✓ Upgraded: $previousVersion → $newVersion',
           if (!deployed)
-            '  The CLI is upgraded. Run `iq host get` to deploy the hosts.',
+            '  The CLI is upgraded. Run `iq host get --apply` to deploy '
+                'the hosts.',
         ].join('\n')
       : (reason ?? 'Already on the latest version');
 }

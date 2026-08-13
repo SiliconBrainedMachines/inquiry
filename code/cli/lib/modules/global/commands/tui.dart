@@ -79,7 +79,7 @@ class TuiCommand implements Query<TuiInput, TuiOutput> {
       final result = await checker(currentVersion: inquiryVersion);
       if (result.updateAvailable && result.latestVersion != null) {
         diagram += "\n\nUpdate available: $inquiryVersion → ${result.latestVersion}"
-            " — run 'iq upgrade'";
+            " — run 'iq upgrade --apply'";
       }
     } catch (_) {
       // Silent on failure

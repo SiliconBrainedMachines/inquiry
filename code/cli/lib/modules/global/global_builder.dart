@@ -29,7 +29,7 @@ void buildGlobalModule(
     'init',
     (req) => InitCommand(InitInput.fromCliRequest(req)),
     description:
-        'Set up the Inquiry workspace in this repo (cleanrooms + .inquiry). Install a host first with `iq host get`.',
+        'Set up the Inquiry workspace in this repo (cleanrooms + .inquiry). Install a host first with `iq host get --apply`.',
     params: InitInput.params,
   );
 
