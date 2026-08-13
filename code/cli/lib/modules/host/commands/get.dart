@@ -65,23 +65,113 @@ class HostGetInput extends Input {
 // ─── Output ─────────────────────────────────────────────────────────────────
 
 class HostGetOutput extends Output {
-  final String message;
+  HostGetOutput({
+    required this.hosts,
+    this.retired = const {},
+    this.ollamaLines = const [],
+    this.supported = const [],
+  });
 
   /// The hosts actually installed into. Empty is a valid outcome: a machine may
   /// carry the CLI and no AI assistant at all.
   final List<String> hosts;
 
-  HostGetOutput({required this.message, this.hosts = const []});
+  /// Host → the skills it no longer ships, which the deploy retired.
+  final Map<String, List<String>> retired;
+
+  /// What the Ollama configurator had to say, when it ran.
+  final List<String> ollamaLines;
+
+  /// Every host this CLI knows how to install into, for the empty case.
+  final List<String> supported;
 
   @override
-  Map<String, dynamic> toJson() => {'message': message, 'hosts': hosts};
+  Map<String, dynamic> toJson() => {
+    'hosts': hosts,
+    if (retired.isNotEmpty) 'retired': retired,
+    if (ollamaLines.isNotEmpty) 'ollama': ollamaLines,
+  };
 
   /// Deploying to nothing is not a failure — see [hosts].
   @override
   int get exitCode => ExitCode.ok;
 
   @override
-  String? toText() => message;
+  String? toText() => hosts.isEmpty
+      ? 'No AI coding host found on this machine — nothing deployed.\n'
+            'Supported: ${supported.join(', ')}.\n'
+            'Pass --host <host> to install into one anyway.'
+      : [
+          for (final host in hosts) ...[
+            'Inquiry agent + skills deployed (global) to host $host',
+            for (final skill in retired[host] ?? const <String>[])
+              '  removed  $skill (no longer shipped)',
+          ],
+          ...ollamaLines,
+        ].join('\n');
+}
+
+// ─── Steps ──────────────────────────────────────────────────────────────────
+
+/// Deploys the agent and skills into one host, retiring what it no longer
+/// ships.
+///
+/// One step per host, so the plan names each of them: deploying to two
+/// assistants and deploying to none look nothing alike, and a single line
+/// saying "deploy hosts" would hide the difference.
+class DeployToHost implements Step {
+  DeployToHost({required this.deployer, required this.host});
+
+  final HostDeployer deployer;
+  final String host;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'deploy',
+    target: 'host $host',
+    detail: 'the Inquiry agent and its skills, globally; skills no longer '
+        'shipped are retired',
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    final retired = deployer.deploy(host);
+    return Outcome(
+      verb: 'deploy',
+      target: 'host $host',
+      values: {'host': host, 'retired': retired},
+    );
+  }
+}
+
+/// Bakes `num_ctx` variants of the configured Ollama models.
+///
+/// Opt-in behind `--configure-ollama`: it shells out to `ollama create`, which
+/// is slow and blocks when the daemon is not running. That is an optimization,
+/// not part of installing a CLI — which is exactly why it is a step of its own
+/// and named in the plan.
+class ConfigureOllama implements Step {
+  ConfigureOllama(this.configurator);
+
+  final OpenCodeOllamaConfigurator configurator;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'configure',
+    target: 'the Ollama models OpenCode uses',
+    detail: 'bakes num_ctx variants — shells out to `ollama create`, which is '
+        'slow and needs the daemon running',
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    final lines = await configurator.configure();
+    return Outcome(
+      verb: 'configure',
+      target: 'the Ollama models OpenCode uses',
+      values: {'lines': lines},
+    );
+  }
 }
 
 // ─── Command ────────────────────────────────────────────────────────────────
@@ -108,33 +198,45 @@ class HostGetCommand implements Command<HostGetInput, HostGetOutput> {
     return null;
   }
 
+  /// One step per host, and the Ollama configuration after the host it belongs
+  /// to.
+  ///
+  /// Deploying to nothing builds no steps: a machine may carry the CLI and no
+  /// AI assistant at all, and that is an answer rather than a failure.
   @override
-  Future<HostGetOutput> execute() async {
+  Future<List<Step>> steps() async {
     final targets = input.host != null
         ? [input.host!]
         : deployer.detectedHosts.map((a) => a.name).toList();
 
-    if (targets.isEmpty) {
-      return HostGetOutput(
-        message: 'No AI coding host found on this machine — nothing deployed.\n'
-            'Supported: ${deployer.adapters.map((a) => a.name).join(', ')}.\n'
-            'Pass --host <host> to install into one anyway.',
-      );
-    }
-
-    final lines = <String>[];
-    for (final host in targets) {
-      final retired = deployer.deploy(host);
-      lines.add('Inquiry agent + skills deployed (global) to host $host');
-      for (final skill in retired) {
-        lines.add('  removed  $skill (no longer shipped)');
-      }
-
-      if (host == 'opencode' && input.configureOllama && configurator != null) {
-        lines.addAll(await configurator!.configure());
-      }
-    }
-
-    return HostGetOutput(message: lines.join('\n'), hosts: targets);
+    return [
+      for (final host in targets) ...[
+        DeployToHost(deployer: deployer, host: host),
+        if (host == 'opencode' &&
+            input.configureOllama &&
+            configurator != null)
+          ConfigureOllama(configurator!),
+      ],
+    ];
   }
+
+  @override
+  HostGetOutput describe(Execution execution) => HostGetOutput(
+    hosts: [
+      for (final o in execution.outcomes)
+        if (o.verb == 'deploy') o.values['host'] as String,
+    ],
+    retired: {
+      for (final o in execution.outcomes)
+        if (o.verb == 'deploy')
+          o.values['host'] as String:
+              (o.values['retired'] as List).cast<String>(),
+    },
+    ollamaLines: [
+      for (final o in execution.outcomes)
+        if (o.verb == 'configure')
+          ...(o.values['lines'] as List).cast<String>(),
+    ],
+    supported: deployer.adapters.map((a) => a.name).toList(),
+  );
 }

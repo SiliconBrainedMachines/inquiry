@@ -184,7 +184,7 @@ class DoctorOutput extends Output {
           if (!tc.agentExists) {
             buffer.writeln('  ✗ ${tc.hostName}: agent not deployed');
             buffer.writeln(
-              "    → Run 'inquiry host get --host ${tc.hostName}' to install the agent",
+              "    → Run 'iq host get --host ${tc.hostName} --apply' to install the agent",
             );
           } else {
             buffer.writeln('  ✓ ${tc.hostName}: agent deployed');
@@ -197,7 +197,7 @@ class DoctorOutput extends Output {
             // Only suggest host get when agent is already deployed
             if (tc.agentExists) {
               buffer.writeln(
-                "    → Run 'inquiry host get --host ${tc.hostName}' to deploy skills",
+                "    → Run 'iq host get --host ${tc.hostName} --apply' to deploy skills",
               );
             }
           }
@@ -207,7 +207,7 @@ class DoctorOutput extends Output {
         buffer.writeln('  - no AI coding host installed on this machine');
       } else if (!hostChecks.any((hc) => hc.active)) {
         buffer.writeln('  ✗ no host deployed');
-        buffer.writeln("    → Run 'iq host get'");
+        buffer.writeln("    → Run 'iq host get --apply'");
       }
     }
 
@@ -251,7 +251,7 @@ class RealFileSystemOps implements FileSystemOps {
 }
 
 /// Command that verifies all prerequisites and host deployment.
-class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
+class DoctorCommand implements Query<DoctorInput, DoctorOutput> {
   @override
   final DoctorInput input;
 
@@ -440,7 +440,7 @@ class DoctorCommand implements Command<DoctorInput, DoctorOutput> {
           "harness fails silently. Bake a variant — Modelfile 'FROM <model>\\n"
           "PARAMETER num_ctx 16384' then 'ollama create <model>-16k -f Modelfile' "
           "(32768 recommended) — and point opencode.jsonc at it. "
-          "Or run 'iq host get --host opencode' to configure it.",
+          "Or run 'iq host get --host opencode --configure-ollama --apply' to configure it.",
     );
   }
 

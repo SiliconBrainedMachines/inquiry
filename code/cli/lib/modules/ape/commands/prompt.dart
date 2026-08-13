@@ -99,7 +99,7 @@ class ApePromptOutput extends Output {
 // ─── Command ────────────────────────────────────────────────────────────────
 
 /// Assembles a sub-agent prompt from its YAML definition + current FSM state.
-class ApePromptCommand implements Command<ApePromptInput, ApePromptOutput> {
+class ApePromptCommand implements Query<ApePromptInput, ApePromptOutput> {
   @override
   final ApePromptInput input;
   final Assets? _assets;

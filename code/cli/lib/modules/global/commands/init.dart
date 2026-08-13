@@ -62,7 +62,7 @@ class InitOutput extends Output {
 // ─── Command ────────────────────────────────────────────────────────────────
 
 /// Sets up the repo workspace (cleanrooms + .inquiry). Idempotent.
-class InitCommand implements Command<InitInput, InitOutput> {
+class InitCommand implements Query<InitInput, InitOutput> {
   @override
   final InitInput input;
 

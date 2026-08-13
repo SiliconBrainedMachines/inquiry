@@ -77,7 +77,7 @@ class ApeTransitionOutput extends Output {
 
 // ─── Command ────────────────────────────────────────────────────────────────
 
-class ApeTransitionCommand implements Command<ApeTransitionInput, ApeTransitionOutput> {
+class ApeTransitionCommand implements Query<ApeTransitionInput, ApeTransitionOutput> {
   @override
   final ApeTransitionInput input;
   final Assets? _assets;

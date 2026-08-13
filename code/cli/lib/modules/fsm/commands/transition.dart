@@ -261,7 +261,7 @@ class StateTransitionOutput extends Output {
 }
 
 class StateTransitionCommand
-    implements Command<StateTransitionInput, StateTransitionOutput> {
+    implements Query<StateTransitionInput, StateTransitionOutput> {
   @override
   final StateTransitionInput input;
   final BranchProvider branchProvider;
@@ -1277,7 +1277,14 @@ class StateTransitionCommand
         'Expected a branch named "<NNN>-<slug>" that starts with "$issueRef-" '
         '(e.g. "$issueRef-fix-login"). A branch under a prefix like '
         '"feat/$issueRef-…" does NOT qualify — the name must be a single segment.\n'
-        'Create it and enter ANALYZE in one step with: iq implementation start --issue $issueRef';
+        // `--apply --autoapprove`: this message is acted on by the scheduler,
+        // which has no terminal to be asked on. Inquiry gates at state
+        // completion, not at every command — an approval prompt here would
+        // stall the very agent the remediation is written for. A person typing
+        // it by hand can drop `--autoapprove` to be asked, or pass `--plan` to
+        // only look.
+        'Create it and enter ANALYZE in one step with: '
+        'iq implementation start --issue $issueRef --apply --autoapprove';
   }
 
   bool _isIssueLinkedFeatureBranch(String branch, String? issue) {

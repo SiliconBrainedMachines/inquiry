@@ -165,8 +165,20 @@ class ImplementationStartCommand
     return null;
   }
 
+  String _branch = '';
+
+  /// Three steps, over a branch name settled before the plan is built.
+  ///
+  /// **The issue's title is read once, here.** The branch name derives from it,
+  /// so reading it again at perform time could produce a different branch from
+  /// the one that was approved — a renamed issue between plan and apply, and
+  /// the cycle opens somewhere nobody asked for.
+  ///
+  /// What comes first are preconditions, not steps: not a git repository, an
+  /// issue `gh` cannot see, a title with nothing to slug. A plan built from any
+  /// of them would describe work that will never happen.
   @override
-  Future<ImplementationStartOutput> execute() async {
+  Future<List<Step>> steps() async {
     final projectRoot = getProjectRoot(input.workingDirectory);
     if (projectRoot == null) {
       throw CommandException(
@@ -179,11 +191,6 @@ class ImplementationStartCommand
       );
     }
 
-    // AC3 — the workspace initializes itself when missing; the user never has
-    // to remember `iq init`.
-    final initialized = _ensureWorkspace(projectRoot);
-
-    // Read the issue so the branch slug comes from its real title.
     final info = _issueInfo(input.issue, projectRoot);
     if (info == null) {
       throw CommandException(
@@ -197,9 +204,8 @@ class ImplementationStartCommand
       );
     }
 
-    final String branch;
     try {
-      branch = branchNameFor(issue: input.issue, title: info.title);
+      _branch = branchNameFor(issue: input.issue, title: info.title);
     } on ArgumentError catch (e) {
       throw CommandException(
         code: 'EMPTY_SLUG',
@@ -210,79 +216,38 @@ class ImplementationStartCommand
       );
     }
 
-    final branchCreated = _checkoutBranch(projectRoot, branch);
+    return [
+      // AC3 — the workspace initializes itself when missing; the user never
+      // has to remember `iq init`.
+      EnsureWorkspace(projectRoot),
+      CheckoutBranch(
+        projectRoot: projectRoot,
+        branch: _branch,
+        git: _git,
+        issue: input.issue,
+      ),
+      StartAnalyze(
+        issue: input.issue,
+        projectRoot: projectRoot,
+        assets: _assets,
+        run: _startAnalyze,
+        branch: _branch,
+      ),
+    ];
+  }
 
-    // Fire the real transition; its open_analysis_context effect scaffolds the
-    // cleanroom under cleanrooms/<branch>/.
-    final result = await _startAnalyze(
-      issue: input.issue,
-      workingDirectory: projectRoot,
-      assets: _assets,
-    );
-    if (!result.ok) {
-      throw CommandException(
-        code: 'TRANSITION_FAILED',
-        message:
-            'Branch "$branch" is ready but the transition to ANALYZE failed:\n'
-            '${result.message}',
-        exitCode: ExitCode.genericError,
-      );
-    }
-
+  @override
+  ImplementationStartOutput describe(Execution execution) {
+    final checkout = execution.outcomes
+        .where((o) => o.values.containsKey('created'))
+        .firstOrNull;
     return ImplementationStartOutput(
       issue: input.issue,
-      branch: branch,
-      cleanroom: p.posix.join('cleanrooms', branch),
-      branchCreated: branchCreated,
-      initialized: initialized,
+      branch: _branch,
+      cleanroom: p.posix.join('cleanrooms', _branch),
+      branchCreated: checkout?.values['created'] as bool? ?? false,
+      initialized: execution.outcomes.any((o) => o.verb == 'initialize'),
     );
-  }
-
-  /// Ensures `.inquiry/config.yaml` exists; returns whether it had to create it.
-  bool _ensureWorkspace(String projectRoot) {
-    final config = File(p.join(projectRoot, '.inquiry', 'config.yaml'));
-    if (config.existsSync()) return false;
-    // InitCommand is idempotent and repo-scoped; reuse it rather than
-    // reimplementing the workspace layout.
-    InitCommand(InitInput(workingDirectory: projectRoot)).execute();
-    return true;
-  }
-
-  /// Checks out [branch], creating it when it does not yet exist. Returns
-  /// whether the branch was newly created.
-  bool _checkoutBranch(String projectRoot, String branch) {
-    final current = getCurrentBranch(projectRoot);
-    if (current == branch) return false;
-
-    final exists = _git(projectRoot, [
-      'rev-parse',
-      '--verify',
-      '--quiet',
-      'refs/heads/$branch',
-    ]).exitCode == 0;
-
-    final checkout = exists
-        ? _git(projectRoot, ['checkout', branch])
-        : _git(projectRoot, ['checkout', '-b', branch]);
-
-    if (checkout.exitCode != 0) {
-      throw CommandException(
-        code: 'BRANCH_CHECKOUT_FAILED',
-        message:
-            'Could not switch to branch "$branch":\n'
-            '${_gitError(checkout)}\n'
-            'Commit or stash your changes, then retry `iq implementation start --issue ${input.issue}`.',
-        exitCode: ExitCode.genericError,
-      );
-    }
-    return !exists;
-  }
-
-  static String _gitError(ProcessResult r) {
-    final err = r.stderr.toString().trim();
-    if (err.isNotEmpty) return err;
-    final out = r.stdout.toString().trim();
-    return out.isNotEmpty ? out : 'git exited with code ${r.exitCode}';
   }
 
   static ProcessResult _defaultGit(
@@ -329,5 +294,165 @@ class ImplementationStartCommand
     );
     final output = await command.execute();
     return (ok: output.allowed, message: output.message);
+  }
+}
+
+// ─── Steps ──────────────────────────────────────────────────────────────────
+
+/// Creates the Inquiry workspace when the repository has none.
+///
+/// The user never has to remember `iq init`: opening a cycle in a repository
+/// that never had one is the ordinary first run, not an error.
+class EnsureWorkspace implements Step {
+  EnsureWorkspace(this.projectRoot);
+
+  final String projectRoot;
+
+  bool get _exists =>
+      File(p.join(projectRoot, '.inquiry', 'config.yaml')).existsSync();
+
+  @override
+  Preview preview() => _exists
+      ? Preview(verb: 'exists', target: '.inquiry/config.yaml')
+      : Preview(
+          verb: 'initialize',
+          target: '.inquiry/',
+          detail: 'the repository has no Inquiry workspace yet',
+        );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    if (_exists) return Outcome(verb: 'exists', target: '.inquiry/config.yaml');
+    // InitCommand is idempotent and repo-scoped; reuse it rather than
+    // reimplementing the workspace layout.
+    InitCommand(InitInput(workingDirectory: projectRoot)).execute();
+    return Outcome(verb: 'initialize', target: '.inquiry/');
+  }
+}
+
+/// Checks out the cycle's branch, creating it when it does not yet exist.
+class CheckoutBranch implements Step {
+  CheckoutBranch({
+    required this.projectRoot,
+    required this.branch,
+    required this.git,
+    required this.issue,
+  });
+
+  final String projectRoot;
+  final String branch;
+  final GitCommandRunner git;
+  final String issue;
+
+  bool get _onIt => getCurrentBranch(projectRoot) == branch;
+
+  bool get _exists =>
+      git(projectRoot, [
+        'rev-parse',
+        '--verify',
+        '--quiet',
+        'refs/heads/$branch',
+      ]).exitCode ==
+      0;
+
+  @override
+  Preview preview() {
+    if (_onIt) {
+      return Preview(verb: 'stay', target: 'branch $branch', detail: 'already on it');
+    }
+    return _exists
+        ? Preview(verb: 'checkout', target: 'branch $branch')
+        : Preview(
+            verb: 'create',
+            target: 'branch $branch',
+            detail: 'derived from the title of issue #$issue',
+          );
+  }
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    if (_onIt) {
+      return Outcome(
+        verb: 'stay',
+        target: 'branch $branch',
+        values: {'created': false},
+      );
+    }
+
+    final exists = _exists;
+    final checkout = exists
+        ? git(projectRoot, ['checkout', branch])
+        : git(projectRoot, ['checkout', '-b', branch]);
+
+    if (checkout.exitCode != 0) {
+      throw CommandException(
+        code: 'BRANCH_CHECKOUT_FAILED',
+        message:
+            'Could not switch to branch "$branch":\n'
+            '${_gitErrorOf(checkout)}\n'
+            'Commit or stash your changes, then retry `iq implementation start --issue $issue`.',
+        exitCode: ExitCode.genericError,
+      );
+    }
+
+    return Outcome(
+      verb: exists ? 'checkout' : 'create',
+      target: 'branch $branch',
+      values: {'created': !exists},
+    );
+  }
+
+  static String _gitErrorOf(ProcessResult r) {
+    final err = r.stderr.toString().trim();
+    if (err.isNotEmpty) return err;
+    final out = r.stdout.toString().trim();
+    return out.isNotEmpty ? out : 'git exited with code ${r.exitCode}';
+  }
+}
+
+/// Fires the `start_analyze` transition.
+///
+/// Its `open_analysis_context` effect scaffolds the cleanroom under
+/// `cleanrooms/<branch>/`. Last, because the branch has to exist first: the
+/// cleanroom is named after it.
+class StartAnalyze implements Step {
+  StartAnalyze({
+    required this.issue,
+    required this.projectRoot,
+    required this.assets,
+    required this.run,
+    required this.branch,
+  });
+
+  final String issue;
+  final String projectRoot;
+  final Assets? assets;
+  final StartAnalyzeRunner run;
+  final String branch;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'transition',
+    target: 'to ANALYZE',
+    detail: 'scaffolds cleanrooms/$branch/analyze/ for issue #$issue',
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    final result = await run(
+      issue: issue,
+      workingDirectory: projectRoot,
+      assets: assets,
+    );
+    if (!result.ok) {
+      throw CommandException(
+        code: 'TRANSITION_FAILED',
+        message:
+            'Branch "$branch" is ready but the transition to ANALYZE failed:\n'
+            '${result.message}',
+        exitCode: ExitCode.genericError,
+      );
+    }
+    return Outcome(verb: 'transition', target: 'to ANALYZE');
   }
 }
