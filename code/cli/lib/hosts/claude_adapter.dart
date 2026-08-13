@@ -24,7 +24,7 @@ class ClaudeAdapter extends HostAdapter {
 
   @override
   Map<String, String> get agentSubstitutions => const {
-        'INIT_HINT': 'Run `iq host get --host claude`',
+        'INIT_HINT': 'Run `iq host get --host claude --apply --autoapprove`',
         'DISPATCH_TOOL': 'Agent',
       };
 }

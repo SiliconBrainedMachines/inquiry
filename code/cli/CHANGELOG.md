@@ -4,6 +4,40 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.25.1]
+
+### Fixed
+
+- **Twelve messages told you to run a command that would fail.** 0.25.0 made
+  five routes require `--plan` or `--apply`, and updated the places that
+  *invoke* them — but not every place that *names* them to a reader. So the CLI
+  handed out instructions that were dead ends, which is worse than saying
+  nothing: it reads as guidance and behaves as a wall.
+
+  The one actually hit in the wild: upgrading to 0.25.0 ends with
+  ``Run `iq host get` to retry`` — and that retry fails. Also corrected: the
+  update banner (`run 'iq upgrade'`), `iq doctor`'s update remediation, the
+  `iq init` route description, the `INIT_HINT` baked into the OpenCode and
+  Claude agent files, and six messages in `iq implementation start` — including
+  its `Example:` line, which exists to be copied verbatim.
+
+  A new test sweeps all of `lib/` for any message that names one of the five
+  without a mode, so this cannot be missed a second time. It was written by
+  reintroducing one of the twelve and confirming it failed.
+
+- **`iq implementation start`'s usage line now says a mode is required** —
+  `--issue <number> (--plan | --apply)` — instead of a synopsis that will not
+  run.
+
+### Known
+
+- **Upgrading *from* 0.24.1 reports a failed host deploy.** Expected, and not
+  fixable from this side: `iq upgrade` runs as the *outgoing* version, so
+  0.24.1's post-install — frozen in that release — invokes a bare `host get`
+  against the newly installed 0.25.x binary, which refuses it. The upgrade
+  itself succeeds; run `iq host get --apply` once afterwards. From 0.25.0
+  onward the child carries `--apply --autoapprove` and the step passes.
+
 ## [0.25.0]
 
 ### Changed — BREAKING

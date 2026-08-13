@@ -154,13 +154,13 @@ class ImplementationStartCommand
   String? validate() {
     if (input.issue.isEmpty) {
       return 'Missing --issue.\n'
-          'Usage: iq implementation start --issue <number>\n'
-          'Example: iq implementation start --issue 40';
+          'Usage: iq implementation start --issue <number> (--plan | --apply)\n'
+          'Example: iq implementation start --issue 40 --apply';
     }
     if (int.tryParse(input.issue) == null) {
       return 'The --issue value must be a number, got "${input.issue}".\n'
-          'Usage: iq implementation start --issue <number>\n'
-          'Example: iq implementation start --issue 40';
+          'Usage: iq implementation start --issue <number> (--plan | --apply)\n'
+          'Example: iq implementation start --issue 40 --apply';
     }
     return null;
   }
@@ -185,8 +185,8 @@ class ImplementationStartCommand
         code: 'NOT_A_GIT_REPO',
         message:
             'Not inside a git repository, so there is no place to open a cycle.\n'
-            'Run `iq implementation start --issue ${input.issue}` from within your project, '
-            'or initialize one first with `git init`.',
+            'Run `iq implementation start --issue ${input.issue} --apply` from '
+            'within your project, or initialize one first with `git init`.',
         exitCode: ExitCode.validationFailed,
       );
     }
@@ -390,7 +390,8 @@ class CheckoutBranch implements Step {
         message:
             'Could not switch to branch "$branch":\n'
             '${_gitErrorOf(checkout)}\n'
-            'Commit or stash your changes, then retry `iq implementation start --issue $issue`.',
+            'Commit or stash your changes, then retry '
+            '`iq implementation start --issue $issue --apply`.',
         exitCode: ExitCode.genericError,
       );
     }

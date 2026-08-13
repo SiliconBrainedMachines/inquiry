@@ -27,7 +27,7 @@ class OpenCodeAdapter extends HostAdapter {
   // OpenCode's sub-agent dispatch tool is `task` (there is no `agent` tool).
   @override
   Map<String, String> get agentSubstitutions => const {
-        'INIT_HINT': 'Run `iq host get --host opencode`',
+        'INIT_HINT': 'Run `iq host get --host opencode --apply --autoapprove`',
         'DISPATCH_TOOL': 'task',
       };
 }
