@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
+import 'package:modular_cli_sdk/testing.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
@@ -64,7 +65,7 @@ void main() {
         deployer: deployer,
       );
 
-      final output = await command.execute();
+      final output = await applyCommand(command);
 
       expect(output.exitCode, ExitCode.ok);
       expect(
@@ -82,13 +83,15 @@ void main() {
       );
     });
 
-    test('HostGetInput defaults to no host, meaning every detected one (#300)',
-        () {
-      // Defaulting to opencode deployed into a host the user might not have,
-      // and dragged the OpenCode/Ollama configurator into every `iq upgrade`.
-      expect(HostGetInput().host, isNull);
-      expect(HostGetInput().configureOllama, isFalse);
-    });
+    test(
+      'HostGetInput defaults to no host, meaning every detected one (#300)',
+      () {
+        // Defaulting to opencode deployed into a host the user might not have,
+        // and dragged the OpenCode/Ollama configurator into every `iq upgrade`.
+        expect(HostGetInput().host, isNull);
+        expect(HostGetInput().configureOllama, isFalse);
+      },
+    );
 
     group('host detection (#300)', () {
       /// The host tool is present when its own config directory exists — the
@@ -96,50 +99,51 @@ void main() {
       void installFakeHost() =>
           Directory(p.join(homeDir.path, '.fake')).createSync(recursive: true);
 
-      test('no host installed → nothing deployed, and that is not a failure',
-          () async {
-        final out = await HostGetCommand(
-          HostGetInput(),
-          deployer: deployer,
-        ).execute();
+      test(
+        'no host installed → nothing deployed, and that is not a failure',
+        () async {
+          final out = await applyCommand(
+            HostGetCommand(HostGetInput(), deployer: deployer),
+          );
 
-        expect(out.exitCode, ExitCode.ok);
-        expect(out.hosts, isEmpty);
-        expect(out.message, contains('No AI coding host found'));
-        expect(out.message, contains('--host'));
-        expect(
-          Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
-          isFalse,
-        );
-      });
+          expect(out.exitCode, ExitCode.ok);
+          expect(out.hosts, isEmpty);
+          expect(out.toText(), contains('No AI coding host found'));
+          expect(out.toText(), contains('--host'));
+          expect(
+            Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+            isFalse,
+          );
+        },
+      );
 
       test('a detected host is deployed into without being named', () async {
         installFakeHost();
 
-        final out = await HostGetCommand(
-          HostGetInput(),
-          deployer: deployer,
-        ).execute();
+        final out = await applyCommand(
+          HostGetCommand(HostGetInput(), deployer: deployer),
+        );
 
         expect(out.hosts, ['fake']);
         expect(
-          File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
-              .existsSync(),
+          File(
+            p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
+          ).existsSync(),
           isTrue,
         );
       });
 
       test('--host deploys even when the host looks absent', () async {
         // Priming a machine before the host tool has ever run.
-        final out = await HostGetCommand(
-          HostGetInput(host: 'fake'),
-          deployer: deployer,
-        ).execute();
+        final out = await applyCommand(
+          HostGetCommand(HostGetInput(host: 'fake'), deployer: deployer),
+        );
 
         expect(out.hosts, ['fake']);
         expect(
-          File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
-              .existsSync(),
+          File(
+            p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
+          ).existsSync(),
           isTrue,
         );
       });
@@ -161,9 +165,8 @@ void main() {
         f.writeAsStringSync('# frozen copy from an older release');
       }
 
-      bool deployed(String name) => Directory(
-            p.join(homeDir.path, '.fake', 'skills', name),
-          ).existsSync();
+      bool deployed(String name) =>
+          Directory(p.join(homeDir.path, '.fake', 'skills', name)).existsSync();
 
       test('removes namespaced skills that are no longer shipped', () async {
         // Exactly the state a user upgrading from before the lifecycle moved
@@ -177,14 +180,16 @@ void main() {
           seedDeployed(name);
         }
 
-        final out = await HostGetCommand(
-          HostGetInput(host: 'fake'),
-          deployer: deployer,
-        ).execute();
+        final out = await applyCommand(
+          HostGetCommand(HostGetInput(host: 'fake'), deployer: deployer),
+        );
 
         expect(deployed('iq-analyze'), isFalse);
         expect(deployed('iq-specification'), isFalse);
-        expect(out.message, contains('removed  iq-analyze (no longer shipped)'));
+        expect(
+          out.toText(),
+          contains('removed  iq-analyze (no longer shipped)'),
+        );
       });
 
       test('never touches skills outside the namespace', () async {
@@ -194,10 +199,9 @@ void main() {
         seedDeployed('my-own-skill');
         seedDeployed('iq-analyze');
 
-        await HostGetCommand(
-          HostGetInput(host: 'fake'),
-          deployer: deployer,
-        ).execute();
+        await applyCommand(
+          HostGetCommand(HostGetInput(host: 'fake'), deployer: deployer),
+        );
 
         expect(deployed('kritik'), isTrue);
         expect(deployed('legion'), isTrue);
@@ -246,8 +250,8 @@ void main() {
         deployer: deployer,
       );
 
-      await command.execute();
-      final output = await command.execute();
+      await applyCommand(command);
+      final output = await applyCommand(command);
 
       expect(output.exitCode, ExitCode.ok);
     });
@@ -258,12 +262,9 @@ void main() {
       // Deploy first using deploy
       deployer.deploy('fake');
 
-      final command = HostCleanCommand(
-        HostCleanInput(),
-        deployer: deployer,
-      );
+      final command = HostCleanCommand(HostCleanInput(), deployer: deployer);
 
-      final output = await command.execute();
+      final output = await applyCommand(command);
 
       expect(output.exitCode, ExitCode.ok);
       expect(
@@ -273,12 +274,9 @@ void main() {
     });
 
     test('exits 0 when nothing to clean', () async {
-      final command = HostCleanCommand(
-        HostCleanInput(),
-        deployer: deployer,
-      );
+      final command = HostCleanCommand(HostCleanInput(), deployer: deployer);
 
-      final output = await command.execute();
+      final output = await applyCommand(command);
 
       expect(output.exitCode, ExitCode.ok);
     });
@@ -296,10 +294,13 @@ void main() {
         workingDirectory: tempDir.path,
       );
 
-      await command.execute();
+      await applyCommand(command);
 
-      expect(agentFile.existsSync(), isFalse,
-      reason: 'iq host clean must remove repo-scoped agent');
+      expect(
+        agentFile.existsSync(),
+        isFalse,
+        reason: 'iq host clean must remove repo-scoped agent',
+      );
     });
 
     test('removes repo-scoped agent when invoked from nested subdir', () async {
@@ -319,20 +320,91 @@ void main() {
         workingDirectory: nestedDir.path,
       );
 
-      await command.execute();
+      await applyCommand(command);
 
       expect(agentFile.existsSync(), isFalse);
     });
 
-    test('does not fail if .github/agents/inquiry.agent.md does not exist',
-        () async {
-      final command = HostCleanCommand(
-        HostCleanInput(),
-        deployer: deployer,
-        workingDirectory: tempDir.path,
+    test(
+      'does not fail if .github/agents/inquiry.agent.md does not exist',
+      () async {
+        final command = HostCleanCommand(
+          HostCleanInput(),
+          deployer: deployer,
+          workingDirectory: tempDir.path,
+        );
+
+        await expectLater(applyCommand(command), completes);
+      },
+    );
+  });
+
+  // What `--plan` shows. `iq host get` deploys into whatever this machine
+  // happens to carry, which is exactly the kind of thing a user wants named
+  // before it happens: two assistants, one, or none look nothing alike.
+  group('under --plan', () {
+    void installFakeHost() =>
+        Directory(p.join(homeDir.path, '.fake')).createSync(recursive: true);
+
+    test('host get names one step per host it would deploy to', () async {
+      installFakeHost();
+
+      final previews = await previewCommand(
+        HostGetCommand(HostGetInput(), deployer: deployer),
       );
 
-      await expectLater(command.execute(), completes);
+      expect(previews.map((p) => p.verb).toList(), ['deploy']);
+      expect(previews.single.target, 'host fake');
+    });
+
+    test('host get plans nothing when no host is detected', () async {
+      final previews = await previewCommand(
+        HostGetCommand(HostGetInput(), deployer: deployer),
+      );
+
+      expect(previews, isEmpty);
+    });
+
+    test('host get touches nothing: no skill reaches the host', () async {
+      await previewCommand(
+        HostGetCommand(HostGetInput(host: 'fake'), deployer: deployer),
+      );
+
+      expect(
+        Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+        isFalse,
+      );
+    });
+
+    test('host clean names the hosts and the repo-scoped agent', () async {
+      final previews = await previewCommand(
+        HostCleanCommand(
+          HostCleanInput(),
+          deployer: deployer,
+          workingDirectory: tempDir.path,
+        ),
+      );
+
+      expect(previews.map((p) => p.verb).toList(), ['clean', 'absent']);
+    });
+
+    test('host clean touches nothing: the deployment survives', () async {
+      deployer.deploy('fake');
+
+      await previewCommand(
+        HostCleanCommand(
+          HostCleanInput(),
+          deployer: deployer,
+          workingDirectory: tempDir.path,
+        ),
+      );
+
+      expect(
+        File(
+          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
+        ).existsSync(),
+        isTrue,
+      );
     });
   });
 }

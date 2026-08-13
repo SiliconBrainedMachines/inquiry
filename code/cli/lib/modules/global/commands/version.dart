@@ -44,7 +44,7 @@ class VersionOutput extends Output {
 
 // ─── Command ────────────────────────────────────────────────────────────────
 
-class VersionCommand implements Command<VersionInput, VersionOutput> {
+class VersionCommand implements Query<VersionInput, VersionOutput> {
   @override
   final VersionInput input;
 

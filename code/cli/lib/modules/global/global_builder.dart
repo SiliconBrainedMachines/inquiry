@@ -18,14 +18,14 @@ void buildGlobalModule(
   required HostDeployer cleaner,
   Assets? assets,
 }) {
-  m.command<TuiInput, TuiOutput>(
+  m.query<TuiInput, TuiOutput>(
     '',
     (req) => TuiCommand(TuiInput.fromCliRequest(req)),
     description: 'Display Inquiry status and FSM diagram',
     params: TuiInput.params,
   );
 
-  m.command<InitInput, InitOutput>(
+  m.query<InitInput, InitOutput>(
     'init',
     (req) => InitCommand(InitInput.fromCliRequest(req)),
     description:
@@ -33,14 +33,14 @@ void buildGlobalModule(
     params: InitInput.params,
   );
 
-  m.command<VersionInput, VersionOutput>(
+  m.query<VersionInput, VersionOutput>(
     'version',
     (req) => VersionCommand(VersionInput.fromCliRequest(req)),
     description: 'Print the current CLI version',
     params: VersionInput.params,
   );
 
-  m.command<DoctorInput, DoctorOutput>(
+  m.query<DoctorInput, DoctorOutput>(
     'doctor',
     (req) => DoctorCommand(DoctorInput.fromCliRequest(req), assets: assets),
     description: 'Verify prerequisites (inquiry, git, gh, gh auth, gh copilot)',

@@ -53,7 +53,7 @@ class TuiOutput extends Output {
 // ─── Command ────────────────────────────────────────────────────────────────
 
 /// Command that displays the APE FSM diagram and version.
-class TuiCommand implements Command<TuiInput, TuiOutput> {
+class TuiCommand implements Query<TuiInput, TuiOutput> {
   @override
   final TuiInput input;
   final Future<VersionCheckResult> Function({required String currentVersion})?

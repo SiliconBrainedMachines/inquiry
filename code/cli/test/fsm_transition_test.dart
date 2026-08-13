@@ -455,6 +455,33 @@ void main() {
       },
     );
 
+    // The remediation is acted on by the scheduler, which has no terminal to
+    // be asked on. A remediation that names neither mode would send the agent
+    // straight into "Choose --plan or --apply" and leave the cycle unopened.
+    test(
+      'the branch-policy remediation is runnable as written',
+      () async {
+        _initGitRepo(tempDir.path, branch: 't1-pilot-h');
+        _writeState(tempDir.path, 'IDLE', issue: '231');
+
+        final output = await StateTransitionCommand(
+          StateTransitionInput(
+            currentState: null,
+            event: 'start_analyze',
+            workingDirectory: tempDir.path,
+          ),
+          branchProvider: (_) async => 't1-pilot-h',
+        ).execute();
+
+        expect(
+          output.message,
+          contains(
+            'iq implementation start --issue 231 --apply --autoapprove',
+          ),
+        );
+      },
+    );
+
     test('allows IDLE to ANALYZE with issue and feature branch', () async {
       _initGitRepo(tempDir.path, branch: '152-feature-branch');
       _writeState(tempDir.path, 'IDLE');

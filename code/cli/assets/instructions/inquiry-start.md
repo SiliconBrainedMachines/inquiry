@@ -9,7 +9,7 @@ description: 'Protocol for starting work on an existing GitHub issue. Verifies t
 
 Run iq doctor first and stop on any failed check.
 Verify the issue already exists with gh issue view.
-Open the implementation with iq implementation start --issue NNN, which derives the NNN-slug branch, checks it out, scaffolds the cleanroom, and transitions to ANALYZE.
+Open the implementation with iq implementation start --issue NNN --apply --autoapprove, which derives the NNN-slug branch, checks it out, scaffolds the cleanroom, and transitions to ANALYZE.
 Confirm iq fsm state reports ANALYZE for that issue.
 
 ## When to Use
@@ -53,7 +53,7 @@ branch name — `iq implementation start` derives it from the issue itself.
 ### Step 3: Open the Cycle
 
 ```bash
-iq implementation start --issue <NNN>
+iq implementation start --issue <NNN> --apply --autoapprove
 ```
 
 This single command owns every mechanical step of the bootstrap — there is no
@@ -70,6 +70,14 @@ This single command owns every mechanical step of the bootstrap — there is no
 The command reports the branch, the cleanroom path, and the new state. Do NOT
 write `.inquiry` state directly — all state mutations go through `iq` commands.
 
+**Why `--apply --autoapprove`.** This command writes into the user's own
+repository — a branch and a cleanroom — so it will not act unless told which of
+`--plan` (say what would happen, change nothing) and `--apply` (say it, take
+approval, then do it) was meant. `--autoapprove` carries the approval, because
+the scheduler has no terminal to be asked on; Inquiry gates at state completion,
+not at every command. Run it with `--plan` alone first if you want to see the
+branch name it derived before anything is created.
+
 ### Step 4: Verify
 
 ```bash
@@ -83,7 +91,7 @@ Confirm the state is now ANALYZE with the correct issue number.
 After completing all steps, verify:
 
 - [ ] The issue already exists and `gh issue view <NNN> --json number,title,state` succeeds
-- [ ] `iq implementation start --issue <NNN>` reported ANALYZE
+- [ ] `iq implementation start --issue <NNN> --apply --autoapprove` reported ANALYZE
 - [ ] Branch exists: `git branch --show-current` returns `<NNN>-<slug>`
 - [ ] Directory exists: `cleanrooms/<NNN>-<slug>/analyze/`
 - [ ] State updated: `iq fsm state` shows ANALYZE with the issue number

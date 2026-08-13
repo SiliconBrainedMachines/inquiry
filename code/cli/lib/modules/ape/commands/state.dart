@@ -84,7 +84,7 @@ class ApeStateOutput extends Output {
 
 // ─── Command ────────────────────────────────────────────────────────────────
 
-class ApeStateCommand implements Command<ApeStateInput, ApeStateOutput> {
+class ApeStateCommand implements Query<ApeStateInput, ApeStateOutput> {
   @override
   final ApeStateInput input;
   final Assets? _assets;

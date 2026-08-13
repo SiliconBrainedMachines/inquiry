@@ -33,15 +33,65 @@ class HostCleanInput extends Input {
 // ─── Output ─────────────────────────────────────────────────────────────────
 
 class HostCleanOutput extends Output {
-  final String message;
+  HostCleanOutput({required this.removedRepoAgent});
 
-  HostCleanOutput({required this.message});
+  /// Whether a repository-scoped agent file was there to remove.
+  final bool removedRepoAgent;
 
   @override
-  Map<String, dynamic> toJson() => {'message': message};
+  Map<String, dynamic> toJson() => {'removedRepoAgent': removedRepoAgent};
 
   @override
   int get exitCode => ExitCode.ok;
+
+  @override
+  String? toText() => [
+    'Inquiry cleaned from all hosts',
+    if (removedRepoAgent) '  removed the repository-scoped agent too',
+  ].join('\n');
+}
+
+// ─── Steps ──────────────────────────────────────────────────────────────────
+
+/// Removes the agent and skills deployed into every host.
+class CleanDeployedHosts implements Step {
+  CleanDeployedHosts(this.deployer);
+
+  final HostDeployer deployer;
+
+  @override
+  Preview preview() => Preview(
+    verb: 'clean',
+    target: 'every host this machine deployed to',
+    detail: 'the Inquiry agent and its skills',
+  );
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    deployer.clean();
+    return Outcome(verb: 'clean', target: 'every host this machine deployed to');
+  }
+}
+
+/// Removes the repository-scoped agent file, when one is there.
+class RemoveRepoScopedAgent implements Step {
+  RemoveRepoScopedAgent(this.path);
+
+  final String path;
+
+  bool get _exists => File(path).existsSync();
+
+  @override
+  Preview preview() => _exists
+      ? Preview(verb: 'remove', target: path)
+      : Preview(verb: 'absent', target: path);
+
+  @override
+  Future<Outcome> perform(StepContext context) async {
+    if (!_exists) return Outcome(verb: 'absent', target: path);
+    File(path).deleteSync();
+    return Outcome(verb: 'remove', target: path);
+  }
 }
 
 // ─── Command ────────────────────────────────────────────────────────────────
@@ -63,17 +113,18 @@ class HostCleanCommand
   String? validate() => null;
 
   @override
-  Future<HostCleanOutput> execute() async {
-    deployer.clean();
-    _cleanRepoScopedAgent();
-    return HostCleanOutput(message: 'Inquiry cleaned from all hosts');
+  Future<List<Step>> steps() async {
+    final projectRoot = getProjectRoot(_workingDirectory) ?? _workingDirectory;
+    return [
+      CleanDeployedHosts(deployer),
+      RemoveRepoScopedAgent(
+        p.join(projectRoot, '.github', 'agents', 'inquiry.agent.md'),
+      ),
+    ];
   }
 
-  void _cleanRepoScopedAgent() {
-    final projectRoot = getProjectRoot(_workingDirectory) ?? _workingDirectory;
-    final agentFile = File(
-      p.join(projectRoot, '.github', 'agents', 'inquiry.agent.md'),
-    );
-    if (agentFile.existsSync()) agentFile.deleteSync();
-  }
+  @override
+  HostCleanOutput describe(Execution execution) => HostCleanOutput(
+    removedRepoAgent: execution.outcomes.any((o) => o.verb == 'remove'),
+  );
 }
