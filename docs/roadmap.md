@@ -236,11 +236,19 @@ whole manual bootstrap (slug + branch + cleanroom + transition) into one explici
 command. It is the template the remaining stages migrate toward — incrementally,
 each stage keeping its old command working until its module lands.
 
-Two principles this direction locks in (see the `mejora-ux` requisition):
+Three principles this direction locks in (see the `mejora-ux` requisition):
 - **Every mechanical process is an `iq` command**, never an instruction that has
   the model run `git`/`mkdir`/write scaffold by hand.
 - **Commands are not flow-aware**: they do their job and report it; they do not
   print a "next step" that would bias what the user does next.
+- **Each new route declares which kind it is.** A route that reaches outside the
+  files the CLI itself owns is a `Command` — it names its steps and takes
+  approval (`--plan` / `--apply`); everything else is a `Query` and answers on
+  the spot. The rule for telling them apart is in
+  [ADR 0002](adr/0002-a-query-may-write-what-the-cli-itself-owns.md): *if the
+  CLI git-ignores it in the repositories it serves, writing it does not make a
+  route a command.* Most stage verbs will be queries — `iq plan check` reads a
+  gate, `iq analyze skill` prints an instruction.
 
 ## How this roadmap is updated
 
