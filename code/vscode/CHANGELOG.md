@@ -13,6 +13,26 @@
   and a progress notification is not somewhere an approval can be taken. A test
   pins the exact argument list, since the failure mode here is silence.
 
+- **The extension had been unpublishable for a month, and three tests had
+  stopped running** (#308). The Windows integration job failed in an
+  `afterEach`, not in an assertion: `removeTempWorkspace` called `rmSync` on a
+  directory VS Code's file-watcher process still held open, and Windows refuses
+  that. Because mocha abandons the rest of a `describe` after a failing hook,
+  three status-bar tests silently stopped running — the total stayed plausible
+  enough that nothing looked wrong. `publish` depends on `test`, so it was
+  skipped rather than reported.
+
+  Nothing in the extension had changed: the only commit to `code/vscode/`
+  between the last green run and the first red one edited an unrelated fixture.
+  `@vscode/test-electron` installs the newest stable VS Code, and a release
+  changed the watcher's disposal timing. The test had always been racy; the
+  update just made it lose every time.
+
+  Cleanup can no longer fail the suite. `removeTempWorkspace` retries, and if
+  the handle is still held it leaves the directory for the OS to reclaim —
+  which is what a temp directory is for. 13 integration tests now pass, up from
+  10 passing and 3 never reached.
+
 ## [0.4.1] - 2026-06-01
 
 ### Fixed
