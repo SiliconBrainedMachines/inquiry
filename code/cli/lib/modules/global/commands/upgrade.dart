@@ -262,7 +262,8 @@ class UpgradeOutput extends Output {
 
 // ─── Command ────────────────────────────────────────────────────────────────
 
-class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
+class UpgradeCommand
+    implements Command<UpgradeInput, UpgradeOutput>, ExplainsNothingToDo {
   @override
   final UpgradeInput input;
   final PlatformOps platformOps;
@@ -296,6 +297,12 @@ class UpgradeCommand implements Command<UpgradeInput, UpgradeOutput> {
 
   String _latest = inquiryVersion;
   String? _reason;
+
+  /// Being current is the ordinary outcome, not a non-answer. Without this the
+  /// framework would report `nothing would change`, which states the fact and
+  /// withholds the only part worth reading.
+  @override
+  String? get nothingToDo => _reason;
 
   /// Two steps, and everything they need read before the plan is built.
   ///

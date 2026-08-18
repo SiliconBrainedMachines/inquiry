@@ -176,7 +176,18 @@ class ConfigureOllama implements Step {
 
 // ─── Command ────────────────────────────────────────────────────────────────
 
-class HostGetCommand implements Command<HostGetInput, HostGetOutput> {
+/// What `host get` says when this machine carries no AI coding host.
+///
+/// One wording, reached two ways: as the reason an empty plan gives, and as
+/// [HostGetOutput.toText] for a run that produced no deploy. Written once so
+/// the two cannot drift.
+String noHostFoundMessage(List<String> supported) =>
+    'No AI coding host found on this machine — nothing deployed.\n'
+    'Supported: ${supported.join(', ')}.\n'
+    'Pass --host <host> to install into one anyway.';
+
+class HostGetCommand
+    implements Command<HostGetInput, HostGetOutput>, ExplainsNothingToDo {
   @override
   final HostGetInput input;
   final HostDeployer deployer;
@@ -186,6 +197,12 @@ class HostGetCommand implements Command<HostGetInput, HostGetOutput> {
   final OpenCodeOllamaConfigurator? configurator;
 
   HostGetCommand(this.input, {required this.deployer, this.configurator});
+
+  /// A machine with no AI assistant is an answer, not a failure — and the
+  /// answer says which hosts exist and how to install one anyway.
+  @override
+  String? get nothingToDo =>
+      noHostFoundMessage(deployer.adapters.map((a) => a.name).toList());
 
   @override
   String? validate() {
