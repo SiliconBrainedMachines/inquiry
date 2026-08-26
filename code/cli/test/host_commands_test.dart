@@ -267,10 +267,18 @@ void main() {
       final output = await applyCommand(command);
 
       expect(output.exitCode, ExitCode.ok);
-      expect(
-        Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
-        isFalse,
-      );
+
+      // The directory survives, and so does everything in it that Inquiry
+      // cannot prove is its own. `clean` removes the `iq-` namespace and the
+      // agent file it wrote; a shipped skill's *name* is not ownership, and
+      // another consumer may have deployed the same name.
+      final skills = Directory(p.join(homeDir.path, '.fake', 'skills'));
+      expect(skills.existsSync(), isTrue);
+
+      final legacy = Directory(p.join(skills.path, 'iq-analyze'))
+        ..createSync(recursive: true);
+      await applyCommand(HostCleanCommand(HostCleanInput(), deployer: deployer));
+      expect(legacy.existsSync(), isFalse);
     });
 
     test('exits 0 when nothing to clean', () async {

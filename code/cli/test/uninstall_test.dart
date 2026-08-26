@@ -80,14 +80,21 @@ void main() {
       expect(output.exitCode, ExitCode.ok);
       expect(output.toText(), contains('uninstalled'));
 
-      // Hosts should be cleaned
+      // Uninstalling Inquiry removes Inquiry. It does not empty a host's
+      // skills directory, which holds other tools' work and the user's:
+      // uninstalling one program has never been a licence to delete another's
+      // files. `clean` takes the `iq-` namespace and the agent file, and the
+      // directories themselves stay.
       expect(
         Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
-        isFalse,
+        isTrue,
       );
       expect(
-        Directory(p.join(homeDir.path, '.fake', 'agents')).existsSync(),
-        isFalse,
+        File(
+          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
+        ).existsSync(),
+        isTrue,
+        reason: "an unprefixed skill is not provably Inquiry's to remove",
       );
     });
 
