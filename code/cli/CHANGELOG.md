@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.25.3]
+
+### Fixed
+
+- **`clean` deleted directories Inquiry does not own.** `iq host clean` and
+  `iq uninstall` removed each adapter's skills and agents directories outright.
+  Across `allAdapters` that is ten directories deleted in full — taking another
+  tool's skills and anything the user had written beside them.
+
+  The inconsistency was internal. `_pruneRetiredSkills`, six lines below, was
+  scrupulous about exactly this question: it skips any directory whose name
+  does not start with `iq-`, and its own comment says that skills outside the
+  namespace "belong to someone else". The narrow path was right and the wide
+  one was not.
+
+  `clean` now removes two things and never a directory it does not own:
+
+  | Removed | Why it is provably Inquiry's |
+  |---|---|
+  | `<agentDirectory>/inquiry.md` | the one file `_deployAgent` writes, at a path Inquiry chose |
+  | `iq-` prefixed skill directories | the namespace `inquirySkillNamespace` declares |
+
+  The skills directory itself survives even when left empty. Deleting it takes
+  every occupant with it, whoever they belong to, and an empty directory harms
+  nobody.
+
+  It deliberately does **not** remove the skills this release ships. Those
+  names — `kritik`, `legion`, `research` — are unprefixed and shared: another
+  consumer may have deployed the same name, and a name is not ownership.
+  Inquiry cannot prove those are its own, so it leaves them.
+
+  `iq uninstall` changes with it. Uninstalling Inquiry removes Inquiry; it does
+  not empty a host's skills directory. Uninstalling one program has never been
+  a licence to delete another's files.
+
 ## [0.25.2]
 
 ### Changed

@@ -119,18 +119,106 @@ void main() {
       expect(extraFile.existsSync(), isTrue);
     });
 
-    test('clean removes deployed files from all adapters', () {
-      deployer.deploy('fake');
-      deployer.clean();
+    group('clean removes what Inquiry deployed, and only that', () {
+      // The rule `_pruneRetiredSkills` has always applied, now applied here
+      // too: the `iq-` namespace is Inquiry's, and a skill without it belongs
+      // to someone else. `clean` used to delete each adapter's skills and
+      // agents directories outright — ten directories across five adapters,
+      // taking another tool's skills and anything the user had written with
+      // them.
 
-      final skillsDir = Directory(p.join(homeDir.path, '.fake', 'skills'));
-      final agentsDir = Directory(p.join(homeDir.path, '.fake', 'agents'));
-      expect(skillsDir.existsSync(), isFalse);
-      expect(agentsDir.existsSync(), isFalse);
-    });
+      File otherToolsSkill(String name) {
+        final f = File(
+          p.join(homeDir.path, '.fake', 'skills', name, 'SKILL.md'),
+        );
+        f.parent.createSync(recursive: true);
+        f.writeAsStringSync('# $name');
+        return f;
+      }
 
-    test('clean does not fail if nothing was deployed', () {
-      expect(() => deployer.clean(), returnsNormally);
+      /// Planted rather than deployed: `FakeAdapter` inherits
+      /// `deploysAgent => false`, and `clean`'s contract is to remove
+      /// `inquiry.md` wherever it finds one, not only where this run put it.
+      File plantAgentFile(String name) {
+        final f = File(p.join(homeDir.path, '.fake', 'agents', name));
+        f.parent.createSync(recursive: true);
+        f.writeAsStringSync('# $name');
+        return f;
+      }
+
+      test('removes its own agent file', () {
+        final agent = plantAgentFile('inquiry.md');
+        deployer.clean();
+        expect(agent.existsSync(), isFalse);
+      });
+
+      test('removes iq- prefixed skills, which are its namespace', () {
+        final legacy = otherToolsSkill('iq-analyze');
+        deployer.clean();
+        expect(legacy.existsSync(), isFalse);
+      });
+
+      test("leaves another tool's skills alone", () {
+        final macss = otherToolsSkill('macss-plan');
+        final skillwire = otherToolsSkill('legion');
+
+        deployer.clean();
+
+        expect(macss.existsSync(), isTrue);
+        expect(skillwire.existsSync(), isTrue);
+      });
+
+      test('leaves a skill the user wrote by hand alone', () {
+        final mine = otherToolsSkill('my-own-notes');
+        deployer.clean();
+        expect(mine.existsSync(), isTrue);
+      });
+
+      test('never removes the skills directory itself', () {
+        // Deleting the directory takes every occupant with it, whoever they
+        // belong to. Only named children are removed.
+        deployer.deploy('fake');
+        otherToolsSkill('macss-plan');
+
+        deployer.clean();
+
+        expect(
+          Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+          isTrue,
+        );
+      });
+
+      test('never removes the agents directory itself', () {
+        plantAgentFile('inquiry.md');
+        final other = plantAgentFile('someone-else.md');
+
+        deployer.clean();
+
+        expect(other.existsSync(), isTrue);
+        expect(
+          Directory(p.join(homeDir.path, '.fake', 'agents')).existsSync(),
+          isTrue,
+        );
+      });
+
+      test('does not fail if nothing was deployed', () {
+        expect(() => deployer.clean(), returnsNormally);
+      });
+
+      test('does not fail when a host directory does not exist at all', () {
+        expect(() => deployer.clean(), returnsNormally);
+        expect(
+          Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+          isFalse,
+          reason: 'clean must not create what it came to inspect',
+        );
+      });
+
+      test('is idempotent', () {
+        deployer.deploy('fake');
+        deployer.clean();
+        expect(() => deployer.clean(), returnsNormally);
+      });
     });
 
     test('deploy can target either of two hosts', () {

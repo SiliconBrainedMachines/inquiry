@@ -57,11 +57,51 @@ class HostDeployer {
   List<HostAdapter> get detectedHosts =>
       adapters.where((a) => a.exists(homeDir)).toList(growable: false);
 
-  /// Removes all deployed files from **all** adapter directories.
+  /// Removes what Inquiry deployed, from every adapter, and nothing else.
+  ///
+  /// This used to delete each adapter's skills and agents directories outright.
+  /// Across [allAdapters] that is ten directories removed in full, taking with
+  /// them another tool's skills and anything the user had written beside them —
+  /// while `_pruneRetiredSkills`, six lines below, was scrupulous about exactly
+  /// the same question. The narrow path was right and the wide one was not.
+  ///
+  /// The rule is the one [inquirySkillNamespace] already states: the `iq-`
+  /// namespace is Inquiry's, and a skill without it belongs to someone else.
+  /// So `clean` removes two things — the agent file Inquiry writes, at a path
+  /// it chose, and the `iq-` prefixed skill directories — and never a directory
+  /// it does not own.
+  ///
+  /// It deliberately does **not** remove the skills this release currently
+  /// ships. Those names are unprefixed and shared with other consumers, and a
+  /// name is not ownership.
   void clean() {
     for (final adapter in adapters) {
-      _deleteDirectory(adapter.skillsDirectory(homeDir));
-      _deleteDirectory(adapter.agentDirectory(homeDir));
+      _removeAgentFile(adapter);
+      _removeNamespacedSkills(adapter);
+    }
+  }
+
+  /// Deletes `<agentDirectory>/inquiry.md`, the one file [_deployAgent] writes.
+  ///
+  /// The file, never the directory: a host's agents directory holds other
+  /// tools' agents too.
+  void _removeAgentFile(HostAdapter adapter) {
+    final file = File(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'));
+    if (file.existsSync()) file.deleteSync();
+  }
+
+  /// Deletes the `iq-` prefixed skill directories, and only those.
+  ///
+  /// The skills directory itself survives even when it is left empty. Deleting
+  /// it would take every occupant with it, whoever they belong to, and an empty
+  /// directory harms nobody.
+  void _removeNamespacedSkills(HostAdapter adapter) {
+    final dir = Directory(adapter.skillsDirectory(homeDir));
+    if (!dir.existsSync()) return;
+    for (final entry in dir.listSync().whereType<Directory>()) {
+      if (p.basename(entry.path).startsWith(inquirySkillNamespace)) {
+        entry.deleteSync(recursive: true);
+      }
     }
   }
 
@@ -119,10 +159,5 @@ class HostDeployer {
     final hostFile = File(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'));
     hostFile.parent.createSync(recursive: true);
     hostFile.writeAsStringSync(content);
-  }
-
-  void _deleteDirectory(String path) {
-    final dir = Directory(path);
-    if (dir.existsSync()) dir.deleteSync(recursive: true);
   }
 }
