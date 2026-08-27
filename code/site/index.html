@@ -45,7 +45,7 @@
             <button class="copy-btn" onclick="copy(this)" aria-label="Copy install command">Copy</button>
             <code>irm https://inquiry.ccisne.dev/install.ps1 | iex</code>
           </div>
-          <p class="install-note">Installs to <code>%LOCALAPPDATA%\inquiry\</code>, adds to <code>PATH</code>, and deploys Inquiry skills to your AI coding host.</p>
+          <p class="install-note">Installs to <code>%LOCALAPPDATA%\inquiry\</code>, adds to <code>PATH</code>, and deploys the Inquiry agent to your AI coding host.</p>
         </div>
         <div id="panel-linux" class="os-panel" role="tabpanel" aria-labelledby="tab-linux" hidden>
           <div class="install-block">
@@ -53,7 +53,7 @@
             <button class="copy-btn" onclick="copy(this)" aria-label="Copy install command">Copy</button>
             <code>curl -fsSL https://inquiry.ccisne.dev/install.sh | bash</code>
           </div>
-          <p class="install-note">Installs to <code>~/.inquiry/</code> and deploys Inquiry skills to your AI coding host.</p>
+          <p class="install-note">Installs to <code>~/.inquiry/</code> and deploys the Inquiry agent to your AI coding host.</p>
         </div>
       </div>
 
@@ -114,7 +114,7 @@
         <li class="cmd"><code>iq</code><span class="desc">Print ASCII banner + version</span></li>
         <li class="cmd"><code>iq init</code><span class="desc">Scaffold repo-scoped Inquiry files (<code>.inquiry/config.yaml</code>, ignore rules, agent)</span></li>
         <li class="cmd"><code>iq doctor</code><span class="desc">Verify prerequisites</span></li>
-        <li class="cmd"><code>iq host get</code><span class="desc">Deploy skills to every AI host detected — <code>--plan</code>/<code>--apply</code></span></li>
+        <li class="cmd"><code>iq host get</code><span class="desc">Deploy the agent to every AI host detected — <code>--plan</code>/<code>--apply</code></span></li>
         <li class="cmd"><code>iq implementation start</code><span class="desc">Open a cycle: branch, cleanroom, ANALYZE — <code>--plan</code>/<code>--apply</code></span></li>
         <li class="cmd"><code>iq fsm transition</code><span class="desc">Execute a deterministic FSM transition</span></li>
         <li class="cmd"><code>iq fsm state</code><span class="desc">Show current FSM state as JSON</span></li>
@@ -127,7 +127,7 @@
 
     <section id="targets">
       <h2>Hosts</h2>
-      <p>Inquiry deploys host-scoped skills to the global configuration of your AI coding tool. The repo-scoped agent is scaffolded by <code>iq init</code>.</p>
+      <p>Inquiry deploys its agent to the global configuration of your AI coding tool. The repo-scoped agent is scaffolded by <code>iq init</code>. It ships no skills: the three it once carried were transversal and now ship with <a href="https://pub.dev/packages/skillwire">skillwire_cli</a>.</p>
       <ul class="targets">
         <li class="target-badge"><span class="dot"></span>OpenCode</li>
         <li class="target-badge"><span class="dot"></span>GitHub Copilot</li>
