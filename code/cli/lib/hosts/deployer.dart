@@ -25,7 +25,7 @@ class HostDeployer {
     required this.homeDir,
   });
 
-  /// Deploys the inquiry agent + skills GLOBALLY for [hostName], **additively** —
+  /// Deploys the inquiry **agent** GLOBALLY for [hostName], **additively** —
   /// other hosts are left untouched, so one machine can serve multiple hosts
   /// (e.g. OpenCode + Claude) at once. Global host dirs are isolated, so there
   /// is no cross-host duplication (#280).
@@ -41,8 +41,7 @@ class HostDeployer {
       );
     }
     final selected = adapters.firstWhere((a) => a.name == hostName);
-    _deploySkills(selected);
-    final retired = _pruneRetiredSkills(selected);
+    final retired = _sweepNamespacedSkills(selected);
     if (selected.deploysAgent) _deployAgent(selected);
     return retired;
   }
@@ -57,58 +56,79 @@ class HostDeployer {
   List<HostAdapter> get detectedHosts =>
       adapters.where((a) => a.exists(homeDir)).toList(growable: false);
 
-  /// Removes all deployed files from **all** adapter directories.
+  /// Removes what Inquiry deployed, from every adapter, and nothing else.
+  ///
+  /// This used to delete each adapter's skills and agents directories outright.
+  /// Across [allAdapters] that is ten directories removed in full, taking with
+  /// them another tool's skills and anything the user had written beside them —
+  /// while `_pruneRetiredSkills`, six lines below, was scrupulous about exactly
+  /// the same question. The narrow path was right and the wide one was not.
+  ///
+  /// The rule is the one [inquirySkillNamespace] already states: the `iq-`
+  /// namespace is Inquiry's, and a skill without it belongs to someone else.
+  /// So `clean` removes two things — the agent file Inquiry writes, at a path
+  /// it chose, and the `iq-` prefixed skill directories — and never a directory
+  /// it does not own.
+  ///
+  /// It deliberately does **not** remove the skills this release currently
+  /// ships. Those names are unprefixed and shared with other consumers, and a
+  /// name is not ownership.
   void clean() {
     for (final adapter in adapters) {
-      _deleteDirectory(adapter.skillsDirectory(homeDir));
-      _deleteDirectory(adapter.agentDirectory(homeDir));
+      _removeAgentFile(adapter);
+      _removeNamespacedSkills(adapter);
     }
   }
 
-  /// Deploys inquiry's own skills from the asset tree.
+  /// Deletes `<agentDirectory>/inquiry.md`, the one file [_deployAgent] writes.
   ///
-  /// The lifecycle skills (`specification`, `analyze`, `plan`, `execute`) are no
-  /// longer generated here: they belong to MACSS, which ships them as static
-  /// assets and installs them with `macss skill deploy`.
-  void _deploySkills(HostAdapter adapter) {
-    final hostSkillsDir = adapter.skillsDirectory(homeDir);
+  /// The file, never the directory: a host's agents directory holds other
+  /// tools' agents too.
+  void _removeAgentFile(HostAdapter adapter) {
+    final file = File(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'));
+    if (file.existsSync()) file.deleteSync();
+  }
 
-    for (final skillName in assets.listDirectory('skills')) {
-      final content = assets.loadString('skills/$skillName/SKILL.md');
-      final hostFile = File(p.join(hostSkillsDir, skillName, 'SKILL.md'));
-      hostFile.parent.createSync(recursive: true);
-      hostFile.writeAsStringSync(content);
+  /// Deletes the `iq-` prefixed skill directories, and only those.
+  ///
+  /// The skills directory itself survives even when it is left empty. Deleting
+  /// it would take every occupant with it, whoever they belong to, and an empty
+  /// directory harms nobody.
+  void _removeNamespacedSkills(HostAdapter adapter) {
+    final dir = Directory(adapter.skillsDirectory(homeDir));
+    if (!dir.existsSync()) return;
+    for (final entry in dir.listSync().whereType<Directory>()) {
+      if (p.basename(entry.path).startsWith(inquirySkillNamespace)) {
+        entry.deleteSync(recursive: true);
+      }
     }
   }
 
-  /// Removes deployed skills that belong to Inquiry's namespace but are no
-  /// longer shipped.
+  /// Removes every `iq-` prefixed skill directory left on this machine.
   ///
-  /// Deployment could add but never retire, so a skill dropped from a release
-  /// survived forever as a frozen copy nothing would update again — the
-  /// `iq-analyze` / `iq-plan` / `iq-execute` / `iq-specification` left behind
-  /// when the lifecycle moved to MACSS (#299). Users then saw both those and
-  /// the `macss-*` ones, with no way to tell which was live.
+  /// Inquiry ships no skills any more. The three it carried — `kritik`,
+  /// `legion` and `research` — were transversal and belonged to no single
+  /// project; they now ship with `skillwire_cli`, which deploys them through the
+  /// shared `skill` module. The lifecycle four went to MACSS before that.
   ///
-  /// Scoped by prefix rather than a hand-maintained list of retirements: the
-  /// `iq-` namespace is Inquiry's, so anything under it that Inquiry does not
-  /// ship is Inquiry's to remove. Skills outside the namespace — `kritik`,
-  /// `legion`, `research`, and anything a user wrote — are never touched.
-  List<String> _pruneRetiredSkills(HostAdapter adapter) {
+  /// What remains is the sweep. Users on 0.23.x and earlier still carry
+  /// `iq-analyze`, `iq-plan`, `iq-execute` and `iq-specification` from when
+  /// deployment could add but never retire, and nothing else will ever remove
+  /// them. Scoped by prefix, because the prefix is the only thing that makes
+  /// them provably Inquiry's — a skill without it belongs to someone else.
+  ///
+  /// Returns what it removed, so the caller can report it.
+  List<String> _sweepNamespacedSkills(HostAdapter adapter) {
     final hostSkillsDir = Directory(adapter.skillsDirectory(homeDir));
     if (!hostSkillsDir.existsSync()) return const [];
 
-    final shipped = assets.listDirectory('skills').toSet();
     final retired = <String>[];
-
     for (final entry in hostSkillsDir.listSync().whereType<Directory>()) {
       final name = p.basename(entry.path);
       if (!name.startsWith(inquirySkillNamespace)) continue;
-      if (shipped.contains(name)) continue;
       entry.deleteSync(recursive: true);
       retired.add(name);
     }
-
     return retired..sort();
   }
 
@@ -119,10 +139,5 @@ class HostDeployer {
     final hostFile = File(p.join(adapter.agentDirectory(homeDir), 'inquiry.md'));
     hostFile.parent.createSync(recursive: true);
     hostFile.writeAsStringSync(content);
-  }
-
-  void _deleteDirectory(String path) {
-    final dir = Directory(path);
-    if (dir.existsSync()) dir.deleteSync(recursive: true);
   }
 }

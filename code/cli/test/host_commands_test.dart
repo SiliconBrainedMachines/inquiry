@@ -59,7 +59,10 @@ void main() {
   });
 
   group('iq host get', () {
-    test('exits 0 and deploys skills globally to the selected host', () async {
+    test('exits 0 and sweeps the legacy namespace on the selected host', () async {
+      Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-legacy'))
+          .createSync(recursive: true);
+
       final command = HostGetCommand(
         HostGetInput(host: 'fake'),
         deployer: deployer,
@@ -69,10 +72,10 @@ void main() {
 
       expect(output.exitCode, ExitCode.ok);
       expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
-        isTrue,
+        Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-legacy'))
+            .existsSync(),
+        isFalse,
+        reason: 'host get sweeps the iq- namespace it once deployed into',
       );
       // FakeAdapter.deploysAgent is false → no global agent for it.
       expect(
@@ -117,35 +120,34 @@ void main() {
         },
       );
 
-      test('a detected host is deployed into without being named', () async {
+      /// Something for the sweep to find, so the assertion is about the host
+      /// that was chosen rather than about an empty directory.
+      Directory seedLegacy() =>
+          Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-legacy'))
+            ..createSync(recursive: true);
+
+      test('a detected host is acted on without being named', () async {
         installFakeHost();
+        final legacy = seedLegacy();
 
         final out = await applyCommand(
           HostGetCommand(HostGetInput(), deployer: deployer),
         );
 
         expect(out.hosts, ['fake']);
-        expect(
-          File(
-            p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-          ).existsSync(),
-          isTrue,
-        );
+        expect(legacy.existsSync(), isFalse);
       });
 
-      test('--host deploys even when the host looks absent', () async {
+      test('--host acts even when the host looks absent', () async {
         // Priming a machine before the host tool has ever run.
+        final legacy = seedLegacy();
+
         final out = await applyCommand(
           HostGetCommand(HostGetInput(host: 'fake'), deployer: deployer),
         );
 
         expect(out.hosts, ['fake']);
-        expect(
-          File(
-            p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-          ).existsSync(),
-          isTrue,
-        );
+        expect(legacy.existsSync(), isFalse);
       });
 
       test('detectedHosts reports only what exists on disk', () {
@@ -209,18 +211,17 @@ void main() {
         expect(deployed('iq-analyze'), isFalse);
       });
 
-      test('keeps a namespaced skill that is still shipped', () {
-        // Guards the rule: the prefix marks ownership, not obsolescence.
-        final shipped = Directory(
-          p.join(tempDir.path, 'assets', 'skills', 'iq-still-here'),
-        )..createSync(recursive: true);
-        File(p.join(shipped.path, 'SKILL.md')).writeAsStringSync('# live');
+      test('takes the whole namespace, because none of it is shipped now', () {
+        // The old rule was "prefixed and no longer shipped". Inquiry ships no
+        // skills at all, so the second half is always true and the sweep is
+        // simply the namespace. What still holds is the first half: the prefix
+        // is what makes a directory provably Inquiry's.
+        seedDeployed('iq-analyze');
+        seedDeployed('iq-plan');
 
-        seedDeployed('iq-still-here');
-        final retired = deployer.deploy('fake');
-
-        expect(retired, isEmpty);
-        expect(deployed('iq-still-here'), isTrue);
+        expect(deployer.deploy('fake'), ['iq-analyze', 'iq-plan']);
+        expect(deployed('iq-analyze'), isFalse);
+        expect(deployed('iq-plan'), isFalse);
       });
 
       test('reports nothing when there is nothing to retire', () {
@@ -258,19 +259,25 @@ void main() {
   });
 
   group('iq host clean', () {
-    test('exits 0 and removes deployed files', () async {
-      // Deploy first using deploy
-      deployer.deploy('fake');
+    test('exits 0, takes the iq- namespace, and leaves the rest', () async {
+      final skills = Directory(p.join(homeDir.path, '.fake', 'skills'));
+      final ours = Directory(p.join(skills.path, 'iq-analyze'))
+        ..createSync(recursive: true);
+      final theirs = Directory(p.join(skills.path, 'legion'))
+        ..createSync(recursive: true);
 
-      final command = HostCleanCommand(HostCleanInput(), deployer: deployer);
-
-      final output = await applyCommand(command);
+      final output = await applyCommand(
+        HostCleanCommand(HostCleanInput(), deployer: deployer),
+      );
 
       expect(output.exitCode, ExitCode.ok);
-      expect(
-        Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
-        isFalse,
-      );
+      expect(ours.existsSync(), isFalse);
+
+      // The directory survives, and so does everything in it Inquiry cannot
+      // prove is its own. A skill's *name* is not ownership: another consumer
+      // may have deployed the same one.
+      expect(theirs.existsSync(), isTrue);
+      expect(skills.existsSync(), isTrue);
     });
 
     test('exits 0 when nothing to clean', () async {
@@ -400,10 +407,10 @@ void main() {
       );
 
       expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
-        isTrue,
+        Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-legacy'))
+            .existsSync(),
+        isFalse,
+        reason: 'host get sweeps the iq- namespace it once deployed into',
       );
     });
   });

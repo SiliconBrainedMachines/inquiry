@@ -377,7 +377,7 @@ void main() {
 
         final text = output.toText()!;
         expect(text, contains('Checking hosts...'));
-        expect(text, contains('✓ opencode: agent + ${deployedSkills.length} skills deployed'));
+        expect(text, contains('✓ opencode: agent deployed'));
         expect(text, contains('- claude: not installed'));
         expect(text, contains('All checks passed.'));
       });
@@ -617,7 +617,7 @@ void main() {
             reason: 'Claude not deployed → inactive, not a failure');
 
         final text = output.toText()!;
-        expect(text, contains('✓ opencode: agent + ${deployedSkills.length} skills deployed'));
+        expect(text, contains('✓ opencode: agent deployed'));
         expect(text, contains('- claude: not deployed (inactive)'));
         expect(text, contains('All checks passed.'));
       });
@@ -759,7 +759,7 @@ void main() {
         expect(
           output.toText()!,
           contains(
-            '✓ opencode: agent + ${deployedSkills.length} skills deployed',
+            '✓ opencode: agent deployed',
           ),
         );
       });

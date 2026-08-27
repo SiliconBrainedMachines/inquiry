@@ -66,9 +66,22 @@ void main() {
     test('no longer advertises the migrated lifecycle commands', () async {
       final r = await _run(const ['help']);
 
+      // Matched at the start of a line, where a route name sits. The bare word
+      // is not enough: `skill validate` describes itself as checking skills
+      // against the Agent Skills *specification*, and prose is not a route.
       for (final gone in ['specification', 'issue new', 'issue publish']) {
-        expect(r.out, isNot(contains(gone)),
-            reason: '`$gone` moved to macss and must not appear in iq help');
+        expect(
+          r.out,
+          isNot(matches(RegExp('^[ ]+$gone\b', multiLine: true))),
+          reason: '`\$gone` moved to macss and must not appear as an iq route',
+        );
+      }
+    });
+
+    test('and it does advertise the shared skill module', () async {
+      final r = await _run(const ['help']);
+      for (final route in ['skill list', 'skill doctor', 'skill validate']) {
+        expect(r.out, contains(route));
       }
     });
 

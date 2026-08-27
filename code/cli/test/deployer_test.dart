@@ -67,21 +67,40 @@ void main() {
   });
 
   group('HostDeployer', () {
-    test('deploy copies skills to selected adapter skillsDirectory',
-        () {
+    test("deploy no longer copies skills - that is the module's work now", () {
+      // Inquiry ships none, and what it ever shipped is deployed through the
+      // shared `skill` module over the ledger. A CLI that also wrote them here
+      // would be writing behind that ledger's back.
       deployer.deploy('fake');
 
-      final skillFile = File(
-        p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
+      expect(
+        Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+        isFalse,
+        reason: 'deploy must not create a skills directory it will not fill',
       );
-      expect(skillFile.existsSync(), isTrue);
-      expect(skillFile.readAsStringSync(), '# Doc Read');
+    });
 
-      final skillFile2 = File(
-        p.join(homeDir.path, '.fake', 'skills', 'doc-write', 'SKILL.md'),
-      );
-      expect(skillFile2.existsSync(), isTrue);
-      expect(skillFile2.readAsStringSync(), '# Doc Write');
+    test('deploy sweeps the iq- namespace left by older releases', () {
+      // Users on 0.23.x and earlier still carry iq-analyze and friends from
+      // when deployment could add but never retire, and nothing else will ever
+      // remove them.
+      final legacy = Directory(
+        p.join(homeDir.path, '.fake', 'skills', 'iq-analyze'),
+      )..createSync(recursive: true);
+
+      final retired = deployer.deploy('fake');
+
+      expect(legacy.existsSync(), isFalse);
+      expect(retired, ['iq-analyze']);
+    });
+
+    test('and sweeps nothing outside it', () {
+      final foreign = Directory(
+        p.join(homeDir.path, '.fake', 'skills', 'legion'),
+      )..createSync(recursive: true);
+
+      expect(deployer.deploy('fake'), isEmpty);
+      expect(foreign.existsSync(), isTrue);
     });
 
     test('deploy does NOT copy agent to adapter agentDirectory', () {
@@ -93,15 +112,12 @@ void main() {
       expect(agentFile.existsSync(), isFalse);
     });
 
-    test('deploy is idempotent — second run produces same result', () {
-      deployer.deploy('fake');
-      deployer.deploy('fake');
+    test('deploy is idempotent — the second run sweeps nothing', () {
+      Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-analyze'))
+          .createSync(recursive: true);
 
-      final skillFile = File(
-        p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-      );
-      expect(skillFile.existsSync(), isTrue);
-      expect(skillFile.readAsStringSync(), '# Doc Read');
+      expect(deployer.deploy('fake'), ['iq-analyze']);
+      expect(deployer.deploy('fake'), isEmpty);
     });
 
     test('deploy is additive — does not clean before deploying (#280)', () {
@@ -119,18 +135,106 @@ void main() {
       expect(extraFile.existsSync(), isTrue);
     });
 
-    test('clean removes deployed files from all adapters', () {
-      deployer.deploy('fake');
-      deployer.clean();
+    group('clean removes what Inquiry deployed, and only that', () {
+      // The rule `_pruneRetiredSkills` has always applied, now applied here
+      // too: the `iq-` namespace is Inquiry's, and a skill without it belongs
+      // to someone else. `clean` used to delete each adapter's skills and
+      // agents directories outright — ten directories across five adapters,
+      // taking another tool's skills and anything the user had written with
+      // them.
 
-      final skillsDir = Directory(p.join(homeDir.path, '.fake', 'skills'));
-      final agentsDir = Directory(p.join(homeDir.path, '.fake', 'agents'));
-      expect(skillsDir.existsSync(), isFalse);
-      expect(agentsDir.existsSync(), isFalse);
-    });
+      File otherToolsSkill(String name) {
+        final f = File(
+          p.join(homeDir.path, '.fake', 'skills', name, 'SKILL.md'),
+        );
+        f.parent.createSync(recursive: true);
+        f.writeAsStringSync('# $name');
+        return f;
+      }
 
-    test('clean does not fail if nothing was deployed', () {
-      expect(() => deployer.clean(), returnsNormally);
+      /// Planted rather than deployed: `FakeAdapter` inherits
+      /// `deploysAgent => false`, and `clean`'s contract is to remove
+      /// `inquiry.md` wherever it finds one, not only where this run put it.
+      File plantAgentFile(String name) {
+        final f = File(p.join(homeDir.path, '.fake', 'agents', name));
+        f.parent.createSync(recursive: true);
+        f.writeAsStringSync('# $name');
+        return f;
+      }
+
+      test('removes its own agent file', () {
+        final agent = plantAgentFile('inquiry.md');
+        deployer.clean();
+        expect(agent.existsSync(), isFalse);
+      });
+
+      test('removes iq- prefixed skills, which are its namespace', () {
+        final legacy = otherToolsSkill('iq-analyze');
+        deployer.clean();
+        expect(legacy.existsSync(), isFalse);
+      });
+
+      test("leaves another tool's skills alone", () {
+        final macss = otherToolsSkill('macss-plan');
+        final skillwire = otherToolsSkill('legion');
+
+        deployer.clean();
+
+        expect(macss.existsSync(), isTrue);
+        expect(skillwire.existsSync(), isTrue);
+      });
+
+      test('leaves a skill the user wrote by hand alone', () {
+        final mine = otherToolsSkill('my-own-notes');
+        deployer.clean();
+        expect(mine.existsSync(), isTrue);
+      });
+
+      test('never removes the skills directory itself', () {
+        // Deleting the directory takes every occupant with it, whoever they
+        // belong to. Only named children are removed.
+        deployer.deploy('fake');
+        otherToolsSkill('macss-plan');
+
+        deployer.clean();
+
+        expect(
+          Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+          isTrue,
+        );
+      });
+
+      test('never removes the agents directory itself', () {
+        plantAgentFile('inquiry.md');
+        final other = plantAgentFile('someone-else.md');
+
+        deployer.clean();
+
+        expect(other.existsSync(), isTrue);
+        expect(
+          Directory(p.join(homeDir.path, '.fake', 'agents')).existsSync(),
+          isTrue,
+        );
+      });
+
+      test('does not fail if nothing was deployed', () {
+        expect(() => deployer.clean(), returnsNormally);
+      });
+
+      test('does not fail when a host directory does not exist at all', () {
+        expect(() => deployer.clean(), returnsNormally);
+        expect(
+          Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
+          isFalse,
+          reason: 'clean must not create what it came to inspect',
+        );
+      });
+
+      test('is idempotent', () {
+        deployer.deploy('fake');
+        deployer.clean();
+        expect(() => deployer.clean(), returnsNormally);
+      });
     });
 
     test('deploy can target either of two hosts', () {
@@ -143,35 +247,32 @@ void main() {
         homeDir: homeDir.path,
       );
 
+      // Per-host targeting is still the point; the legacy sweep is what shows
+      // it now that skills are the module's.
+      for (final host in ['.fake', '.fake2']) {
+        Directory(p.join(homeDir.path, host, 'skills', 'iq-analyze'))
+            .createSync(recursive: true);
+      }
+
       allDeployer.deploy('fake');
 
-      // Only 'fake' received skills
       expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
-        isTrue,
-      );
-      expect(
-        Directory(p.join(homeDir.path, '.fake2', 'skills')).existsSync(),
+        Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-analyze'))
+            .existsSync(),
         isFalse,
       );
-
-      // Add fake2 — additive (#280)
-      allDeployer.deploy('fake2');
-
-      // fake2 now has skills; fake is KEPT (additive — both coexist).
       expect(
-        File(
-          p.join(homeDir.path, '.fake2', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
+        Directory(p.join(homeDir.path, '.fake2', 'skills', 'iq-analyze'))
+            .existsSync(),
         isTrue,
+        reason: 'a host that was not named is not touched',
       );
+
+      allDeployer.deploy('fake2');
       expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
-        isTrue,
+        Directory(p.join(homeDir.path, '.fake2', 'skills', 'iq-analyze'))
+            .existsSync(),
+        isFalse,
       );
     });
   });
@@ -191,17 +292,23 @@ void main() {
       );
     });
 
-    test('deploys skills to the selected adapter only', () {
+    test('acts on the selected adapter only', () {
+      for (final host in ['.fake', '.fake2']) {
+        Directory(p.join(homeDir.path, host, 'skills', 'iq-plan'))
+            .createSync(recursive: true);
+      }
+
       multiDeployer.deploy('fake');
 
       expect(
-        File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
+        Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-plan'))
             .existsSync(),
-        isTrue,
+        isFalse,
       );
       expect(
-        Directory(p.join(homeDir.path, '.fake2', 'skills')).existsSync(),
-        isFalse,
+        Directory(p.join(homeDir.path, '.fake2', 'skills', 'iq-plan'))
+            .existsSync(),
+        isTrue,
       );
     });
 
@@ -235,15 +342,12 @@ void main() {
       );
     });
 
-    test('is idempotent — second call to same target produces same result', () {
-      multiDeployer.deploy('fake');
-      multiDeployer.deploy('fake');
+    test('is idempotent — the second call has nothing left to sweep', () {
+      Directory(p.join(homeDir.path, '.fake', 'skills', 'iq-execute'))
+          .createSync(recursive: true);
 
-      expect(
-        File(p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'))
-            .existsSync(),
-        isTrue,
-      );
+      expect(multiDeployer.deploy('fake'), ['iq-execute']);
+      expect(multiDeployer.deploy('fake'), isEmpty);
     });
 
     test('throws ArgumentError for unknown host name', () {

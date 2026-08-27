@@ -5,7 +5,9 @@ library;
 
 import 'dart:io';
 
+import 'package:datajack/datajack.dart';
 import 'package:modular_cli_sdk/modular_cli_sdk.dart';
+import 'package:skillwire/skillwire.dart';
 import 'package:path/path.dart' as p;
 
 import 'assets.dart';
@@ -16,6 +18,10 @@ import 'modules/implementation/implementation_builder.dart';
 import 'modules/host/host_builder.dart';
 import 'hosts/all_adapters.dart';
 import 'hosts/deployer.dart';
+
+/// The name this CLI writes into every ledger row it creates, and the name the
+/// other consumers see when they meet one of its artifacts.
+const inquiryConsumerName = 'inquiry';
 
 /// `--help` / `-h` are NOT normalized here: the SDK routes every help request
 /// itself, including the focused `iq <command> --help`, which this could not.
@@ -61,6 +67,25 @@ Future<int> runInquiry(
 
   cli.module('', (m) => buildGlobalModule(m, cleaner: cleaner, assets: assets));
   cli.module('host', (m) => buildHostModule(m, deployer: deployer, cleaner: cleaner));
+  // R12.1 — the same `skill` module the other consumers mount, from `datajack`.
+  // Inquiry ships no skills of its own, so `deploy` has nothing to carry; what
+  // it gains is `doctor`, `list` and `validate` over the shared ledger, which
+  // is what a user on a machine that also runs `macss` actually needs.
+  final skillWorkspace = Workspace.detect();
+  cli.module(
+    'skill',
+    (m) => buildSkillModule(
+      m,
+      consumer: inquiryConsumerName,
+      workspace: skillWorkspace,
+      catalogue: Catalogue.read(
+        skillWorkspace.assetsRoot,
+        validator: SkillValidator(
+          reservedNames: skillWorkspace.matrix.reservedNames,
+        ),
+      ),
+    ),
+  );
   cli.module('fsm', (m) => buildFsmModule(m, assets: assets));
   cli.module('ape', (m) => buildApeModule(m, assets: assets));
   cli.module('implementation', (m) => buildImplementationModule(m, assets: assets));
