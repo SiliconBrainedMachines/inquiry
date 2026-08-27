@@ -176,10 +176,9 @@ class DoctorOutput extends Output {
           // Not the active host — informational, not a failure.
           buffer.writeln('  - ${tc.hostName}: not deployed (inactive)');
         } else if (tc.passed) {
-          final deployed = tc.totalSkills - tc.missingSkills.length;
-          buffer.writeln(
-            '  ✓ ${tc.hostName}: agent + $deployed skills deployed',
-          );
+          // Skills are no longer Inquiry's to report here: it ships none, and
+          // what is deployed on this machine is `iq skill doctor`'s answer.
+          buffer.writeln('  ✓ ${tc.hostName}: agent deployed');
         } else {
           if (!tc.agentExists) {
             buffer.writeln('  ✗ ${tc.hostName}: agent not deployed');
@@ -444,12 +443,16 @@ class DoctorCommand implements Query<DoctorInput, DoctorOutput> {
     );
   }
 
-  /// The skills a deployed host is expected to carry — exactly what the
-  /// deployer installs from the asset tree (see deployer.dart `_deploySkills`).
+  /// The skills a deployed host is expected to carry.
   ///
-  /// The lifecycle skills are deliberately absent: they moved to MACSS, which
-  /// installs them with `macss skill deploy`. Expecting them here would report
-  /// every host as unhealthy for a deployment inquiry no longer performs.
+  /// **Empty, and that is the answer now.** Inquiry ships no skills: the
+  /// lifecycle four went to MACSS, and `kritik`, `legion` and `research` — which
+  /// were transversal and belonged to no single project — ship with
+  /// `skillwire_cli`. What is deployed on this machine, by whom, and whether it
+  /// has drifted is `iq skill doctor`'s question, over the shared ledger.
+  ///
+  /// The method stays because the asset tree may carry skills again, and a host
+  /// check that silently ignored them would be worse than one that finds none.
   List<String> _getExpectedSkills() {
     final assets = _assets;
     if (assets == null) return [];

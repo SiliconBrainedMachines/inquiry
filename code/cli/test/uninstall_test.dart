@@ -60,14 +60,12 @@ void main() {
 
   group('UninstallCommand', () {
     test('cleans deployed hosts', () async {
-      deployer.deploy('fake');
-
-      expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
-        isTrue,
-      );
+      final ours = Directory(
+        p.join(homeDir.path, '.fake', 'skills', 'iq-analyze'),
+      )..createSync(recursive: true);
+      final theirs = Directory(
+        p.join(homeDir.path, '.fake', 'skills', 'legion'),
+      )..createSync(recursive: true);
 
       final command = UninstallCommand(
         UninstallInput(installDir: tempDir.path),
@@ -89,10 +87,9 @@ void main() {
         Directory(p.join(homeDir.path, '.fake', 'skills')).existsSync(),
         isTrue,
       );
+      expect(ours.existsSync(), isFalse);
       expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
+        theirs.existsSync(),
         isTrue,
         reason: "an unprefixed skill is not provably Inquiry's to remove",
       );
@@ -257,7 +254,9 @@ void main() {
     });
 
     test('touches nothing: the deployed host survives the plan', () async {
-      deployer.deploy('fake');
+      final ours = Directory(
+        p.join(homeDir.path, '.fake', 'skills', 'iq-analyze'),
+      )..createSync(recursive: true);
       final ops = FakePlatformOps();
 
       await previewCommand(
@@ -270,10 +269,9 @@ void main() {
       );
 
       expect(
-        File(
-          p.join(homeDir.path, '.fake', 'skills', 'doc-read', 'SKILL.md'),
-        ).existsSync(),
+        ours.existsSync(),
         isTrue,
+        reason: 'a plan changes nothing, including the sweep',
       );
       expect(ops.calls, isEmpty);
     });
