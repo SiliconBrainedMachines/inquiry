@@ -4,6 +4,49 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.25.2]
+
+### Changed
+
+- **A command that has nothing to do now says why, not just that.** Two
+  messages here were being computed and thrown away, because a plan that comes
+  out empty never reaches `describe`. The caller was told `nothing would
+  change` — a fact, with the actionable half removed.
+
+  | Command | Now says |
+  |---|---|
+  | `iq upgrade`, already current | `Already on the latest version` |
+  | `iq host get`, no host on this machine | `No AI coding host found on this machine — nothing deployed.` `Supported: opencode, claude.` `Pass --host <host> to install into one anyway.` |
+
+  `host get` is the sharper case: the old wording reads like a bug, and the new
+  one tells you what to do next.
+
+  The reason now reaches `--plan` as well, where an empty plan had always been
+  mute — that path never called `describe`, so this was never a regression,
+  just a silence with no way to fill it:
+
+  ```
+  Plan — upgrade
+
+    Already on the latest version
+
+  Nothing to carry out, so --apply would do nothing either.
+  ```
+
+- **`modular_cli_sdk` 0.5.0**, which is where the mechanism
+  (`ExplainsNothingToDo`) comes from. It also stops `--apply` from asking for
+  approval over a plan that changes nothing — which, with no terminal to
+  answer, used to fail an invocation that had nothing to do.
+
+### Internal
+
+- **The sweep that checks remediation messages no longer keeps its own list of
+  commands.** It carried a literal five, which is a second place the truth
+  lives and goes blind exactly when the CLI grows — register `iq analyze start`
+  and the check would keep passing while the new command's messages went
+  unread. It now derives them from `iq help --json`, which publishes `kind` per
+  route, so registering a command extends the check with no edit to the test.
+
 ## [0.25.1]
 
 ### Fixed
