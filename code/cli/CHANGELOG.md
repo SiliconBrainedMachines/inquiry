@@ -4,6 +4,54 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.26.0]
+
+### Changed — breaking
+
+- **Inquiry ships no skills, and no longer deploys any.** `kritik`, `legion` and
+  `research` were transversal — they belonged to no single project and lived
+  here because there was nowhere else to put them. They ship with
+  `skillwire_cli` now and reach a host through the shared `skill` module. The
+  lifecycle four went to MACSS before them.
+
+  `iq host get` still deploys the Inquiry **agent**, which is what it was
+  actually for. A subagent is not a skill: its path and its file format differ
+  per host, and that work is gated on questions nobody has answered yet.
+
+- **`iq host get` sweeps the `iq-` namespace instead of populating it.** Users
+  on 0.23.x and earlier still carry `iq-analyze`, `iq-plan`, `iq-execute` and
+  `iq-specification` from when deployment could add but never retire. Nothing
+  else will ever remove them, so `host get` does, on the host it is acting on.
+
+- **`iq doctor` no longer counts skills per host.** It reports the agent. What
+  is deployed on this machine, by whom, and whether it has drifted is
+  `iq skill doctor`'s question now, and it answers it over a ledger shared with
+  every other consumer.
+
+- **`Assets.listDirectory` answers "none" for a missing directory** instead of
+  throwing. Nothing shipped is a legitimate answer — this release ships no
+  skills, and a caller asking what they are should be told none rather than
+  handed an exception to catch.
+
+### Added
+
+- **The `skill` module**, from [`datajack`](https://pub.dev/packages/datajack)
+  over [`skillwire`](https://pub.dev/packages/skillwire) — the same five routes
+  `macss` and `skillwire_cli` mount:
+
+  ```
+  iq skill list --host claude --scope global --all
+  iq skill doctor
+  ```
+
+  Inquiry ships nothing for `deploy` to carry. What it gains is the view: on a
+  machine that also runs `macss`, `iq skill doctor` reports what is deployed,
+  who owns it, what has drifted, and what is present that no consumer recorded.
+
+  Every ledger row this CLI writes carries `inquiry`, so the other consumers see
+  its artifacts as owned rather than overwriting them — and it sees theirs the
+  same way.
+
 ## [0.25.3]
 
 ### Fixed

@@ -23,12 +23,19 @@ class Assets {
       File(path(relativePath)).readAsStringSync();
 
   /// Lists immediate child directory names under `<root>/assets/[dirPath]`.
+  ///
+  /// Empty when the directory is absent. "Nothing shipped" is a legitimate
+  /// answer — this release ships no skills, and a caller asking what they are
+  /// should be told none rather than handed an exception to catch. Sorted, so a
+  /// caller enumerating an asset directory gets the same answer twice.
   List<String> listDirectory(String dirPath) {
     final dir = Directory(path(dirPath));
+    if (!dir.existsSync()) return const [];
     return dir
         .listSync()
         .whereType<Directory>()
         .map((d) => p.basename(d.path))
-        .toList();
+        .toList()
+      ..sort();
   }
 }
