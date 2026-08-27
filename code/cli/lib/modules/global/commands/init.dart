@@ -5,7 +5,7 @@
 /// 2. Add .inquiry/ and cleanrooms/**/.iq.state.yaml to .gitignore
 /// 3. Create .inquiry/config.yaml with defaults
 ///
-/// The inquiry agent + skills are installed GLOBALLY per host by
+/// The inquiry agent is installed GLOBALLY per host by
 /// `iq host get --host <host>` (#280) — NOT here. Cycle runtime
 /// (`.iq.state.yaml`, `mutations.md`) is materialized per cycle under
 /// `cleanrooms/<branch>/` by the FSM, not scaffolded at init.

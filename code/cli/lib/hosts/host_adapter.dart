@@ -20,7 +20,7 @@ abstract class HostAdapter {
   bool exists(String homeDir) => Directory(baseDirectory(homeDir)).existsSync();
 
   /// Whether `iq host get` deploys the inquiry agent (globally) for this host.
-  /// Active hosts (OpenCode, Claude) deploy the agent + skills; hosts kept only
+  /// Active hosts (OpenCode, Claude) deploy the agent; hosts kept only
   /// for `host clean` migration leave it `false`.
   bool get deploysAgent => false;
 

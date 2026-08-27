@@ -15,7 +15,7 @@ final List<HostAdapter> allAdapters = [
   GeminiAdapter(),
 ];
 
-/// Active deploy targets (#280): `iq host get` installs the agent + skills
+/// Active deploy targets (#280): `iq host get` installs the agent
 /// GLOBALLY for these, additively. Copilot/Codex/Gemini are kept only in
 /// [allAdapters] for `host clean` migration.
 final List<HostAdapter> deployAdapters = [

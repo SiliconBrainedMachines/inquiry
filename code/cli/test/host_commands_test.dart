@@ -190,7 +190,7 @@ void main() {
         expect(deployed('iq-specification'), isFalse);
         expect(
           out.toText(),
-          contains('removed  iq-analyze (no longer shipped)'),
+          contains('removed  iq-analyze (from before Inquiry stopped shipping skills)'),
         );
       });
 

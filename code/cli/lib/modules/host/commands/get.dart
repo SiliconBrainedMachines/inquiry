@@ -103,9 +103,9 @@ class HostGetOutput extends Output {
             'Pass --host <host> to install into one anyway.'
       : [
           for (final host in hosts) ...[
-            'Inquiry agent + skills deployed (global) to host $host',
+            'Inquiry agent deployed (global) to host $host',
             for (final skill in retired[host] ?? const <String>[])
-              '  removed  $skill (no longer shipped)',
+              '  removed  $skill (from before Inquiry stopped shipping skills)',
           ],
           ...ollamaLines,
         ].join('\n');
@@ -113,8 +113,8 @@ class HostGetOutput extends Output {
 
 // ─── Steps ──────────────────────────────────────────────────────────────────
 
-/// Deploys the agent and skills into one host, retiring what it no longer
-/// ships.
+/// Deploys the agent into one host, and sweeps the `iq-` namespace left there
+/// by releases that did ship skills.
 ///
 /// One step per host, so the plan names each of them: deploying to two
 /// assistants and deploying to none look nothing alike, and a single line

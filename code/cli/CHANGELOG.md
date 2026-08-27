@@ -4,6 +4,22 @@ All notable changes to this project will be documented in this file.
 The format loosely follows [Keep a Changelog](https://keepachangelog.com/)
 and the project adheres to [Semantic Versioning](https://semver.org/).
 
+## [0.26.1]
+
+### Fixed
+
+- **`iq host get` said it deployed skills, and it does not.** 0.26.0 stopped
+  shipping them and stopped deploying them, but the line it prints on success
+  still read `Inquiry agent + skills deployed (global) to host <host>` — as did
+  three comments describing the same work. A message that promises what the tool
+  does not do is a defect whether or not any bytes move, and this one appeared
+  in the middle of an upgrade, which is exactly where a user has no way to check.
+
+  It now reads `Inquiry agent deployed (global) to host <host>`, and the sweep
+  line says what the removal actually is: `removed <skill> (from before Inquiry
+  stopped shipping skills)` rather than "no longer shipped", which described a
+  comparison against a shipped set that no longer exists.
+
 ## [0.26.0]
 
 ### Changed — breaking
