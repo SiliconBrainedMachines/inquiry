@@ -3,6 +3,10 @@
 # Usage:
 #   irm https://inquiry.ccisne.dev/install.ps1 | iex
 #
+# This file is served from the site and exists nowhere else in the repository.
+# It used to exist twice and the copies drifted in both directions. See
+# code/cli/test/installer_layout_test.dart, which now refuses a second copy.
+#
 # What it does:
 #   1. Detects Windows x64
 #   2. Downloads the latest .zip from GitHub Releases
@@ -35,6 +39,15 @@ if ([System.Environment]::Is64BitOperatingSystem -eq $false) {
 Write-Host '>>> Fetching latest release...'
 $releaseUrl = "https://api.github.com/repos/$repo/releases/latest"
 $headers = @{ Accept = 'application/vnd.github+json' }
+
+# Unauthenticated, the GitHub API allows 60 requests an hour per address, which
+# a shared network can exhaust. This header is for the API call only: it is
+# deliberately not passed to the download below, because browser_download_url
+# redirects to another host and Windows PowerShell 5.1 preserves an
+# Authorization header across a redirect — which would hand the token to a CDN.
+if ($env:GITHUB_TOKEN) {
+    $headers['Authorization'] = "Bearer $env:GITHUB_TOKEN"
+}
 
 $release = Invoke-RestMethod -Uri $releaseUrl -Headers $headers
 $asset = $release.assets | Where-Object { $_.name -like 'inquiry-windows-x64*.zip' } | Select-Object -First 1
